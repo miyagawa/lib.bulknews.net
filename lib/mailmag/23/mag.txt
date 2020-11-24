@@ -1,0 +1,235 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.23
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Perl の継承  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+多重継承で問題になるのは、アトリビュートの共有や、同一メソッド名の重複
+です。そもそもアトリビュートを持つようなクラスを多重継承するのが間違っ
+ている、という気もしなくもないですが、実際そのような設計になったとして 
+Perl でどのように対処するか、というのを紹介します。
+
+たとえばこんなクラス階層を考えます。
+
+
+PerlHacker   ServerAdmin      Rubyist
+     \            |            /
+    .----------------------------.
+    |           Worker           |
+    `----------------------------'
+
+Worker クラスは、Perl が書け、サーバ管理をおこない、また Rubyist でも
+ある。この3つのクラスから能力を継承していると考えます。
+
+さて、これらのクラスのコンストラクタを考えてみます。
+
+  package PerlHacker;
+  sub new {
+      my($class, %args) = @_;
+      bless {
+          cpanid => $args{cpanid},
+      }, $class;
+  }
+
+  package main;
+  my $hacker = PerlHacker->new(
+      cpanid => 'miyagawa',
+  );
+
+こんな感じになったとしましょう。しかし、new() の中でアトリビュートを定
+義してしまうと、多重継承でハマってしまうことは目に見えています。init() 
+メソッドにくくり出しておきます。
+
+  package PerlHacker;
+  sub new {
+      my $class = shift;
+      my $self = bless {}, $class;
+      $self->init(@_);
+      return $self;
+  }
+
+  sub init {
+      my($self, %args) = @_;
+      $self->{cpanid} = $args{cpanid};
+  }
+
+
+これでOKです。同様に、ServerAdmin クラスも作っておきましょう。
+
+  package ServerAdmin;
+  sub new {
+      my $class = shift;
+      my $self = bless {}, $class;
+      $self->init(@_);
+      return $self;
+  }
+
+  sub init {
+      my($self, %args) = @_;
+      $self->{software} = $args{software};
+      $self->{os}       = $args{os};
+  }
+
+ServerAdmin クラスは、コンストラクタのハッシュ引数に、管理できるサーバ
+ソフトウェアとオペレーティングシステムを指定します。あとは Rubyist も
+同様に作って、PerlHacker, ServerAdmin, Rubyist クラスを多重継承した 
+Worker クラスをつくります。
+
+クライアントからの呼出しとしては、全部のアトリビュートを一気にコンスト
+ラクタで渡す感じにします。
+
+
+  my $worker = Worker->new(
+       cpanid   => 'miyagawa',
+       software => 'Apache',
+       os       => 'freebsd',
+       rwikiname => 'miya',
+  );
+
+# rwiki は Rubyist クラスの引数の例だと思ってください。
+さて、Worker クラスの実装はどうなるでしょうか。
+
+  package Worker;
+  use base qw(PerlHacker ServerAdmin Rubyist);
+
+  sub new {
+      my $class = shift;
+      my $self = bless {}, $class;
+      $self->PerlHacker::init(@_);
+      $self->ServerAdmin::init(@_);
+      $self->Rubyist::init(@_);
+      return $self;
+  }
+
+どうも冗長ですが、これでいけそうです。しかし、スーパークラスの new が
+まったく再利用されず、init() のみを順番に呼び出しているので、サブクラ
+スでも init() のみの定義でいけるように、Initializable インターフェース
+にしてみます。(*1)
+
+  package Initializable;
+
+  sub new {
+      my $class = shift;
+      my $self = bless {}, $class;
+      $self->init(@_);
+      return $self;
+  }
+
+  package PerlHacker;
+  use base qw(Initializable);
+
+  sub init {
+      my($self, %args) = @_;
+      $self->{cpanid} = $args{cpanid};
+  }
+
+
+new を定義せず、init() のみをオーバーライドすることにしました。
+ServerAdmin や Rubyist も同様に定義しなおすと、Worker は以下のようにな
+ります。
+
+  package Worker;
+  use base qw(Initializable PerlHacker ServerAdmin Rubyist);
+
+  sub init {
+      my $self = shift;
+      $self->PerlHacker::init(@_);
+      $self->ServerAdmin::init(@_);
+      $self->Rubyist::init(@_);
+  }
+
+*1) この方法は Damian Conway "Object Oriented Perl" からの引用です。
+
+2. NEXT.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+上の init() は若干冗長です。継承しているクラス群の init() メソッドを明
+示的に順番に呼び出しています。なんとかスッキリさせる方法はないでしょう
+か。
+
+ひとつの方法は以下のようになります。@ISA 配列の利用です。
+
+  package Worker;
+  use base qw(Initializable PerlHacker ServerAdmin Rubyist);
+
+  sub init {
+      my $self = shift;
+      for my $class (@ISA) {
+          my $init = $class->can('init');
+          $self->$init(@_) if $init;
+      }
+  }
+
+
+すべてのクラスの祖先である UNIVERSAL クラスによって提供される can メソッ
+ドを利用し、init() が実装されているかチェックします。can メソッドは、
+メソッドが実装されている場合、そのメソッドへのリファレンスを返すので、
+次の行で再利用することが出来ます。(この場合は特に意味はないですが)
+
+また、最近 Damian Conway がリリースした NEXT.pm[1] を利用する方法も考
+えられます。NEXT.pm は SUPER などと同様に、pseudo クラス NEXT を定義し
+て、メソッドのリディスパッチを行うことが出来ます(*2)。
+
+NEXT.pm を用いた多重継承ソリューションは以下のようになります。
+
+  package PerlHacker;
+  use base qw(Initializable);
+  use NEXT;
+
+  sub init {
+      my($self, %args) = @_;
+      $self->{cpanid} = $args{cpanid};
+      $self->NEXT::init(%args);
+  }
+
+
+PerlHacker クラスの init() に変更を加えました。SUPER:: で自分の親クラ
+スが呼べるのと同様の感覚で、メソッド探索の次のクラスにリディスパッチす
+ることができます。同様に ServerAdmin, Rubyist にもこの実装をいれること
+によって、
+
+1) Worker::new('Worker')
+2) Initializable::new('Worker')
+3) Initializable::init('HASH=Worker') => NONE
+4) PerlHacker::init('HASH=Worker')
+5) ServerAdmin::init('HASH=Worker')
+6) Rubyist::init('HASH=Worker')
+
+の順番で、正しくメソッドを呼び出すことが出来るというわけです。この結果、
+Worker クラスの実装はシンプルになります。
+
+  package Worker;
+  use base qw(Initializable PerlHacker ServerAdmin Rubyist);
+
+
+Worker クラスで冗長な init() を定義する必要はなくなりました。init() を
+順番に呼び出す実装は、スーパークラス側で NEXT() によって勝手に行われま
+す。
+
+さらに Initializable インターフェースを実装したクラスを追加で多重継承
+する場合も、そのクラスの init() が NEXT によるメソッドリディスパッチを
+実装していれば、Worker は use base に追加するのみでOK になります。
+
+
+*2) perl 5.7.1 からは CORE モジュールとして採用されているようです。
+
+
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+init() や DESTROY() など、多重継承下でメソッドをクラス階層下で連続呼出
+ししたいときに、pseudo-class NEXT を使ってみるのも面白いかも知れません。
+
+また、AUTOLOAD と組み合わせることで、処理を担当するクラスがみつかるま
+で呼出しを繰り返すという、デザインパターン "Chain of Responsibility"
+[2] の実装にも使えそうです。
+
+
+[1] http://search.cpan.org/search?dist=NEXT
+[2] http://c2.com/cgi/wiki?GangOfFour
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+

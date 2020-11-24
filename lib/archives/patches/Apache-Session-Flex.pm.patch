@@ -1,0 +1,10 @@
+--- Flex.pm.orig	Fri May  4 22:00:13 2001
++++ Flex.pm	Fri May  4 22:11:48 2001
+@@ -42 +42,2 @@
+-        eval '$incl->{$gen} = \&' . $gen . '::generate' || die $@;
++        eval '$incl->{$gen}->[0] = \&' . $gen . '::generate' || die $@;
++        eval '$incl->{$gen}->[1] = \&' . $gen . '::validate' || die $@;
+@@ -53 +54,2 @@
+-    $self->{generate}     = $incl->{$gen};
++    $self->{generate}     = $incl->{$gen}->[0];
++    $self->{validate}     = $incl->{$gen}->[1];

@@ -1,0 +1,82 @@
+NAME
+    WebService::ChangesXml - Do something with updated blogs on Weblogs.Com
+
+SYNOPSIS
+      use WebService::ChangesXml;
+      my $blogs = WebService::ChangesXml->new("http://www.weblogs.com/changes.xml");
+      $blogs->add_handler(\&found_new_ping);
+
+      # do something with new blogs with 30 seconds interval
+      while (1) {
+          $blogs->find_pings();
+          sleep 30;
+      }
+
+      sub found_new_ping {
+          my($blog_name, $blog_url, $when) = @_;
+          do_something($blog_url);
+      }
+
+DESCRIPTION
+    WebService::ChangesXml is a event-driven module to build your application that does something with newly
+    updated blogs displayed on Weblogs.Com (or other services that provides compatible `changes.xml').
+
+METHODS
+    new $blogs = WebService::ChangesXml->new($changes_xml);
+
+        Creates new object. Takes URL for `changes.xml'.
+
+    url $url = $blogs->url();
+
+        Returns URL for `changes.xml', that should be set on `new'.
+
+    add_handler
+        Registers new subroutine that is invoked when this module finds newly updated blogs. Registerd
+        subroutine will be given 3 paarameters: Blog name, Blog URL and when its updated (epoch time).
+
+    find_pings
+        Fetches `changes.xml' and invokes registered handlers when it found new blogs.
+
+    updated
+          my $updated = $blogs->updated();
+          $blogs->updated($updated);
+
+        Gets/sets last updated time of `changes.xml'. If you call `find_pings' method once in a script, and
+        saves updated timestamp in file or database. Use this method to restore last updated time. For example:
+
+          # restore updated time from $timestamp_file's mtime
+          my $last_invoked = (stat($timestamp_file))[8];
+          $blogs->updated($updated);
+
+          # now find new Blogs
+          $blogs->find_pings();
+
+          # equivalent to Unix "touch"
+          my $updated = $blogs->updated;
+          utime $updated, $updated, $timestamp_file;
+
+        Last updated time is set internally when you call `find_pings' methods.
+
+    count
+          my $count = $blogs->count();
+
+        Returns how many `changes.xml' is updated.
+
+    user_agent
+          my $ua = $blogs->user_agent();
+
+        Returns LWP::UserAgent object used internally. If you wanna override User-Agent: header, timeout setting
+        or other LWP setting, use this method.
+
+AUTHOR
+    Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+
+    This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+SEE ALSO
+    the WebService::weblogUpdates manpage
+
+    http://newhome.weblogs.com/changesXml
+
+    http://www.weblogs.com/changes.xml
+

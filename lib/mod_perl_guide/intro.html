@@ -1,0 +1,947 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Introduction. Incentives. Credits. </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Introduction. Incentives. Credits. 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+                                       |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./start.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#What_is_mod_perl">What is mod_perl</A>
+	<UL>
+
+		<LI><A HREF="#mod_cgi">mod_cgi</A>
+		<LI><A HREF="#C_API">C API</A>
+		<LI><A HREF="#Perl_API">Perl API</A>
+		<LI><A HREF="#Apache_Registry">Apache::Registry</A>
+		<LI><A HREF="#Apache_PerlRun">Apache::PerlRun</A>
+	</UL>
+
+	<LI><A HREF="#What_will_you_learn">What will you learn</A>
+	<LI><A HREF="#High_Profile_Sites_Running_mod_p">High-Profile Sites Running mod_perl</A>
+	<LI><A HREF="#References_and_Acknowledgments">References and Acknowledgments</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="What_is_mod_perl">What is mod_perl</A></H1></CENTER>
+<P>
+The Apache/Perl integration project brings together the full power of the
+Perl programming language and the Apache HTTP server. With mod_perl it is
+possible to write Apache modules entirely in Perl, letting you easily do
+things that are more difficult or impossible in regular CGI programs, such
+as running sub requests. In addition, the persistent Perl interpreter
+embedded in the server saves the overhead of starting an external
+interpreter, i.e. the penalty of Perl start-up time. And not the least
+important feature is code caching, where modules and scripts are loaded and
+compiled only once, and for the rest of the server's life they are served
+from the cache. Thus the server spends its time only running already loaded
+and compiled code, which is very fast.
+
+<P>
+The primary advantages of mod_perl are power and speed. You have full
+access to the inner workings of the web server and can intervene at any
+stage of request-processing. This allows for customized processing of (to
+name just a few of the phases) URI-&gt;filename translation,
+authentication, response generation, and logging. There is very little
+run-time overhead. In particular, it is not necessary to start a separate
+process, as is often done with web-server extensions. The most wide-spread
+such extension, the Common Gateway Interface (CGI), can be replaced
+entirely with Perl code that handles the response generation phase of
+request processing. mod_perl includes two general purpose modules for this
+purpose: <CODE>Apache::Registry</CODE>, which can transparently run existing perl CGI scripts and <CODE>Apache::PerlRun</CODE>, which does a similar job but allows you to run ``dirtier'' (to some
+extent) scripts.
+
+<P>
+You can configure your httpd server and handlers in Perl (using
+<CODE>PerlSetVar</CODE>, and &lt;Perl&gt; sections). You can even define your own configuration directives.
+
+<P>
+Many people ask ``How much of a performance improvement does mod_perl
+give?'' Well, it all depends on what you are doing with mod_perl and
+possibly who you ask. Developers report speed boosts from 200% to 2000%.
+The best way to measure is to try it and see for yourself! (See <A
+HREF="http://perl.apache.org/tidbits.html">http://perl.apache.org/tidbits.html</A>
+and <A
+HREF="http://perl.apache.org/stories/">http://perl.apache.org/stories/</A>
+for the facts.)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_cgi">mod_cgi</A></H2></CENTER>
+<P>
+When you run your CGI scripts by using a configuration like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ScriptAlias /cgi-bin/ /home/httpd/cgi-bin/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+you run it under a mod_cgi handler, you never define it explicitly. Apache
+does all the configuration work behind the scenes, when you use a
+ScriptAlias.
+
+<P>
+By the way, don't confuse <CODE>ScriptAlias</CODE> with the <CODE>ExecCGI</CODE>
+configuration option, which we enable so that the script will be executed
+rather than returned as a plain text file. For example for mod_perl and <CODE>Apache::Registry</CODE> you would use a configuration like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="C_API">C API</A></H2></CENTER>
+<P>
+META: complete
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Perl_API">Perl API</A></H2></CENTER>
+<P>
+META: complete
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Apache_Registry">Apache::Registry</A></H2></CENTER>
+<P>
+From the viewpoint of the Perl API, <CODE>Apache::Registry</CODE> is simply another handler that's not conceptually different from any other
+handler. <CODE>Apache::Registry</CODE> reads in the script file, compiles, executes it and stores into the cache.
+Since the perl interpreter keeps running from child process' creation to
+its death, any code compiled by the interpreter is kept in memory until the
+child dies.
+
+<P>
+To prevent script name collisions, <CODE>Apache::Registry</CODE> creates a unique key for each cached script by prepending <CODE>Apache::ROOT::</CODE> to the mangled path of the script's URI. This key is actually the package
+name that the script resides in. So if you have requested a script <CODE>/perl/project/test.pl</CODE>, the scripts would be wrapped in code which starts with a package
+declaration of:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::ROOT::perl::project::test_e2pl;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>Apache::Registry</CODE> also stores the script's last modification time. Everytime the script
+changes, the cached code is discarded and recompiled using the modified
+source. However, it doesn't check the modification times of any of the perl
+libraries the script might use.
+
+<P>
+<CODE>Apache::Registry</CODE> overrides <CODE>CORE::exit()</CODE> with <CODE>Apache::exit()</CODE>, so CGI scripts that use <CODE>exit()</CODE> will run correctly. We will talk about all these details in depth later.
+
+<P>
+The last thing <CODE>Apache::Registry</CODE> does, is emulation of mod_cgi's environment variables, like <CODE>$ENV{SERVER_NAME}</CODE>, <CODE>$ENV{REMOTE_USER}</CODE>
+and so on. <STRONG>PerlSetupEnv Off</STRONG> disables this feature which saves some memory and CPU cycles.
+
+<P>
+From the viewpoint of the programmer, there is almost no difference between
+running a script as a plain CGI script under mod_cgi and running it under
+mod_perl. There is however a great speed improvement, but at the expense of
+much heavier memory usage (there is no free lunch :).
+
+<P>
+When they run under mod_cgi, your CGI scripts are loaded each time they are
+called and then they exit. Under mod_perl they are loaded once and cached.
+This gives a big performance boost. But because the code is cached and
+doesn't exit, it won't cleanup memory as it would under mod_cgi. This can
+have unexpected effects.
+
+<P>
+Your scripts will be recompiled and reloaded by mod_perl when it detects
+that you have changed them, but remember that any libraries that your
+scripts might <CODE>require()</CODE> or <CODE>use()</CODE> will not be
+recompiled when they are changed. You will have to take action yourself to
+ensure that they are recompiled.
+
+<P>
+Of course the guide will answer all these issues in depth.
+
+<P>
+Let's see what happens to your script when it's being executed under
+<CODE>Apache::Registry</CODE>. If we take the simplest code of (URI
+<CODE>/perl/project/test.pl</CODE>)
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/html\n\n&quot;;
+  print &quot;It works\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>Apache::Registry</CODE> will convert it into the following:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::ROOT::perl::project::test_e2pl;
+  use Apache qw(exit);
+  sub handler {
+    print &quot;Content-type: text/html\n\n&quot;;
+    print &quot;It works\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The first line provides a unique namespace for the code to use, and a
+unique key by which the code can be referenced from the cache.
+
+<P>
+The second line imports <CODE>Apache::exit</CODE> which over-rides perl's built-in <CODE>exit</CODE>.
+
+<P>
+The <CODE>sub handler</CODE> subroutine is wrapped around your code. By default (i.e. if you do not
+specify an alternative), when you use mod_perl and your code's URI is
+called, mod_perl will seek to execute the URI's associated <CODE>handler</CODE> subroutine.
+
+<P>
+META: Complete
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Apache_PerlRun">Apache::PerlRun</A></H2></CENTER>
+<P>
+META: Complete
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="What_will_you_learn">What will you learn</A></H1></CENTER>
+<P>
+This document was written in an effort to help you start using Apache's
+mod_perl extension as quickly and easily as possible. It includes
+information about the installation and configuration of both Perl and the
+Apache web server and delves deeply into the issues of writing and porting
+existing Perl scripts to run under mod_perl. Note that it does not attempt
+to enter the big world of using the Perl API or C API. You will find
+pointers to coverage of these topics in the
+<A HREF="././help.html#">Getting Help and Further Learning</A> section of this document. This guide tries to cover the most of the
+<CODE>Apache::Registry</CODE> and <CODE>Apache::PerlRun</CODE> modules. Along with mod_perl related topics, there are many more issues
+related to administering Apache servers, debugging scripts, using
+databases, mod_perl related Perl, code snippets and more. The <A HREF="././start.html#">Guide's Overview</A> will help you to find your way through the guide.
+
+<P>
+It is assumed that you know at least the basics of building and installing
+Perl and Apache. (If you do not, just read the INSTALL documents which are
+part of the distribution of each package.) However, in this guide you will
+find specific Perl and Apache installation and configuration notes, which
+will help you successfully complete the mod_perl installation and get the
+server running in a short time.
+
+<P>
+If after reading this guide and the other documents listed in
+<A HREF="././help.html#">Getting Help and Further Learning</A> you feel that your questions remain unanswered, you could try asking the
+apache/mod_perl mailing list to help you. But first try to browse the
+mailing list archive (located at <A
+HREF="http://forum.swarthmore.edu/epigone/modperl">http://forum.swarthmore.edu/epigone/modperl</A>
+). Often you will find the answer to your question by searching the mailing
+list archive, since most questions have already been asked and answered
+already! If you ignore this advice, do not be surprised if your question
+goes unanswered - it bores people when they're asked to answer the same
+question repeatedly - especially if the answer can be found in the archive
+or in the documentation. This does not mean that you should avoid asking
+questions, just do not abuse the available help and <STRONG>RTFM</STRONG> before you call for <STRONG>HELP</STRONG>. (You have certainly heard the infamous fable of the shepherd boy and the
+wolves...) And if you do ask questions on the mailing list <EM>please</EM> make your subject line descriptive of the problem, not just ``Help'' -
+you're far more likely to get replies if people can see the issue you are
+talking about straight away.
+
+<P>
+If you find incorrect details or mistakes in my grammar, or you want to
+contribute to this document please feel free to send me an email at <A
+HREF="mailto:stas@stason.org">stas@stason.org</A> .
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="High_Profile_Sites_Running_mod_p">High-Profile Sites Running mod_perl</A></H1></CENTER>
+<P>
+A report prepared by Rex Staples at Thu, 14 Oct 1999:
+
+<UL>
+<P><LI>
+<P>
+Macromedia
+
+<P>
+4,273,000 unique visitors/month Aug-1999
+
+<P>
+<A HREF="http://www.macromedia.com">http://www.macromedia.com</A>
+
+<P>
+Apache/1.3.4 (Unix) mod_perl/1.18 on Solaris
+
+<P><LI>
+<P>
+ValueClick: Results-based advertising network
+
+<P>
+80 million page views/day May 2000 using about 45 machines
+
+<P>
+<A HREF="http://valueclick.com">http://valueclick.com</A>
+
+<P>
+Apache/1.3.9-dev (Unix) mod_perl/1.21_01 on FreeBSD
+
+<P><LI>
+<P>
+Deja.com
+
+<P>
+130 million pageviews/month Oct-1999
+
+<P>
+<A HREF="http://www.deja.com">http://www.deja.com</A>
+
+<P>
+Apache/1.3b5 mod_perl/1.08 on Linux
+
+<P><LI>
+<P>
+MP3.com, Inc.
+
+<P>
+77 million page views/month Aug-1999
+
+<P>
+408,000 unique visitors/day Aug-1999
+
+<P>
+<A HREF="http://www.mp3.com">http://www.mp3.com</A> <A
+HREF="http://www.mp3.com/pr/990914-keymetrics.html">http://www.mp3.com/pr/990914-keymetrics.html</A>
+
+
+<P>
+Apache/1.3.4-9 (Unix) mod_perl/1.18-21 on Linux/FreeBSD
+
+<P><LI>
+<P>
+IMDB: Internet Movie Database
+
+<P>
+1.25 million page views/day Mar-1998
+
+<P>
+<A HREF="http://www.imdb.com">http://www.imdb.com</A>
+
+<P>
+* They are now an Amazon.com company
+
+<P>
+Apache/1.3.7-dev (Unix) mod_perl/1.19_01-dev
+
+<P><LI>
+<P>
+Flash.net: Internet Service Provider
+
+<P>
+1,603,000 unique visitors/month Aug-1999
+
+<P>
+<A HREF="http://www.flash.net">http://www.flash.net</A> <A
+HREF="http://www.mediametrix.com/TopRankings/TopRankings.html">http://www.mediametrix.com/TopRankings/TopRankings.html</A>
+
+
+<P>
+Apache/1.2.4 mod_perl/1.00 on Solaris
+
+<P><LI>
+<P>
+At Hand Network Yellow Pages
+
+<P>
+917,000 unique visitors/month Aug-1999
+
+<P>
+<A HREF="http://www.athand.com">http://www.athand.com</A> <A
+HREF="http://www.mediametrix.com/TopRankings/TopRankings.html">http://www.mediametrix.com/TopRankings/TopRankings.html</A>
+
+
+<P>
+Stronghold/2.3 Apache/1.2.6 (Unix) mod_perl/1.15 on Solaris
+
+<P><LI>
+<P>
+Commissioner.com: Subscription Fantasy Football
+
+<P>
+12 million page views/day Oct-1999
+
+<P>
+<A HREF="http://www.commissioner.com">http://www.commissioner.com</A>
+
+<P>
+Apache/1.35b mod_perl/1.10 on Linux
+
+<P><LI>
+<P>
+Slashdot: News For Nerds
+
+<P>
+400,000 page views/day Oct-1999
+
+<P>
+<A HREF="http://www.slashdot.org">http://www.slashdot.org</A>
+
+<P>
+Apache/1.3.6 (Unix) mod_perl/1.21 on Linux
+
+<P><LI>
+<P>
+Hot Bot mail and member web pages:
+
+<P>
+<A HREF="http://members.hotbot.com">http://members.hotbot.com</A>
+
+<P>
+Also widely used on HotWired, WiredNews, Webmonkey, and Suck.com
+
+<P>
+Apache/1.3.4 (Unix) mod_perl/1.21 on Solaris
+
+<P><LI>
+<P>
+Art Today: subscription clip-art service
+
+<P>
+250k hits/day
+
+<P>
+<A HREF="http://www.arttoday.com">http://www.arttoday.com</A>
+
+<P>
+Oracle 7 + 1 Sun Ultra w/150GB storage Apache/1.3.4 (Unix) mod_perl/1.17 on
+Solaris
+
+<P><LI>
+<P>
+CMPnet: a technology information network
+
+<P>
+500k hits/day
+
+<P>
+<A HREF="http://www.cmpnet.com">http://www.cmpnet.com</A>
+
+<P>
+Apache/1.3.9 (Unix) mod_perl/1.16
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="References_and_Acknowledgments">References and Acknowledgments</A></H1></CENTER>
+<P>
+I have used the following references while writing this guide:
+
+<UL>
+<P><LI>
+<P>
+<STRONG>mod_perl FAQ</STRONG> by Frank Cringle at <A
+HREF="http://perl.apache.org/faq/">http://perl.apache.org/faq/</A> .
+
+<P><LI>
+<P>
+<STRONG>mod_perl performance tuning guide</STRONG> by Vivek Khera at <A
+HREF="http://perl.apache.org/tuning/">http://perl.apache.org/tuning/</A> .
+
+<P><LI>
+<P>
+<STRONG>mod_perl plugin reference guide</STRONG> by Doug MacEachern at <A
+HREF="http://perl.apache.org/src/mod_perl.html">http://perl.apache.org/src/mod_perl.html</A>
+.
+
+<P><LI>
+<P>
+<STRONG>Quick guide for moving from CGI to mod_perl</STRONG> at <A
+HREF="http://perl.apache.org/dist/cgi_to_mod_perl.html">http://perl.apache.org/dist/cgi_to_mod_perl.html</A>
+.
+
+<P><LI>
+<P>
+<STRONG>mod_perl_traps, common traps and solutions for mod_perl users</STRONG> at <A
+HREF="http://perl.apache.org/dist/mod_perl_traps.html">http://perl.apache.org/dist/mod_perl_traps.html</A>
+.
+
+<P><LI>
+<P>
+<STRONG>mod_perl mailing list emails</STRONG>. Answers to some of the questions posted to Apache/Perl mailing list. (To
+send email to <A
+HREF="mailto:modperl-subscribe@apache.org)">modperl-subscribe@apache.org)</A>
+
+
+<P><LI>
+<P>
+<STRONG>My personal experience with mod_perl</STRONG>.
+
+</UL>
+<P>
+I have quoted many snippets of information from FAQs and emails, but I have
+not credited each quote in the guide individually. I did not mean to take
+the credit for myself, it's just that I tried to keep track of names, and
+became lost, so instead of scattering credits thoughout the Guide I have
+gathered them all together here. If you want your name to show up under
+your original quote, please tell me and I'll add it for you.
+
+<P>
+Major contributors:
+
+<UL>
+<P><LI>
+<P>
+<STRONG>Doug MacEachern</STRONG>. A large part of this guide is built upon his email replies to users
+questions.
+
+<P><LI>
+<P>
+<STRONG>Frank Cringle</STRONG>. Parts of his mod_perl FAQ have been used in this guide.
+
+<P><LI>
+<P>
+<STRONG>Vivek Khera</STRONG>. For his mod_perl performance tuning guide. And lots of useful comments on
+the list that made into the guide.
+
+<P><LI>
+<P>
+<STRONG>Steve Reppucci</STRONG>, who did a thorough review of the stuff I wrote. He fixed lots of spelling
+and grammar errors, and made the guide readable to English speakers :)
+
+<P><LI>
+<P>
+<STRONG>Eric Cholet</STRONG>, who wrote complete sections for the guide, and pointed out technical
+errors in it.
+
+<P><LI>
+<P>
+<STRONG>Ken Williams</STRONG>, who reviewed a lot of stuff in the guide. Many snippets from his emails
+are included in the guide.
+
+<P><LI>
+<P>
+<STRONG>Matt Sergeant</STRONG>, who contributed the section ``Exception Handling for mod_perl'' for the
+perl reference chapter and made many other contributions.
+
+<P><LI>
+<P>
+<STRONG>Wesley Darlington</STRONG> for contributing a big section for the scenario chapter.
+
+<P><LI>
+<P>
+<STRONG>Geoffrey S Young</STRONG> and <STRONG>David Harris</STRONG> for contributing big sections about mod_perl and RPM packages, and
+providing helpful comments and corrections.
+
+<P><LI>
+<P>
+<STRONG>Andreas J. Koenig</STRONG> for contributing his ``Correct HTTP headers'' document.
+
+<P><LI>
+<P>
+<STRONG>Ged W. Haywood</STRONG> for reviewing and fixing the whole guide, providing lots of constructive
+criticisms and helping to reorganize the guide to make it more user
+friendly.
+
+<P><LI>
+<P>
+<STRONG>Mark Summerfield</STRONG> for reviewing and fixing all the guide's chapters, improving guide's
+readability and suggesting useful extensions.
+
+<P><LI>
+<P>
+<STRONG>Jeffrey W. Baker</STRONG> for his ``guide to mod_perl database performance'' and many useful comments
+on the list that has been reused in the guide's material.
+
+<P><LI>
+<P>
+<STRONG>Richard A. Wells</STRONG> for reviewing and correcting a large part of the guide.
+
+<P><LI>
+<P>
+<STRONG>Randy Harmon</STRONG> for rewriting the mod_perl advocacy chapter
+
+<P><LI>
+<P>
+<STRONG>Dean Fitz</STRONG> for reviewing the ``Operating System and Hardware Demands'' chapter.
+
+</UL>
+<P>
+Credits of course go to ( alphabetically sorted ):
+
+<UL>
+<P><LI><STRONG><A NAME="item_Ajay">Ajay Shah</A></STRONG>
+<P><LI><STRONG><A NAME="item_Andreas">Andreas J. Koenig</A></STRONG>
+<P><LI><STRONG><A NAME="item_Andreas">Andreas Piesk</A></STRONG>
+<P><LI><STRONG><A NAME="item_Andrei">Andrei A. Voropaev</A></STRONG>
+<P><LI><STRONG><A NAME="item_Andrew">Andrew Ford</A></STRONG>
+<P><LI><STRONG><A NAME="item_Anthony">Anthony D. Ettinger</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ask">Ask Bjoern Hansen</A></STRONG>
+<P><LI><STRONG><A NAME="item_Barrie">Barrie Slaymaker</A></STRONG>
+<P><LI><STRONG><A NAME="item_Bill">Bill Moseley</A></STRONG>
+<P><LI><STRONG><A NAME="item_Brian">Brian Moseley</A></STRONG>
+<P><LI><STRONG><A NAME="item_Carl">Carl Hansen</A></STRONG>
+<P><LI><STRONG><A NAME="item_Chad">Chad K. Lewis</A></STRONG>
+<P><LI><STRONG><A NAME="item_Chris">Chris Nokleberg</A></STRONG>
+<P><LI><STRONG><A NAME="item_Chris">Chris Winters</A></STRONG>
+<P><LI><STRONG><A NAME="item_Christof">Christof Damian</A></STRONG>
+<P><LI><STRONG><A NAME="item_Christophe">Christophe Dupre</A></STRONG>
+<P><LI><STRONG><A NAME="item_Cliff">Cliff Rayman</A></STRONG>
+<P><LI><STRONG><A NAME="item_Craig">Craig</A></STRONG>
+<P><LI><STRONG><A NAME="item_Daniel">Daniel Koch</A></STRONG>
+<P><LI><STRONG><A NAME="item_Daniel">Daniel W. Burke</A></STRONG>
+<P><LI><STRONG><A NAME="item_Darren">Darren Chamberlain</A></STRONG>
+<P><LI><STRONG><A NAME="item_Dave">Dave Hodgkinson</A></STRONG>
+<P><LI><STRONG><A NAME="item_Dave">Dave Rolsky</A></STRONG>
+<P><LI><STRONG><A NAME="item_David">David Harris</A></STRONG>
+<P><LI><STRONG><A NAME="item_David">David Huggins-Daines</A></STRONG>
+<P><LI><STRONG><A NAME="item_David">David Landgren</A></STRONG>
+<P><LI><STRONG><A NAME="item_David">David Mitchell</A></STRONG>
+<P><LI><STRONG><A NAME="item_DeWitt">DeWitt Clinton</A></STRONG>
+<P><LI><STRONG><A NAME="item_Dean">Dean Fitz</A></STRONG>
+<P><LI><STRONG><A NAME="item_Doug">Doug Bagley</A></STRONG>
+<P><LI><STRONG><A NAME="item_Doug">Doug Kyle</A></STRONG>
+<P><LI><STRONG><A NAME="item_Drew">Drew Taylor</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ed">Ed Park</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ed">Ed Phillips</A></STRONG>
+<P><LI><STRONG><A NAME="item_Edmund">Edmund Mergl</A></STRONG>
+<P><LI><STRONG><A NAME="item_Edwin">Edwin Pratomo</A></STRONG>
+<P><LI><STRONG><A NAME="item_Eric">Eric Cholet</A></STRONG>
+<P><LI><STRONG><A NAME="item_Eric">Eric Strovink</A></STRONG>
+<P><LI><STRONG><A NAME="item_Evan">Evan A. Zacks</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ewan">Ewan Edwards</A></STRONG>
+<P><LI><STRONG><A NAME="item_Frank">Frank Schoeters</A></STRONG>
+<P><LI><STRONG><A NAME="item_Garr">Garr Updegraff</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ged">Ged Haywood</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ged">Ged W. Haywood</A></STRONG>
+<P><LI><STRONG><A NAME="item_Geoff">Geoff Crawshaw</A></STRONG>
+<P><LI><STRONG><A NAME="item_Geoffrey">Geoffrey Young</A></STRONG>
+<P><LI><STRONG><A NAME="item_Gerald">Gerald Richter</A></STRONG>
+<P><LI><STRONG><A NAME="item_Gerd">Gerd Knops</A></STRONG>
+<P><LI><STRONG><A NAME="item_Greg">Greg Cope</A></STRONG>
+<P><LI><STRONG><A NAME="item_Greg">Greg Stark</A></STRONG>
+<P><LI><STRONG><A NAME="item_Gunther">Gunther Birznieks</A></STRONG>
+<P><LI><STRONG><A NAME="item_Hailei">Hailei Dai</A></STRONG>
+<P><LI><STRONG><A NAME="item_Henrique">Henrique Pantarotto</A></STRONG>
+<P><LI><STRONG><A NAME="item_Honza">Honza Pazdziora</A></STRONG>
+<P><LI><STRONG><A NAME="item_Howard">Howard Jones</A></STRONG>
+<P><LI><STRONG><A NAME="item_Hunter">Hunter Monroe</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ilya">Ilya Obshadko</A></STRONG>
+<P><LI><STRONG><A NAME="item_James">James Furness</A></STRONG>
+<P><LI><STRONG><A NAME="item_James">James G Smith</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jan">Jan Peter Hecking</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jason">Jason Bodnar</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jason">Jason Rhinelander</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jauder">Jauder Ho</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jay">Jay J</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jeff">Jeff Chan</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jeff">Jeff Rowe</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jeffrey">Jeffrey W. Baker</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jie">Jie Gao</A></STRONG>
+<P><LI><STRONG><A NAME="item_Joao">Joao Fonseca</A></STRONG>
+<P><LI><STRONG><A NAME="item_Joe">Joe Schaefer</A></STRONG>
+<P><LI><STRONG><A NAME="item_Joe">Joe Slag</A></STRONG>
+<P><LI><STRONG><A NAME="item_John">John Armstrong</A></STRONG>
+<P><LI><STRONG><A NAME="item_John">John Deighan</A></STRONG>
+<P><LI><STRONG><A NAME="item_John">John Hyland</A></STRONG>
+<P><LI><STRONG><A NAME="item_John">John Milton</A></STRONG>
+<P><LI><STRONG><A NAME="item_John">John Walker</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jon">Jon Orwant</A></STRONG>
+<P><LI><STRONG><A NAME="item_Jonathan">Jonathan Peterson</A></STRONG>
+<P><LI><STRONG><A NAME="item_Joshua">Joshua Chamas</A></STRONG>
+<P><LI><STRONG><A NAME="item_Kavitha">Kavitha</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ken">Ken Williams</A></STRONG>
+<P><LI><STRONG><A NAME="item_Kenny">Kenny Gatdula</A></STRONG>
+<P><LI><STRONG><A NAME="item_Kevin">Kevin Murphy</A></STRONG>
+<P><LI><STRONG><A NAME="item_Lance">Lance Cleveland</A></STRONG>
+<P><LI><STRONG><A NAME="item_Larry">Larry Leszczynski</A></STRONG>
+<P><LI><STRONG><A NAME="item_Leslie">Leslie Mikesell</A></STRONG>
+<P><LI><STRONG><A NAME="item_Lincoln">Lincoln Stein</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mads">Mads Toftum</A></STRONG>
+<P><LI><STRONG><A NAME="item_Marcel">Marcel Grunauer</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mark">Mark Mills</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mark">Mark Summerfield</A></STRONG>
+<P><LI><STRONG><A NAME="item_Marko">Marko van der Puil</A></STRONG>
+<P><LI><STRONG><A NAME="item_Marshall">Marshall Dudley</A></STRONG>
+<P><LI><STRONG><A NAME="item_Matt">Matt Sergeant</A></STRONG>
+<P><LI><STRONG><A NAME="item_Matthew">Matthew Darwin</A></STRONG>
+<P><LI><STRONG><A NAME="item_Michael">Michael Blakeley</A></STRONG>
+<P><LI><STRONG><A NAME="item_Michael">Michael Finke</A></STRONG>
+<P><LI><STRONG><A NAME="item_Michael">Michael Hall</A></STRONG>
+<P><LI><STRONG><A NAME="item_Michael">Michael Rendell</A></STRONG>
+<P><LI><STRONG><A NAME="item_Michael">Michael Schout</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mike">Mike Depot</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mike">Mike Fletcher</A></STRONG>
+<P><LI><STRONG><A NAME="item_Mike">Mike Miller</A></STRONG>
+<P><LI><STRONG><A NAME="item_Nancy">Nancy Lin</A></STRONG>
+<P><LI><STRONG><A NAME="item_Nathan">Nathan Torkington</A></STRONG>
+<P><LI><STRONG><A NAME="item_Nathan">Nathan Vonnahme</A></STRONG>
+<P><LI><STRONG><A NAME="item_Neil">Neil Conway</A></STRONG>
+<P><LI><STRONG><A NAME="item_Nick">Nick Tonkin</A></STRONG>
+<P><LI><STRONG><A NAME="item_Oleg">Oleg Bartunov</A></STRONG>
+<P><LI><STRONG><A NAME="item_Pascal">Pascal Eeftinck</A></STRONG>
+<P><LI><STRONG><A NAME="item_Patrick">Patrick</A></STRONG>
+<P><LI><STRONG><A NAME="item_Pavel">Pavel Shmidt</A></STRONG>
+<P><LI><STRONG><A NAME="item_Perrin">Perrin Harkins</A></STRONG>
+<P><LI><STRONG><A NAME="item_Peter">Peter Galbavy</A></STRONG>
+<P><LI><STRONG><A NAME="item_Peter">Peter Haworth</A></STRONG>
+<P><LI><STRONG><A NAME="item_Peter">Peter J. Schoenster</A></STRONG>
+<P><LI><STRONG><A NAME="item_Peter">Peter Skov</A></STRONG>
+<P><LI><STRONG><A NAME="item_Philip">Philip Jacob</A></STRONG>
+<P><LI><STRONG><A NAME="item_Philip">Philip Newton</A></STRONG>
+<P><LI><STRONG><A NAME="item_Radu">Radu Greab</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ralf">Ralf Engelschall</A></STRONG>
+<P><LI><STRONG><A NAME="item_Randal">Randal L. Schwartz</A></STRONG>
+<P><LI><STRONG><A NAME="item_Randy">Randy Harmon</A></STRONG>
+<P><LI><STRONG><A NAME="item_Randy">Randy Kobes</A></STRONG>
+<P><LI><STRONG><A NAME="item_Rauznitz">Rauznitz Balazs</A></STRONG>
+<P><LI><STRONG><A NAME="item_Rex">Rex Staples</A></STRONG>
+<P><LI><STRONG><A NAME="item_Richard">Richard A. Wells</A></STRONG>
+<P><LI><STRONG><A NAME="item_Richard">Richard Chen</A></STRONG>
+<P><LI><STRONG><A NAME="item_Richard">Richard Dice</A></STRONG>
+<P><LI><STRONG><A NAME="item_Richard">Richard More</A></STRONG>
+<P><LI><STRONG><A NAME="item_Rick">Rick Myers</A></STRONG>
+<P><LI><STRONG><A NAME="item_Robert">Robert Mathews</A></STRONG>
+<P><LI><STRONG><A NAME="item_Robin">Robin Berjon</A></STRONG>
+<P><LI><STRONG><A NAME="item_Rodger">Rodger Donaldson</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ron">Ron Pero</A></STRONG>
+<P><LI><STRONG><A NAME="item_Roy">Roy Nasser</A></STRONG>
+<P><LI><STRONG><A NAME="item_Salve">Salve J Nilsen</A></STRONG>
+<P><LI><STRONG><A NAME="item_Scott">Scott Fagg</A></STRONG>
+<P><LI><STRONG><A NAME="item_Scott">Scott Holdren</A></STRONG>
+<P><LI><STRONG><A NAME="item_Sean">Sean Dague</A></STRONG>
+<P><LI><STRONG><A NAME="item_Shane">Shane Nay</A></STRONG>
+<P><LI><STRONG><A NAME="item_Stephane">Stephane Benoit</A></STRONG>
+<P><LI><STRONG><A NAME="item_Stephen">Stephen Judd</A></STRONG>
+<P><LI><STRONG><A NAME="item_Steve">Steve Reppucci</A></STRONG>
+<P><LI><STRONG><A NAME="item_Steve">Steve Willer</A></STRONG>
+<P><LI><STRONG><A NAME="item_Terry">Terry West</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tim">Tim Bunce</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tom">Tom Brown</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tom">Tom Christiansen</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tom">Tom Hughes</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tom">Tom Mornini</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tuomas">Tuomas Salo</A></STRONG>
+<P><LI><STRONG><A NAME="item_Tzvetan">Tzvetan Stoyanov</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ulrich">Ulrich Pfeifer</A></STRONG>
+<P><LI><STRONG><A NAME="item_Vivek">Vivek Khera</A></STRONG>
+<P><LI><STRONG><A NAME="item_Ward">Ward Vandewege</A></STRONG>
+<P><LI><STRONG><A NAME="item_Wesley">Wesley Darlington</A></STRONG>
+<P><LI><STRONG><A NAME="item_Will">Will Trillich</A></STRONG>
+<P><LI><STRONG><A NAME="item_Yann">Yann Kerhervé</A></STRONG>
+<P><LI><STRONG><A NAME="item_Yann">Yann Ramin</A></STRONG>
+<P><LI><STRONG><A NAME="item_Did">Did I miss your name? Tell me!</A></STRONG>
+</UL>
+<P>
+I want to thank all the people who donated their time and efforts to make
+this amazing idea of mod_perl a reality. This includes Doug MacEachern, the
+author of mod_perl, and all the developers who contributed bug patches,
+modules and help. And of course the numerous unseen users around the world
+who help to promote mod_perl and to make it a better tool.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+                                       |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./start.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/20/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

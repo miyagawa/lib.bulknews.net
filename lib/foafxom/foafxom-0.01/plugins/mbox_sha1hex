@@ -1,0 +1,12 @@
+package mbox_sha1hex;
+use strict;
+use Digest::SHA1 qw(sha1_hex);
+
+sub start { 1 }
+
+sub story {
+    $meta::mbox_sha1sum = $meta::mbox =~ /^mailto:/
+	? sha1_hex($meta::mbox) : $meta::mbox;
+}
+
+1;

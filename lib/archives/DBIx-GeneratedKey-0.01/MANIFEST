@@ -1,0 +1,11 @@
+Changes
+MANIFEST			This list of files
+Makefile.PL
+lib/DBIx/GeneratedKey.pm
+lib/DBIx/GeneratedKey/SQLite.pm
+lib/DBIx/GeneratedKey/mysql.pm
+lib/DBIx/GeneratedKey/mysqlPP.pm
+t/00_compile.t
+t/01_mysql.t
+t/02_mysqlPP.t
+t/03_SQLite.t

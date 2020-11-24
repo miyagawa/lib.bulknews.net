@@ -1,0 +1,157 @@
+<HTML>
+<HEAD>
+<TITLE>Mail::Address::Classify - Mail address classification framework</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#METHODS">METHODS</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+Mail::Address::Classify - Mail address classification framework
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
+<P>
+<PRE>  use Mail::Address::Classify;
+</PRE>
+<P>
+<PRE>  my $addr = Mail::Address::Classify-&gt;new('foo@example.com');
+  if ($addr-&gt;belongs('mobile_jp')) {
+      print &quot;Address: &quot;, $addr-&gt;address, &quot; is mobile one in Japan&quot;;
+  }
+</PRE>
+<P>
+<PRE>  # your own classification
+  package Mail::Address::Classify::mailer_daemon;
+</PRE>
+<P>
+<PRE>  sub is_valid {
+      my($class, $addr) = @_;
+      return uc($addr-&gt;user) eq 'MAILER-DAEMON';
+  }
+</PRE>
+<P>
+<PRE>  package main;
+  my $addr = Mail::Address::Classify-&gt;new('MAILER-DAEMON@example.com');
+  if ($addr-&gt;belongs('mailer_daemon')) {
+      print &quot;Address: &quot;, $addr-&gt;format, &quot; is mailer-daemon&quot;;
+  }
+</PRE>
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+Mail::Address::Classify is a (pluggable) lightweight framework for Email
+address classification. It can be quite useful in cases like validating if
+an address
+
+<UL>
+<LI>
+<P>
+is a free mail (on the web) or not
+
+<LI>
+<P>
+is a mobile (cellular) mail or not
+
+</UL>
+<P>
+Mail::Address::Classify is a simple framework, so it cannot be used without
+any pluggable module for the classification. Currently distributed
+classification is <CODE>mobile_jp</CODE>.
+
+<P>
+I hope we will have more implementations soon. See
+<A HREF="/Mail/Address/Classify/mobile_jp.html">Mail::Address::Classify::mobile_jp</A> and do search on CPAN for more modules.
+
+<P>
+<HR>
+<H1><A NAME="METHODS">METHODS</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_new">new</A></STRONG><DD>
+<P>
+<PRE>  $addr = Mail::Address::Classify-&gt;new('foo@example.com');
+  $addr = Mail::Address::Classify-&gt;new('foo &lt;foo@example.com&gt;');
+  $addr = Mail::Address::Classify-&gt;new(
+       Mail::Address-&gt;new('foo', 'foo@example.com'),
+  );
+</PRE>
+<P>
+constructs Mail::Address::Classify instance.
+
+<P>
+Mail::Address::Classify delegates methods to Mail::Address, so you can call
+any instance methods of Mail::Address on the object like:
+
+<P>
+<PRE>  my $output = $addr-&gt;format;
+</PRE>
+<DT><STRONG><A NAME="item_belongs">belongs</A></STRONG><DD>
+<P>
+<PRE>  if ($addr-&gt;belongs('foo')) { }
+</PRE>
+<P>
+Suppose you have Mail::Address::Classify::foo module, you can call
+<A HREF="#item_belongs">belongs</A> method to Mail::Address::Classify instance with <CODE>foo</CODE>
+argument. This will result in the method call
+
+<P>
+<PRE>  Mail::Address::Classify::foo-&gt;is_valid($addr);
+</PRE>
+<P>
+where <CODE>$addr</CODE> is the object. So what you should do is define your own
+<CODE>is_valid</CODE> class method:
+
+<P>
+<PRE>  package Mail::Address::Classify::foo;
+</PRE>
+<P>
+<PRE>  sub is_valid {
+      my($class, $addr) = @_;
+      # do some stuff, and returns if $addr belongs to 'foo'
+  }
+</PRE>
+<P>
+XXX should I name this method <CODE>belongs_to</CODE>?
+
+</DL>
+<P>
+<HR>
+<H1><A NAME="AUTHOR">AUTHOR</A></H1>
+<P>
+Tatsuhiko Miyagawa &lt;<A HREF="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A>&gt;
+
+
+
+<P>
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+<P>
+<HR>
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
+<P>
+<A HREF="/Mail/Address.html">Mail::Address</A>, <A HREF="/Mail/Address/Classify/mobile_jp.html">Mail::Address::Classify::mobile_jp</A>
+
+
+
+</BODY>
+
+</HTML>

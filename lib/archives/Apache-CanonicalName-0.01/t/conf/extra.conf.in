@@ -1,0 +1,10 @@
+PerlSetEnv PERL5LIB lib
+
+UseCanonicalName On
+ServerName www.example.com
+Port 9999
+
+<Location />
+SetHandler perl-script
+PerlHandler Apache::TestCanonicalName
+</Location>

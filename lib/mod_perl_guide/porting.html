@@ -1,0 +1,6391 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: CGI to mod_perl Porting. mod_perl Coding guidelines. </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      CGI to mod_perl Porting. mod_perl Coding guidelines. 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./scenario.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./performance.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Document_Coverage">Document Coverage</A>
+	<LI><A HREF="#Before_you_start_to_code">Before you start to code</A>
+	<LI><A HREF="#Exposing_Apache_Registry_secret">Exposing Apache::Registry secrets</A>
+	<UL>
+
+		<LI><A HREF="#The_First_Mystery">The First Mystery</A>
+		<LI><A HREF="#The_Second_Mystery">The Second Mystery</A>
+	</UL>
+
+	<LI><A HREF="#Sometimes_it_Works_Sometimes_it">Sometimes it Works, Sometimes it Doesn't</A>
+	<UL>
+
+		<LI><A HREF="#An_Easy_Break_in">An Easy Break-in</A>
+		<LI><A HREF="#Thinking_mod_cgi">Thinking mod_cgi</A>
+		<LI><A HREF="#Regular_Expression_Memory">Regular Expression Memory</A>
+	</UL>
+
+	<LI><A HREF="#Script_s_name_space">Script's name space</A>
+	<LI><A HREF="#_INC_and_mod_perl">@INC and mod_perl</A>
+	<LI><A HREF="#Reloading_Modules_and_Required_F">Reloading Modules and Required Files</A>
+	<UL>
+
+		<LI><A HREF="#Restarting_the_server">Restarting the server</A>
+		<LI><A HREF="#Using_Apache_StatINC_for_the_De">Using Apache::StatINC for the Development Process</A>
+		<LI><A HREF="#Using_Apache_Reload">Using Apache::Reload </A>
+		<UL>
+
+			<LI><A HREF="#Register_Modules_Implicitly">Register Modules Implicitly</A>
+			<LI><A HREF="#Register_Modules_Explicitly">Register Modules Explicitly</A>
+			<LI><A HREF="#Special_Touch_File">Special &quot;Touch&quot; File</A>
+			<LI><A HREF="#Caveats">Caveats</A>
+			<LI><A HREF="#Availability">Availability</A>
+		</UL>
+
+		<LI><A HREF="#Configuration_Files_Writing_Dy">Configuration Files: Writing, Dynamically Updating and Reloading</A>
+		<UL>
+
+			<LI><A HREF="#Writing_Configuration_Files">Writing Configuration Files</A>
+			<LI><A HREF="#Reloading_Configuration_Files">Reloading Configuration Files</A>
+			<LI><A HREF="#Dynamically_updating_configurati">Dynamically updating configuration files</A>
+		</UL>
+
+		<LI><A HREF="#Reloading_handlers">Reloading handlers</A>
+	</UL>
+
+	<LI><A HREF="#Name_collisions_with_Modules_and">Name collisions with Modules and libs</A>
+	<LI><A HREF="#More_package_name_related_issues">More package name related issues</A>
+	<LI><A HREF="#_END_and_DATA_tokens">__END__ and __DATA__ tokens</A>
+	<LI><A HREF="#Output_from_system_calls">Output from system calls</A>
+	<LI><A HREF="#Using_format_and_write_">Using format() and write()</A>
+	<LI><A HREF="#Terminating_requests_and_process">Terminating requests and processes, the exit() and child_terminate() functions</A>
+	<LI><A HREF="#die_and_mod_perl">die() and mod_perl</A>
+	<LI><A HREF="#Return_Codes">Return Codes</A>
+	<LI><A HREF="#Testing_the_Code_from_the_Shell">Testing the Code from the Shell</A>
+	<LI><A HREF="#I_O_is_different">I/O is different</A>
+	<LI><A HREF="#STDIN_STDOUT_and_STDERR_streams">STDIN, STDOUT and STDERR streams</A>
+	<LI><A HREF="#Redirecting_STDOUT_into_a_Scalar">Redirecting STDOUT into a Scalar</A>
+	<LI><A HREF="#Apache_print_and_CORE_print_">Apache::print() and CORE::print()</A>
+	<LI><A HREF="#Global_Variables_Persistence">Global Variables Persistence</A>
+	<LI><A HREF="#Generating_correct_HTTP_Headers">Generating correct HTTP Headers</A>
+	<LI><A HREF="#NPH_Non_Parsed_Headers_scripts">NPH (Non Parsed Headers) scripts</A>
+	<LI><A HREF="#BEGIN_blocks">BEGIN blocks </A>
+	<LI><A HREF="#END_blocks">END blocks</A>
+	<LI><A HREF="#CHECK_Blocks">CHECK Blocks</A>
+	<LI><A HREF="#Command_Line_Switches_w_T_e">Command Line Switches (-w, -T, etc)</A>
+	<UL>
+
+		<LI><A HREF="#Warnings">Warnings</A>
+		<LI><A HREF="#Taint_Mode">Taint Mode</A>
+		<LI><A HREF="#Other_switches">Other switches</A>
+	</UL>
+
+	<LI><A HREF="#The_strict_pragma">The strict pragma</A>
+	<LI><A HREF="#Passing_ENV_variables_to_CGI">Passing ENV variables to CGI</A>
+	<LI><A HREF="#_M_and_other_time_file_tests_u">-M and other time() file tests under mod_perl</A>
+	<LI><A HREF="#Apache_and_syslog">Apache and syslog</A>
+	<LI><A HREF="#File_tests_operators">File tests operators</A>
+	<LI><A HREF="#Filehandlers_and_locks_leakages">Filehandlers and locks leakages</A>
+	<LI><A HREF="#Code_has_been_changed_but_it_se">Code has been changed, but it seems the script is running the old code</A>
+	<LI><A HREF="#The_Script_Is_Too_Dirty_But_It_">The Script Is Too Dirty, But It Does The Job And I Cannot Afford To Rewrite It.</A>
+	<LI><A HREF="#Apache_PerlRun_a_closer_look">Apache::PerlRun-a closer look</A>
+	<LI><A HREF="#Sharing_variables_between_proces">Sharing variables between processes</A>
+	<LI><A HREF="#Transitioning_from_Apache_Regis">Transitioning from Apache::Registry to Apache handlers</A>
+	<UL>
+
+		<LI><A HREF="#Starting_with_mod_cgi_Compatible">Starting with mod_cgi Compatible Script</A>
+		<LI><A HREF="#Converting_into_Perl_Content_Han">Converting into Perl Content Handler</A>
+		<LI><A HREF="#Converting_to_use_Apache_Perl_Mo">Converting to use Apache Perl Modules</A>
+		<LI><A HREF="#Conclusion">Conclusion</A>
+	</UL>
+
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Document_Coverage">Document Coverage</A></H1></CENTER>
+<P>
+This chapter is relevant to both writing a new CGI script or perl handler
+from scratch and migrating an application from plain CGI to mod_perl.
+
+<P>
+It also addresses the situation where the CGI script being ported does the
+job, but is too dirty to be altered easily to run as a mod_perl program. (<CODE>Apache::PerlRun</CODE> mode)
+
+<P>
+If you are at the porting stage, you can use this chapter as a reference
+for possible problems you might encounter when running an existing CGI
+script in the new mode.
+
+<P>
+If your project schedule is tight, I would suggest converting to mod_perl
+in the following steps: Initially, run all the scripts in the
+<CODE>Apache::PerlRun</CODE> mode. Then as time allows, move them into
+<CODE>Apache::Registry</CODE> mode. Later if you need Apache Perl API functionality you can always add
+it.
+
+<P>
+If you are about to write a new CGI script from scratch, it would be a good
+idea to learn about possible mod_perl related pitfalls and to avoid them in
+the first place.
+
+<P>
+If you don't need mod_cgi compatibility, it's a good idea to start writing
+using the mod_perl API in first place. This will make your application a
+little bit more efficient and it will be easier to use the full mod_perl
+feature set, which extends the core Perl functionality with Apache specific
+functions and overriden Perl core functions that were reimplemented to work
+better in mod_perl environment.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Before_you_start_to_code">Before you start to code</A></H1></CENTER>
+<P>
+It can be a good idea to tighten up some of your Perl programming
+practices, since mod_perl doesn't tolerate sloppy programming.
+
+<P>
+This chapter relies on a certain level of Perl knowledge. Please read
+through the <A HREF="././perl.html#">Perl Reference</A> chapter and make sure you know the material covered there. This will allow
+me to concentrate on pure mod_perl issues and make them more prominent to
+the experinced Perl programmer, which would otherwise be lost in the sea of
+Perl background notes.
+
+<P>
+Additional resources:
+
+<UL>
+<P><LI><STRONG><A NAME="item_Perl">Perl Module Mechanics</A></STRONG>
+<P>
+This page describes the mechanics of creating, compiling, releasing, and
+maintaining Perl modules. <A
+HREF="http://world.std.com/~swmcd/steven/perl/module_mechanics.html">http://world.std.com/~swmcd/steven/perl/module_mechanics.html</A>
+
+
+<P>
+The information is very relevant to a mod_perl developer.
+
+<P><LI><STRONG><A NAME="item_The">The Eagle Book</A></STRONG>
+<P>
+``Writing Apache Modules with Perl and C'' is a ``must have'' book!
+
+<P>
+See the details at <A
+HREF="http://www.modperl.com">http://www.modperl.com</A> .
+
+<P><LI><STRONG><A NAME="item__Programming_Perl_Book">&quot;Programming Perl&quot; Book</A></STRONG>
+<P><LI><STRONG><A NAME="item__Perl_Cookbook_Book">&quot;Perl Cookbook&quot; Book</A></STRONG>
+<P><LI><STRONG><A NAME="item__Object_Oriented_Perl_Book">&quot;Object Oriented Perl&quot; Book</A></STRONG>
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Exposing_Apache_Registry_secret">Exposing Apache::Registry secrets</A></H1></CENTER>
+<P>
+Let's start with some simple code and see what can go wrong with it, detect
+bugs and debug them, discuss possible pitfalls and how to avoid them.
+
+<P>
+I will use a simple CGI script, that initializes a <CODE>$counter</CODE> to 0, and prints its value to the browser while incrementing it.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  counter.pl:
+  ----------
+  #!/usr/bin/perl -w
+  use strict;
+  
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  
+  my $counter = 0;
+  
+  for (1..5) {
+    increment_counter();
+  }
+  
+  sub increment_counter{
+    $counter++;
+    print &quot;Counter is equal to $counter !\r\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You would expect to see the output:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Counter is equal to 1 !
+  Counter is equal to 2 !
+  Counter is equal to 3 !
+  Counter is equal to 4 !
+  Counter is equal to 5 !</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And that's what you see when you execute this script the first time. But
+let's reload it a few times... See, suddenly after a few reloads the
+counter doesn't start its count from 1 any more. We continue to reload and
+see that it keeps on growing, but not steadily starting almost randomly at
+10, 10, 10, 15, 20... Weird...
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Counter is equal to 6 !
+  Counter is equal to 7 !
+  Counter is equal to 8 !
+  Counter is equal to 9 !
+  Counter is equal to 10 !</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We saw two anomalies in this very simple script: Unexpected increment of
+our counter over 5 and inconsistent growth over reloads. Let's investigate
+this script.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_First_Mystery">The First Mystery</A></H2></CENTER>
+<P>
+First let's peek into the <CODE>error_log</CODE> file. Since we have enabled the warnings what we see is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Variable &quot;$counter&quot; will not stay shared 
+  at /home/httpd/perl/conference/counter.pl line 13.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <EM>Variable "$counter" will not stay shared</EM> warning is generated when the script contains a named nested subroutine (a
+named - as opposed to anonymous - subroutine defined inside another
+subroutine) that refers to a lexically scoped variable defined outside this
+nested subroutine. This effect is explained in <A HREF="././perl.html#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested Subroutines</A>.
+
+<P>
+Do you see a nested named subroutine in my script? I don't! What's going
+on? Maybe it's a bug? But wait, maybe the perl interpreter sees the script
+in a different way, maybe the code goes through some changes before it
+actually gets executed? The easiest way to check what's actually happening
+is to run the script with a debugger.
+
+<P>
+But since we must debug it when it's being executed by the webserver, a
+normal debugger won't help, because the debugger has to be invoked from
+within the webserver. Luckily Doug MacEachern wrote the
+<CODE>Apache::DB</CODE> module and we will use this to debug my script. While
+<CODE>Apache::DB</CODE> allows you to debug the code interactively, we will do it
+non-interactively.
+
+<P>
+Modify the <CODE>httpd.conf</CODE> file in the following way:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv PERLDB_OPTS &quot;NonStop=1 LineInfo=/tmp/db.out AutoTrace=1 frame=2&quot;
+  PerlModule Apache::DB
+  &lt;Location /perl&gt;
+    PerlFixupHandler Apache::DB
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Restart the server and issue a request to <EM>counter.pl</EM> as before. On the surface nothing has changed--we still see the correct
+output as before, but two things happened in the background:
+
+<P>
+Firstly, the file <EM>/tmp/db.out</EM> was written, with a complete trace of the code that was executed.
+
+<P>
+Secondly, if you have loaded the <CODE>Carp</CODE> module already, <EM>error_log</EM>
+now contains the real code that was actually executed. This is produced as
+a side effect of reporting the <EM>Variable "$counter" will
+not stay shared at...</EM> warning that we saw earlier. To load the Carp module, you can add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Carp;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in your <EM>startup.pl</EM> file or in the executed code.
+
+<P>
+Here is the code that was actually executed:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::ROOT::perl::conference::counter_2epl;
+  use Apache qw(exit);
+  sub handler {
+    BEGIN {
+      $^W = 1;
+    };
+    $^W = 1;
+    
+    use strict;
+    
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+    
+    my $counter = 0;
+    
+    for (1..5) {
+      increment_counter();
+    }
+    
+    sub increment_counter{
+      $counter++;
+      print &quot;Counter is equal to $counter !\r\n&quot;;
+    }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The code in the <EM>error.log</EM> wasn't indented. I've indented it for you to stress that the code was
+wrapped inside the <CODE>handler()</CODE> subroutine.
+
+<P>
+What do we learn from this?
+
+<P>
+Well firstly that every CGI script is cached under a package whose name is
+formed from the <CODE>Apache::ROOT::</CODE> prefix and the relative part of the script's URL (<CODE>perl::conference::counter_2epl</CODE>) by replacing all occurrences of <CODE>/</CODE> with <CODE>::</CODE> and <CODE>.</CODE> with <CODE>_2e</CODE>. That's how mod_perl knows what script should be fetched from the
+cache--each script is just a package with a single subroutine named <CODE>handler</CODE>.
+
+<P>
+If we were to add <CODE>use diagnostics</CODE> to the script we would also see a reference in the error text to an inner
+(nested) subroutine--<CODE>increment_counter</CODE> is actually a nested subroutine.
+
+<P>
+With mod_perl, each subroutine in every <CODE>Apache::Registry</CODE> script is nested inside the <CODE>handler</CODE> subroutine.
+
+<P>
+It's important to understand that the <EM>inner subroutine</EM> effect happens only with code that <CODE>Apache::Registry</CODE> wraps with a declaration of the <CODE>handler</CODE> subroutine. If you put your code into a library or module, which the main
+script <CODE>require()'s</CODE> or <CODE>use()'s,</CODE> this effect
+doesn't occur.
+
+<P>
+For example if we move the code from the script into the subroutine
+<EM>run</EM>, place the subroutines into the <EM>mylib.pl</EM> file, save it in the same directory as the script itself and
+<CODE>require()</CODE> it, there will be no problem at all. (Don't forget
+the <CODE>1;</CODE> at the end of the library or the <CODE>require()</CODE> might fail.)
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  mylib.pl:
+  ---------
+  my $counter;
+  sub run{
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+    $counter = 0;
+    for (1..5) {
+      increment_counter();
+    }
+  }
+  sub increment_counter{
+    $counter++;
+    print &quot;Counter is equal to $counter !\r\n&quot;;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  counter.pl:
+  ----------
+  use strict;
+  require &quot;./mylib.pl&quot;;
+  run();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This solution provides the easiest and the fastest way to solve the nested
+subroutines problem, since all you have to do is to move the code into a
+separate file, by first wrapping the initial code into some function that
+you later will call from the script and keeping the lexically scoped
+variables that could cause the problem out of this function.
+
+<P>
+But as a general rule of thumb, unless the script is very short, I tend to
+write all the code in external libraries, and to have only a few lines in
+the main script. Generally the main script simply calls the main function
+of my library. Usually I call it <CODE>init()</CODE> or
+<CODE>run()</CODE>. I don't worry about nested subroutine effects anymore (unless I create
+them myself :).
+
+<P>
+The section '<A HREF="././perl.html#Remedies_for_Inner_Subroutines">Remedies for Inner Subroutines</A>' discusses many other possible workarounds for this problem.
+
+<P>
+You shouldn't be intimidated by this issue at all, since Perl is your
+friend. Just keep the warnings mode <STRONG>On</STRONG> and Perl will gladly tell you whenever you have this effect, by saying:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Variable &quot;$counter&quot; will not stay shared at ...[snipped]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Just don't forget to check your <EM>error_log</EM> file, before going into production!
+
+<P>
+By the way, the above example was pretty boring. In my first days of using
+mod_perl, I wrote a simple user registration program. I'll give a very
+simple representation of this program.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI;
+  $q = CGI-&gt;new;
+  my $name = $q-&gt;param('name');
+  print_response();
+  
+  sub print_response{
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+    print &quot;Thank you, $name!&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+My boss and I checked the program at the development server and it worked
+OK. So we decided to put it in production. Everything was OK, but my boss
+decided to keep on checking by submitting variations of his profile.
+Imagine the surprise when after submitting his name (let's say ``The Boss''
+:), he saw the response ``Thank you, Stas Bekman!''.
+
+<P>
+What happened is that I tried the production system as well. I was new to
+mod_perl stuff, and was so excited with the speed improvement that I didn't
+notice the nested subroutine problem. It hit me. At first I thought that
+maybe Apache had started to confuse connections, returning responses from
+other people's requests. I was wrong of course.
+
+<P>
+Why didn't we notice this when we were trying the software on our
+development server? Keep reading and you will understand why.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Second_Mystery">The Second Mystery</A></H2></CENTER>
+<P>
+Let's return to our original example and proceed with the second mystery we
+noticed. Why did we see inconsistent results over numerous reloads?
+
+<P>
+That's very simple. Every time a server gets a request to process, it hands
+it over one of the children, generally in a round robin fashion. So if you
+have 10 httpd children alive, the first 10 reloads might seem to be correct
+because the effect we've just talked about starts to appear from the second
+re-invocation. Subsequent reloads then return unexpected results.
+
+<P>
+Moreover, requests can appear at random and children don't always run the
+same scripts. At any given moment one of the children could have served the
+same script more times than any other, and another may never have run it.
+That's why we saw the strange behavior.
+
+<P>
+Now you see why we didn't notice the problem with the user registration
+system in the example. First, we didn't look at the
+<CODE>error_log</CODE>. (As a matter of fact we did, but there were so many warnings in there
+that we couldn't tell what were the important ones and what were not).
+Second, we had too many server children running to notice the problem.
+
+<P>
+A workaround is to run the server as a single process. You achieve this by
+invoking the server with the <CODE>-X</CODE> parameter (<CODE>httpd -X</CODE>). Since there are no other servers (children) running, you will see the
+problem on the second reload.
+
+<P>
+But before that, let the <CODE>error_log</CODE> help you detect most of the possible errors--most of the warnings can
+become errors, so you should make sure to check every warning that is
+detected by perl, and probably you should write your code in such a way
+that no warnings appear in the <CODE>error_log</CODE>. If your <CODE>error_log</CODE> file is filled up with hundreds of lines on every script invocation, you
+will have difficulty noticing and locating real problems--and on a
+production server you'll soon run out of disk space if your site is
+popular.
+
+<P>
+Of course none of the warnings will be reported if the warning mechanism is
+not turned <STRONG>On</STRONG>. Refer to the section ``<A HREF="././perl.html#Tracing_Warnings_Reports">Tracing Warnings Reports</A>'' to learn about warnings in general and to the ``<A HREF="././porting.html#Warnings">Warnings</A>'' section to learn how to turn them on and off under mod_perl.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Sometimes_it_Works_Sometimes_it">Sometimes it Works, Sometimes it Doesn't</A></H1></CENTER>
+<P>
+When you start running your scripts under mod_perl, you might find yourself
+in a situation where a script seems to work, but sometimes it screws up.
+And the more it runs without a restart, the more it screws up. Often the
+problem is easily detectable and solvable. You have to test your script
+under a server running in single process mode (<CODE>httpd -X</CODE>).
+
+<P>
+Generally the problem is the result of using global variables. Because
+global variables don't change from one script invocation to another unless
+you change them, you can find your scripts do strange things.
+
+<P>
+Let's look at three real world examples:
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="An_Easy_Break_in">An Easy Break-in</A></H2></CENTER>
+<P>
+The first example is amazing--Web Services. Imagine that you enter some
+site where you have an account, perhaps a free email account. Having read
+your own mail you decide to take a look at someone else's.
+
+<P>
+You type in the username you want to peek at and a dummy password and try
+to enter the account. On some services this will work!!!
+
+<P>
+You say, why in the world does this happen? The answer is simple:
+<STRONG>Global Variables</STRONG>. You have entered the account of someone who happened to be served by the
+same server child as you. Because of sloppy programming, a global variable
+was not reset at the beginning of the program and voila, you can easily
+peek into someone else's email! Here is an example of sloppy code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use vars ($authenticated);
+  my $q = new CGI;
+  my $username = $q-&gt;param('username');
+  my $passwd   = $q-&gt;param('passwd');
+  authenticate($username,$passwd);
+    # failed, break out
+  unless ($authenticated){
+    print &quot;Wrong passwd&quot;;
+    exit;
+  }
+    # user is OK, fetch user's data
+  show_user($username);
+  
+  sub authenticate{
+    my ($username,$passwd) = @_;
+        # some checking
+    $authenticated = 1 if SOME_USER_PASSWD_CHECK_IS_OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Do you see the catch? With the code above, I can type in any valid username
+and any dummy password and enter that user's account, provided she has
+successfully entered her account before me using the same child process!
+Since <CODE>$authenticated</CODE> is global--if it becomes 1 once, it'll stay 1 for the remainder of the
+child's life!!! The solution is trivial--reset <CODE>$authenticated</CODE> to 0 at the beginning of the program.
+
+<P>
+A cleaner solution of course is not to rely on global variables, but rely
+on the return value from the function.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $q = CGI-&gt;new;
+  my $username = $q-&gt;param('username');
+  my $passwd   = $q-&gt;param('passwd');
+  my $authenticated = authenticate($username,$passwd);
+    # failed, break out
+  unless ($authenticated){
+    print &quot;Wrong passwd&quot;;
+    exit;
+  }
+    # user is OK, fetch user's data
+  show_user($username);
+  
+  sub authenticate{
+    my ($username,$passwd) = @_;
+        # some checking
+    return (SOME_USER_PASSWD_CHECK_IS_OK) ? 1 : 0;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course this example is trivial--but believe me it happens!
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Thinking_mod_cgi">Thinking mod_cgi</A></H2></CENTER>
+<P>
+Just another little one liner that can spoil your day, assuming you forgot
+to reset the <CODE>$allowed</CODE> variable. It works perfectly OK in plain mod_cgi:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $allowed = 1 if $username eq 'admin';</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But using mod_perl, and if your system administrator with superuser access
+rights has previously used the system, anybody who is lucky enough to be
+served later by the same child which served your administrator will happen
+to gain the same rights.
+
+<P>
+The obvious fix is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $allowed = $username eq 'admin' ? 1 : 0;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Regular_Expression_Memory">Regular Expression Memory</A></H2></CENTER>
+<P>
+Another good example is usage of the <STRONG>/o</STRONG> regular expression modifier, which compiles a regular expression once, on
+its first execution, and never compiles it again. This problem can be
+difficult to detect, as after restarting the server each request you make
+will be served by a different child process, and thus the regex pattern for
+that child will be compiled afresh. Only when you make a request that
+happens to be served by a child which has already cached the regex will you
+see the problem. Generally you miss that. When you press reload, you see
+that it works (with a new, fresh child). Eventually it doesn't, because you
+get a child that has already cached the regex and won't recompile because
+of the <STRONG>/o</STRONG> modifier.
+
+<P>
+An example of such a case would be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $pat = $q-&gt;param(&quot;keyword&quot;);
+  foreach( @list ) {
+    print if /$pat/o;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To make sure you don't miss these bugs always test your CGI in
+<A HREF="././control.html#Running_a_Server_in_Single_Proce">single process mode</A>.
+
+<P>
+To solve this particular <STRONG>/o</STRONG> modifier problem refer to <A HREF="././perl.html#Compiled_Regular_Expressions">Compiled Regular Expressions</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Script_s_name_space">Script's name space</A></H1></CENTER>
+<P>
+Scripts under <CODE>Apache::Registry</CODE> do not run in package <CODE>main</CODE>, they run in a unique name space based on the requested URI. For example,
+if your URI is <CODE>/perl/test.pl</CODE> the package will be called
+<CODE>Apache::ROOT::perl::test_2epl</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="_INC_and_mod_perl">@INC and mod_perl</A></H1></CENTER>
+<P>
+The basic Perl <CODE>@INC</CODE> behaviour is explained in section <A HREF="././perl.html#use_require_do_INC_and">use(), require(), do(), %INC and @INC Explained</A>.
+
+<P>
+When running under mod_perl, once the server is up <CODE>@INC</CODE> is frozen and cannot be updated. The only opportunity to <STRONG>temporarily</STRONG> modify
+<CODE>@INC</CODE> is while the script or the module are loaded and compiled for the first
+time. After that its value is reset to the original one. The only way to
+change <CODE>@INC</CODE> permanently is to modify it at Apache startup.
+
+<P>
+Two ways to alter <CODE>@INC</CODE> at server startup:
+
+<UL>
+<P><LI>
+<P>
+In the configuration file. For example add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv PERL5LIB /home/httpd/perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv PERL5LIB /home/httpd/perl:/home/httpd/mymodules</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that this setting will be ignored if you have the
+<CODE>PerlTaintCheck</CODE> mode turned on.
+
+<P><LI>
+<P>
+In the startup file directly alter the <CODE>@INC</CODE>. For example
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  startup.pl
+  ----------
+  use lib qw(/home/httpd/perl /home/httpd/mymodules);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and load the startup file from the configuration file by:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlRequire /path/to/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Reloading_Modules_and_Required_F">Reloading Modules and Required Files</A></H1></CENTER>
+<P>
+You might want to read the ``<A HREF="././perl.html#use_require_do_INC_and">use(), require(), do(), %INC and @INC Explained</A>'' before you proceed with this section.
+
+<P>
+When you develop plain CGI scripts, you can just change the code, and rerun
+the CGI from your browser. Since the script isn't cached in memory, the
+next time you call it the server starts up a new perl process, which
+recompiles it from scratch. The effects of any modifications you've applied
+are immediately present.
+
+<P>
+The situation is different with <CODE>Apache::Registry</CODE>, since the whole idea is to get maximum performance from the server. By
+default, the server won't spend time checking whether any included library
+modules have been changed. It assumes that they weren't, thus saving a few
+milliseconds to <CODE>stat()</CODE> the source file (multiplied by however
+many modules/libraries you <CODE>use()</CODE> and/or <CODE>require()</CODE>
+in your script.)
+
+<P>
+The only check that is done is to see whether your main script has been
+changed. So if you have only scripts which do not <CODE>use()</CODE> or
+<CODE>require()</CODE> other perl modules or packages, there is nothing to
+worry about. If, however, you are developing a script that includes other
+modules, the files you <CODE>use()</CODE> or <CODE>require()</CODE> aren't
+checked for modification and you need to do something about that.
+
+<P>
+So how do we get our mod_perl-enabled server to recognize changes in
+library modules? Well, there are a couple of techniques:
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Restarting_the_server">Restarting the server</A></H2></CENTER>
+<P>
+The simplest approach is to restart the server each time you apply some
+change to your code. See <A HREF="././control.html#Restarting_Techniques">Server Restarting techniques</A>.
+
+<P>
+After restarting the server about 100 times, you will tire of it and you
+will look for other solutions.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Using_Apache_StatINC_for_the_De">Using Apache::StatINC for the Development Process</A></H2></CENTER>
+<P>
+Help comes from the <CODE>Apache::StatINC</CODE> module. When Perl pulls a file via <CODE>require(),</CODE> it stores the
+full pathname as a value in the global hash <CODE>%INC</CODE> with the file name as the key.  <CODE>Apache::StatINC</CODE> looks through <CODE>%INC</CODE> and immediately reloads any files that have been updated on disk.
+
+<P>
+To enable this module just add two lines to <CODE>httpd.conf</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::StatINC
+  PerlInitHandler Apache::StatINC</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To be sure it really works, turn on debug mode on your development box by
+adding <CODE>PerlSetVar StatINCDebug On</CODE> to your config file. You end up with something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::StatINC
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    PerlSendHeader On
+    PerlInitHandler Apache::StatINC
+    PerlSetVar StatINCDebug On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Be aware that only the modules located in <CODE>@INC</CODE> are reloaded on change, and you can change <CODE>@INC</CODE> only before the server has been started (in the startup file).
+
+<P>
+Nothing you do in your scripts and modules which are pulled in with
+<CODE>require()</CODE> after server startup will have any effect on <CODE>@INC</CODE>.
+
+<P>
+When you write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(foo/bar);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>@INC</CODE> is changed only for the time the code is being parsed and compiled. When
+that's done, <CODE>@INC</CODE> is reset to its original value.
+
+<P>
+To make sure that you have set <CODE>@INC</CODE> correctly, configure
+<A HREF="././debug.html#Apache_Status_Embedded_Inter">/perl-status location</A>, fetch <A
+HREF="http://www.example.com/perl-status?inc">http://www.example.com/perl-status?inc</A>
+and look at the bottom of the page, where the contents of <CODE>@INC</CODE> will be shown.
+
+<P>
+Notice the following trap:
+
+<P>
+While ``<CODE>.</CODE>'' is in <CODE>@INC</CODE>, perl knows to <CODE>require()</CODE> files with pathnames given relative
+to the current (script) directory. After the script has been parsed, the
+server doesn't remember the path!
+
+<P>
+So you can end up with a broken entry in <CODE>%INC</CODE> like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $INC{bar.pl} eq &quot;bar.pl&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want Apache::StatINC to reload your script--modify <CODE>@INC</CODE> at server startup, or use a full path in the <CODE>require()</CODE> call.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Using_Apache_Reload">Using Apache::Reload</A></H2></CENTER>
+<P>
+<CODE>Apache::Reload</CODE> comes as a drop-in replacement for
+<CODE>Apache::StatINC</CODE>. It provides extra functionality and better flexibility.
+
+<P>
+If you want <CODE>Apache::Reload</CODE> to check all the loaded modules on each request, you just add to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlInitHandler Apache::Reload</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to reload only specific modules when these get changed, you
+have two ways to do that. 
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Register_Modules_Implicitly">Register Modules Implicitly</A></H3></CENTER>
+<P>
+The first way is to turn <EM>Off</EM> the <CODE>ReloadAll</CODE> variable, which is
+<EM>On</EM> by default
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlInitHandler Apache::Reload
+  PerlSetVar ReloadAll Off</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Reload;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to every module that you want to be reloaded on change.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Register_Modules_Explicitly">Register Modules Explicitly</A></H3></CENTER>
+<P>
+The second way is to explicitly specify modules to be reloaded in
+<EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlInitHandler Apache::Reload
+  PerlSetVar ReloadModules &quot;My::Foo My::Bar Foo::Bar::Test&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that these are split on whitespace, but the module list <STRONG>must</STRONG>
+be in quotes, otherwise Apache tries to parse the parameter list.
+
+<P>
+You can register groups of modules using the metacharacter (<CODE>*</CODE>).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PerlSetVar ReloadModules &quot;Foo::* Bar::*&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the above example all modules starting with <EM>Foo::</EM> and <EM>Bar::</EM>
+will become registered. This features allows you to assign the whole
+project modules tree in one pattern.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Special_Touch_File">Special &quot;Touch&quot; File</A></H3></CENTER>
+<P>
+You can also set a file that you can <CODE>touch(1)</CODE> that causes the
+reloads to be performed. If you set this, and don't <CODE>touch(1)</CODE>
+the file, the reloads don't happen (no matter how have you registered the
+modules to be reloaded).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetVar ReloadTouchFile /tmp/reload_modules</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now when you're happy with your changes, simply go to the command line and
+type:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % touch /tmp/reload_modules</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This feature is very convenient in a production server environment, but
+compared to a full restart, the benefits of preloaded modules memory
+sharing are lost, since each child will get it's own copy of the reloaded
+modules.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Caveats">Caveats</A></H3></CENTER>
+<P>
+This module might have a problem with reloading single modules that contain
+multiple packages that all use pseudo-hashes.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Availability">Availability</A></H3></CENTER>
+<P>
+This module is available from <A HREF="././download.html#CPAN_Downloads">CPAN</A>. 
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration_Files_Writing_Dy">Configuration Files: Writing, Dynamically Updating and Reloading</A></H2></CENTER>
+<P>
+Checking all the modules in <STRONG>%INC</STRONG> on every request can add a large overhead to server response times, and you
+certainly would not want the <CODE>Apache::StatINC</CODE> module to be enabled in your production site's configuration. But sometimes
+you want a configuration file reloaded when it is updated, without
+restarting the server.
+
+<P>
+This is an especially important feature if for example you have a person
+that is allowed to modify some of the tool configuration, but for security
+reasons it's undesirable for him to telnet to the server to restart it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Writing_Configuration_Files">Writing Configuration Files</A></H3></CENTER>
+<P>
+Since we are talking about configuration files, I would like to show you
+some good and bad approaches to configuration file writing.
+
+<P>
+If you have a configuration file of just a few variables, it doesn't really
+matter how you do it. But generally this is not the case. Configuration
+files tend to grow as a project grows. It's very relevant to projects that
+generate HTML files, since they tend to demand many easily configurable
+parameters, like headers, footers, colors and so on.
+
+<P>
+So let's start with the approach that is most often taken by CGI scripts
+writers. All configuration variables are defined in a separate file.
+
+<P>
+For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $cgi_dir = &quot;/home/httpd/perl&quot;;
+  $cgi_url = &quot;/perl&quot;;
+  $docs_dir = &quot;/home/httpd/docs&quot;;
+  $docs_url = &quot;/&quot;;
+  $img_dir = &quot;/home/httpd/docs/images&quot;;
+  $img_url = &quot;/images&quot;;
+  ... many more config params here ...
+  $color_hint   = &quot;#777777&quot;;
+  $color_warn   = &quot;#990066&quot;;
+  $color_normal = &quot;#000000&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>use strict;</CODE> pragma demands that all the variables be declared. When we want to use
+these variables in a mod_perl script we must declare them with <CODE>use vars</CODE> in the script. (Under Perl v5.6.0
+<CODE>our()</CODE> has replaced <CODE>use vars</CODE>.)
+
+<P>
+So we start the script with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use vars qw($cgi_dir $cgi_url $docs_dir $docs_url 
+              ... many more config params here ....
+              $color_hint  $color_warn $color_normal
+             );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It is a nightmare to maintain such a script, especially if not all the
+features have been coded yet. You have to keep adding and removing variable
+names. But that's not a big deal.
+
+<P>
+Since we want our code clean, we start the configuration file with
+<CODE>use strict;</CODE> as well, so we have to list the variables with <CODE>use
+vars</CODE> pragma here as well. A second list of variables to maintain.
+
+<P>
+If you have many scripts, you may get collisions between configuration
+files. One of the best solutions is to declare packages, with unique names
+of course. For example for our configuration file we might declare the
+following package name:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Config;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The moment you add a package declaration and think that you are done, you
+realize that the nightmare has just begun. When you have declared the
+package, you cannot just <CODE>require()</CODE> the file and use the
+variables, since they now belong to a different package. So you have either
+to modify all your scripts to use a fully qualified notation like
+<CODE>$My::Config::cgi_url</CODE> instead of just <CODE>$cgi_url</CODE> or to import the needed variables into any script that is going to use
+them.
+
+<P>
+Since you don't want to do the extra typing to make the variables fully
+qualified, you'd go for importing approach. But your configuration package
+has to export them first. That means that you have to list all the
+variables again and now you have to keep at least three variable lists
+updated when you make some changes in the naming of the configuration
+variables. And that's when you have only one script that uses the
+configuration file, in the general case you have many of them. So now our
+example configuration file looks like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Config;
+  use strict;
+  
+  BEGIN {
+    use Exporter ();
+  
+    @My::HTML::ISA       = qw(Exporter);
+    @My::HTML::EXPORT    = qw();
+    @My::HTML::EXPORT_OK = qw($cgi_dir $cgi_url $docs_dir $docs_url
+                              ... many more config params here ....
+                              $color_hint $color_warn $color_normal);
+  }
+  
+  use vars qw($cgi_dir $cgi_url $docs_dir $docs_url 
+              ... many more config params here ....
+              $color_hint  $color_warn $color_normal
+             );
+  
+  $cgi_dir = &quot;/home/httpd/perl&quot;;
+  $cgi_url = &quot;/perl&quot;;
+  $docs_dir = &quot;/home/httpd/docs&quot;;
+  $docs_url = &quot;/&quot;;
+  $img_dir = &quot;/home/httpd/docs/images&quot;;
+  $img_url = &quot;/images&quot;;
+  ... many more config params here ...
+  $color_hint   = &quot;#777777&quot;;
+  $color_warn   = &quot;#990066&quot;;
+  $color_normal = &quot;#000000&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And in the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use My::Config qw($cgi_dir $cgi_url $docs_dir $docs_url 
+                    ... many more config params here ....
+                    $color_hint  $color_warn $color_normal
+                   );
+  use vars       qw($cgi_dir $cgi_url $docs_dir $docs_url 
+                    ... many more config params here ....
+                    $color_hint  $color_warn $color_normal
+                   );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This approach is especially bad in the context of mod_perl, since exported
+variables add a memory overhead. The more variables exported the more
+memory you use. If we multiply this overhead by the number of servers we
+are going to run, we get a pretty big number which could be used to run a
+few more servers instead.
+
+<P>
+As a matter of fact things aren't so bad. You can group your variables, and
+call the groups by special names called tags, which can later be used as
+arguments to the <CODE>import()</CODE> or <CODE>use()</CODE> calls. You are
+probably familiar with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI qw(:standard :html);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We can implement this quite easily, with the help of
+<CODE>export_ok_tags()</CODE> from <CODE>Exporter</CODE>. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  BEGIN {
+    use Exporter ();
+    use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+    @ISA         = qw(Exporter);
+    @EXPORT      = qw();
+    @EXPORT_OK   = qw();
+    
+    %EXPORT_TAGS = (
+      vars =&gt; [qw($fname $lname)],
+      subs =&gt; [qw(reread_conf untaint_path)],
+    );
+    Exporter::export_ok_tags('vars');
+    Exporter::export_ok_tags('subs');
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You export subroutines exactly like variables, since what's actually being
+exported is a symbol. The definition of these subroutines is not shown
+here.
+
+<P>
+Notice that we didn't use <CODE>export_tags(),</CODE> as it exports the
+variables automatically without the user asking for them in first place,
+which is considered bad style. If a module automatically exports variables
+with <CODE>export_tags()</CODE> you can stop this by not exporting at all:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use My::Config ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In your code you can now write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use My::Config qw(:subs :vars);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Groups of group tags:
+
+<P>
+The <CODE>:all</CODE> tag from <CODE>CGI.pm</CODE> is a group tag of all other groups. It will require a little more effort to
+implement, but you can always save time by looking at the solution in <CODE>CGI.pm</CODE>'s code. It's just a matter of a little code to expand all the groups
+recursively.
+
+<P>
+After going through the pain of maintaining a list of variables in a big
+project with a huge configuration file (more than 100 variables) and many
+files actually using them, I came up with a much simpler solution: keeping
+all the variables in a single hash, which is built from references to other
+anonymous scalars, arrays and hashes.
+
+<P>
+Now my configuration file looks like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Config;
+  use strict;
+  
+  BEGIN {
+    use Exporter ();
+  
+    @My::Config::ISA       = qw(Exporter);
+    @My::Config::EXPORT    = qw();
+    @My::Config::EXPORT_OK = qw(%c);
+  }
+  
+  use vars qw(%c);
+  
+  %c = 
+    (
+     dir =&gt; {
+             cgi  =&gt; &quot;/home/httpd/perl&quot;,
+             docs =&gt; &quot;/home/httpd/docs&quot;,
+             img  =&gt; &quot;/home/httpd/docs/images&quot;,
+            },
+     url =&gt; {
+             cgi  =&gt; &quot;/perl&quot;,
+             docs =&gt; &quot;/&quot;,
+             img  =&gt; &quot;/images&quot;,
+            },
+     color =&gt; {
+               hint   =&gt; &quot;#777777&quot;,
+               warn   =&gt; &quot;#990066&quot;,
+               normal =&gt; &quot;#000000&quot;,
+              },
+    );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Good perl style suggests keeping a comma at the end of lists. That's
+because additional items tend to be added to the end of the list. If you
+keep that last comma in place, you don't have to remember to add one when
+you add a new item.
+
+<P>
+So now the script looks like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use My::Config qw(%c);
+  use vars       qw(%c)
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;My url docs root: $c{url}{docs}\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Do you see the difference? The whole mess has gone, there is only one
+variable to worry about.
+
+<P>
+There is one small downside to taking this approach: auto-vivification. For
+example, if we wrote <CODE>$c{url}{doc}</CODE> by mistake, perl would silently create this element for us with the value
+<EM>undef</EM>. When we <CODE>use strict;</CODE> Perl will tell us about any misspelling of this kind for a simple scalar,
+but this check is not performed for hash elements. This puts the onus of
+responsibility back on us since we must take greater care. A possible
+solution to this is to use pseudo-hashes, but they are still considered
+experimental so we won't cover them here.
+
+<P>
+The benefits of the hash approach are significant and we can make do even
+better. I would like to get rid of the <CODE>Exporter</CODE> stuff completely. I remove all the exporting code so my config file now
+looks like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Config;
+  use strict;
+  use vars qw(%c);
+  
+  %c = 
+    (
+     dir =&gt; {
+             cgi  =&gt; &quot;/home/httpd/perl&quot;,
+             docs =&gt; &quot;/home/httpd/docs&quot;,
+             img  =&gt; &quot;/home/httpd/docs/images&quot;,
+            },
+     url =&gt; {
+             cgi  =&gt; &quot;/perl&quot;,
+             docs =&gt; &quot;/&quot;,
+             img  =&gt; &quot;/images&quot;,
+            },
+     color =&gt; {
+               hint   =&gt; &quot;#777777&quot;,
+               warn   =&gt; &quot;#990066&quot;,
+               normal =&gt; &quot;#000000&quot;,
+              },
+    );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use My::Config ();
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;My url docs root: $My::Config::c{url}{docs}\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since we still want to save lots of typing, and since now we need to use a
+fully qualified notation like <CODE>$My::Config::c{url}{docs}</CODE>, let's use the magical Perl aliasing feature. I'll modify the code to be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use My::Config ();
+  use vars qw(%c);
+  *c = \%My::Config::c;
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;My url docs root: $c{url}{docs}\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+I have aliased the <CODE>*c</CODE> glob with <CODE>\%My::Config::c</CODE>, a reference to a hash. From now on, <CODE>%My::Config::c</CODE> and <CODE>%c</CODE> are the same hash and you can read from or modify either of them.
+
+<P>
+Just one last little point. Sometimes you see a lot of redundancy in the
+configuration variables, for example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $cgi_dir  = &quot;/home/httpd/perl&quot;;
+  $docs_dir = &quot;/home/httpd/docs&quot;;
+  $img_dir  = &quot;/home/httpd/docs/images&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now if you want to move the base path <CODE>&quot;/home/httpd&quot;</CODE> into a new place, it demands lots of typing. Of course the solution is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $base     = &quot;/home/httpd&quot;;
+  $cgi_dir  = &quot;$base/perl&quot;;
+  $docs_dir = &quot;$base/docs&quot;;
+  $img_dir  = &quot;$docs_dir/images&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You cannot do the same trick with a hash, since you cannot refer to its
+values before the definition is finished. So this wouldn't work:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  %c =
+    (
+     base =&gt; &quot;/home/httpd&quot;,
+     dir =&gt; {
+             cgi  =&gt; &quot;$c{base}/perl&quot;,
+             docs =&gt; &quot;$c{base}/docs&quot;,
+             img  =&gt; &quot;$c{base}{docs}/images&quot;,
+            },
+    );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But nothing stops us from adding additional variables, which are lexically
+scoped with <CODE>my().</CODE> The following code is correct.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $base = &quot;/home/httpd&quot;;
+  %c =
+    (
+     dir =&gt; {
+             cgi  =&gt; &quot;$base/perl&quot;,
+             docs =&gt; &quot;$base/docs&quot;,
+             img  =&gt; &quot;$base/docs/images&quot;,
+            },
+    );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You have just learned how to make configuration files easily maintainable,
+and how to save memory by avoiding the export of variables into a script's
+namespace.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Reloading_Configuration_Files">Reloading Configuration Files</A></H3></CENTER>
+<P>
+First, lets look at a simple case, when we just have to look after a simple
+configuration file like the one below. Imagine a script that tells you who
+is the patch pumpkin of the current Perl release.
+
+<P>
+Sidenote: &lt;Pumpkin&gt; A humorous term for the token (notional or real)
+that gives its possessor (the ``pumpking'' or the ``pumpkineer'') exclusive
+access to something, e.g. applying patches to a master copy of some source
+(for which the token is called the ``patch pumpkin'').
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI ();
+  use strict;
+  
+  my $fname = &quot;Larry&quot;;
+  my $lname = &quot;Wall&quot;;
+  my $q = CGI-&gt;new;
+  
+  print $q-&gt;header(-type=&gt;'text/html');
+  print $q-&gt;p(qq{$fname $lname holds the patch pumpkin
+               for this Perl release.});</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The script has a hardcoded value for the name. It's very simple: initialize
+the CGI object, print the proper HTTP header and tell the world who is the
+current patch pumpkin.
+
+<P>
+When the patch pumpkin changes we don't want to modify the script.
+Therefore, we put the <CODE>$fname</CODE> and <CODE>$lname</CODE> variables into a configuration file.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $fname = &quot;Gurusamy&quot;;
+  $lname = &quot;Sarathy&quot;;
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Please note that there is no package declaration in the above file, so the
+code will be evaluated in the caller's package or in the <CODE>main::</CODE>
+package if none was declared. This means that the variables <CODE>$fname</CODE>
+and <CODE>$lname</CODE> will override (or initialize if they weren't yet) the variables with the
+same names in the caller's namespace. This works for global variables
+only--you cannot update variables defined lexically (with
+<CODE>my())</CODE> using this technique.
+
+<P>
+You have started the server and everything is working properly. After a
+while you decide to modify the configuration. How do you let your running
+server know that the configuration was modified without restarting it?
+Remember we are in production and server restarting can be quite expensive
+for us. One of the simplest solutions is to poll the file's modification
+time by calling <CODE>stat()</CODE> before the script starts to do real
+work. If we see that the file was updated, we force a reconfiguration of
+the variables located in this file. We will call the function that reloads
+the configuration <CODE>reread_conf()</CODE> and have it accept a single
+argument, which is the relative path to the configuration file.
+
+<P>
+<CODE>Apache::Registry</CODE> calls a <CODE>chdir()</CODE> to the script's directory before it starts the
+script's execution. So if your CGI script is invoked under the <CODE>Apache::Registry</CODE> handler you can put the configuration file in the same directory as the
+script. Alternatively you can put the file in a directory below that and
+use a path relative to the script directory. You have to make sure that the
+file will be found, somehow. Be aware that <CODE>do()</CODE> searches the
+libraries in the directories in <CODE>@INC</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use vars qw(%MODIFIED);
+  sub reread_conf{
+    my $file = shift;
+    return unless $file;
+    return unless -e $file and -r _;
+    unless ($MODIFIED{$file} and $MODIFIED{$file} == -M _){
+      my $result;
+      unless ($result = do $file) {
+        warn &quot;couldn't parse $file: $@&quot; if $@;
+        warn &quot;couldn't do $file: $!&quot;    unless defined $result;
+        warn &quot;couldn't run $file&quot;       unless         $result;
+      }
+      $MODIFIED{$file} =  -M _; # Update the MODIFICATION times
+    }
+  } # end of reread_conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Notice that we use the <CODE>==</CODE> comparison operator when checking file's modification timestamp, because
+all we want to know whether the file was changed or not.
+
+<P>
+When the <CODE>require(),</CODE> <CODE>use()</CODE> and <CODE>do()</CODE>
+operators successfully return, the file that was passed as an argument is
+inserted into <CODE>%INC</CODE> (the key is the name of the file and the value the path to it).
+Specifically, when Perl sees <CODE>require()</CODE> or <CODE>use()</CODE>
+in the code, it first tests <CODE>%INC</CODE>
+to see whether the file is already there and thus loaded. If the test
+returns true, Perl saves the overhead of code re-reading and re-compiling;
+however calling <CODE>do()</CODE> will (re)load regardless.
+
+<P>
+You generally don't notice with plain perl scripts, but in mod_perl it's
+used all the time; after the first request served by a process all the
+files loaded by <CODE>require()</CODE> stay in memory. If the file is
+preloaded at server startup, even the first request doesn't have the
+loading overhead.
+
+<P>
+We use <CODE>do()</CODE> to reload the code in this file and not
+<CODE>require()</CODE> because while <CODE>do()</CODE> behaves almost
+indentically to <CODE>require(),</CODE> it reloads the file
+unconditionally. If <CODE>do()</CODE> cannot read the file, it returns
+<CODE>undef</CODE> and sets <CODE>$!</CODE> to report the error. If <CODE>do()</CODE> can read the file but cannot
+compile it, it returns <CODE>undef</CODE> and sets an error message in <CODE>$@</CODE>. If the file is successfully compiled, <CODE>do()</CODE> returns the value
+of the last expression evaluated.
+
+<P>
+The configuration file can be broken if someone has incorrectly modified
+it. We don't want the whole service that uses that file to be broken, just
+because of that. We trap the possible failure to <CODE>do()</CODE> the file
+and ignore the changes, by the resetting the modification time. If
+<CODE>do()</CODE> fails to load the file it might be a good idea to send an
+email to the system administrator about the problem.
+
+<P>
+Notice however, that since <CODE>do()</CODE> updates <CODE>%INC</CODE> like <CODE>require()</CODE> does, if you are using <CODE>Apache::StatINC</CODE> it will attempt to reload this file before the <CODE>reread_conf()</CODE>
+call. So if the file wouldn't compile, the request will be aborted.  <CODE>Apache::StatINC</CODE> shouldn't be used in production (because it slows things down by
+<CODE>stat()'ing</CODE> all the files listed in <CODE>%INC</CODE>) so this shouldn't be a problem.
+
+<P>
+Note that we assume that the entire purpose of this function is to reload
+the configuration if it was changed. This is fail-safe, because if
+something goes wrong we just return without modifying the server
+configuration. The script should not be used to initialize the variables on
+its first invocation. To do that, you would need to replace each occurence
+of <CODE>return()</CODE> and <CODE>warn()</CODE> with <CODE>die().</CODE>
+If you do that, take a look at the section ``<A HREF="././snippets.html#Redirecting_Errors_to_the_Client">Redirecting Errors to the Client instead of error_log</A>''.
+
+<P>
+I used the above approach when I had a huge configuration file that was
+loaded only at server startup, and another little configuration file that
+included only a few variables that could be updated by hand or through the
+web interface. Those variables were initialized in the main configuration
+file. If the webmaster breaks the syntax of this dynamic file while
+updating it by hand, it won't affect the main (write-protected)
+configuration file and so stop the proper execution of the programs. Soon
+we will see a simple web interface which allows us to modify the
+configuration file without actually breaking it.
+
+<P>
+A sample script using the presented subroutine would be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use vars qw(%MODIFIED $fname $lname);
+  use CGI ();
+  use strict;
+  
+  my $q = CGI-&gt;new;
+  print $q-&gt;header(-type=&gt;'text/plain');
+  my $config_file = &quot;./config.pl&quot;;
+  reread_conf($config_file);
+  print $q-&gt;p(qq{$fname $lname holds the patch pumpkin
+               for this Perl release.});
+  
+  sub reread_conf{
+    my $file = shift;
+    return unless $file;
+    return unless -e $file and -r _;
+    unless ($MODIFIED{$file} and $MODIFIED{$file} == -M _){
+      my $result;
+      unless ($result = do $file) {
+        warn &quot;couldn't parse $file: $@&quot; if $@;
+        warn &quot;couldn't do $file: $!&quot;    unless defined $result;
+        warn &quot;couldn't run $file&quot;       unless $result;
+      }
+      $MODIFIED{$file} =  -M _; # Update the MODIFICATION times
+    }
+  } # end of reread_conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Remember that you should be using <CODE>(stat $file)[9]</CODE> instead of <CODE>-M
+$file</CODE> if you are modifying the <CODE>$^M</CODE> variable. In some of my scripts, I reset <CODE>$^M</CODE> to the time of the script invocation with
+<CODE>&quot;$^M = time()&quot;</CODE>. That way I can perform <CODE>-M</CODE> and the similar (<CODE>-A</CODE>, <CODE>-C</CODE>) file status tests relative to the script invocation time, and not the
+time the process was started.
+
+<P>
+If your configuration file is more sophisticated and it declares a package
+and exports variables, the above code will work just as well. Even if you
+think that you will have to <CODE>import()</CODE> variables again, when
+<CODE>do()</CODE> recompiles the script the originally imported variables
+get updated with the values from the reloaded code.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Dynamically_updating_configurati">Dynamically updating configuration files</A></H3></CENTER>
+<P>
+The CGI script below allows a system administrator to dynamically update a
+configuration file through the web interface. Combining this with the code
+we have just seen to reload the modified files, you get a system which is
+dynamically reconfigurable without needing to restart the server.
+Configuration can be performed from any machine having just a web interface
+(a simple browser connected to the Internet).
+
+<P>
+Let's say you have a configuration file like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package MainConfig;
+  
+  use strict;
+  use vars qw(%c);
+  
+  %c = (
+        name     =&gt; &quot;Larry Wall&quot;,
+        release  =&gt; &quot;5.000&quot;,
+        comments =&gt; &quot;Adding more ways to do the same thing :)&quot;,
+  
+        other    =&gt; &quot;More config values&quot;,
+  
+        hash     =&gt; { foo =&gt; &quot;ouch&quot;,
+                      bar =&gt; &quot;geez&quot;,
+                    },
+  
+        array    =&gt; [qw( a b c)],
+  
+       );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You want to make the variables <CODE>name</CODE>, <CODE>release</CODE> and <CODE>comments</CODE>
+dynamically configurable. You want to have a web interface with an input
+form that allows you to modify these variables. Once modified you want to
+update the configuration file and propagate the changes to all the
+currently running processes. Quite a simple task.
+
+<P>
+Let's look at the main stages of the implementation. Create a form with
+preset current values of the variables. Let the administrator modify it and
+submit the changes. Validate the submitted information (numeric fields
+should carry numbers, literals--words, etc). Update the configuration file.
+Update the modified value in the memory of the current process. Present the
+form as before but with updated fields if any.
+
+<P>
+The only part that seems to be complicated to implement is a configuration
+file update, for a couple of reasons. If updating the file breaks it, the
+whole service won't work. If the file is very big and includes comments and
+complex data structures, parsing the file can be quite a challenge.
+
+<P>
+So let's simplify the task. If all we want is to update a few variables,
+why don't we create a tiny configuration file with just those variables? It
+can be modified through the web interface and overwritten each time there
+is something to be changed. This way we don't have to parse the file before
+updating it. If the main configuration file is changed we don't care, we
+don't depend on it any more.
+
+<P>
+The dynamically updated variables are duplicated, they will be in the main
+file and in the dynamic file. We do this to simplify maintainance. When a
+new release is installed the dynamic configuration file won't exist at all.
+It will be created only after the first update. As we just saw, the only
+change in the main code is to add a snippet to load this file if it exists
+and was changed.
+
+<P>
+This additional code must be executed after the main configuration file has
+been loaded. That way the updated variables will override the default
+values in the main file.
+
+<P>
+META: extend on the comments:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # remember to run this code in taint mode
+  
+  use strict;
+  use vars qw($q %c $dynamic_config_file %vars_to_change %validation_rules);
+  
+  use CGI ();
+  
+  use lib qw(.);
+  use MainConfig ();
+  *c = \%MainConfig::c;
+  
+  $dynamic_config_file = &quot;./config.pl&quot;;
+  
+  # load the dynamic configuration file if it exists, and override the
+  # default values from the main configuration file
+  do $dynamic_config_file if -e $dynamic_config_file and -r _;
+  
+  # fields that can be changed and their titles
+  %vars_to_change =
+    (
+     'name'     =&gt; &quot;Patch Pumpkin's Name&quot;,
+     'release'  =&gt; &quot;Current Perl Release&quot;,
+     'comments' =&gt; &quot;Release Comments&quot;,
+    );
+  
+  %validation_rules =
+    (
+     'name'     =&gt; sub { $_[0] =~ /^[\w\s\.]+$/;   },
+     'release'  =&gt; sub { $_[0] =~ /^\d+\.[\d_]+$/; },
+     'comments' =&gt; sub { 1;                        },
+    );
+  
+  $q = CGI-&gt;new;
+  print $q-&gt;header(-type=&gt;'text/html'), 
+        $q-&gt;start_html();
+  
+  my %updates = ();
+  
+  # We always rewrite the dynamic config file, so we want all the
+  # vars to be passed, but to save time we will only do checking
+  # of vars that were changed.  The rest will be retrieved from
+  # the 'prev_foo' values.
+  foreach (keys %vars_to_change) {
+    # copy var so we can modify it
+    my $new_val = $q-&gt;param($_) || '';
+  
+    # strip a possible ^M char (DOS/WIN)
+    $new_val =~ s/\cM//g;
+  
+    # push to hash if was changed
+    $updates{$_} = $new_val
+      if defined $q-&gt;param(&quot;prev_&quot;.$_) and $new_val ne $q-&gt;param(&quot;prev_&quot;.$_);
+  }
+  
+  # Note that we cannot trust the previous values of the variables
+  # since they were presented to the user as hidden form variables,
+  # and the user can mangle those. We don't care: it cannot do any
+  # damage, as we verify each variable by rules which we define.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # Process if there is something to process. Will be not called if
+  # it's invoked a first time to display the form or when the form
+  # was submitted but the values weren't modified (we know that by
+  # comparing with the previous values of the variables, which are
+  # the hidden fields in the form)
+  
+  # process and update the values if valid
+  process_change_config(%updates) if %updates;
+  
+  # print the update form
+  conf_modification_form();
+  
+  # update the config file but first validate that the values are correct ones
+  #########################
+  sub process_change_config{
+    my %updates = @_;
+  
+      # we will list here all the malformatted vars
+    my %malformatted = ();
+  
+    print $q-&gt;b(&quot;Trying to validate these values&lt;BR&gt;&quot;);
+    foreach (keys %updates) {
+      print &quot;&lt;DT&gt;&lt;B&gt;$_&lt;/B&gt; =&gt; &lt;PRE&gt;$updates{$_}&lt;/PRE&gt;&quot;;
+  
+      # now we have to handle each var to be changed very very carefully
+      # since this file goes immediately into production!
+      $malformatted{$_} = delete $updates{$_}
+        unless $validation_rules{$_}-&gt;($updates{$_});
+  
+    } # end of foreach (keys %updates)
+  
+    # print warnings if there are any invalid changes
+    print $q-&gt;hr,
+      $q-&gt;p($q-&gt;b(qq{Warning! These variables were changed
+                   but found malformed, thus the original
+                   values will be preserved.})
+         ),
+      join(&quot;,&lt;BR&gt;&quot;,
+         map { $q-&gt;b($vars_to_change{$_}) . &quot; : $malformatted{$_}\n&quot;
+             } keys %malformatted)
+        if %malformatted;
+  
+    # Now complete the vars that weren't changed from the
+    # $q-&gt;param('prev_var') values
+    map { $updates{$_} = $q-&gt;param('prev_'.$_) unless exists $updates{$_}
+        } keys %vars_to_change;
+  
+    # Now we have all the data that should be written into the dynamic
+    # config file
+  
+      # escape single quotes &quot;'&quot; while creating a file
+    my $content = join &quot;\n&quot;,
+      map { $updates{$_} =~ s/(['\\])/\\$1/g;
+          '$c{' . $_ . &quot;}  =  '&quot; . $updates{$_} . &quot;';\n&quot;
+        } keys %updates;
+  
+      # now add '1;' to make require() happy
+    $content .= &quot;\n1;&quot;;
+  
+      # keep the dummy result in $res so it won't complain
+    eval {my $res = $content};
+    if ($@) {
+      print qq{Warning! Something went wrong with config file
+             generation!&lt;P&gt; The error was : &lt;BR&gt;&lt;PRE&gt;$@&lt;/PRE&gt;};
+      return;
+    }
+  
+    print $q-&gt;hr;
+  
+      # overwrite the dynamic config file
+    use Symbol ();
+    my $fh = Symbol::gensym();
+    open $fh, &quot;&gt;$dynamic_config_file.bak&quot;
+      or die &quot;Can't open $dynamic_config_file.bak for writing :$! \n&quot;;
+    flock $fh,2; # exclusive lock
+    seek $fh,0,0;       # rewind to the start
+    truncate $fh, 0; # the file might shrink!
+       print $fh $content;
+    close $fh;
+  
+      # OK, now we make a real file
+    rename &quot;$dynamic_config_file.bak&quot;,$dynamic_config_file
+      or die &quot;Failed to rename: $!&quot;;
+  
+      # rerun it to update variables in the current process! Note that
+      # it won't update the variables in other processes. Special
+      # code that watches the timestamps on the config file will do this
+      # work for each process. Since the next invocation will update the
+      # configuration anyway, why do we need to load it here? The reason
+      # is simple: we are going to fill the form's input fields with
+      # the updated data.
+    do $dynamic_config_file;
+  
+  } # end sub process_change_config
+  
+  ##########################
+  sub conf_modification_form{
+  
+    print $q-&gt;center($q-&gt;h3(&quot;Update Form&quot;));
+  
+    print $q-&gt;hr,
+      $q-&gt;p(qq{This form allows you to dynamically update the current
+             configuration. You don\'t need to restart the server in
+             order for changes to take an effect}
+           );
+  
+      # set the previous settings in the form's hidden fields, so we
+      # know whether we have to do some changes or not
+    map {$q-&gt;param(&quot;prev_$_&quot;,$c{$_}) } keys %vars_to_change;
+  
+      # rows for the table, go into the form
+    my @configs = ();
+  
+      # prepare one textfield entries
+    push @configs,
+      map {
+        $q-&gt;td(
+             $q-&gt;b(&quot;$vars_to_change{$_}:&quot;),
+            ),
+        $q-&gt;td(
+             $q-&gt;textfield(-name      =&gt; $_,
+                           -default   =&gt; $c{$_},
+                           -override  =&gt; 1,
+                           -size      =&gt; 20,
+                           -maxlength =&gt; 50,
+                          )
+            ),
+          } qw(name release);
+  
+      # prepare multiline textarea entries
+    push @configs,
+      map {
+        $q-&gt;td(
+             $q-&gt;b(&quot;$vars_to_change{$_}:&quot;),
+            ),
+        $q-&gt;td(
+             $q-&gt;textarea(-name    =&gt; $_,
+                          -default =&gt; $c{$_},
+                          -override  =&gt; 1,
+                          -rows    =&gt; 10,
+                          -columns =&gt; 50,
+                          -wrap    =&gt; &quot;HARD&quot;,
+                          )
+            ),
+          } qw(comments);
+  
+    print $q-&gt;startform('POST',$q-&gt;url),&quot;\n&quot;,
+        $q-&gt;center($q-&gt;table(map {$q-&gt;Tr($_),&quot;\n&quot;,} @configs),
+                   $q-&gt;submit('','Update!'),&quot;\n&quot;,
+                  ),
+        map ({$q-&gt;hidden(&quot;prev_&quot;.$_, $q-&gt;param(&quot;prev_&quot;.$_)).&quot;\n&quot; }
+             keys %vars_to_change), # hidden previous values
+        $q-&gt;br,&quot;\n&quot;,
+        $q-&gt;endform,&quot;\n&quot;,
+        $q-&gt;hr,&quot;\n&quot;,
+        $q-&gt;end_html;
+  
+  } # end sub conf_modification_form</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Once updated the script generates a file like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $c{release}  =  '5.6';
+  
+  $c{name}  =  'Gurusamy Sarathy';
+  
+  $c{comments}  =  'Perl rules the world!';
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Reloading_handlers">Reloading handlers</A></H2></CENTER>
+<P>
+If you want to reload a perlhandler on each invocation, the following trick
+will do it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlHandler &quot;sub { do 'MyTest.pm'; MyTest::handler(shift) }&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>do()</CODE> reloads <CODE>MyTest.pm</CODE> on every request.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Name_collisions_with_Modules_and">Name collisions with Modules and libs</A></H1></CENTER>
+<P>
+This section requires an in-depth understanding of <A HREF="././perl.html#use_require_do_INC_and">use(), require(), do(), %INC and @INC </A>.
+
+<P>
+To make things clear before we go into details: each child process has its
+own <CODE>%INC</CODE> hash which is used to store information about its compiled modules. The
+keys of the hash are the names of the modules and files passed as arguments
+to <CODE>require()</CODE> and <CODE>use().</CODE> The values are the full
+or relative paths to these modules and files.
+
+<P>
+Suppose we have <CODE>my-lib.pl</CODE> and <CODE>MyModule.pm</CODE> both located at
+<CODE>/home/httpd/perl/my/</CODE>.
+
+<UL>
+<P><LI>
+<P>
+<CODE>/home/httpd/perl/my/</CODE> is in <CODE>@INC</CODE> at server startup.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;my-lib.pl&quot;;
+  use MyModule.pm;
+  print $INC{&quot;my-lib.pl&quot;},&quot;\n&quot;;
+  print $INC{&quot;MyModule.pm&quot;},&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+prints:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /home/httpd/perl/my/my-lib.pl
+  /home/httpd/perl/my/MyModule.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Adding <CODE>use lib</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(.);
+  require &quot;my-lib.pl&quot;;
+  use MyModule.pm;
+  print $INC{&quot;my-lib.pl&quot;},&quot;\n&quot;;
+  print $INC{&quot;MyModule.pm&quot;},&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+prints:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my-lib.pl
+  MyModule.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+<CODE>/home/httpd/perl/my/</CODE> isn't in <CODE>@INC</CODE> at server startup.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;my-lib.pl&quot;;
+  use MyModule.pm;
+  print $INC{&quot;my-lib.pl&quot;},&quot;\n&quot;;
+  print $INC{&quot;MyModule.pm&quot;},&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+wouldn't work, since perl cannot find the modules.
+
+<P>
+Adding <CODE>use lib</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(.);
+  require &quot;my-lib.pl&quot;;
+  use MyModule.pm;
+  print $INC{&quot;my-lib.pl&quot;},&quot;\n&quot;;
+  print $INC{&quot;MyModule.pm&quot;},&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+prints:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my-lib.pl
+  MyModule.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </UL>
+<P>
+Let's look at three scripts with faults related to name space. For the
+following discussion we will consider just one individual child process.
+
+<DL>
+<P><DT><STRONG><A NAME="item_Scenario">Scenario 1</A></STRONG><DD>
+<P>
+First, You can't have two identical module names running on the same
+server! Only the first one found in a <CODE>use()</CODE> or
+<CODE>require()</CODE> statement will be compiled into the package, the
+request for the other module will be skipped, since the server will think
+that it's already compiled. This is a direct result of using <CODE>%INC</CODE>, which has keys equal to the names of the modules. Two identical names
+will refer to the same key in the hash. (Refer to the section '<A HREF="././debug.html#Looking_inside_the_server">Looking inside the server</A>' to find out how you can know what is loaded and where.)
+
+<P>
+So if you have two different <CODE>Foo</CODE> modules in two different directories and two scripts <CODE>script1.pl</CODE> and <CODE>script2.pl</CODE>, placed like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/Foo.pm
+  ./tool1/tool1.pl
+  ./tool2/Foo.pm
+  ./tool2/tool2.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Where some sample code could be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/tool1.pl
+  ----------------
+  use Foo;
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;I'm Script number One\n&quot;;
+  foo();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/Foo.pm
+  --------------
+  sub foo{
+    print &quot;&lt;B&gt;I'm Tool Number One!&lt;/B&gt;\n&quot;;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool2/tool2.pl
+  ----------------
+  use Foo;
+  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;I'm Script number Two\n&quot;;
+  foo();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool2/Foo.pm
+  --------------
+  sub foo{
+    print &quot;&lt;B&gt;I'm Tool Number Two!&lt;/B&gt;\n&quot;;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Both scripts call <CODE>use Foo;</CODE>. Only the first one called will know about <CODE>Foo</CODE>. When you call the second script it will not know about
+<CODE>Foo</CODE> at all--it's like you've forgotten to write <CODE>use Foo;</CODE>. Run the server in <A HREF="././control.html#Running_a_Server_in_Single_Proce">single server mode</A> to detect this kind of bug immediately.
+
+<P>
+You will see the following in the error_log file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Undefined subroutine
+  &amp;Apache::ROOT::perl::tool2::tool2_2epl::foo called at
+  /home/httpd/perl/tool2/tool2.pl line 4.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><DT><STRONG>Scenario 2</STRONG><DD>
+<P>
+If the files do not declare a package, the above is true for libraries
+(i.e. <EM>my-lib.pl"</EM>) you <CODE>require()</CODE> as well:
+
+<P>
+Suppose that you have a directory structure like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/config.pl
+  ./tool1/tool1.pl
+  ./tool2/config.pl
+  ./tool2/tool2.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and both scripts contain:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(.);
+  require &quot;config.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+while <EM>./tool1/config.pl</EM> can be something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $foo = 0;
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and <EM>./tool2/config.pl</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $foo = 1;
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The second scenario is not different from the first, there is almost no
+difference between <CODE>use()</CODE> and <CODE>require()</CODE> if you
+don't have to import some symbols into a calling script. Only the first
+script served will actually do the <CODE>require(),</CODE> for the same
+reason as the example above.
+<CODE>%INC</CODE> already includes the key <EM>"config.pl"</EM>!
+
+<P><DT><STRONG>Scenario 3</STRONG><DD>
+<P>
+It is interesting that the following scenario will fail too!
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool/config.pl
+  ./tool/tool1.pl
+  ./tool/tool2.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+where <CODE>tool1.pl</CODE> and <CODE>tool2.pl</CODE> both <CODE>require()</CODE> the <STRONG>same</STRONG>
+
+<CODE>config.pl</CODE>.
+
+</DL>
+<P>
+There are three solutions for this:
+
+<DL>
+<P><DT><STRONG><A NAME="item_Solution">Solution 1</A></STRONG><DD>
+<P>
+The first two faulty scenarios can be solved by placing your library
+modules in a subdirectory structure so that they have different path
+prefixes. The file system layout will be something like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/Tool1/Foo.pm
+  ./tool1/tool1.pl
+  ./tool2/Tool2/Foo.pm
+  ./tool2/tool2.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And modify the scripts:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Tool1::Foo;
+  use Tool2::Foo;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For <CODE>require()</CODE> (scenario number 2) use the following:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./tool1/tool1-lib/config.pl
+  ./tool1/tool1.pl
+  ./tool2/tool2-lib/config.pl
+  ./tool2/tool2.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And each script contains respectively:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(.);
+  require &quot;tool1-lib/config.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(.);
+  require &quot;tool2-lib/config.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This solution isn't good, since while it might work for you now, if you add
+another script that wants to use the same module or
+<CODE>config.pl</CODE> file, it would fail as we saw in the third scenario.
+
+<P>
+Let's see some better solutions.
+
+<P><DT><STRONG>Solution 2</STRONG><DD>
+<P>
+Another option is to use a full path to the script, so it will be used as a
+key in <CODE>%INC</CODE>;
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;/full/path/to/the/config.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This solution solves the problem of the first two scenarios. I was
+surprised that it worked for the third scenario as well!
+
+<P>
+With this solution you lose some portability. If you move the tool around
+in the file system you will have to change the base directory or write some
+additional script that will automatically update the hardcoded path after
+it was moved. Of course you will have to remember to invoke it.
+
+<P><DT><STRONG>Solution 3</STRONG><DD>
+<P>
+Make sure you read all of this solution.
+
+<P>
+Declare a package name in the required files! It should be unique in
+relation to the rest of the package names you use.  <CODE>%INC</CODE> will then use the unique package name for the key. It's a good idea to use
+at least two-level package names for your private modules, e.g. <CODE>MyProject::Carp</CODE> and not <CODE>Carp</CODE>, since the latter will collide with an existing standard package. Even
+though a package may not exist in the standard distribution now, a package
+may come along in a later distribution which collides with a name you've
+chosen. Using a two part package name will help avoid this problem.
+
+<P>
+Even a better approach is to use three level naming, like
+<CODE>CompanyName::ProjectName::Module</CODE>, which is most unlikely to have conflicts with later Perl releases.
+Foresee problems like this and save yourself future trouble.
+
+<P>
+What are the implications of package declaration?
+
+<P>
+Without package declarations, it is very convenient to <CODE>use()</CODE>
+or <CODE>require()</CODE> files because all the variables and subroutines
+are part of the <CODE>main::</CODE> package. Any of them can be used as if they are part of the main script.
+With package declarations things are more awkward. You have to use the <CODE>Package::function()</CODE> method to call a subroutine from <CODE>Package</CODE> and to access a global variable <CODE>$foo</CODE> inside the same package you have to write <CODE>$Package::foo</CODE>.
+
+<P>
+Lexically defined variables, those declared with <CODE>my()</CODE> inside <CODE>Package</CODE>
+will be inaccessible from outside the package.
+
+<P>
+You can leave your scripts unchanged if you import the names of the global
+variables and subroutines into the namespace of package
+<STRONG>main::</STRONG> like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Module qw(:mysubs sub_b $var1 :myvars);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can export both subroutines and global variables. Note however that
+this method has the disadvantage of consuming more memory for the current
+process.
+
+<P>
+See <CODE>perldoc Exporter</CODE> for information about exporting other variables and symbols.
+
+<P>
+This completely covers the third scenario. When you use different module
+names in package declarations, as explained above, you cover the first two
+as well.
+
+</DL>
+<P>
+See also the <CODE>perlmodlib</CODE> and <CODE>perlmod</CODE> manpages.
+
+<P>
+From the above discussion it should be clear that you cannot run
+development and production versions of the tools using the same apache
+server! You have to run a separate server for each. They can be on the same
+machine, but the servers will use different ports.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="More_package_name_related_issues">More package name related issues</A></H1></CENTER>
+<P>
+If you have the following:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlHandler Apache::Work::Foo
+  PerlHandler Apache::Work::Foo::Bar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And you make a request that pulls in <CODE>Apache/Work/Foo/Bar.pm</CODE> first, then the <CODE>Apache::Work::Foo</CODE> package gets defined, so mod_perl does not try to pull in <CODE>Apache/Work/Foo.pm</CODE>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="_END_and_DATA_tokens">__END__ and __DATA__ tokens</A></H1></CENTER>
+<P>
+<CODE>Apache::Registry</CODE> scripts cannot contain <CODE>__END__</CODE> or <CODE>__DATA__</CODE>
+tokens.
+
+<P>
+Why? Because <CODE>Apache::Registry</CODE> scripts are being wrapped into a subroutine called <CODE>handler</CODE>, like the script at URI <CODE>/perl/test.pl</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;Hi&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When the script is being executed under <CODE>Apache::Registry</CODE> handler, it actually becomes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::ROOT::perl::test_2epl;
+  use Apache qw(exit);
+  sub handler {
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+    print &quot;Hi&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So if you happen to put an <CODE>__END__</CODE> tag, like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;Hi&quot;;
+  __END__
+  Some text that wouldn't be normally executed</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+it will be turned into:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::ROOT::perl::test_2epl;
+  use Apache qw(exit);
+  sub handler {
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+    print &quot;Hi&quot;;
+    __END__
+    Some text that wouldn't be normally executed
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and you try to execute this script, you will receive the following error:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Missing right bracket at .... line 4, at end of line</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Perl cuts everything after the <CODE>__END__</CODE> tag. The same applies to the <CODE>__DATA__</CODE> tag.
+
+<P>
+Also, rememeber that whatever applies to <CODE>Apache::Registry</CODE> scripts, in most cases applies to <CODE>Apache::PerlRun</CODE> scripts.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Output_from_system_calls">Output from system calls</A></H1></CENTER>
+<P>
+The output of <CODE>system()</CODE>, <CODE>exec()</CODE>, and <CODE>open(PIPE,&quot;|program&quot;)</CODE> calls will not be sent to the browser unless your Perl was configured with
+<CODE>sfio</CODE>.
+
+<P>
+You can use backticks as a possible workaround:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print `command here`;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But you're throwing performance out the window either way. It's best not to
+fork at all if you can avoid it. See the ``<A HREF="././performance.html#Forking_and_Executing_Subprocess">Forking or Executing subprocesses from mod_perl</A>'' section to learn about implications of forking.
+
+<P>
+Also read about <A HREF="././modules.html#Apache_SubProcess">Apache::SubProcess</A> for overriden <CODE>system()</CODE> and <CODE>exec()</CODE> implementations
+that work with mod_perl.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Using_format_and_write_">Using format() and write()</A></H1></CENTER>
+<P>
+The interface to filehandles which are linked to variables with Perl's
+<CODE>tie()</CODE> function is not yet complete. The <CODE>format()</CODE>
+and <CODE>write()</CODE> functions are missing. If you configure Perl with <CODE>sfio</CODE>, <CODE>write()</CODE> and <CODE>format()</CODE> should work just fine.
+
+<P>
+Otherwise you could use <CODE>sprintf()</CODE> to replace
+<CODE>format():</CODE> <CODE>##.##</CODE>
+becomes <CODE>%2.2f</CODE> and <CODE>####.##</CODE> becomes <CODE>%4.2f</CODE>.
+
+<P>
+Pad all strings with ("&nbsp;"&nbsp;x&nbsp;80) before using, and set their length with: %.25s for a max 25 char string. Or prefix the string with
+("&nbsp;"&nbsp;x&nbsp;80) for right-justifying.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Terminating_requests_and_process">Terminating requests and processes, the exit() and child_terminate() functions</A></H1></CENTER>
+<P>
+Perl's <CODE>exit()</CODE> built-in function (all versions prior to 5.6) cannot be used in mod_perl
+scripts. Calling it causes the mod_perl process to exit (which defeats the
+purpose of using mod_perl). The
+<CODE>Apache::exit()</CODE> function should be used instead. Starting from Perl version 5.6 mod_perl
+will override <CODE>exit()</CODE> behind the scenes, using
+<CODE>CORE::GLOBAL::</CODE>, a new <EM>magical</EM> package.
+
+<P>
+You might start your scripts by overriding the <CODE>exit()</CODE>
+subroutine (if you use <CODE>Apache::exit()</CODE> directly, you will have a problem testing the script from the shell, unless
+you put <CODE>use Apache ();</CODE> into your code.) I use the following code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use constant IS_MODPERL =&gt; $ENV{MOD_PERL};
+  use subs qw(exit);
+  # Select the correct exit function
+  *exit = IS_MODPERL ? \&amp;Apache::exit : sub { CORE::exit };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the correct <CODE>exit()</CODE> is always chosen, whether the script is running under mod_perl, ordinary
+CGI or from the shell. Notice that since we are using the constant pragma,
+there is no runtime overhead to select one of the code references, since <CODE>IS_MODPERL</CODE> constant is folded, that block is optimized away at compile time outside of
+mod_perl.
+
+<P>
+Note that if you run the script under <CODE>Apache::Registry</CODE>, <STRONG>The
+Apache function <CODE>exit()</CODE> overrides the Perl core built-in
+function</STRONG>. While you see <CODE>exit()</CODE> listed in the <CODE>@EXPORT_OK</CODE> list of the Apache package, <CODE>Apache::Registry</CODE> does something you don't see and imports this function for you. This means
+that if your script is running under the <CODE>Apache::Registry</CODE> handler you don't have to worry about <CODE>exit().</CODE> The same applies
+to <CODE>Apache::PerlRun</CODE>.
+
+<P>
+If you use <CODE>CORE::exit()</CODE> in scripts running under mod_perl, the child will exit, but neither a
+proper exit nor logging will happen on the way. <CODE>CORE::exit()</CODE> cuts off the server's legs.
+
+<P>
+Note that <CODE>Apache::exit(Apache::Constants::DONE)</CODE> will cause the server to exit gracefully, completing the logging functions
+and protocol requirements etc. ( Apache::Constants::DONE == -2,
+Apache::Constants::OK == 0.)
+
+<P>
+If you need to shut down the child cleanly after the request was completed,
+use the <CODE>$r-&gt;child_terminate</CODE> method. You can call it anywhere in the code, and not just at the ``end''.
+This sets the value of the <CODE>MaxRequestsPerChild</CODE> configuration variable to 1 and clears the <CODE>keepalive</CODE> flag. After the request is serviced, the current connection is broken,
+because of the <CODE>keepalive</CODE> flag, and the parent tells the child to cleanly quit, because <CODE>MaxRequestsPerChild</CODE> is smaller than the number of requests served.
+
+<P>
+In an <CODE>Apache::Registry</CODE> script you would do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache-&gt;request-&gt;child_terminate;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or in httpd.conf:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlFixupHandler &quot;sub { shift-&gt;child_terminate }&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You would want to use the latter example only if you wanted the child to
+terminate every time the registered handler is called. Probably this is not
+what you want.
+
+<P>
+Even if you don't need to call <CODE>child_terminate()</CODE> at the end of
+the request if you want the process to quit afterwards, here is an example
+of assigning the postprocessing handler. You might do this if you wanted to
+execute your own code a moment before the process quits.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r = shift;
+  $r-&gt;post_connection(\&amp;exit_child);
+  sub exit_child{
+     # some logic here if needed
+    $r-&gt;child_terminate;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The above is the code that is used by the <CODE>Apache::SizeLimit</CODE> module which terminates processes that grow bigger than a value you choose.
+
+<P>
+<A HREF="././modules.html#Apache_GTopLimit_Limit_Apache">Apache::GTopLimit</A> (based on
+<EM>libgtop</EM> and <CODE>GTop.pm</CODE>) is a similar module. It does the same thing, plus you can configure it to
+terminate processes when their shared memory shrinks below some specified
+size.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="die_and_mod_perl">die() and mod_perl</A></H1></CENTER>
+<P>
+When you write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  open FILE, &quot;foo&quot; or die &quot;Cannot open foo file for reading: $!&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in a perl script and execute it--the script would <CODE>die()</CODE> if it
+is unable to open the file, by aborting the script execution, printing the
+death reason and quitting the Perl interpreter.
+
+<P>
+You will hardly find a properly written Perl script that doesn't have at
+least one <CODE>die()</CODE> statement in it, if it has to cope with system
+calls and the like.
+
+<P>
+A CGI script running under mod_cgi exits on its completion. The Perl
+interperter exits as well. So it doesn't really matter whether the
+interpreter quits because the script died by natural death (when the last
+statement was executed) or was aborted by a <CODE>die()</CODE> statement.
+
+<P>
+In mod_perl we don't want the interpreter to quit. We already know that
+when the script completes its chores the interpeter won't quit. There is no
+reason why it should quit when the script has stopped because of
+<CODE>die().</CODE> As a result calling <CODE>die()</CODE> won't quit the
+process.
+
+<P>
+And this is how it works--when the <CODE>die()</CODE> gets triggered, it's
+mod_perl's <CODE>$SIG{__DIE__}</CODE> handler that logs the error message and calls Apache::exit() instead of
+CORE::die(). Thus the script stops, but the process doesn't quit.
+
+<P>
+Here is an example of such trapping code, although it isn't the real code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $SIG{__DIE__} = sub { print STDERR @_; Apache::exit(); }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Return_Codes">Return Codes</A></H1></CENTER>
+<P>
+<CODE>Apache::Registry</CODE> normally assumes a return code of <CODE>OK</CODE> (<CODE>200</CODE>). If you want to send another return code, use <CODE>$r-&gt;status()</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(NOT_FOUND);
+  $r-&gt;status(NOT_FOUND);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course if you do that, you don't have to call
+<CODE>$r-&gt;send_http_header()</CODE> (assuming that you have <CODE>PerlSendHeader
+Off</CODE>).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Testing_the_Code_from_the_Shell">Testing the Code from the Shell</A></H1></CENTER>
+<P>
+Your CGI scripts will <STRONG>not</STRONG> yet run from the command line unless you use <CODE>CGI::Switch</CODE> or <CODE>CGI.pm</CODE> and have Perl 5.004 or later. They must not make any direct calls to
+Apache's Perl API methods.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="I_O_is_different">I/O is different</A></H1></CENTER>
+<P>
+If you are using Perl 5.004 or later, most CGI scripts can run under
+mod_perl untouched. 
+
+<P>
+If you're using 5.003, Perl's built-in <CODE>read()</CODE> and <CODE>print()</CODE>
+functions do not work as they do under CGI. If you're using <CODE>CGI.pm</CODE>, use <CODE>$query-&gt;print</CODE> instead of plain ol' <CODE>print()</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="STDIN_STDOUT_and_STDERR_streams">STDIN, STDOUT and STDERR streams</A></H1></CENTER>
+<P>
+In mod_perl both <CODE>STDIN</CODE> and <CODE>STDOUT</CODE> are tied to the socket the request came from. Because the C level STDOUT is
+not hooked up to the client, you can re-open the STDOUT filehandler using
+<CODE>tie().</CODE> For example if you want to dup an STDOUT filehandler
+and for the code to work with mod_perl and without it, the following
+example will do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use constant IS_MODPERL =&gt; $ENV{MOD_PERL};
+  if (IS_MODPERL) {
+    tie *OUT, 'Apache';
+  } else {
+    open (OUT, &quot;&gt;-&quot;);
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that <CODE>OUT</CODE> was picked just as an example -- there is nothing special about it. If you
+are looking to redirect the STDOUT stream into a scalar, see the <A HREF="././porting.html#Redirecting_STDOUT_into_a_Scalar">Redirecting STDOUT into a String</A> section.
+
+<P>
+<CODE>STDERR</CODE> is tied to the file defined by the <CODE>ErrorLog</CODE> directive.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Redirecting_STDOUT_into_a_Scalar">Redirecting STDOUT into a Scalar</A></H1></CENTER>
+<P>
+Sometimes you have a situation where a black box functions prints the
+output to <CODE>STDOUT</CODE> and you want to get this output into a scalar. This is just as valid under
+mod_perl, where you want the
+<CODE>STDOUT</CODE> to be tied to the <A HREF="#item_Apache">Apache</A> object. So that's where the
+<CODE>IO::String</CODE> package comes to help. You can re-tie() the STDOUT (or any other
+filehandler to a string) by doing a simple <CODE>select()</CODE> on the
+<CODE>IO::String</CODE> object and at the end to re-tie() the STDOUT back to its original stream:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $str;
+  my $str_fh = IO::String-&gt;new($str);
+  my $old_fh = select($str_fh);
+  
+  # some function that prints to currently selected file handler.
+  print_stuff()
+  
+  # reset default fh to previous value
+  select($old_fh) if defined $old_fh;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_print_and_CORE_print_">Apache::print() and CORE::print()</A></H1></CENTER>
+<P>
+Under mod_perl <CODE>CORE::print()</CODE> will redirect its data to
+<CODE>Apache::print()</CODE> since the STDOUT filehandle is tied to the
+<EM>Apache</EM> module. This allows us to run CGI scripts unmodified under
+<CODE>Apache::Registry</CODE> by chaining the output of one content handler to the input of the other
+handler.
+
+<P>
+<CODE>Apache::print()</CODE> behaves mostly like the built-in <EM>print()</EM>
+function. In addition it sets a timeout so that if the client connection is
+broken the handler won't wait forever trying to print data downstream to
+the client.
+
+<P>
+There is also an optimization built into <CODE>Apache::print()</CODE>. If any of the arguments to the method are scalar references to strings,
+they are automatically dereferenced for you. This avoids needless copying
+of large strings when passing them to subroutines. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> $long_string = &quot;A&quot; x 10000000;
+ $r-&gt;print(\$long_string);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you still want to print the reference you can always call:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;print(\\$foo);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or by forcing it into a scalar context:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print(scalar($foo));</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Global_Variables_Persistence">Global Variables Persistence</A></H1></CENTER>
+<P>
+Since the child process generally doesn't exit before it has serviced
+several requests, global variables persist inside the same process from
+request to request. This means that you must never rely on the value of the
+global variable if it wasn't initialized at the beginning of the request
+processing. See ``<A HREF="././perl.html#Variables_Globally_Lexically_Sc">Variables globally, lexically scoped and fully qualified</A>'' for more info.
+
+<P>
+You should avoid using global variables unless it's impossible without
+them, because it will make code development harder and you will have to
+make certain that all the variables are initialized before they are used.
+Use <CODE>my()</CODE> scoped variables wherever you can.
+
+<P>
+You should be especially careful with <A HREF="././perl.html#The_Scope_of_the_Special_Perl_Va">Perl Special Variables</A> which cannot be lexically scoped. You have to use <CODE>local()</CODE>
+instead.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Generating_correct_HTTP_Headers">Generating correct HTTP Headers</A></H1></CENTER>
+<P>
+A HTTP response header consists of at least two fields. HTTP response and
+MIME type header <CODE>Content-type</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  HTTP/1.0 200 OK
+  Content-Type: text/plain</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After adding one more new line, you can start printing the content. A more
+complete response includes the date timestamp and server type, for example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  HTTP/1.0 200 OK
+  Date: Tue, 28 Dec 1999 18:47:58 GMT
+  Server: Apache/1.3.10-dev (Unix) mod_perl/1.21_01-dev
+  Content-Type: text/plain</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To notify that the server was configured with KeepAlive Off, you need to
+tell the client that the connection was closed, with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Connection: close</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+There can be other headers as well, like caching control and others
+specified by the HTTP protocol. You can code the response header with a
+single <CODE>print():</CODE>
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    print qq{HTTP/1.1 200 OK    
+  Date: Tue, 28 Dec 1999 18:49:41 GMT
+  Server: Apache/1.3.10-dev (Unix) mod_perl/1.21_01-dev
+  Connection: close
+  Content-type: text/plain
+  
+    };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or with a <EM>"here"</EM> style print:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    print &lt;&lt;EOT;
+  HTTP/1.1 200 OK    
+  Date: Tue, 28 Dec 1999 18:49:41 GMT
+  Server: Apache/1.3.10-dev (Unix) mod_perl/1.21_01-dev
+  Connection: close
+  Content-type: text/plain
+  
+  EOT</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Notice the double new line at the end. But you have to prepare a timestamp
+string (<CODE>Apache::Util::ht_time()</CODE> does just this) and to know what server you are running under. You needed
+to send only the response MIME type (<CODE>Content-type</CODE>) under mod_cgi, so why would you want to do this manually under mod_perl? 
+
+<P>
+Actually sometimes you do want to set some headers manually, but not every
+time. So mod_perl gives you the default set of headers, just like in the
+example above. And if you want to override or add more headers you can do
+that as well. Let's see how to do that.
+
+<P>
+When writing your own handlers and scripts with the Perl Apache API the
+proper way to send the HTTP header is with the
+<CODE>send_http_header()</CODE> method. If you need to add or override
+methods you can use the <CODE>headers_out()</CODE> method:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;headers_out(&quot;Server&quot; =&gt; &quot;Apache Next Generation 10.0&quot;);
+  $r-&gt;headers_out(&quot;Date&quot; =&gt; &quot;Tue, 28 Dec 1999 18:49:41 GMT&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When you have prepared all the headers you send them with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;send_http_header;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Some headers have special aliases:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;content_type('text/plain');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+is the same as:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> headers_out(&quot;Content-type&quot; =&gt; &quot;text/plain&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A typical handler looks like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;content_type('text/plain');
+  $r-&gt;send_http_header;
+  return OK if $r-&gt;header_only;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If the client issues an HTTP <CODE>HEAD</CODE> request rather than the usual
+<CODE>GET</CODE>, to be compliant with the HTTP protocol we should not send the document
+body, but only the HTTP header. When Apache receives a <CODE>HEAD</CODE>
+request, <EM>header_only()</EM> returns <EM>true</EM>. If we see that this has happened, we return from the handler immediately
+with an <CODE>OK</CODE> status code.
+
+<P>
+Generally, you don't need the explicit content type setting, since Apache
+does this for you, by looking up the MIME type of the request and by
+matching the extension of the URI in the MIME tables (from the
+<EM>mime.types</EM> file). So if the request URI is <EM>/welcome.html</EM>, the
+<CODE>text/html</CODE> content-type will be picked. However for CGI scripts or URIs that cannot be
+mapped by a known extension, you should set the appropriate type by using
+<CODE>content_type()</CODE> method.
+
+<P>
+The situation is a little bit different with <CODE>Apache::Registry</CODE> and similar handlers. If you take a basic CGI script like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;Hello world&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+it wouldn't work, because the HTTP header will not be sent out. By default,
+mod_perl does not send any headers itself. You may wish to change this by
+adding
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSendHeader On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in the <CODE>Apache::Registry</CODE>  <CODE>&lt;Location&gt;</CODE> section of your configuration. Now, the response line and common headers
+will be sent as they are by mod_cgi. Just as with mod_cgi, <CODE>PerlSendHeader</CODE> will not send the MIME type and a terminating double newline. Your script
+must send that itself, e.g.:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/html\r\n\r\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+According to HTTP specs, you should send ``\cM\cJ'', ``\015\012'' or
+``\0x0D\0x0A'' string. The ``\r\n'' is the way to do that on UNIX and
+MS-DOS/Windows machines. However, on a Mac ``\r\n'' eq ``\012\015'',
+exactly the other way around.
+
+<P>
+Note, that in most UNIX CGI scripts, developers use a simpler ``\n\n'' and
+not ``\r\n\r\n''. There are occasions where sending ``\n'' without ``\r''
+can cause problems, make it a habit to always send ``\r\n'' every time.
+
+<P>
+If you use an OS which uses the EBCDIC as character set (e.g.
+BS2000-Posix), you should use this method to send the Content-type header:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  shift-&gt;send_http_header('text/html');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>PerlSendHeader On</CODE> directive tells mod_perl to intercept anything that looks like a header
+line (such as <CODE>Content-Type:
+text/plain</CODE>) and automatically turn it into a correctly formatted HTTP/1.0 header, the
+same way it happens with CGI scripts running under mod_cgi. This allows you
+to keep your CGI scripts unmodified.
+
+<P>
+You can use <CODE>$ENV{PERL_SEND_HEADER}</CODE> to find out whether
+<CODE>PerlSendHeader</CODE> is <STRONG>On</STRONG> or <STRONG>Off</STRONG>. You use it in your module like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> if($ENV{PERL_SEND_HEADER}) {
+     print &quot;Content-type: text/html\r\n\r\n&quot;;
+ }
+ else {
+     my $r = Apache-&gt;request;
+     $r-&gt;content_type('text/html');
+     $r-&gt;send_http_header;
+ }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that you can always use the code in the else part of the above
+example, no matter whether the <CODE>PerlSendHeader</CODE> directive is On or Off.
+
+<P>
+If you use <CODE>CGI.pm</CODE>'s <CODE>header()</CODE> function to generate HTTP headers, you do not need to activate this
+directive because <CODE>CGI.pm</CODE> detects
+<EM>mod_perl</EM> and calls <CODE>send_http_header()</CODE> for you.
+
+<P>
+There is no free lunch--you get the mod_cgi behavior at the expense of the
+small but finite overhead of parsing the text that is sent. Note that
+mod_perl makes the assumption that individual headers are not split across
+print statements.
+
+<P>
+The <CODE>Apache::print()</CODE> routine has to gather up the headers that your script outputs, in order to
+pass them to <CODE>$r-&gt;send_http_header</CODE>. This happens in <CODE>src/modules/perl/Apache.xs</CODE> (<CODE>print</CODE>) and
+<CODE>Apache/Apache.pm</CODE> (<CODE>send_cgi_header</CODE>). There is a shortcut in there, namely the assumption that each print
+statement contains one or more complete headers. If for example you
+generate a <CODE>Set-Cookie</CODE>
+header by multiple <CODE>print()</CODE> statements, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   print &quot;Content-type: text/plain\n&quot;;
+   print &quot;Set-Cookie: iscookietext\; &quot;;
+   print &quot;expires=Wednesday, 09-Nov-1999 00:00:00 GMT\; &quot;;
+   print &quot;path=\/\; &quot;;
+   print &quot;domain=\.mmyserver.com\; &quot;;
+   print &quot;\r\n\r\n&quot;;
+   print &quot;hello&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Your generated <CODE>Set-Cookie</CODE> header is split over a number of <CODE>print()</CODE> statements and gets
+lost. The above example wouldn't work! Try this instead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   my $cookie = &quot;Set-Cookie: iscookietext\; &quot;;
+   $cookie .= &quot;expires=Wednesday, 09-Nov-1999 00:00:00 GMT\; &quot;;
+   $cookie .= &quot;path=\/\; &quot;;
+   $cookie .= &quot;domain=\.mmyserver.com\; &quot;;
+   print &quot;Content-type: text/plain\n&quot;,
+   print &quot;$cookie\r\n\r\n&quot;;
+   print &quot;hello&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course using a special purpose cookie generator modules, like
+<CODE>Apache::Cookie</CODE>, <CODE>CGI::Cookie</CODE> etc is an even cleaner solution.
+
+<P>
+Sometimes when you call a script you see an ugly "Content-Type:
+text/html" displayed at the top of the page, and of course the rest of the HTML code
+won't be rendered correctly by the browser. As you have seen above, this
+generally happens when your code has already sent the header so you see the
+duplicate header rendered into the browser's page. This might happen when
+you call the <CODE>CGI.pm</CODE>
+
+<CODE>$q-&gt;header</CODE> method or mod_perl's <CODE>$r-&gt;send_http_header</CODE>.
+
+<P>
+If you have a complicated application where the header might be generated
+from many different places, depending on the calling logic, you might want
+to write a special subroutine that sends a header, and keeps track of
+whether the header has been already sent. Of course you can use a global
+variable to flag that the header has already been sent:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use vars qw{$header_printed};
+  $header_printed = 0;
+  
+  print_header(&quot;text/plain&quot;);
+  print &quot;It worked!\n&quot;;
+  print_header(&quot;text/plain&quot;);
+  
+  sub print_header {
+    my $type = shift || &quot;text/html&quot;;
+    unless  ($header_printed) {
+      $header_printed = 1;
+      my $r = Apache-&gt;request;
+      $r-&gt;content_type($type);
+      $r-&gt;send_http_header;
+    }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>$header_printed</CODE> is the variable that flags whether the header was sent or not and it gets
+initialized to false (0) at the beginning of each code invocation. Note
+that the second invocation of <CODE>print_header()</CODE> within the same
+code, will do nothing, since
+<CODE>$header_printed</CODE> will become true after <CODE>print_header()</CODE> will be executed for the
+first time.
+
+<P>
+A solution that is a little bit more memory friendly is to use a fully
+qualified variable instead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  $main::header_printed = 0;
+  
+  print_header(&quot;text/plain&quot;);
+  print &quot;It worked!\n&quot;;
+  print_header(&quot;text/plain&quot;);
+  
+  sub print_header {
+    my $type = shift || &quot;text/html&quot;;
+    unless  ($main::header_printed) {
+      $main::header_printed = 1;
+      my $r = Apache-&gt;request;
+      $r-&gt;content_type($type);
+      $r-&gt;send_http_header;
+    }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We just removed the global variable predeclaration, which allowed us to use <CODE>$header_printed</CODE> under <CODE>&quot;use strict&quot;</CODE> and replaced
+<CODE>$header_printed</CODE> with <CODE>$main::header_printed</CODE>;
+
+<P>
+You may become tempted to use a more elegant Perl solution--the nested
+subroutine effect which seems to be a natural approach to take here.
+Unfortunately it will not work. If the process was starting fresh for each
+script or handler, like with plain mod_cgi scripts, it would work just
+fine:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  
+  print_header(&quot;text/plain&quot;);
+  print &quot;It worked!\n&quot;;
+  print_header(&quot;text/plain&quot;);
+  
+  {
+    my $header_printed = 0;
+    sub print_header {
+      my $type = shift || &quot;text/html&quot;;
+      unless  ($header_printed) {
+        $header_printed = 1;
+        my $r = Apache-&gt;request;
+        $r-&gt;content_type($type);
+        $r-&gt;send_http_header;
+      }
+    }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In this code <CODE>$header_printed</CODE> is declared as lexically scoped (with <CODE>my())</CODE> outside the
+subroutine <CODE>print_header()</CODE> and modified inside of it. Curly
+braces define the block which limits the scope of the lexically variable.
+
+<P>
+This means that once <CODE>print_header()</CODE> sets it to 1, it will stay
+1 as long as the code is running. So all subsequent calls to this
+subroutine will just return without doing a thing. This would serve our
+purpose, but unfortunately it will work only for the first time the script
+is invoked within a process. When the script is executed for the second or
+subsequent times and is served by the same process--the header will not be
+printed anymore, since <CODE>print_header()</CODE> will remember that the
+value of <CODE>$header_printed</CODE> is equal to 1--it won't be reinitialized, since the subroutine won't be
+recompiled.
+
+<P>
+Why can't we use a lexical without hitting the nested subroutine effect?
+Because when we've discussed <A HREF="././porting.html#Exposing_Apache_Registry_secret">Apache::Registry secrets</A> we have seen that the code is wrapped in a <CODE>handler</CODE> routine, effectively turning any subroutines within the file a script
+resides in into nested subroutines. Hence we are forced to use a global in
+this situation.
+
+<P>
+Let's make our smart method more elaborate with respect to the
+<CODE>PerlSendHeader</CODE> directive, so that it always does the right thing. It's especially
+important if you write an application that you are going to distribute,
+hopefully under one of the Open Source or GPL licences.
+
+<P>
+You can continue to improve this subroutine even further to handle
+additional headers, such as cookies.
+
+<P>
+See also <A HREF="././correct_headers.html#">Correct Headers--A quick guide for mod_perl users</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="NPH_Non_Parsed_Headers_scripts">NPH (Non Parsed Headers) scripts</A></H1></CENTER>
+<P>
+To run a Non Parsed Header CGI script under mod_perl, simply add to your
+code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  local $| = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And if you normally set <CODE>PerlSendHeader On</CODE>, add this to your server's configuration file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Files */nph-*&gt;
+    PerlSendHeader Off
+  &lt;/Files&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="BEGIN_blocks">BEGIN blocks</A></H1></CENTER>
+<P>
+Perl executes <CODE>BEGIN</CODE> blocks as soon as possible, at the time of compiling the code. The same is
+true under mod_perl. However, since mod_perl normally only compiles scripts
+and modules once, either in the parent server or once per-child, <CODE>BEGIN</CODE> blocks in that code will only be run once. As the <CODE>perlmod</CODE> manpage explains, once a <CODE>BEGIN</CODE>
+block has run, it is immediately undefined. In the mod_perl environment,
+this means that <CODE>BEGIN</CODE> blocks will not be run during the response to an incoming request unless
+that request happens to be the one that causes the compilation of the code.
+
+<P>
+<CODE>BEGIN</CODE> blocks in modules and files pulled in via <CODE>require()</CODE> or
+<CODE>use()</CODE> will be executed:
+
+<UL>
+<P><LI>
+<P>
+Only once, if pulled in by the parent process.
+
+<P><LI>
+<P>
+Once per-child process if not pulled in by the parent process.
+
+<P><LI>
+<P>
+An additional time, once per child process if the module is pulled in off
+disk again via <CODE>Apache::StatINC</CODE>.
+
+<P><LI>
+<P>
+An additional time, in the parent process on each restart if
+<CODE>PerlFreshRestart</CODE> is <CODE>On</CODE>.
+
+<P><LI>
+<P>
+Unpredictable if you fiddle with <CODE>%INC</CODE> yourself.
+
+</UL>
+<P>
+<CODE>BEGIN</CODE> blocks in <CODE>Apache::Registry</CODE> scripts will be executed, as above plus:
+
+<UL>
+<P><LI>
+<P>
+Only once, if pulled in by the parent process via
+
+<P>
+<CODE>Apache::RegistryLoader</CODE>.
+
+<P><LI>
+<P>
+Once per-child process if not pulled in by the parent process.
+
+<P><LI>
+<P>
+An additional time, once per child process, each time the script file
+changes on disk.
+
+<P><LI>
+<P>
+An additional time, in the parent process on each restart if pulled in by
+the parent process via <CODE>Apache::RegistryLoader</CODE> and
+<CODE>PerlFreshRestart</CODE> is <CODE>On</CODE>.
+
+</UL>
+<P>
+Make sure you read <A HREF="././troubleshooting.html#Evil_things_might_happen_when_us">Evil things might happen when using PerlFreshRestart</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="END_blocks">END blocks</A></H1></CENTER>
+<P>
+As the <CODE>perlmod</CODE> manpage explains, an <CODE>END</CODE> subroutine is executed as late as possible, that is, when the interpreter
+exits. In the mod_perl environment, the interpreter does not exit until the
+server shuts down. However, mod_perl does make a special case for
+<CODE>Apache::Registry</CODE> scripts.
+
+<P>
+Normally, <CODE>END</CODE> blocks are executed by Perl during its <STRONG>perl_run()</STRONG>
+function. This is called once each time the Perl program is executed, i.e.
+under mod_cgi, once per invocation of the CGI script. However, mod_perl
+only calls <STRONG>perl_run()</STRONG> once, during server startup. Any
+<CODE>END</CODE> blocks encountered during main server startup, i.e. those pulled in by the <CODE>PerlRequire</CODE> or by any <CODE>PerlModule</CODE>, are suspended.
+
+<P>
+Except during the cleanup phase, any <CODE>END</CODE> blocks encountered during compilation of <CODE>Apache::Registry</CODE> scripts, including subsequent invocations when the script is cached in
+memory, are called after the script has completed.
+
+<P>
+All other <CODE>END</CODE> blocks encountered during other <CODE>Perl*Handler</CODE>
+call-backs, e.g. <CODE>PerlChildInitHandler</CODE>, will be suspended while the process is running and called during <CODE>child_exit()</CODE> when the process is shutting down. Module authors might wish to use
+<CODE>$r-&gt;register_cleanup()</CODE> as an alternative to <CODE>END</CODE> blocks if this behavior is not desirable. <CODE>$r-&gt;register_cleanup()</CODE> is called at the CleanUp processing phase of each request and thus can be
+used to emulate plain perl's <CODE>END{}</CODE> block behavior.
+
+<P>
+The last paragraph is very important for handling the case of <A HREF="././debug.html#Handling_the_User_pressed_Stop_">'User Pressed the Stop Button'</A>.
+
+<P>
+If you only want something to run once in the parent on shutdown or restart
+you can use  <CODE>$r-&gt;register_cleanup()</CODE> in the <EM>startup.pl</EM>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #PerlRequire startup.pl
+  warn &quot;parent pid is $$\n&quot;;
+  Apache-&gt;server-&gt;register_cleanup
+    (sub { warn &quot;server cleanup in $$\n&quot;});</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is usually useful when some server wide cleanup should be performed
+when the server is stopped or restarted.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="CHECK_Blocks">CHECK Blocks</A></H1></CENTER>
+<P>
+-- available since perl5.6.0
+
+<P>
+This block runs when compilation is complete, but before the program
+starts. <STRONG>CHECK</STRONG> can mean ``checkpoint'' or ``double-check'' or even jus ``stop'').
+
+<P>
+Perl only calls <STRONG>CHECK</STRONG> blocks during <CODE>perl_parse(),</CODE> which mod_perl calls once at
+startup time. Therefore <STRONG>CHECK</STRONG> blocks don't work for the same reason this doesn't:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -e 'eval qq(CHECK { print &quot;ok\n&quot; })'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Command_Line_Switches_w_T_e">Command Line Switches (-w, -T, etc)</A></H1></CENTER>
+<P>
+Normally when you run perl from the command line, you have the shell invoke
+it with <CODE>#!/bin/perl</CODE> (sometimes referred to as the shebang line). In scripts running under
+mod_cgi, you may use perl execution switch arguments as described in the <CODE>perlrun</CODE> manpage, such as
+<CODE>-w</CODE>, <CODE>-T</CODE> or <CODE>-d</CODE>. Since scripts running under mod_perl don't need the shebang line, all
+switches except <CODE>-w</CODE> are ignored by mod_perl. This feature was added for a backward
+compatibility with CGI scripts.
+
+<P>
+Most command line switches have a special variable equivalent which allows
+them to be set/unset in code. Consult the <CODE>perlvar</CODE> manpage for more details.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Warnings">Warnings</A></H2></CENTER>
+<P>
+There are three ways to enable warnings:
+
+<UL>
+<P><LI><STRONG><A NAME="item_Globally">Globally to all Processes</A></STRONG>
+<P>
+Setting:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlWarn On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in <CODE>httpd.conf</CODE> will turn warnings <STRONG>On</STRONG> in any script.
+
+<P>
+You can then fine tune your code, turning warnings <STRONG>Off</STRONG> and <STRONG>On</STRONG> by setting the <CODE>$^W</CODE> variable in your scripts.
+
+<P><LI><STRONG><A NAME="item_Locally">Locally to a script</A></STRONG>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/bin/perl -w</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will turn warnings <STRONG>On</STRONG> for the scope of the script. You can turn them <STRONG>Off</STRONG> and <STRONG>On</STRONG> in the script by setting the <CODE>$^W</CODE> variable as noted above.
+
+<P><LI><STRONG><A NAME="item_Locally">Locally to a block</A></STRONG>
+<P>
+This code turns warnings mode <STRONG>On</STRONG> for the scope of the block.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    local $^W = 1;
+    # some code
+  }
+  # $^W assumes its previous value here</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This turns it <STRONG>Off</STRONG>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    local $^W = 0;
+    # some code
+  }
+  # $^W assumes its previous value here</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note, that if you forget the <CODE>local</CODE> operator this code will affect the child processing the current request,
+and all the subsequent requests processed by that child. Thus
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $^W = 0;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will turn the warnings <EM>Off</EM>, no matter what.
+
+<P>
+If you want to turn warnings <EM>On</EM> for the scope of the whole file, as in the previous item, you can do this
+by adding:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  local $^W = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+at the beginning of the file. Since a file is effectively a block, file
+scope behaves like a block's curly braces <CODE>{ }</CODE> and <CODE>local $^W</CODE>
+at the start of the file will be effective for the whole file.
+
+</UL>
+<P>
+While having warning mode turned <STRONG>On</STRONG> is essential for a development server, you should turn it globally <STRONG>Off</STRONG> in a production server, since, for example, if every served request
+generates only one warning, and your server serves millions of requests per
+day, your log file will eat up all of your disk space and your system will
+die.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Taint_Mode">Taint Mode</A></H2></CENTER>
+<P>
+Perl's <CODE>-T</CODE> switch enables <EM>Taint</EM> mode. (META: Link to security chapter). If you aren't forcing all your
+scripts to run under <STRONG>Taint</STRONG>
+mode you are looking for trouble from malicious users. (See the
+<EM>perlsec</EM> manpage for more information)
+
+<P>
+If you have some scripts that won't run under Taint mode, run only the ones
+that run under mod_perl with Taint mode enabled and the rest on another
+server with Taint mode disabled -- this can be either a mod_cgi in the
+front-end server or another back-end mod_perl server. You can use the
+mod_rewrite module and redirect requests based on the file extensions. For
+example you can use <EM>.tcgi</EM> for the taint-clean scripts, and <EM>cgi</EM> for the rest.
+
+<P>
+When you have this setup you can start working toward cleaning the rest of
+the scripts, to make them run under the Taint mode. Just because you have a
+few dirty scripts doesn't mean that you should jeopardize your whole
+service.
+
+<P>
+Since the <CODE>-T</CODE> switch doesn't have an equivalent perl variable, mod_perl provides the <CODE>PerlTaintCheck</CODE> directive to turn on taint checks. In <CODE>httpd.conf</CODE>, enable this mode with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlTaintCheck On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now any code compiled inside httpd will be taint checked.
+
+<P>
+If you use the <CODE>-T</CODE> switch, Perl will warn you that you should use the <CODE>PerlTaintCheck</CODE> configuration directive and will otherwise ignore it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Other_switches">Other switches</A></H2></CENTER>
+<P>
+Finally, if you still need to to set additional perl startup flags such as <CODE>-d</CODE> and <CODE>-D</CODE>, you can use an environment variable
+<CODE>PERL5OPT</CODE>. Switches in this variable are treated as if they were on every Perl
+command line.
+
+<P>
+Only the <CODE>-[DIMUdmw]</CODE> switches are allowed.
+
+<P>
+When the <CODE>PerlTaintCheck</CODE> variable is turned on, the value of
+<CODE>PERL5OPT</CODE> will be ignored.
+
+<P>
+[META: verify]
+
+<P>
+See also
+<A HREF="././modules.html#Apache_PerlRun_Run_unaltered_">Apache::PerlRun</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_strict_pragma">The strict pragma</A></H1></CENTER>
+<P>
+It's _absolutely_ mandatory (at least for development) to start all your
+scripts with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If needed, you can always turn off the 'strict' pragma or a part of it
+inside the block, e.g:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    no strict 'refs';
+    ... some code
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It's more important to have the <CODE>strict</CODE> pragma enabled under mod_perl than anywhere else. While it's not required
+by the language, its use cannot be too strongly recommended. It will save
+you a great deal of time. And, of course, clean scripts will still run
+under mod_cgi (plain CGI)!
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Passing_ENV_variables_to_CGI">Passing ENV variables to CGI</A></H1></CENTER>
+<P>
+To pass an environment variable from <EM>httpd.conf</EM>, add to it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv key val
+  PerlPassEnv key</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+e.g.:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv PERLDB_OPTS &quot;NonStop=1 LineInfo=/tmp/db.out AutoTrace=1&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will set <CODE>$ENV{PERLDB_OPTS}</CODE>, and it will be accessible in every child.
+
+<P>
+<CODE>%ENV</CODE> is only set up for CGI emulation. If you are using the API, you should use <CODE>$r-&gt;subprocess_env</CODE>, <CODE>$r-&gt;notes</CODE> or
+<CODE>$r-&gt;pnotes</CODE> for passing data around between handlers. <CODE>%ENV</CODE> is slow because it must update the underlying C environment table. It also
+insecure sinve its use exposes the data on systems which allow users to see
+the environment with <CODE>ps</CODE>.
+
+<P>
+In any case, <CODE>%ENV</CODE> and the tables used by those methods are all cleared after the request is
+served. 
+
+<P>
+The Perl <CODE>%ENV</CODE> is cleared during startup, but the C environment is left in tact. With a
+combo of forking <CODE>`env`</CODE> and <CODE>&lt;Perl&gt;</CODE>
+sections you can do even do wildcards matching. For example, this passes
+all environment variables that begin with the letter H:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+    local $ENV{PATH} = '/usr/bin';
+    local $_;
+    
+    for (`env`) {
+        next unless /^(H.*)=/;
+        push @PassEnv, $1;
+    }
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+See also <A HREF="././performance.html#PerlSetupEnv_Off">PerlSetupEnv</A> which can enable/disable environment variables settings.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="_M_and_other_time_file_tests_u">-M and other time() file tests under mod_perl</A></H1></CENTER>
+<P>
+Under mod_perl, files that have been created after the server's (child)
+startup are reported as having a negative age with <CODE>-M</CODE>
+(<CODE>-C</CODE>  <CODE>-A</CODE>) test. This is obvious if you remember that you will get the negative
+result if the server was started before the file was created. It's normal
+behavior with perl.
+
+<P>
+If you want to have <CODE>-M</CODE> report the time relative to the current request, you should reset the <CODE>$^T</CODE> variable just as with any other perl script. Add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  local $^T = time;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+at the beginning of the script.
+
+<P>
+Another even simpler solution would be to specify a fixup handler, which
+will be executed before each script is run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub Apache::PerlBaseTime::handler {
+    $^T = shift-&gt;request_time;
+    return Apache::Constants::DECLINED;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and then in the <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlFixupHandler Apache::PerlBaseTime</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This technique is better performance-wise as it skips the
+<CODE>time()</CODE> system call, and uses the already available time of the
+request has been started at via <CODE>$r-&gt;request_time</CODE> method.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_and_syslog">Apache and syslog</A></H1></CENTER>
+<P>
+When native syslog support is enabled, the stderr stream will be redirected
+to <CODE>/dev/null</CODE>!
+
+<P>
+It has nothing to do with mod_perl (plain Apache does the same). Doug wrote
+the <A HREF="././modules.html#Apache_LogSTDERR">Apache::LogSTDERR</A> module to work around this.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="File_tests_operators">File tests operators</A></H1></CENTER>
+<P>
+Remember that with mod_perl you might get negative times when you use file
+test operators like <CODE>-M</CODE> -- last modification time, <CODE>-A</CODE> -- last access time, <CODE>-C</CODE> -- last inode-change time, and others.  <CODE>-M</CODE>
+returns the difference in time between the modification time of the file
+and the time the script was started. Because the <CODE>^T</CODE> variable is not reset on each script invocation, and is equal to the time
+when the process was forked, you might want to perform:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $^T = time;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+at the beginning of your scripts to simulate the regular perl script
+behaviour of file tests.
+
+<P>
+META: Above is near duplicate of ``-M and other <CODE>time()</CODE> file
+tests under mod_perl'' make a link instead
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Filehandlers_and_locks_leakages">Filehandlers and locks leakages</A></H1></CENTER>
+<P>
+META: duplication at debug.pod: =head3 Safe Resource Locking
+
+<P>
+When you write a script running under mod_cgi, you can get away with sloppy
+programming, like opening a file and letting the interpreter close it for
+you when the script had finished its run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  open IN, &quot;in.txt&quot; or die &quot;Cannot open in.txt for reading : $!\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For mod_perl, before the end of the script you <STRONG>must</STRONG>  <CODE>close()</CODE> any files you opened!
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  close IN;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you forget to <CODE>close()</CODE>, you might get file descriptor leakage and (if you <CODE>flock()ed</CODE> on this file descriptor) also unlock problems.
+
+<P>
+Even if you do call <CODE>close(),</CODE> if for some reason the
+interpreter was stopped before the <CODE>close()</CODE> call, the leakage will still happen. See for example <A HREF="././debug.html#Handling_the_User_pressed_Stop_">Handling the 'User pressed Stop button' case</A>. After a long run without restarting Apache your machine might run out of
+file descriptors, and worse, files might be left locked and unusable.
+
+<P>
+What can you do? Use <CODE>IO::File</CODE> (and the other <CODE>IO::*</CODE> modules). This allows you to assign the file handler to variable which can
+be
+<CODE>my()</CODE> (lexically) scoped. When this variable goes out of scope the file or other
+file system entity will be properly closed (and unlocked if it was locked).
+Lexically scoped variables will always go out of scope at the end of the
+script's invocation even if it was aborted in the middle. If the variable
+was defined inside some internal block, it will go out of scope at the end
+of the block. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    my $fh = IO::File-&gt;new(&quot;filename&quot;) or die $!;
+    # read from $fh
+  } # ...$fh is closed automatically at end of block, without leaks.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As I have just mentioned, you don't have to create a special block for this
+purpose. A script in a file is effectively written in a block with the same
+scope as the file, so you can simply write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $fh = IO::File-&gt;new(&quot;filename&quot;) or die $!;
+    # read from $fh
+    # ...$fh is closed automatically at end of script, without leaks.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Using a <CODE>{ BLOCK }</CODE>) makes sure is that the file is closed the moment that the end of the
+block is reached.
+
+<P>
+An even faster and lighter technique is to use <CODE>Symbol.pm</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $fh = Symbol::gensym();
+  open $fh, &quot;filename&quot; or die $!;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Use these approaches to ensure you have no leakages, but don't be too lazy
+to write <CODE>close()</CODE> statements. Make it a habit.
+
+<P>
+Under perl 5.6.0 we can do this instead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  open my $fh, $filename or die $! ;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Code_has_been_changed_but_it_se">Code has been changed, but it seems the script is running the old code</A></H1></CENTER>
+<P>
+Files pulled in via <STRONG>use</STRONG> or <STRONG>require</STRONG> statements are not automatically reloaded when they change on disk. See <A HREF="././porting.html#Reloading_Modules_and_Required_F">Reloading Modules and Required Files</A> for more info.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_Script_Is_Too_Dirty_But_It_">The Script Is Too Dirty, But It Does The Job And I Cannot Afford To Rewrite It.</A></H1></CENTER>
+<P>
+You still can win from using mod_perl. 
+
+<P>
+One approach is to replace the <CODE>Apache::Registry</CODE> handler with
+<CODE>Apache::PerlRun</CODE> and define a new location. The script can reside in the same directory on
+the disk.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # httpd.conf
+  Alias /cgi-perl/ /home/httpd/cgi/
+  
+  &lt;Location /cgi-perl&gt;
+    #AllowOverride None
+    SetHandler perl-script
+    PerlHandler Apache::PerlRun
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+See <A HREF="././porting.html#Apache_PerlRun_a_closer_look">Apache::PerlRun--a closer look</A>
+
+
+
+<P>
+Another ``bad'', but workable method is to set <CODE>MaxRequestsPerChild</CODE> to 1, which will force each child to exit after serving only one request.
+You will get the preloaded modules, etc., but the script will be compiled
+for each request, then be thrown away. This isn't good for ``high-traffic''
+sites, as the parent server will need to fork a new child each time one is
+killed. You can fiddle with <CODE>MaxStartServers</CODE>
+and <CODE>MinSpareServers</CODE>, so that the parent pre-spawns more servers than actually required and the
+killed one will immediately be replaced with a fresh one. Probably that's
+not what you want.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_PerlRun_a_closer_look">Apache::PerlRun--a closer look</A></H1></CENTER>
+<P>
+<CODE>Apache::PerlRun</CODE> gives you the benefit of preloaded Perl and its modules. This module's
+handler emulates the CGI environment, allowing programmers to write scripts
+that run under CGI or mod_perl without any change. Unlike <CODE>Apache::Registry</CODE>, the <CODE>Apache::PerlRun</CODE>
+handler does not cache the script inside a subroutine. Scripts will be
+``compiled'' on each request. After the script has run, its name space is
+flushed of all variables and subroutines. Still, you don't have the
+overhead of loading the Perl interpreter and the compilation time of the
+standard modules. If your script is very light, but uses lots of standard
+modules, you will see no difference between
+<CODE>Apache::PerlRun</CODE> and <CODE>Apache::Registry</CODE>!.
+
+<P>
+Be aware though, that if you use packages that use internal variables that
+have circular references, they will be not flushed!!!
+<CODE>Apache::PerlRun</CODE> only flushes your script's name space, which does not include any other
+required packages' name spaces. If there's a reference to a <CODE>my()</CODE> scoped variable that's keeping it from being destroyed after leaving the
+eval scope (of <CODE>Apache::PerlRun</CODE>), that cleanup might not be taken care of until the server is shutdown and
+<CODE>perl_destruct()</CODE> is run, which always happens after running command line scripts. Consider
+this example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Foo;
+  sub new { bless {} }
+  sub DESTROY {
+    warn &quot;Foo-&gt;DESTROY\n&quot;;
+  }
+  
+  eval &lt;&lt;'EOF';
+  package my_script;
+  my $self = Foo-&gt;new;
+  #$self-&gt;{circle} = $self;
+  EOF
+  
+  print $@ if $@;
+  print &quot;Done with script\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When executed as a plain script you'll see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Foo-&gt;DESTROY
+  Done with script</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then, uncomment the line where <CODE>$self</CODE> makes a circular reference, and you'll see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Done with script
+  Foo-&gt;DESTROY</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you run this example with the circular reference enabled under mod_perl
+you won't see <CODE>Foo-&gt;DESTROY</CODE> until server shutdown, or until your module properly takes care of things.
+Note that the <CODE>warn()</CODE> call logs its messages to the <EM>error_log</EM> file, so you should expect the output there and not together with STDOUT.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Sharing_variables_between_proces">Sharing variables between processes</A></H1></CENTER>
+<P>
+META: to be completed
+
+<UL>
+<P><LI>
+<P>
+Global variables initialized at server startup, through the Perl startup
+file, can be shared between processes, until modified by some of the
+processes. e.g. when you write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $My::debug = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+all processes will read the same value. If one of the processes changes
+that value to <CODE>0</CODE>, it will still be equal to <CODE>1</CODE> for any other process, but not for the one which actually made the change.
+When a process modifies a shared variable, it becomes the process' private
+copy.
+
+<P><LI>
+<P>
+<CODE>IPC::Shareable</CODE> can be used to share variables between children.
+
+<P><LI>
+<P>
+libmm
+
+<P><LI>
+<P>
+other methods?
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Transitioning_from_Apache_Regis">Transitioning from Apache::Registry to Apache handlers</A></H1></CENTER>
+<P>
+Even if you are a CGI script die-hard at some point you might want to move
+a few or all your scripts to Apache Perl handlers. Actually this is an easy
+task, since we saw already what <CODE>Apache::Registry</CODE> makes our scripts appear to Apache to be Perl handlers.
+
+<P>
+When you no longer need backward mod_cgi compatibility you can benefit from
+the Perl libraries working only under mod_perl. We will see why in a
+moment.
+
+<P>
+Let's see an example. We will start with a mod_cgi compatible CGI script
+running under <CODE>Apache::Registry</CODE>, transpose it into a Perl content handler and then convert it to use <CODE>Apache::Request</CODE> and
+<CODE>Apache::Cookie</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Starting_with_mod_cgi_Compatible">Starting with mod_cgi Compatible Script</A></H2></CENTER>
+<P>
+This is the original script's code we are going to work with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cookie_script.pl
+  ----------------
+  use strict;
+  use CGI;
+  use CGI::Cookie;
+  use vars qw($q $switch $status $sessionID);
+  
+  init();
+  print_header();
+  print_status();
+  
+  ### &lt;-- subroutines --&gt; ###
+  
+  # the init code
+  ###########
+  sub init{
+    $q = new CGI;
+    
+    $switch = $q-&gt;param(&quot;switch&quot;) ? 1 : 0;
+    
+      # try to retrieve the session ID
+              # fetch existing cookies
+    my %cookies = CGI::Cookie-&gt;fetch;
+    $sessionID = exists $cookies{'sessionID'} 
+       ? $cookies{'sessionID'}-&gt;value : '';
+    
+      # 0 = not running, 1 = running
+    $status = $sessionID ? 1 : 0;
+    
+      # switch status if asked to
+    $status = ($status+1) % 2 if $switch;
+    
+    if ($status){
+        # preserve sessionID if exists or create a new one
+      $sessionID ||= generate_sessionID() if $status;
+    } else {
+        # delete the sessionID
+      $sessionID = '';
+    }
+    
+  } # end of sub init
+  
+  #################
+  sub print_header{
+      # prepare a cooke
+    my $c = CGI::Cookie-&gt;new
+      ('-name'    =&gt; 'sessionID',
+       '-value'   =&gt; $sessionID,
+       '-expires' =&gt; '+1h');
+    
+    print $q-&gt;header
+      (-type   =&gt; 'text/html',
+       -cookie =&gt; $c);
+  
+  } # end of sub print_header
+  
+  
+  # print the current Session status and a form to toggle the status
+  #################
+  sub print_status{
+    
+    print qq{&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;Cookie&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;};
+  
+      # print status
+    print &quot;&lt;B&gt;Status:&lt;/B&gt; &quot;,
+          $status
+            ? &quot;Session is running with ID: $sessionID&quot;
+            : &quot;No session is running&quot;;
+    
+    
+      # change status form
+    my $button_label = $status ? &quot;Stop&quot; : &quot;Start&quot;;
+    print qq{&lt;HR&gt;
+         &lt;FORM&gt;
+           &lt;INPUT TYPE=SUBMIT NAME=switch VALUE=&quot; $button_label &quot;&gt; 
+         &lt;/FORM&gt;
+           };
+    
+    print qq{&lt;/BODY&gt;&lt;/HTML&gt;};
+  
+  } # end of sub print_status
+  
+  # A dummy ID generator
+  # Replace with a real session ID generator
+  ########################
+  sub generate_sessionID {
+    return scalar localtime;
+  } # end of sub generate_sessionID</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The code is very simple. It creates a session if you've pressed the
+<EM>'Start'</EM> button or deletes it if you've pressed the the <EM>'Stop'</EM>
+button. The session is stored and retrieved using the cookies technique.
+
+<P>
+Note that we have split the obviously simple and short code into three
+logical units, by putting the code into three subroutines.
+<CODE>init()</CODE> to initialize global variables and parse incoming data,
+<CODE>print_header()</CODE> to print the HTTP headers including the cookie
+header, and finally <CODE>print_status()</CODE> to generate the output.
+Later we will see that this logical separation will allow us an easy
+conversion to Perl content handler code.
+
+<P>
+We have used global variables for a few variables since we didn't want to
+pass them from function to function. In a big project you should be very
+restrictive about what variables should be allowed to be global, if any at
+all. In any case, the <CODE>init()</CODE> subroutine makes sure all these
+variables are re-initialized for each code reinvocation.
+
+<P>
+Note that we have used a very simple <CODE>generate_sessionID()</CODE>
+function that returns a date string (i.e. Wed&nbsp;Apr&nbsp;12&nbsp;15:02:23&nbsp;2000) as a session ID. You want to replace this one with code which generates a
+unique session every time it was called. And it should be secure, i.e.
+users will not be able to forge one and do nasty things.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Converting_into_Perl_Content_Han">Converting into Perl Content Handler</A></H2></CENTER>
+<P>
+Now let's convert this script into a content handler. There are two parts
+to this task; the first one is to configure Apache to run the new code as a
+Perl handler, the second one is to modify the code itself.
+
+<P>
+First we add the following snippet to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Test::Cookie
+  &lt;Location /test/cookie&gt;
+    SetHandler perl-script
+    PerlHandler Test::Cookie
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After we restart the server, when there is a request whose URI starts with <EM>/test/cookie</EM>, Apache will execute the <CODE>Test::Cookie::handler()</CODE>
+subroutine as a content handler. We made sure to preload the
+<CODE>Test::Cookie</CODE> module at server start-up, with the <CODE>PerlModule</CODE>
+directive.
+
+<P>
+Now we are going to modify the script itself. We copy the content to the
+file <EM>Cookie.pm</EM> and place it into one of the directories listed in <CODE>@INC</CODE>. For example if <EM>/home/httpd/perl</EM> is a part of <CODE>@INC</CODE>
+and since we want to call this package <CODE>Test::Cookie</CODE>, we can put
+<EM>Cookie.pm</EM> into the <EM>/home/httpd/perl/Test/</EM> directory.
+
+<P>
+So this is the new code. Notice that all the subroutines were left
+unmodified from the original script, so to make the differences clear we do
+not repeat them here.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Test/Cookie.pm
+  --------------
+  package Test::Cookie;
+  use Apache::Constants qw(:common);
+  
+  use strict;
+  use CGI;
+  use CGI::Cookie;
+  use vars qw($q $switch $status $sessionID);
+  
+  sub handler{
+    my $r = shift;
+    Apache-&gt;request($r);
+  
+    init();
+    print_header();
+    print_status();
+  
+    return OK;
+  }
+  
+  ### &lt;-- subroutines --&gt; ###
+  # all subroutines as before
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As you see there are two lines added to the beginning of the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Test::Cookie;
+  use Apache::Constants qw(:common);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The first one declares the package name and the second one imports some
+symbols commonly used in Perl handlers to return status codes.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use CGI;
+  use CGI::Cookie;
+  use vars qw($q $switch $status $sessionID);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This code is left unchanged just as before.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub handler{
+    my $r = shift;
+    Apache-&gt;request($r);
+  
+    init();
+    print_header();
+    print_status();
+  
+    return OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Each content handler (and any other handler) should begin with a subroutine
+called <CODE>handler().</CODE> This subroutine is called when a request's
+URI starts with <EM>/test/cookie</EM> as per our configuration. Of course you can choose a different name, for
+example <CODE>execute(),</CODE> but then you must explicitly use it in the
+configuration directives in the following way:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Test::Cookie
+  &lt;Location /test/cookie&gt;
+    SetHandler perl-script
+    PerlHandler Test::Cookie::execute
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But we will use the default name, <CODE>handler().</CODE> 
+
+<P>
+The <CODE>handler()</CODE> subroutine is just like any other subroutine,
+but generally it has the following structure:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub handler{
+    my $r = shift;
+   
+    # the code
+  
+    # status (OK, DECLINED or else)
+    return OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+First we get the request object by shifting it from <CODE>@_</CODE> and assigning it to the <CODE>$r</CODE> variable.
+
+<P>
+Second we write the code that does the processing of the request.
+
+<P>
+Third we return the status of the execution. There are many possible
+statuses, the most commonly used are <CODE>OK</CODE> and <CODE>DECLINED</CODE>, which tell the server whether they have completed the request phase that
+the handler was assigned to do or not. If not, another handler must
+complete the processing. <CODE>Apache::Constants</CODE> imports these two and other some commonly used status codes.
+
+<P>
+So in our example all we had to do was to wrap the three calls:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    init();
+    print_header();
+    print_status();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+inside:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub handler{
+    my $r = shift;
+    Apache-&gt;request($r);
+  
+    return OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+There is one line we didn't discuss:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    Apache-&gt;request($r);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since we use &lt;CGI.pm&gt;, it relies on the fact that <CODE>$r</CODE> was set in the
+<A HREF="#item_Apache">Apache</A> module. <CODE>Apache::Registry</CODE> did that behind the scenes. Since we don't use <CODE>Apache::Registry</CODE> here, we have to do that ourselves.
+
+<P>
+The one last thing we should do is to add <CODE>1;</CODE> at the end of the module, just like with any Perl module, so <CODE>PerlModule</CODE> will not fail when it tries to load <CODE>Test::Cookie</CODE>.
+
+<P>
+So to summarise, we took the original script's code and added the following
+eight lines:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Test::Cookie;
+  use Apache::Constants qw(:common);
+  
+  sub handler{
+    my $r = shift;
+    Apache-&gt;request($r);
+  
+    return OK;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and now we have a fully fledged Perl Content Handler.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Converting_to_use_Apache_Perl_Mo">Converting to use Apache Perl Modules</A></H2></CENTER>
+<P>
+So now we have a complete PerlHandler, let's convert it to use Apache Perl
+modules. This breaks the backward compatibility, but gives us better
+performance, mainly because the internals of many of these Perl modules are
+implemented in C, therefore we should get a significant improvement in
+speed. The section ``<A HREF="././performance.html#TMTOWTDI_Convenience_and_Habit_">TMTOWTDI: Convenience and Performance</A>'' compares the three approaches.
+
+<P>
+What we are going to do is to replace <CODE>CGI.pm</CODE> and <CODE>CGI::Cookie</CODE>
+with <CODE>Apache::Request</CODE> and <CODE>Apache::Cookie</CODE> respectively. The two modules are written in C with the XS interface to
+Perl, which makes code much faster if it utilizes any of these modules a
+lot.
+<CODE>Apache::Request</CODE> uses an API similar to the one <CODE>CGI</CODE> uses, the same goes for <CODE>Apache::Cookie</CODE> and <CODE>CGI::Cookie</CODE>. This allows an easy porting process. Basically we just replace:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI;
+  $q = new CGI;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Request ();
+  my $q = Apache::Request-&gt;new($r);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI::Cookie ();
+  my $cookie = CGI::Cookie-&gt;new(...)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Cookie ();
+  my $cookie = Apache::Cookie-&gt;new($r, ...);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is the new code for <CODE>Test::Cookie2</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Test/Cookie2.pm
+  --------------
+  package Test::Cookie2;
+  use Apache::Constants qw(:common);
+  
+  use strict;
+  use Apache::Request;
+  use Apache::Cookie ();
+  use vars qw($r $q $switch $status $sessionID);
+  
+  sub handler{
+    $r = shift;
+  
+    init();
+    print_header();
+    print_status();
+  
+    return OK;
+  }
+  
+  ### &lt;-- subroutines --&gt; ###
+  
+  # the init code
+  ###########
+  sub init{
+  
+    $q = Apache::Request-&gt;new($r);
+    $switch = $q-&gt;param(&quot;switch&quot;) ? 1 : 0;
+    
+        # fetch existing cookies
+    my %cookies = Apache::Cookie-&gt;fetch;
+      # try to retrieve the session ID
+    $sessionID = exists $cookies{'sessionID'} 
+       ? $cookies{'sessionID'}-&gt;value : '';
+    
+      # 0 = not running, 1 = running
+    $status = $sessionID ? 1 : 0;
+    
+      # switch status if asked to
+    $status = ($status+1) % 2 if $switch;
+    
+    if ($status){
+        # preserve sessionID if exists or create a new one
+      $sessionID ||= generate_sessionID() if $status;
+    } else {
+        # delete the sessionID
+      $sessionID = '';
+    }
+    
+    
+  } # end of sub init
+  
+  
+  #################
+  sub print_header{
+      # prepare a cooke
+    my $c = Apache::Cookie-&gt;new
+      ($r,
+       -name    =&gt; 'sessionID',
+       -value   =&gt; $sessionID,
+       -expires =&gt; '+1h');
+  
+      # Add a Set-Cookie header to the outgoing headers table
+    $c-&gt;bake;
+  
+    $r-&gt;send_http_header('text/html');
+    
+  } # end of sub print_header
+  
+  
+  # print the current Session status and a form to toggle the status
+  #################
+  sub print_status{
+      
+    print qq{&lt;HTML&gt;&lt;HEAD&gt;&lt;TITLE&gt;Cookie&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;};
+    
+      # print status
+    print &quot;&lt;B&gt;Status:&lt;/B&gt; &quot;,
+          $status
+            ? &quot;Session is running with ID: $sessionID&quot;
+            : &quot;No session is running&quot;;
+    
+    
+      # change status form
+    my $button_label = $status ? &quot;Stop&quot; : &quot;Start&quot;;
+    print qq{&lt;HR&gt;
+         &lt;FORM&gt;
+           &lt;INPUT TYPE=SUBMIT NAME=switch VALUE=&quot; $button_label &quot;&gt; 
+         &lt;/FORM&gt;
+           };
+    
+    print qq{&lt;/BODY&gt;&lt;/HTML&gt;};
+  
+  } # end of sub print_status
+   
+  # replace with a real session ID generator
+  ########################
+  sub generate_sessionID {
+    return scalar localtime;
+  }
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The only other changes are in the <CODE>print_header()</CODE> function,
+where instead of passing the cookie code to the <CODE>CGI</CODE>'s <CODE>header()</CODE> to return a proper HTTP header:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    print $q-&gt;header
+      (-type   =&gt; 'text/html',
+       -cookie =&gt; $c);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+we do it in two stages.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    $c-&gt;bake;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Adds a <CODE>Set-Cookie</CODE> header to the outgoing headers table, and:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    $r-&gt;send_http_header('text/html');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+sends out the header itself. We have also eliminated:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    Apache-&gt;request($r);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+since we don't rely on <CODE>CGI.pm</CODE> any more and in this case we don't need it.
+
+<P>
+The rest of the code is unchanged.
+
+<P>
+Of course we add the following snippet to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Test::Cookie2
+  &lt;Location /test/cookie2&gt;
+    SetHandler perl-script
+    PerlHandler Test::Cookie2
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So now the magic URI that will trigger the above code execution will be the
+one starting with <EM>/test/cookie2</EM> . We save the code in the file <EM>/home/httpd/perl/Test/Cookie2.pm</EM> since we have called this package <CODE>Test::Cookie2</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Conclusion">Conclusion</A></H2></CENTER>
+<P>
+If your took care to write the original plain CGI script's code in a clean
+and modular way, you can see that the transition is a very simple one and
+doesn't take a lot of effort. Almost no code was modified.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./scenario.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./performance.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 04/17/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

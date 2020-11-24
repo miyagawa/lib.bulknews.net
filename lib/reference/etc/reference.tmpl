@@ -1,0 +1,30 @@
+<HTML>
+<HEAD>
+<!-- Æþ¸ý -->
+<META http-equiv="Content-Type" content="text/html; charset=x-euc-jp">
+<TITLE>Perl Reference URLs</TITLE></HEAD>
+<BODY bgcolor="#DDDDDD" link="#000000" vlink="#888888" alink="#DDDDDD">
+<H3>Perl Reference URLS</H3>
+<TMPL_LOOP name=cat_loop>
+<TABLE border="0" cellpadding="0" cellspacing="0"><TR><TD bgcolor="#000000">
+<TABLE border="0" cellpadding="5" cellspacing="1" width="600"><TR><TD bgcolor="#444444">
+<STRONG><FONT color="#FFFFFF"><TMPL_VAR name=cat_name></FONT></STRONG></TD></TR>
+<TR><TD bgcolor="#FFFFFF">
+<TMPL_LOOP name=url_loop>
+<A href="<TMPL_VAR name=url>" target="_blank">¢£</A> <TMPL_VAR name=title escape=1><BR>
+</TMPL_LOOP>
+</TD></TR>
+</TABLE>
+</TD></TR></TABLE><P>
+</TMPL_LOOP>
+<P>
+<TABLE border="0" cellpadding="0" cellspacing="0"><TR><TD bgcolor="#000000">
+<TABLE border="0" cellpadding="5" cellspacing="1">
+<TR><TD bgcolor="#EEEEEE">
+<SMALL><STRONG>Perl Refence URLs:</STRONG> updated on <TMPL_VAR name=localtime>; maintained by <A href="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A></SMALL></TD>
+</TR>
+</TABLE>
+</TD></TR></TABLE>
+<P>
+</BODY>
+</HTML>

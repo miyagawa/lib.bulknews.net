@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Workarounds for some known bugs in browsers. </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Workarounds for some known bugs in browsers. 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./debug.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./modules.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Preventing_QUERY_STRING_from_get">Preventing QUERY_STRING from getting corrupted because of &amp;entity key names</A>
+	<LI><A HREF="#IE_4_x_does_not_re_post_data_to_">IE 4.x does not re-post data to a non-port-80 URL</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Preventing_QUERY_STRING_from_get">Preventing QUERY_STRING from getting corrupted because of &amp;entity key names</A></H1></CENTER>
+<P>
+In a URL which contains a query string, if the string has multiple parts
+separated by ampersands and it contains a key named ``reg'', for example <CODE>http://my.site.com/foo.pl?foo=bar&amp;reg=foobar</CODE>, then some browsers will interpret <CODE>&amp;reg</CODE> as an SGML entity and encode it as
+<CODE>&amp;reg;</CODE>. This will result in a corrupted <CODE>QUERY_STRING</CODE>. If you encounter this problem, then either you should avoid using such
+keys or you should separate parameter pairs with <CODE>;</CODE> instead of <CODE>&amp;</CODE>.
+<CODE>CGI.pm</CODE>, <CODE>Apache::Request</CODE> and <CODE>$r-&gt;args()</CODE> support a semicolon instead of an ampersand as a separator. So your URI
+should look like this: <CODE>http://my.site.com/foo.pl?foo=bar;reg=foobar</CODE>.
+
+<P>
+Note that this is only an issue when you are building your own URLs with
+query strings. It is not a problem when the URL is the result of submitting
+a form because the browsers <EM>have</EM> to get that right.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="IE_4_x_does_not_re_post_data_to_">IE 4.x does not re-post data to a non-port-80 URL</A></H1></CENTER>
+<P>
+One problem with publishing 8080 port numbers (or so I have been told) is
+that IE 4.x has a bug when re-posting data to a non-port-80 URL. It drops
+the port designator and uses port 80 anyway.
+
+<P>
+See <A HREF="././config.html#Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A>.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./debug.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./modules.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 06/22/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,1417 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Warnings and Errors Troubleshooting Index </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Warnings and Errors Troubleshooting Index 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./frequent.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./correct_headers.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#General_Advice">General Advice </A>
+	<LI><A HREF="#Building_and_Installation">Building and Installation </A>
+	<LI><A HREF="#Configuration_and_Startup">Configuration and Startup</A>
+	<UL>
+
+		<LI><A HREF="#libexec_libperl_so_open_failed_">libexec/libperl.so: open failed: No such file or directory</A>
+		<LI><A HREF="#install_driver_Oracle_failed_C">install_driver(Oracle) failed: Can't load '.../DBD/Oracle/Oracle.so' for module DBD::Oracle</A>
+		<LI><A HREF="#Invalid_command_PerlHandler_">Invalid command 'PerlHandler'...</A>
+		<LI><A HREF="#RegistryLoader_Translation_of_u">RegistryLoader: Translation of uri [...] to filename failed</A>
+		<LI><A HREF="#_Apache_pm_failed_to_load_">&quot;Apache.pm failed to load!&quot;</A>
+	</UL>
+
+	<LI><A HREF="#Code_Parsing_and_Compilation">Code Parsing and Compilation</A>
+	<UL>
+
+		<LI><A HREF="#Value_of_x_will_not_stay_shared">Value of $x will not stay shared at - line 5</A>
+		<LI><A HREF="#Value_of_x_may_be_unavailable_a">Value of $x may be unavailable at - line 5.</A>
+		<LI><A HREF="#Can_t_locate_loadable_object_for">Can't locate loadable object for module XXX</A>
+		<LI><A HREF="#Can_t_locate_object_method_get_">Can't locate object method &quot;get_handlers&quot;...</A>
+		<LI><A HREF="#Missing_right_bracket_at_line_">Missing right bracket at line ...</A>
+		<LI><A HREF="#Can_t_load_auto_DBI_DBI_so_">Can't load '.../auto/DBI/DBI.so' for module DBI</A>
+	</UL>
+
+	<LI><A HREF="#Runtime">Runtime</A>
+	<UL>
+
+		<LI><A HREF="#_exit_signal_Segmentation_fault_">&quot;exit signal Segmentation fault (11)&quot; with mysql</A>
+		<LI><A HREF="#foo_at_dev_null_line_0">foo ... at /dev/null line 0</A>
+		<LI><A HREF="#Preventing_mod_perl_Processes_Fr">Preventing mod_perl Processes From Going Wild</A>
+		<LI><A HREF="#Segfaults_when_using_XML_Parser">Segfaults when using XML::Parser</A>
+		<LI><A HREF="#My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A>
+		<LI><A HREF="#Incorrect_line_number_reporting_">Incorrect line number reporting in error/warn log messages</A>
+		<LI><A HREF="#rwrite_returned_1">rwrite returned -1</A>
+		<LI><A HREF="#Can_t_upgrade_that_kind_of_scala">Can't upgrade that kind of scalar ...</A>
+		<LI><A HREF="#caught_SIGPIPE_in_process">caught SIGPIPE in process</A>
+		<LI><A HREF="#Client_hit_STOP_or_Netscape_bit_">Client hit STOP or Netscape bit it!</A>
+		<LI><A HREF="#Global_symbol_foo_requires_ex">Global symbol &quot;$foo&quot; requires explicit package name</A>
+		<LI><A HREF="#Use_of_uninitialized_value_at_e">Use of uninitialized value at (eval 80) line 12.</A>
+		<LI><A HREF="#Undefined_subroutine_Apache_RO">Undefined subroutine &amp;Apache::ROOT::perl::test_2epl::some_function called at</A>
+		<LI><A HREF="#Callback_called_exit">Callback called exit</A>
+		<LI><A HREF="#Out_of_memory_">Out of memory!</A>
+		<LI><A HREF="#server_reached_MaxClients_settin">server reached MaxClients setting, consider raising the MaxClients setting</A>
+		<LI><A HREF="#syntax_error_at_dev_null_line_1">syntax error at /dev/null line 1, near &quot;line arguments:&quot;</A>
+		<LI><A HREF="#Can_t_call_method_register_clea">Can't call method &quot;register_cleanup&quot; (CGI.pm)</A>
+	</UL>
+
+	<LI><A HREF="#Shutdown_and_Restart">Shutdown and Restart</A>
+	<UL>
+
+		<LI><A HREF="#Evil_things_might_happen_when_us">Evil things might happen when using PerlFreshRestart</A>
+		<LI><A HREF="#Constant_subroutine_XXX_redefine">Constant subroutine XXX redefined</A>
+		<LI><A HREF="#Can_t_undef_active_subroutine">Can't undef active subroutine</A>
+		<LI><A HREF="#_warn_child_process_30388_did_n">[warn] child process 30388 did not exit, sending another SIGHUP</A>
+		<LI><A HREF="#Processes_Get_Stuck_on_Graceful_">Processes Get Stuck on Graceful Restart</A>
+		<LI><A HREF="#httpd_keeps_on_growing_after_eac">httpd keeps on growing after each restart</A>
+	</UL>
+
+	<LI><A HREF="#Windows_OS_specific_notes">Windows OS specific notes</A>
+	<UL>
+
+		<LI><A HREF="#Apache_DBI">Apache::DBI </A>
+	</UL>
+
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="General_Advice">General Advice</A></H1></CENTER>
+<P>
+Perl's warnings mode is immensely helpful in detecting possible problems.
+Make sure you always turn on warnings while you are developing code. See <A HREF="././debug.html#The_Importance_of_Warnings">The Importance of Warnings</A>.
+
+<P>
+Enabling <CODE>use diagnostics;</CODE> generally helps you to determine the source of the problem and how to solve
+it. See <A HREF="././debug.html#diagnostics_pragma">diagnostics pragma</A> for more information.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Building_and_Installation">Building and Installation</A></H1></CENTER>
+<P>
+See <A HREF="././install.html#make_Troubleshooting">make Troubleshooting</A> and
+<A HREF="././install.html#make_test_Troubleshooting">make test Troubleshooting</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Configuration_and_Startup">Configuration and Startup</A></H1></CENTER>
+<P>
+This section talks about errors reported when you attempt to start the
+server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="libexec_libperl_so_open_failed_">libexec/libperl.so: open failed: No such file or directory</A></H2></CENTER>
+<P>
+If when you run the server you get the following error:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  libexec/libperl.so: open failed: No such file or directory</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+it probably means that Perl was compiled with a shared library. mod_perl
+does detect this and links the Apache executable to the Perl shared library
+(<EM>libperl.so</EM>).
+
+<P>
+First of all make sure you have Perl installed on the machine, and that you
+have <EM>libperl.so</EM> in
+<EM>&lt;perlroot&gt;/&lt;version&gt;/&lt;architecture&gt;/CORE</EM>. For example in <EM>/usr/local/lib/perl5/5.00503/sun4-solaris/CORE</EM>.
+
+<P>
+Then make sure that that directory is included in the environment variable <CODE>LD_LIBRARY_PRELOAD</CODE>. Under normal circumstances, Apache should have the path configured at
+compile time, but this way you can override the library path.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="install_driver_Oracle_failed_C">install_driver(Oracle) failed: Can't load '.../DBD/Oracle/Oracle.so' for module DBD::Oracle</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  install_driver(Oracle) failed: Can't load
+  '/usr/lib/perl5/site_perl/5.005/i386-linux/auto/DBD/Oracle/Oracle.so' 
+  for module DBD::Oracle:
+  libclntsh.so.8.0: cannot open shared object file: 
+  No such file or directory at
+  /usr/lib/perl5/5.00503/i386-linux/DynaLoader.pm line 169. 
+  at (eval 27) line 3
+  Perhaps a required shared
+  library or dll isn't installed where expected at 
+  /usr/local/apache/perl/tmp.pl line 11</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+On BSD style filesystems <CODE>LD_LIBRARY_PATH</CODE> is not searched for setuid programs (a.k.a., Apache). This isn't a problem
+for CGIs since they don't do a setuid (and are forked off), but Apache
+does, and mod_perl is in Apache. Therefore the first solution is to
+explicitly load the library from the system wide <EM>ldconfig</EM> configuration file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # echo $ORACLE_HOME/lib &gt;&gt; /etc/ld.so.conf
+  # ldconfig</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Another solution to this problem is to modify the resulting
+<EM>Makefile</EM> ( after running <CODE>perl Makefile.PL</CODE>) as follows:
+
+<P>
+1. search for the line <CODE>LD_RUN_PATH=</CODE>
+
+
+
+<P>
+2. replace it with <CODE>LD_RUN_PATH=(my_oracle_home)/lib</CODE>
+
+
+
+<P>
+(my_oracle_home) is, of course, the home path to your oracle installation.
+In particular, the file libclntsh.so.8.0 should exist in that directory.
+(If you use cpan, the build directory for DBD::Oracle should be in
+~/.cpan/build/DBD-Oracle-1.06/ if you're logged in as root.)
+
+<P>
+Then, just type <CODE>make install</CODE>, and all should go well.
+
+<P>
+FYI, setting <CODE>LD_RUN_PATH</CODE> has the effect of hard-coding the path to
+<EM>(my_oracle_home)/lib</EM> in the resulting <CODE>Oracle.so</CODE> file generated by the <CODE>DBD::Oracle</CODE> so that at run-time, it doesn't have to go searching through <CODE>LD_LIBRARY_PATH</CODE> or the default directories used by <CODE>ld</CODE>.
+
+<P>
+For more information see the <EM>ld</EM> manpage and an essay on
+<CODE>LD_LIBRARY_PATH</CODE>: <A
+HREF="http://www.visi.com/~barr/ldpath.html">http://www.visi.com/~barr/ldpath.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Invalid_command_PerlHandler_">Invalid command 'PerlHandler'...</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Syntax error on line 393 of /etc/httpd/conf/httpd.conf: Invalid
+  command 'PerlHandler', perhaps mis-spelled or defined by a module
+  not included in the server configuration [FAILED]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This can happen when you have a mod_perl enabled Apache compiled with DSO
+(generally it's an installed RPM or other binary package) but the mod_perl
+module isn't loaded. In this case you have to tell Apache to load mod_perl
+by adding:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  AddModule mod_perl.c</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in your config file.
+
+<P>
+This can also happen when you try to run a non-mod_perl Apache server using
+the configuration from a mod_perl server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="RegistryLoader_Translation_of_u">RegistryLoader: Translation of uri [...] to filename failed</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RegistryLoader: Translation of uri [/home/httpd/perl/test.pl] to filename 
+                  failed [tried: /home/httpd/docs/home/httpd/perl/test.pl]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This error shows up when <CODE>Apache::RegistryLoader</CODE> fails to translate the URI into the corresponding filesystem path. Most
+failures happen when one passes a file path instead of URI. (A reminder:
+<EM>/home/httpd/perl/test.pl</EM> is a file path, while <EM>/perl/test.pl</EM> is a URI). In most cases all you have to do is to pass something that
+<CODE>Apache::RegistryLoader</CODE> expects to get - the URI, but there are more complex cases. <CODE>Apache::RegistryLoader</CODE>'s man page shows how to handle these cases as well (look for the
+<CODE>trans()</CODE> sub).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_Apache_pm_failed_to_load_">&quot;Apache.pm failed to load!&quot;</A></H2></CENTER>
+<P>
+If your server startup fails with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache.pm failed to load!</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+try adding this to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Code_Parsing_and_Compilation">Code Parsing and Compilation</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Value_of_x_will_not_stay_shared">Value of $x will not stay shared at - line 5</A></H2></CENTER>
+<P>
+<A HREF="././perl.html#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested  Subroutines</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Value_of_x_may_be_unavailable_a">Value of $x may be unavailable at - line 5.</A></H2></CENTER>
+<P>
+<A HREF="././perl.html#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested  Subroutines</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_locate_loadable_object_for">Can't locate loadable object for module XXX</A></H2></CENTER>
+<P>
+There is no object built for this module. e.g. when you see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Can't locate loadable object for module Apache::Util in @INC...</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+make sure to give mod_perl's <CODE>Makefile.PL</CODE>  <CODE>PERL_UTIL_API=1</CODE>,
+<CODE>EVERYTHING=1</CODE> or <CODE>DYNAMIC=1</CODE> parameters to enable and build all the components of <CODE>Apache::Util</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_locate_object_method_get_">Can't locate object method &quot;get_handlers&quot;...</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Can't locate object method &quot;get_handlers&quot; via package &quot;Apache&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You need to rebuild your mod_perl with stacked handlers, i.e.
+<CODE>PERL_STACKED_HANDLERS=1</CODE> or more simply <CODE>EVERYTHING=1</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Missing_right_bracket_at_line_">Missing right bracket at line ...</A></H2></CENTER>
+<P>
+Most often you will find that you really do have a syntax error. However
+the other reason might be that a script running under
+<CODE>Apache::Registry</CODE> is using <CODE>__DATA__</CODE> or <CODE>__END__</CODE> tokens. <A HREF="././porting.html#_END_and_DATA_tokens">Learn why</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_load_auto_DBI_DBI_so_">Can't load '.../auto/DBI/DBI.so' for module DBI</A></H2></CENTER>
+<P>
+Check that all your modules are compiled with the same Perl that is
+compiled into mod_perl. Perl 5.005 and 5.004 are not binary compatible by
+default.
+
+<P>
+Other known causes of this problem:
+
+<P>
+OS distributions that ship with a broken binary Perl installation.
+
+<P>
+The `perl' program and `libperl.a' library are somehow built with different
+binary compatibility flags.
+
+<P>
+The solution to these problems is to rebuild Perl and any extension modules
+from a fresh source tree. Tip for running Perl's Configure script: use the
+`-des' flags to accepts defaults and `-D' flag to override certain
+attributes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./Configure -des -Dcc=gcc ... &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Read Perl's INSTALL document for more details.
+
+<P>
+Solaris OS specific:
+
+<P>
+``<CODE>Can't load DBI</CODE>'' or similar error for the IO module or whatever dynamic module mod_perl
+tries to pull in first. The solution is to re-configure, re-build and
+re-install Perl and dynamic modules with the following flags when Configure
+asks for ``<CODE>additional LD flags</CODE>'':
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  -Xlinker --export-dynamic</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  -Xlinker -E</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This problem is only known to be caused by installing gnu ld under Solaris.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Runtime">Runtime</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_exit_signal_Segmentation_fault_">&quot;exit signal Segmentation fault (11)&quot; with mysql</A></H2></CENTER>
+<P>
+If you build mod_perl and php in the same binary, you might get
+Segmentation fault followed by this error:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  exit signal Segmentation fault (11)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Solution: re-compile PHP without the built-in MySQL support (you can still
+connect to MySQL).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="foo_at_dev_null_line_0">foo ... at /dev/null line 0</A></H2></CENTER>
+<P>
+Under mod_perl you may receive a warning or an error in the
+<EM>error_log</EM> which specifies <EM>/dev/null</EM> as the source file, and line 0 as an line number where the printing of the
+message was triggered. This is absolutely normal if the code is executed
+from within a handler, because there is no actual file associated with the
+handler. Therefore <CODE>$0</CODE> is set to <EM>/dev/null</EM> and that's what you see.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Preventing_mod_perl_Processes_Fr">Preventing mod_perl Processes From Going Wild</A></H2></CENTER>
+<P>
+See the sections ``<A HREF="././control.html#Non_Scheduled_Emergency_Log_Rota">Non-Scheduled Emergency Log Rotation</A>'' and ``<A HREF="././control.html#All_RAM_Consumed">All RAM Consumed</A>''
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Segfaults_when_using_XML_Parser">Segfaults when using XML::Parser</A></H2></CENTER>
+<P>
+If you have some of the processes segfault when using <CODE>XML::Parser</CODE>
+you should use
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  --disable-rule=EXPAT</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+during the Apache configuration step.
+
+<P>
+Starting from mod_perl version 1.23 this option is disabled by default.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A></H2></CENTER>
+<P>
+See <A HREF="././config.html#My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Incorrect_line_number_reporting_">Incorrect line number reporting in error/warn log messages</A></H2></CENTER>
+<P>
+See <A HREF="././troubleshooting.html#Use_of_uninitialized_value_at_e">Use of uninitialized value at (eval 80) line 12.</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="rwrite_returned_1">rwrite returned -1</A></H2></CENTER>
+<P>
+This message happens when the client breaks the connection while your
+script is trying to write to the client. With Apache 1.3.x, you should only
+see the rwrite messages if <CODE>LogLevel</CODE> is set to <CODE>debug</CODE>.
+
+<P>
+There was a bug that reported this debug message regardless of the value of
+the <CODE>LogLevel</CODE> directive. It was fixed in mod_perl 1.19_01 (<A HREF="././download.html#mod_perl">CVS version</A>).
+
+<P>
+Generally <CODE>LogLevel</CODE> is either <CODE>debug</CODE> or <CODE>info</CODE>.  <CODE>debug</CODE> logs everything, <CODE>info</CODE> is the next level, which doesn't include debug messages. You shouldn't use
+``debug'' mode on your production server. At the moment there is no way to
+prevent users from aborting connections.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_upgrade_that_kind_of_scala">Can't upgrade that kind of scalar ...</A></H2></CENTER>
+<P>
+Fixed in mod_perl 1.23.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="caught_SIGPIPE_in_process">caught SIGPIPE in process</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  [modperl] caught SIGPIPE in process 1234
+  [modperl] process 1234 going to Apache::exit with status...</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That's the <CODE>$SIG{PIPE}</CODE> handler installed by mod_perl/<CODE>Apache::SIG</CODE>, which is called if a connection times out or if the client presses the
+'Stop' button. It gives you an opportunity to do cleanups if the script was
+aborted in the middle of its execution. See <A HREF="././debug.html#Handling_the_User_pressed_Stop_">Handling the 'User pressed Stop button' case</A>
+for more info.
+
+<P>
+If your mod_perl version is earlier than 1.17 you might also get the
+message in the following section...
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Client_hit_STOP_or_Netscape_bit_">Client hit STOP or Netscape bit it!</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Client hit STOP or Netscape bit it!
+  Process 2493 going to Apache::exit with status=-2</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You may see this message in mod_perl versions less than 1.17. See also
+<A HREF="././troubleshooting.html#caught_SIGPIPE_in_process">caught SIGPIPE in process</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Global_symbol_foo_requires_ex">Global symbol &quot;$foo&quot; requires explicit package name</A></H2></CENTER>
+<P>
+The script below will print a warning like that above, moreover it will
+print the whole script as a part of the warning message:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/bin/perl -w
+  use strict;
+  print &quot;Content-type: text/html\n\n&quot;;
+  print &quot;Hello $undefined&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The warning:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Global symbol &quot;$undefined&quot; requires 
+  explicit package name at /usr/apps/foo/cgi/tmp.pl line 4.
+          eval 'package Apache::ROOT::perl::tmp_2epl;
+  use Apache qw(exit);sub handler {
+  #line 1 /usr/apps/foo/cgi/tmp.pl
+  BEGIN {$^W = 1;}#!/usr/bin/perl -w
+  use strict;
+  print &quot;Content-type: text/html\\n\\n&quot;;
+  print &quot;Hello $undefined&quot;;
+  
+  
+  }
+  ;' called at 
+  /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Registry.pm 
+  line 168
+          Apache::Registry::compile('package
+        Apache::ROOT::perl::tmp_2epl;use Apache qw(exit);sub han...') 
+        called at 
+        /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Registry.pm 
+        line 121
+        Apache::Registry::handler('Apache=SCALAR(0x205026c0)') 
+        called at /usr/apps/foo/cgi/tmp.pl line 4
+          eval {...} called at /usr/apps/foo/cgi/tmp.pl line 4
+  [Sun Nov 15 15:15:30 1998] [error] Undefined subroutine 
+  &amp;Apache::ROOT::perl::tmp_2epl::handler called at 
+  /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Registry.pm 
+  line 135.
+  
+  [Sun Nov 15 15:15:30 1998] [error] Goto undefined subroutine 
+  &amp;Apache::Constants::SERVER_ERROR at 
+  /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Constants.pm 
+  line 23.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The error is simple to fix. When you use the <CODE>use strict;</CODE> pragma (and you should...), Perl will insist that all variables are defined
+before being used, so the error will not arise.
+
+<P>
+The bad thing is that sometimes the whole script (possibly, thousands of
+lines) is printed to the <EM>error_log</EM> file as code that the server has tried to <CODE>eval()</CODE>uate.
+
+<P>
+May be you have a <CODE>$SIG{__DIE__}</CODE> handler installed (<CODE>Carp::confess()</CODE>?). If so that's what's expected.
+
+<P>
+You might wish to try something more terse such as "local
+$SIG{__WARN__}&nbsp;=&nbsp;\&Carp::cluck;" The confess method is <EM>very</EM>
+verbose and will tell you more than you might wish to know including full
+source.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Use_of_uninitialized_value_at_e">Use of uninitialized value at (eval 80) line 12.</A></H2></CENTER>
+<P>
+Your code includes some undefined variable that you have used as if it was
+already defined and initialized. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $param = $q-&gt;param('test');
+  print $param;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+vs.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $param = $q-&gt;param('test') || '';
+  print $param;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the second case, <CODE>$param</CODE> will always be <EM>defined</EM>, either with
+<CODE>$q-&gt;param('test')</CODE>'s return value or the default value (<CODE>''</CODE>
+empty string in our example).
+
+<P>
+Also read about <A HREF="././debug.html#Finding_the_Line_Which_Triggered">Finding the Line Which Triggered the Error or Warning</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Undefined_subroutine_Apache_RO">Undefined subroutine &amp;Apache::ROOT::perl::test_2epl::some_function called at</A></H2></CENTER>
+<P>
+See <A HREF="././porting.html#Name_collisions_with_Modules_and">Names collisions with Modules and libs</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Callback_called_exit">Callback called exit</A></H2></CENTER>
+<P>
+<EM>Callback called exit</EM> is just a generic message when some unrecoverable error occurs inside Perl
+during <CODE>perl_call_sv()</CODE> (which mod_perl uses to invoke all handler subroutines. Such problems seem
+to occur far less with 5.005_03 than 5.004.
+
+<P>
+Sometimes you discover that your server is not responding and its error_log
+has filled up the remaining space on the file system. When you get to see
+the contents of the error_log -- it includes millions of lines, like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Callback called exit at -e line 33, &lt;HTML&gt; chunk 1.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Why the looping?
+
+<P>
+Perl can get <EM>very</EM> confused inside an endless loop in your code. It doesn't necessarily mean
+that your code did call <CODE>exit()</CODE>. Perl's malloc went haywire and called <CODE>croak()</CODE>, but no memory is left to properly report the error, so Perl is stuck in a
+loop writing that same message to stderr.
+
+<P>
+Perl 5.005+ plus is recommended for its improved malloc.c and other
+features that improve mod_perl and are turned on by default.
+
+<P>
+See also <A HREF="#Out_of_memory_">Out_of_memory!</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Out_of_memory_">Out of memory!</A></H2></CENTER>
+<P>
+If something goes really wrong with your code, Perl may die with an ``Out
+of memory!'' message and/or ``Callback called exit''. Common causes of this
+are never-ending loops, deep recursion, or calling an undefined subroutine.
+Here's one way to catch the problem: See Perl's INSTALL document for this
+item:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  =item -DPERL_EMERGENCY_SBRK</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  If PERL_EMERGENCY_SBRK is defined, running out of memory need not be a
+  fatal error: a memory pool can allocated by assigning to the special
+  variable $^M.  See perlvar(1) for more details.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you compile with that option and add '<CODE>use Apache::Debug level
+=&gt; 4;</CODE>' to your PerlScript, it will allocate the <CODE>$^M</CODE> emergency pool and the <CODE>$SIG{__DIE__}</CODE> handler will call <CODE>Carp::confess</CODE>, giving you a stack trace which should reveal where the problem is. See
+the <CODE>Apache::Resource</CODE> module for prevention of spinning httpds.
+
+<P>
+Note that Perl 5.005 and later have <CODE>PERL_EMERGENCY_SBRK</CODE> turned on by default.
+
+<P>
+The other trick is to have a startup script initialize
+<CODE>Carp::confess</CODE>, like so:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Carp ();
+  eval { Carp::confess(&quot;init&quot;) };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+this way, when the real problem happens, <CODE>Carp::confess</CODE> doesn't eat memory in the emergency pool (<CODE>$^M</CODE>).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="server_reached_MaxClients_settin">server reached MaxClients setting, consider raising the MaxClients setting</A></H2></CENTER>
+<P>
+See <A HREF="././performance.html#Choosing_MaxClients">Choosing MaxClients</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="syntax_error_at_dev_null_line_1">syntax error at /dev/null line 1, near &quot;line arguments:&quot;</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  syntax error at /dev/null line 1, near &quot;line arguments:&quot;
+  Execution of /dev/null aborted due to compilation errors.
+  parse: Undefined error: 0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+There is a chance that your <CODE>/dev/null</CODE> device is broken. Try:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % echo &gt; /dev/null</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Alternatively you should try to remove this special file and recreate it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # rm /dev/null
+  # mknod /dev/null c 1 3
+  # chmod a+rw /dev/null</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_call_method_register_clea">Can't call method &quot;register_cleanup&quot; (CGI.pm)</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Can't call method &quot;register_cleanup&quot; on an
+  undefined value at /usr/lib/perl5/5.00503/CGI.pm line 263.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+caused by this code snippet in <EM>CGI.pm</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if ($MOD_PERL) {
+    Apache-&gt;request-&gt;register_cleanup(\&amp;CGI::_reset_globals);
+    undef $NPH;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+One solution is to add to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlPostReadRequestHandler 'sub { Apache-&gt;request(shift) }'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But even better, switch to <CODE>Apache::Cookie</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache;
+  use Apache::Cookie;
+  
+  sub handler {
+    my $r = shift;
+    my $cookies = Apache::Cookie-&gt;new($r)-&gt;parse;
+    my %bar = $cookies-&gt;{foo}-&gt;value;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Shutdown_and_Restart">Shutdown and Restart</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Evil_things_might_happen_when_us">Evil things might happen when using PerlFreshRestart</A></H2></CENTER>
+<P>
+Unfortunately, not all perl modules are robust enough to survive reload.
+For them this is an unusual situation.  <CODE>PerlFreshRestart</CODE>
+does not much more than:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  while (my($k,$v) = each %INC) {
+    delete $INC{$k};
+    require $k;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Besides that, it flushes the <CODE>Apache::Registry</CODE> cache, and empties any dynamic stacked handlers (e.g. <CODE>PerlChildInitHandler</CODE>).
+
+<P>
+Lots of SegFaults and other problems were reported by users who had turned <CODE>PerlFreshRestart</CODE>  <STRONG>On</STRONG>. Most of them have gone away when it was turned off. It doesn't mean that
+you shouldn't use it, if it works for you. Just beware of the dragons...
+
+<P>
+Note that if you have mod_perl enabled Apache built as DSO and you restart
+it, the whole Perl interpreter is completely torn down (perl_destruct())and
+restarted. The value of <CODE>PerlFreshRestart</CODE> is irrelevent at this point.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Constant_subroutine_XXX_redefine">Constant subroutine XXX redefined</A></H2></CENTER>
+<P>
+That's a mandatory warning inside Perl which happens only if you modify
+your script and Apache::Registry reloads it. Perl is warning you that the
+<CODE>subroutine(s)</CODE> were redefined. It is mostly harmless. If you
+don't like seeing these warnings, just <CODE>kill -USR1</CODE> (graceful restart) Apache when you modify your scripts.
+
+<P>
+You aren't supposed to see these warnings if you don't modify the code with
+perl 5.004_05 or 5.005+.and higher. If you still experience a problem with
+code within a CGI script, moving all the code into a module (or a library)
+and <CODE>require()ing</CODE> it should solve the problem.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Can_t_undef_active_subroutine">Can't undef active subroutine</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Can't undef active subroutine at
+  /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Registry.pm line 102.
+  Called from package Apache::Registry, filename
+  /usr/apps/lib/perl5/site_perl/5.005/aix/Apache/Registry.pm, line 102</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This problem is caused when a client drops the connection while httpd is in
+the middle of a write. httpd times out, sending a SIGPIPE, and Perl (in
+that child) is stuck in the middle of its eval context. This is fixed by
+the Apache::SIG module which is called by default. This should not happen
+unless you have code that is messing with <STRONG>$SIG{PIPE}</STRONG>. It's also triggered only when you've changed your script on disk and
+mod_perl is trying to reload it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_warn_child_process_30388_did_n">[warn] child process 30388 did not exit, sending another SIGHUP</A></H2></CENTER>
+<P>
+From mod_perl.pod: With Apache versions 1.3.0 and higher, mod_perl will
+call the <CODE>perl_destruct()</CODE> Perl API function during the child
+exit phase. This will cause proper execution of <CODE>END</CODE> blocks found during server startup as well as invoking the <CODE>DESTROY</CODE> method on global objects which are still alive. It is possible that this
+operation may take a long time to finish, causing problems during a
+restart. If your code does not contain any <CODE>END</CODE> blocks or <CODE>DESTROY</CODE> methods which need to be run during child server shutdown, this destruction
+can be avoided by setting the <CODE>PERL_DESTRUCT_LEVEL</CODE> environment variable to <CODE>-1</CODE>. Be aware that `your code' includes any modules you use and <EM>they</EM> may well have <CODE>DESTROY</CODE> and <CODE>END</CODE> blocks...
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Processes_Get_Stuck_on_Graceful_">Processes Get Stuck on Graceful Restart</A></H2></CENTER>
+<P>
+If you see a process stuck in ``G'' (Gracefully finishing) after a doing a
+graceful restart (sending kill&nbsp;-SIGUSR1) it means that the process is hanging in <CODE>perl_destruct()</CODE>
+while trying to cleanup. This cleanup normally isn't a requirement, you can
+disable it by setting the PERL_DESTRUCT_LEVEL environment variable to -1.
+See the section ``<A HREF="././control.html#Speeding_up_the_Apache_Terminati">Speeding up the Apache Termination and Restart</A>'' for more information.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="httpd_keeps_on_growing_after_eac">httpd keeps on growing after each restart</A></H2></CENTER>
+<P>
+See the <EM>HUP Signal</EM> explanation at the section:
+<A HREF="././control.html#Server_Stopping_and_Restarting">Server Stopping and Restarting</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Windows_OS_specific_notes">Windows OS specific notes</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Apache_DBI">Apache::DBI</A></H2></CENTER>
+<P>
+<CODE>Apache::DBI</CODE> causes the server to exit when it starts up, with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  [Mon Oct 25 15:06:11 1999] file .\main\http_main.c, line 5890,
+  assertion &quot;start_mutex&quot; failed</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Solution: build mod_perl with <CODE>PERL_STARTUP_DONE_CHECK</CODE> set (e.g. insert
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #define PERL_STARTUP_DONE_CHECK 1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+at the top of <EM>mod_perl.h</EM> or add it to the defines in the MSVC++ and similar applications' <CODE>Options</CODE> dialog).
+
+<P>
+Apache loads all Apache modules twice, to make sure the server will
+successfully restart when asked to. This flag disables all
+<CODE>PerlRequire</CODE> and <CODE>PerlModule</CODE> statements on the first load, so they can succeed on the second load.
+Without that flag, the second load fails.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./frequent.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./correct_headers.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/29/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

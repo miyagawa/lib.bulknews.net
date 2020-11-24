@@ -1,0 +1,30 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="09.html">[prev]</A> <A href="11.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>オブジェクトメソッド</H2>
+<HR>
+<UL>
+<LI>自分自身が第1引数 <CODE>my $self = shift;</CODE>
+<LI>属性の隠蔽：<BR>
+内部構造を知っていれば、アクセスできる
+<OL>
+<LI>アクセサメソッドをつくる
+<LI>ハッシュのキーの先頭を &quot;_&quot; にする<BR>
+　　→紳士協定
+</OL>
+<LI><CODE>UNIVERSAL</CODE>メソッド：
+<OL>
+<LI><CODE>UNIVERSAL</CODE>: すべてのオブジェクトのベースクラス
+<LI><CODE>$obj-&gt;isa('ClassName');</CODE><BR>
+<CODE>$obj-&gt;can('methodName');</CODE>
+</OL>
+</UL>
+</BODY>
+</HTML>

@@ -1,0 +1,151 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.19
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+ひきつづき単体テストの話題です。
+
+単体テストを .t ファイルによって行う方法は以前紹介しましたが、クラスが
+大きくなってきたときや、リファクタリングを行う際、クラスとテストの整合
+性をとるのは結構大変だったりします。
+
+どうせメソッドAPIなどを pod で記述するなら、そこに一緒にテストコードも
+埋め込んでしまう、というアイデアを紹介します。
+
+
+2. Pod::Tests ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+pod (Plain Old Document)(*1) 形式でテストコードを埋め込むモジュール 
+Pod::Tests[1] を利用します。
+
+Pod::Tests は Perl6 Quality Assurance 担当の Michael Schwern さんが作
+成されたモジュールです。最近この人は p5p (perl5-porters) のMLなどでも
+テストに関する発言(*2)をよくされているようで、さすが QA担当という感じ
+です。
+
+
+Pod::Tests 自体は非常にシンプルです。pod 形式で perl によるテストコー
+ドを以下のように埋め込みます。
+
+  =item B<is_pirate>
+
+      @pirates = is_pirate(@arrrgs);
+
+  Go through @arrrgs and return a list of pirates.
+
+  =begin testing
+ 
+  my @p = is_pirate('Blargbeard', 'Alfonse', 'Capt. Hampton', 'Wesley');
+  ok(@p == 2);
+ 
+  =end testing
+
+
+"=begin/end testing" で囲まれたブロックにコードを書きます。"=for
+testing" という方法でも構わないようです。
+
+このようにしてできた .pm ファイルに対して pod2tests コマンドを実行する
+と .t ファイルが自動作成されますので、標準的な Makefile.PLによる make
+test でテストが行えますし、自前で以下のようなスクリプトを書いて実行し
+てもいいでしょう(バッチ処理には以下の方法の方がいいかもしれません)
+
+  #!/usr/local/bin/perl
+  use strict;
+  use Test::Harness 'runtests';
+
+  runtests(<*.t>);
+
+
+ちなみに、このモジュールは 5.00503 ではインストールに失敗します。また、
+example と testing が一つもない場合にエラーになってしまいます(それはそ
+れでいいのかもしれませんが)。lib/Pod/Tests.pm と t/Tests.t に以下のパッ
+チをあてると動くようになります。
+
+
+--- Tests.pm.orig       Wed May  2 12:01:28 2001
++++ Tests.pm    Wed May  2 12:26:34 2001
+@@ -201,7 +201,7 @@
+                 }
+                 $self->{_currpod} .= $_;
+             }
+-1        }
++        }
+         else {
+             if( /^\s*$/ ) {
+                 $self->{_sawblank} = 1;
+@@ -233,7 +233,7 @@
+     $self->{_infor}     = 0;
+     $self->{_inpod}     = 0;
+     $self->{_linenum}   = 1;
+-    $self->{_for}       = {};
++    $self->{_for}       = { example => [], testing => [] };
+ }
+
+ =item B<_beginfor>
+
+
+
+--- Tests.t.orig        Sun Mar  4 13:17:32 2001
++++ Tests.t     Wed May  2 12:03:42 2001
+@@ -79,7 +79,7 @@
+ # Test that double parsing works.
+
+ # Seek back to __END__.
+-use Fcntl qw(:seek);
++use POSIX qw(SEEK_SET);
+ seek(DATA, 0, SEEK_SET) || die $!;
+ do { $_ = <DATA> } until /^__END__$/;
+
+
+(*1) Plain Old Document は Perl のモジュール作成の際に、APIなどのドキュ
+メントを記述するための枠組みです。非常にシンプルですが、細かいところを
+覚えるのは大変です :-) 詳しくは perldoc perlpod をご覧ください。
+
+(*2) たとえばこんな記事も。
+http://use.perl.org/article.pl?sid=01/04/21/236229&mode=thread&threshold=
+
+
+[1] http://cpan2.org/Asset/display?dist=Pod-Tests
+
+3. おしらせ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+* Web+DB Press Vol.2
+
+技術評論社[2]さんの WEB+DB Press Vol.2[3] に "Apache モジュールでここ
+までできる!" というタイトルで、mod_rewrite に関する記事を書かせていた
+だきました。他にも Perl 関連では台場圭一さん、川合孝典さんの記事なども
+あって読みごたえがあります。興味のある方はぜひご覧になってください。
+
+* YARPC 19101
+
+2001/5/26 に YARPC (Yet Another Ruby/Perl Conference) 19101 が開催され
+ます。昨年京都で開催された Perl/Ruby Conference [4]の廉価/手作り版といっ
+た感じでしょうか。カンファレンスの内容は以下のようになっています。
+
+10:00〜12:00 チュートリアル(1時間 × Ruby/Perl各1)
+13:00〜15:00 事例紹介(30分 × 4)
+15:00〜16:00 Lightning Talks(5分 × 11)
+16:00〜17:00 BOF(1時間)
+
+日時:	2001年5月26日(土) 10:00〜17:00
+場所:	アスキー本社 B2ホール
+
+私も Lightning Talks で話す予定です。関東近辺の方はぜひお気軽にご来場
+ください。詳しくは YARPC 19101 のサイト[5] をご覧になってください (最
+新情報も随時更新されます。)
+
+
+
+[2] http://www.gihyo.co.jp/
+[3] http://www.gihyo.co.jp/wdpress/
+[4] http://perlruby-con.opensource.gr.jp/
+[5] http://yarpc.tokyo.pm.org/
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

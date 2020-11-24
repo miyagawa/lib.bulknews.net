@@ -1,0 +1,17 @@
+<H2>WHAT'S THIS</H2>
+2ちゃんねるの各板の subback.html から RSS を生成し、STDOUT に出力します。
+
+<H2>INSTALL</H2>
+<blockquote>
+<pre>% perl Makefile.PL
+% make
+# make install
+</pre>
+</blockquote>
+
+<H2>USAGE</H2>
+板の名前を引数に渡すと、STDOUT にRSSを出力します。名前はURLのディレクトリ名に対応し、2chrssスクリプトの末尾にテーブルとして保持されています。オプションとして、出力される RSS のエンコーディング、アイテムの数、見出しにレス数を含めるか否か、が指定できます。詳細は --help オプションを実行してください。
+<blockquote>
+<pre>% 2chrss --charset=shift_jis --num=20 --stripnum unix > unix.rdf</pre>
+</blockquote>
+

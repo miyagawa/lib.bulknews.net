@@ -1,0 +1,180 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.29
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Exporter による Mixin  ＿＿＿＿＿＿＿＿＿＿＿＿
+
+多重継承を使うことなく、Mixin を実装する方法を紹介します。
+
+Vol.23 [1] で紹介したように、Perl の継承は多重継承をサポートしているた
+め、複数の abstract なクラスに実装のコードを書き、多重継承によってそれ
+ぞれの能力を継承するといったことができます。
+
+  walk メソッドを実装する Walkable
+  talk メソッドを実装する Talkable
+  Walkable で Talkable な Human
+
+というクラス階層をコードで表現すると以下のようになります。
+
+
+  Talkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Talkable;
+  use strict;
+  
+  sub talk {
+      my $self = shift;
+      print "My name is ", $self->name, "\n";
+  }
+
+  1;
+
+  Walkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Walkable;
+  use strict;
+  
+  sub walk {
+      print "walk, walk\n";
+  }
+
+  1;
+
+  Human.pm  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Human;
+  use strict;
+  use base qw(Talkable Walkable);
+  
+  sub new {
+      my($class, $name) = @_;
+      bless { name => $name }, $class;
+  }
+  
+  sub name {
+      my $self = shift;
+      $self->{name};
+  }
+
+  1;
+
+  sample.pl ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  use strict;
+  use Human;
+
+  my $man = Human->new('foo');
+  $man->talk;
+  $man->walk;
+
+しかし、多重継承のデメリットはいろんなところで指摘されています。ダイヤ
+モンド型の継承構造になった場合に、インスタンスのアトリビュートが重複す
+ると言った問題です。
+
+Java や Ruby では、多重継承をサポートしていません。かわりに、Java では 
+interface, Ruby では module による mixin [2] を提供しています。Ruby の 
+mixin 機能は、そのままの実装で Perl でも実装可能です。
+
+  walk メソッドを提供する Walkable
+  talk メソッドを提供する Talkable
+  Walkable と Talkable から walk, talk メソッドを受け継ぐ Human
+
+と考え方を変えます。メソッドとは、単にサブルーチンですから、サブルーチ
+ンの提供 = Export と考えれば、実装は単純です。
+
+
+  Talkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Talkable;
+  use strict;
+  use base qw(Exporter);
+  our @EXPORT = qw(talk);
+
+  sub talk {
+      my $self = shift;
+      print "My name is ", $self->name, "\n";
+  }
+
+  1;
+
+  Walkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Walkable;
+  use strict;
+  use base qw(Exporter);
+  our @EXPORT = qw(walk);
+
+  sub walk {
+      print "walk, walk\n";
+  }
+
+  1;
+
+  Human.pm  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+  package Human;
+  use strict;
+  use Talkable;
+  use Walkable;
+  
+  sub new {
+      my($class, $name) = @_;
+      bless { name => $name }, $class;
+  }
+  
+  sub name {
+      my $self = shift;
+      $self->{name};
+  }
+
+  1;
+  
+
+Human クラスはどのクラスも継承せず、かわりに Talkable, Walkable を use 
+することによって、talk, walk サブルーチンを Human パッケージに 
+"import" しています。関数を import しておいて、呼ばれる際にはインスタ
+ンスメソッドとして実行されるところがトリックになります。
+
+1つ注意すべきなのは、以下のようなコードです。
+
+  package Walkable;
+
+  sub walk {
+      my $self = shift;
+      print "walking at ", $self->get_speed, "\n";
+  }
+
+  sub get_speed {
+      my $self = shift;
+      # some code ...
+      return $speed;
+  }
+
+walk() メソッド内の $self が、多重継承の場合は isa Walkable でしたが、
+Exporter による mixin ではまったく無関係です。よって Walkable クラス内
+の get_speed() メソッドを呼ぶことはできません。
+
+  Can't locate object method "get_speed" via package "Human"
+
+という例外が投げられることになります。これを解決するには、
+
+  package Walkable;
+
+  sub walk {
+      my $self = shift;
+      print "walking at ", get_speed($self), "\n";
+  }
+
+  sub get_speed {
+      my $self = shift;
+      # some code ...
+      return $speed;
+  }
+  
+
+とする必要があります。get_speed($self) となっているのがポイントです。
+同様なコードをクラスメソッドについて実装する場合には、__PACKAGE__ や 
+caller() を利用することになるでしょう。
+
+[1] http://bulknews.net/lib/mailmag/23/mag.txt
+[2] http://www.rubycentral.com/book/tut_modules.html
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

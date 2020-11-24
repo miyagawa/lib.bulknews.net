@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl Advocacy </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl Advocacy 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./hardware.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./help.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Thoughts_about_scalability_and_f">Thoughts about scalability and flexibility</A>
+	<LI><A HREF="#The_boss_the_developer_and_advo">The boss, the developer and advocacy</A>
+	<LI><A HREF="#A_summary_of_perl_cgi_discussion">A summary of perl/cgi discussion at slashdot.org</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Thoughts_about_scalability_and_f">Thoughts about scalability and flexibility</A></H1></CENTER>
+<P>
+Your need for scalability and flexibility depends on what you need from
+your web site. If you only want a simple guest book or database gateway
+with no feature headroom, you can get away with any
+EASY_AND_FAST_TO_DEVELOP_TOOL (Exchange, MS IIS, Lotus Notes, etc).
+
+<P>
+Experience shows that you will soon want more functionality, at which point
+you'll discover the limitations of these ``easy'' tools. Gradually, your
+boss will ask for increasing functionality and at some point you'll realize
+that the tool lacks flexibility and/or scalability. Then your boss will
+either buy another EASY_AND_FAST_TO_DEVELOP_WITH_TOOLS and repeat the
+process (with different unforseen problems), or you'll start investing time
+in learning how to use a powerful, flexible tool to make the long-term
+development cycle easier.
+
+<P>
+If you and your company are serious about delivering flexible Internet
+functionality, do your homework. Then urge your boss to invest a little
+extra time and resources in choosing the right tool for the job. The extra
+quality and manageability of your site along with your ability to deliver
+new and improved functionality of high quality and in good time will prove
+the superiority of using solid flexible tools.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_boss_the_developer_and_advo">The boss, the developer and advocacy</A></H1></CENTER>
+<P>
+Each developer has a boss who participates in the decision-making process.
+Remember that the boss considers input from sales people, developers, the
+media and associates before handing down large decisions. Of course,
+results count! A sales brochure makes very little impact compared to a
+working demonstration, and demonstrations of company-specific and
+developer-specific results count for a lot!
+
+<P>
+Personally, when I discovered mod_perl I did a lot of testing and coding at
+home and at work. Once I had a working heavy application, I came to my boss
+with two URLs - one for the plain CGI server and the other for the
+mod_perl-enabled server. It took about 30 secs for my boss to say: `Go with
+it'. Of course since then I have had to provide all the support for other
+developers, which is why I took time to learn it in first place (and why
+this guide was created!).
+
+<P>
+Chances are that if you've done your homework, learnt the tools and can
+deliver results, you'll have a successful project. If you convince your
+boss to try a tool that you don't know very well, your results may suffer.
+If your boss follows your development process closely and sees that your
+progress is much worse than expected, you might be told to ``forget it''
+and mod_perl might not get a second chance.
+
+<P>
+Advocacy is a great thing for the open-source software movement, but it's
+best done quietly until you have confidence that you can show productivity.
+If you can demonstrate to your boss a heavy CGI which is running much
+faster under mod_perl, that may be a strong argument for further
+evaluation. Your company may even sponsor a portion of your learning
+process.
+
+<P>
+Learn the technology by working on sample projects. Learn how to support
+yourself and learn how to get support from the community; then advocate
+your ideas to your boss. Then you'll have the knowledge; your company will
+have the benefit; and mod_perl will have the reputation it deserves.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="A_summary_of_perl_cgi_discussion">A summary of perl/cgi discussion at slashdot.org</A></H1></CENTER>
+<P>
+Well, there was a nice discussion of merits of Perl in CGI world. I took
+the time to summarize this thread, so here is what I've got:
+
+<P>
+Perl Domination in CGI Programming? <A
+HREF="http://slashdot.org/askslashdot/99/10/20/1246241.shtml">http://slashdot.org/askslashdot/99/10/20/1246241.shtml</A>
+
+
+<UL>
+<P><LI>
+<P>
+Perl is cool and fun to code with.
+
+<P><LI>
+<P>
+Perl is very fast to develop with.
+
+<P><LI>
+<P>
+Perl is even faster to develop with if you know what CPAN is. :)
+
+<P><LI>
+<P>
+Math intensive code and other stuff which is faster in C/C++, can be
+plugged into Perl with XS/SWIG and may be used transparently by Perl
+programmers.
+
+<P><LI>
+<P>
+Most CGI applications do text processing, at which Perl excels
+
+<P><LI>
+<P>
+Forking and loading (unless the code is shared) of C/C++ CGI programs
+produces an overhead.
+
+<P><LI>
+<P>
+Except for Intranets, bandwidth is usually a bigger bottleneck than Perl
+performance, although this might change in the future.
+
+<P><LI>
+<P>
+For database driven applications, the database itself is a bottleneck. Lots
+of posts talk about latency vs throughput.
+
+<P><LI>
+<P>
+mod_perl, FastCGI, Velocigen and PerlEx all give good performance gains
+over plain mod_cgi.
+
+<P><LI>
+<P>
+Other light alternatives to Perl and its derivatives which have been
+mentioned: PHP, Python.
+
+<P><LI>
+<P>
+There were almost no voices from users of M$ and similar technologies, I
+guess that's because they don't read <A
+HREF="http://slashdot.org">http://slashdot.org</A> :)
+
+<P><LI>
+<P>
+Many said that in many people's minds: 'CGI' eq 'Perl'
+
+</UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./hardware.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./help.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 09/03/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

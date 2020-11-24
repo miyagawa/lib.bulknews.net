@@ -1,0 +1,7 @@
+Changes
+MANIFEST			This list of files
+Makefile.PL
+lib/POE/Component/MSN.pm
+lib/POE/Component/MSN/Command.pm
+lib/POE/Filter/MSN.pm
+t/00_compile.t

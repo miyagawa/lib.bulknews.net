@@ -1,0 +1,1307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Apache::* modules </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Apache::* modules 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./browserbugs.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./snippets.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Apache_Session_Maintain_sessi">Apache::Session - Maintain session state across HTTP requests</A>
+	<LI><A HREF="#Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A>
+	<LI><A HREF="#Apache_Watchdog_RunAway_Hang">Apache::Watchdog::RunAway - Hanging Processes Monitor and Terminator</A>
+	<LI><A HREF="#Apache_VMonitor_Visual_Syste">Apache::VMonitor - Visual System and Apache Server Monitor</A>
+	<LI><A HREF="#Apache_GTopLimit_Limit_Apache">Apache::GTopLimit - Limit Apache httpd processes</A>
+	<LI><A HREF="#Apache_Request_libapreq_Gen">Apache::Request (libapreq) - Generic Apache Request Library</A>
+	<LI><A HREF="#Apache_RequestNotes_Allow_Eas">Apache::RequestNotes - Allow Easy, Consistent Access to Cookie and Form Data Across Each Request Phase</A>
+	<LI><A HREF="#Apache_PerlRun_Run_unaltered_">Apache::PerlRun - Run unaltered CGI scripts under mod_perl</A>
+	<LI><A HREF="#Apache_RegistryNG_Apache_Re">Apache::RegistryNG - Apache::Registry New Generation</A>
+	<LI><A HREF="#Apache_RegistryBB_Apache_Re">Apache::RegistryBB - Apache::Registry Bare Bones </A>
+	<LI><A HREF="#Apache_OutputChain_Chain_Sta">Apache::OutputChain - Chain Stacked Perl Handlers</A>
+	<LI><A HREF="#Apache_Filter_Alter_the_outpu">Apache::Filter - Alter the output of previous handlers</A>
+	<LI><A HREF="#Apache_GzipChain_compress_HTM">Apache::GzipChain - compress HTML (or anything) in the OutputChain</A>
+	<LI><A HREF="#Apache_Gzip_Auto_compress_web">Apache::Gzip - Auto-compress web files with Gzip</A>
+	<LI><A HREF="#Apache_PerlVINC_Allows_Module">Apache::PerlVINC - Allows Module Versioning in Location blocks and Virtual Hosts</A>
+	<LI><A HREF="#Apache_LogSTDERR">Apache::LogSTDERR</A>
+	<LI><A HREF="#Apache_RedirectLogFix">Apache::RedirectLogFix</A>
+	<LI><A HREF="#Apache_SubProcess">Apache::SubProcess</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Apache_Session_Maintain_sessi">Apache::Session - Maintain session state across HTTP requests</A></H1></CENTER>
+<P>
+This module provides the Apache/mod_perl user with a mechanism for storing
+persistent user data in a global hash, which is independent of the
+underlying storage mechanism. Currently you can choose from these storage
+mechanisms <CODE>Apache::Session::DBI</CODE>, <CODE>Apache::Session::Win32</CODE>,
+<CODE>Apache::Session::File</CODE>, <CODE>Apache::Session::IPC</CODE>. Read the man page of the mechanism you want to use for a complete
+reference.
+
+<P>
+<CODE>Apache::Session</CODE> provides persistence to a data structure. The data structure has an ID
+number, and you can retrieve it by using the ID number. In the case of
+Apache, you would store the ID number in a cookie or the URL to associate
+it with one browser, but the method of dealing with the ID is completely up
+to you. The flow of things is generally:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Tie a session to Apache::Session.
+  Get the ID number.
+  Store the ID number in a cookie.
+  End of Request 1.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  (time passes)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Get the cookie.
+  Restore your hash using the ID number in the cookie.
+  Use whatever data you put in the hash.
+  End of Request 2.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Using <CODE>Apache::Session</CODE> is easy: simply tie a hash to the session object, stick any data structure
+into the hash, and the data you put in automatically persists until the
+next invocation. Here is an example which uses cookies to track the user's
+session.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # pull in the required packages
+  use Apache::Session::DBI;
+  use Apache;
+  
+  use strict;
+  
+  # read in the cookie if this is an old session
+  my $r = Apache-&gt;request;
+  my $cookie = $r-&gt;header_in('Cookie');
+  $cookie =~ s/SESSION_ID=(\w*)/$1/;
+  
+  # create a session object based on the cookie we got from the
+  # browser, or a new session if we got no cookie
+  my %session;
+  tie %session, 'Apache::Session::DBI', $cookie,
+      {DataSource =&gt; 'dbi:mysql:sessions',
+       UserName   =&gt; $db_user,
+       Password   =&gt; $db_pass
+      };
+  
+  # might be a new session, so lets give them their cookie back
+  my $session_cookie = &quot;SESSION_ID=$session{_session_id};&quot;;
+  $r-&gt;header_out(&quot;Set-Cookie&quot; =&gt; $session_cookie);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After setting this up, you can stick anything you want into
+<CODE>%session</CODE> (except file handles and code references and using
+<EM>_session_id</EM>), and it will still be there when the user invokes the next page.
+
+<P>
+It is possible to write an Apache authentication handler using
+<CODE>Apache::Session</CODE>. You can put your authentication token into the session. When a user
+invokes a page, you open their session, check to see if they have a valid
+token, and authenticate or forbid based on that.
+
+<P>
+By way of comparison note that IIS's sessions are only valid on the same
+web server as the one that issued the session.
+<CODE>Apache::Session</CODE>'s session objects can be shared amongst a farm of many machines running
+different operating systems, including even Win32. IIS stores session
+information in RAM.  <CODE>Apache::Session</CODE>
+stores sessions in databases, file systems, or RAM. IIS's sessions are only
+good for storing scalars or arrays.  <CODE>Apache::Session</CODE>'s sessions allow you to store arbitrarily complex objects. IIS sets up the
+session and automatically tracks it for you. With
+<CODE>Apache::Session</CODE>, you setup and track the session yourself. IIS is proprietary.  <CODE>Apache::Session</CODE> is open-source.
+<CODE>Apache::Session::DBI</CODE> can issue 400+ session requests per second on light Celeron 300A running
+Linux. IIS?
+
+<P>
+An alternative to <CODE>Apache::Session</CODE> is <CODE>Apache::ASP</CODE>, which has session tracking abilities.  <CODE>HTML::Embperl</CODE> hooks into
+<CODE>Apache::Session</CODE> for you.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A></H1></CENTER>
+<P>
+See <A HREF="././databases.html#Apache_DBI_Initiate_a_persist">mod_perl and relational Databases</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Watchdog_RunAway_Hang">Apache::Watchdog::RunAway - Hanging Processes Monitor and Terminator</A></H1></CENTER>
+<P>
+This module monitors hanging Apache/mod_perl processes. You define the time
+in seconds after which the process is to be counted as
+<EM>hanging</EM> or <EM>run away</EM>.
+
+<P>
+When the process is considered to be <EM>hanging</EM> it will be killed and the event logged in a log file.
+
+<P>
+Generally you should use the <CODE>amprapmon</CODE> program that is bundled with this module's distribution package, but you
+can write your own code using the module as well. See the <EM>amprapmon</EM> manpage for more information about it.
+
+<P>
+Note that it requires the <CODE>Apache::Scoreboard</CODE> module to work.
+
+<P>
+Referer to the <CODE>Apache::Watchdog::RunAway</CODE> manpage for the configuration details.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_VMonitor_Visual_Syste">Apache::VMonitor -- Visual System and Apache Server Monitor</A></H1></CENTER>
+<P>
+<CODE>Apache::VMonitor</CODE> is the next generation of
+<A HREF="././debug.html#mod_status">mod_status</A>. It provides all the information mod_status provides and much more.
+
+<P>
+This module emulates the reporting functions of the <CODE>top(),</CODE>
+<CODE>mount(),</CODE> <CODE>df()</CODE> and <CODE>ifconfig()</CODE>
+utilities. There is a special mode for mod_perl processes. It has visual
+alert capabilities and a configurable
+<EM>automatic refresh</EM> mode. It provides a Web interface, which can be used to show or hide all
+the sections dynamically.
+
+<P>
+The are two main modes:
+
+<UL>
+<P><LI>
+<P>
+Multi processes mode -- All system processes and information is shown.
+
+<P><LI>
+<P>
+Single process mode -- In-depth information about a single process is
+shown.
+
+</UL>
+<P>
+The main advantage of this module is that it reduces the need to telnet to
+the machine in order to monitor it. Indeed it provides information about
+mod_perl processes that cannot be acquired from telneting to the machine.
+=head3 Configuration
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # Configuration in httpd.conf
+  &lt;Location /sys-monitor&gt;
+    SetHandler perl-script
+    PerlHandler Apache::VMonitor
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # startup file or &lt;Perl&gt; section:
+  use Apache::VMonitor();
+  $Apache::VMonitor::Config{BLINKING} = 0; # Blinking is evil
+  $Apache::VMonitor::Config{REFRESH}  = 0;
+  $Apache::VMonitor::Config{VERBOSE}  = 0;
+  $Apache::VMonitor::Config{SYSTEM}   = 1;
+  $Apache::VMonitor::Config{APACHE}   = 1;
+  $Apache::VMonitor::Config{PROCS}    = 1;
+  $Apache::VMonitor::Config{MOUNT}    = 1;
+  $Apache::VMonitor::Config{FS_USAGE} = 1;
+  $Apache::VMonitor::Config{NETLOAD}  = 1;
+                                
+  @Apache::VMonitor::NETDEVS    = qw(lo eth0);
+  $Apache::VMonitor::PROC_REGEX = join &quot;\|&quot;, qw(httpd mysql squid);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+More information is available in the module's extensive manpage.
+
+<P>
+It requires <CODE>Apache::Scoreboard</CODE> and <CODE>GTop</CODE> to work.  <CODE>GTop</CODE> in turn requires the <CODE>libgtop</CODE> library but is not available for all platforms. Visit <A
+HREF="http://www.home-of-linux.org/gnome/libgtop/">http://www.home-of-linux.org/gnome/libgtop/</A>
+to check whether your platform/flavor is supported.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_GTopLimit_Limit_Apache">Apache::GTopLimit - Limit Apache httpd processes</A></H1></CENTER>
+<P>
+This module allows you to kill off Apache processes if they grow too large
+or if they share too little of their memory. You can choose to set up the
+process size limiter to check the process size on every request:
+
+<P>
+The module is thoroughly explained in the sections: ``<A HREF="././performance.html#Keeping_the_Shared_Memory_Limit">Keeping the Shared Memory Limit</A>'' and ``<A HREF="././performance.html#Limiting_the_Size_of_the_Process">Limiting the Size of the Processes</A>''
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Request_libapreq_Gen">Apache::Request (libapreq) - Generic Apache Request Library</A></H1></CENTER>
+<P>
+This package contains modules for manipulating client request data via the
+Apache API with Perl and C. Functionality includes:
+
+<DL>
+<P><DT><STRONG><A NAME="item_parsing">parsing of application/x-www-form-urlencoded data</A></STRONG><DD>
+<P><DT><STRONG>parsing of multipart/form-data</STRONG><DD>
+<P><DT><STRONG>parsing of HTTP Cookies</STRONG><DD>
+</DL>
+<P>
+The Perl modules are simply a thin xs layer on top of libapreq, making them
+a lighter and faster alternative to CGI.pm and CGI::Cookie. See the <CODE>Apache::Request</CODE> and <CODE>Apache::Cookie</CODE> documentation for more details and eg/perl/ for examples.
+
+<P>
+<CODE>Apache::Request</CODE> and libapreq are tied tightly to the Apache API, to which there is no
+access in a process running under mod_cgi.
+
+<P>
+(<A HREF="././download.html#Apache_Request">Apache::Request</A>)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_RequestNotes_Allow_Eas">Apache::RequestNotes - Allow Easy, Consistent Access to Cookie and Form Data Across Each Request Phase</A></H1></CENTER>
+<P>
+<CODE>Apache::RequestNotes</CODE> provides a simple interface allowing all phases of the request cycle access
+to cookie or form input parameters in a consistent manner. Behind the
+scenes, it uses libapreq
+<A HREF="././modules.html#Apache_Request_libapreq_Gen">Apache::Request</A>&gt;) functions to parse request data and puts references to the data in <CODE>pnotes()</CODE>.
+
+<P>
+Once the request is past the PerlInit phase, all other phases can have
+access to form input and cookie data without parsing it themselves. This
+relieves some strain, especially when the GET or POST data is required by
+numerous handlers along the way.
+
+<P>
+See the <CODE>Apache::RequestNotes</CODE> manpage for more information.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_PerlRun_Run_unaltered_">Apache::PerlRun - Run unaltered CGI scripts under mod_perl</A></H1></CENTER>
+<P>
+See <A HREF="././porting.html#Apache_PerlRun_a_closer_look">Apache::PerlRun - a closer look</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_RegistryNG_Apache_Re">Apache::RegistryNG -- Apache::Registry New Generation</A></H1></CENTER>
+<P>
+<CODE>Apache::RegistryNG</CODE> is the same as <CODE>Apache::Registry</CODE>, aside from using filenames instead of URIs for namespaces. It also uses
+an Object Oriented interface.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::RegistryNG
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::RegistryNG-&gt;handler
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>Apache::RegistryNG</CODE> inherits from <CODE>Apache::PerlRun</CODE>, but the <CODE>handler()</CODE> is overriden. Aside from the
+<CODE>handler(),</CODE> the rest of
+<CODE>Apache::PerlRun</CODE> contains all the functionality of
+<CODE>Apache::Registry</CODE> broken down into several subclass-able methods. These methods are used by <CODE>Apache::RegistryNG</CODE> to implement the exact same functionality of <CODE>Apache::Registry</CODE>, using the
+<CODE>Apache::PerlRun</CODE> methods.
+
+<P>
+There is no compelling reason to use <CODE>Apache::RegistryNG</CODE> over
+<CODE>Apache::Registry</CODE>, unless you want to do add or change the functionality of the existing <EM>Registry.pm</EM>. For example,
+<CODE>Apache::RegistryBB</CODE> (Bare-Bones) is another subclass that skips the <CODE>stat()</CODE> call
+performed by <CODE>Apache::Registry</CODE> on each request.
+
+<P>
+One situation where <CODE>Apache::RegistryNG</CODE> may definitely be required is if you are rewriting URIs (using either
+mod_rewrite or your own handler) in certain ways.
+
+<P>
+For instance if you have a rewrite rule of the form:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  XYZ123456.html  ==&gt; /perl/foo.pl?p1=XYZ&amp;p2=123456</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>Apache::Registry</CODE> loses big, as it recompiles <EM>foo.pl</EM> for each unique URL -- <CODE>Apache::RegistryNG</CODE> should be used instead.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_RegistryBB_Apache_Re">Apache::RegistryBB -- Apache::Registry Bare Bones</A></H1></CENTER>
+<P>
+It works just like <CODE>Apache::Registry</CODE>, but does not test the x bit (-x file test for executable mode), only
+compiles the file once (no <CODE>stat()</CODE> call is made per request),
+skips the <CODE>OPT_EXECCGI</CODE> checks and does not <CODE>chdir()</CODE> into the script parent directory. It uses the Object Oriented interface.
+
+<P>
+Configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::RegistryBB
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::RegistryBB-&gt;handler
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_OutputChain_Chain_Sta">Apache::OutputChain -- Chain Stacked Perl Handlers</A></H1></CENTER>
+<P>
+Apache::OutputChain was written as a way of exploring the possibilities of
+stacked handlers in mod_perl. It ties STDOUT to an object which catches the
+output and makes it easy to build a chain of modules that work on output
+data stream.
+
+<P>
+Examples of modules that are build on this idea are
+<CODE>Apache::SSIChain</CODE>, <CODE>Apache::GzipChain</CODE> and <CODE>Apache::EmbperlChain</CODE>
+-- the first processes the SSI's in the stream, the second compresses the
+output on the fly, the last adds Embperl processing.
+
+<P>
+The syntax goes like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Files *.html&gt;
+    SetHandler perl-script
+    PerlHandler Apache::OutputChain Apache::SSIChain Apache::PassHtml
+  &lt;/Files&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The modules are listed in the reverse order of their execution -- here the <CODE>Apache::PassHtml</CODE> module simply picks a file's content and sends it to STDOUT, then it's
+processed by <CODE>Apache::SSIChain</CODE>, which sends its output to STDOUT again. Then it's processed by
+<CODE>Apache::OutputChain</CODE>, which finally sends the result to the browser.
+
+<P>
+An alternative to this approach is <CODE>Apache::Filter</CODE>, which has a more natural <EM>forward</EM> configuration order and is easier to interface with other modules.
+
+<P>
+It works with <CODE>Apache::Registry</CODE> as well, for example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /foo /home/httpd/perl/foo
+  &lt;Location /foo&gt;
+    SetHandler &quot;perl-script&quot;
+    Options +ExecCGI
+    PerlHandler Apache::OutputChain Apache::GzipChain Apache::Registry
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It's really a regular <CODE>Apache::Registry</CODE> setup, except for the added modules in the PerlHandler line.
+
+<P>
+(<A HREF="././modules.html#Apache_GzipChain_compress_HTM">Apache::GzipChain</A> allows to compress the output on the fly.)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Filter_Alter_the_outpu">Apache::Filter - Alter the output of previous handlers</A></H1></CENTER>
+<P>
+META: to be written (actually summarized the info from Apache::Filter
+manpage)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_GzipChain_compress_HTM">Apache::GzipChain - compress HTML (or anything) in the OutputChain</A></H1></CENTER>
+<P>
+Have you ever served a huge HTML file (e.g. a file bloated with JavaScript
+code) and wondered how could you send it compressed, thus dramatically
+cutting down the download times? After all java applets can be compressed
+into a jar and benefit from faster download times. Why can't we do the same
+with plain ASCII (HTML, JS etc.)? ASCII text can often be compressed by a
+factor of 10.
+
+<P>
+<CODE>Apache::GzipChain</CODE> comes to help you with this task. If a client (browser) understands <CODE>gzip</CODE> encoding, this module compresses the output and sends it downstream. The
+client decompresses the data upon receipt and renders the HTML as if it
+were fetching plain HTML.
+
+<P>
+For example to compress all html files on the fly, do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Files *.html&gt;
+    SetHandler perl-script
+    PerlHandler Apache::OutputChain Apache::GzipChain Apache::PassFile
+  &lt;/Files&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Remember that it will work only if the browser claims to accept compressed
+input, by setting the <CODE>Accept-Encoding</CODE> header.
+<CODE>Apache::GzipChain</CODE> keeps a list of user-agents, thus it also looks at the <CODE>User-Agent</CODE> header to check for browsers known to accept compressed output.
+
+<P>
+For example if you want to return compressed files which will in addition
+pass through the Embperl module, you would write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /test&gt;
+    SetHandler perl-script
+    PerlHandler Apache::OutputChain Apache::GzipChain Apache::EmbperlChain Apache::PassFile
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Hint: Watch the <EM>access_log</EM> file to see how many bytes were actually sent, and compare that with the
+bytes sent using a regular configuration.
+
+<P>
+(See also <CODE>Apache::GzipChain</CODE>).
+
+<P>
+Notice that the rightmost PerlHandler must be a content producer. Here we
+are using <CODE>Apache::PassFile</CODE> but you can use any module which creates output.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Gzip_Auto_compress_web">Apache::Gzip - Auto-compress web files with Gzip</A></H1></CENTER>
+<P>
+Similar to <CODE>Apache::GzipChain</CODE> but works with <CODE>Apache::Filter</CODE>.
+
+<P>
+This configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Filter
+  &lt;Files ~ &quot;*\.html&quot;&gt;
+    SetHandler perl-script
+    PerlSetVar Filter On
+    PerlHandler Apache::Gzip
+  &lt;/Files&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will send all the <EM>*.html</EM> files compressed if the client accepts the compressed input.
+
+<P>
+And this one:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Filter
+  Alias /home/http/perl /perl
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlSetVar Filter On
+    PerlHandler Apache::RegistryFilter Apache::Gzip
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will compess the output of the <CODE>Apache::Registry</CODE> scripts. Yes, you should use <CODE>Apache::RegistryFilter</CODE> instead of <CODE>Apache::Registry</CODE>
+for it to work.
+
+<P>
+You can use as many filters as you want:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Filter
+  &lt;Files ~ &quot;*\.blah&quot;&gt;
+    SetHandler perl-script
+    PerlSetVar Filter On
+    PerlHandler Filter1 Filter2 Apache::Gzip
+  &lt;/Files&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can test that it works by either looking at the size of the response in
+the <EM>access.log</EM> or by telnet:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  panic% telnet localhost 8000
+  Trying 127.0.0.1
+  Connected to 127.0.0.1
+  Escape character is '^]'.
+  GET /perl/test.pl HTTP 1.1
+  Accept-Encoding: gzip
+  User-Agent: Mozilla</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And you will get the data compressed if configured correctly.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_PerlVINC_Allows_Module">Apache::PerlVINC - Allows Module Versioning in Location blocks and Virtual Hosts</A></H1></CENTER>
+<P>
+With this module you can have different <CODE>@INC</CODE> for different virtual hosts, locations and equivalent configuration blocks.
+
+<P>
+Suppose two versions of <CODE>Apache::Status</CODE> are being hacked on the same server. In this configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::PerlVINC
+  
+  &lt;Location /status-dev/perl&gt;
+    SetHandler       perl-script
+    PerlHandler      Apache::Status
+  
+    PerlINC          /home/httpd/dev/lib
+    PerlFixupHandler Apache::PerlVINC
+    PerlVersion      Apache/Status.pm
+  &lt;/Location&gt;
+  
+  &lt;Location /status/perl&gt;
+    SetHandler       perl-script
+    PerlHandler      Apache::Status
+  
+    PerlINC          /home/httpd/prod/lib
+    PerlFixupHandler Apache::PerlVINC
+    PerlVersion      Apache/Status.pm
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>Apache::PerlVINC</CODE> is loaded and then two different locations are specified for the same
+handler <CODE>Apache::Status</CODE>, whose development version resides in <EM>/home/httpd/dev/lib</EM> and production version in
+<EM>/home/httpd/prod/lib</EM>.
+
+<P>
+In case the <EM>/status/perl</EM> request is issued (the latter configuration section), the fixup handler
+will internally do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  delete $INC{Apache/Status.pm};
+  unshift @INC, /home/httpd/prod/lib;
+  require &quot;Apache/Status.pm&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which will load the production version of the module and it'll be used to
+process the request. If on the other hand if the request to the
+<EM>/status-dev/perl</EM> location will be issued, as configured in the former configuration section,
+a similar thing will happen, but a different path (<EM>/home/httpd/dev/lib</EM>) will be prepanded to <CODE>@INC</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  delete $INC{Apache/Status.pm};
+  unshift @INC, /home/httpd/dev/lib;
+  require &quot;Apache/Status.pm&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It's important to be aware that a changed <CODE>@INC</CODE> is effective only inside the <CODE>&lt;Location&gt;</CODE> or a similar configuration directive.
+<CODE>Apache::PerlVINC</CODE> subclasses the <CODE>PerlRequire</CODE> directive, marking the file to be reloaded by the fixup handler, using the
+value of
+<CODE>PerlINC</CODE> for <CODE>@INC</CODE>. That's local to the fixup handler, so you won't actually see <CODE>@INC</CODE> changed in your script.
+
+<P>
+Additionaly the modules with different versions can be unloaded at the end
+of request, using the <CODE>PerlCleanupHandler</CODE> handler:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /status/perl&gt;
+    SetHandler         perl-script
+    PerlHandler        Apache::Status
+  
+    PerlINC            /home/httpd/prod/lib
+    PerlFixupHandler   Apache::PerlVINC
+    PerlCleanupHandler Apache::PerlVINC
+    PerlVersion        Apache/Status.pm
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Also notice that <CODE>PerlVersion</CODE> effect things differently depending on where it was placed. If it was
+placed inside a <CODE>&lt;Location&gt;</CODE>
+or a similar block section, the files will only be reloaded on requests to
+that location. If it was placed in a server section, all requests to the
+server or virtual hosts will have these files reloaded.
+
+<P>
+As you can guess, this module slows the response time down because it
+reloads some modules on a per-request basis. Hence, this module should only
+be used in a development environment, not a production one.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_LogSTDERR">Apache::LogSTDERR</A></H1></CENTER>
+<P>
+When Apache's builtin syslog support is used, the stderr stream is
+redirected to <CODE>/dev/null</CODE>. This means that Perl warnings, any messages from <CODE>die()</CODE>, <CODE>croak()</CODE>, etc., will also end up in the black hole. The <EM>HookStderr</EM> directive will hook the stderr stream to a file of your choice, the default
+is shown in this example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> PerlModule Apache::LogSTDERR
+ HookStderr logs/stderr_log</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[META: see <A
+HREF="http://forum.swarthmore.edu/epigone/modperl/vixquimwhen">http://forum.swarthmore.edu/epigone/modperl/vixquimwhen</A>
+]
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_RedirectLogFix">Apache::RedirectLogFix</A></H1></CENTER>
+<P>
+Because of the way mod_perl handles redirects, the status code is not
+properly logged. The <CODE>Apache::RedirectLogFix</CODE> module works around that bug until mod_perl can deal with this. All you
+have to do is to enable it in the <EM>httpd.conf</EM> file.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlLogHandler Apache::RedirectLogFix</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For example, you will have to use it when doing:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;status(304);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and do some manual header sending, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;status(304);
+  $r-&gt;send_http_header();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_SubProcess">Apache::SubProcess</A></H1></CENTER>
+<P>
+The output of <CODE>system()</CODE>, <CODE>exec()</CODE>, and <CODE>open(PIPE,&quot;|program&quot;)</CODE>
+calls will not be sent to the browser unless your Perl was configured with <CODE>sfio</CODE>.
+
+<P>
+One workaround is to use backticks:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print `command here`;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But a cleaner solution is provided by the <CODE>Apache::SubProcess</CODE>
+module. It overrides the <CODE>exec()</CODE> and <CODE>system()</CODE>
+calls with calls that work correctly under mod_perl.
+
+<P>
+Let's see a few examples:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::SubProcess qw(system);
+  my $r = shift;
+  $r-&gt;send_http_header('text/plain');
+  
+  system &quot;/bin/echo hi there&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+overrides built-in <CODE>system()</CODE> function and sends the output to
+the browser.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::SubProcess qw(exec);
+  my $r = shift;
+  $r-&gt;send_http_header('text/plain');
+  
+  exec &quot;/usr/bin/cal&quot;; 
+  
+  print &quot;NOT REACHED\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+overrides built-in <CODE>exec()</CODE> function and sends the output to the
+browser. As you can see the print statement after the <CODE>exec()</CODE>
+call will be never executed.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::SubProcess ();
+  my $r = shift;
+  $r-&gt;send_http_header('text/plain');
+  
+  my $efh = $r-&gt;spawn_child(\&amp;env);
+  $r-&gt;send_fd($efh);
+  
+  sub env {
+      my $r = shift;
+      $r-&gt;subprocess_env(HELLO =&gt; 'world');
+      $r-&gt;filename(&quot;/bin/env&quot;);
+      $r-&gt;call_exec;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>env()</CODE> is a function that sets an environment variable that can
+be seen by the main and sub-processes, then it executes <EM>/bin/env</EM> program via <CODE>call_exec().</CODE> The main code spawn a process, and
+tells it to execute the <CODE>env()</CODE> function. This call returns an
+output filehandler from the spawned child process. Finally it takes the
+output generated by the child process and sends it to the browser via
+<CODE>send_fd(),</CODE> that expects the filehandler as an argument.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::SubProcess ();
+  my $r = shift;
+  $r-&gt;send_http_header('text/plain');
+  
+  my $fh = $r-&gt;spawn_child(\&amp;banner);
+  $r-&gt;send_fd($fh);
+  
+  sub banner {
+      my $r = shift;
+      # /usr/games/banner on many Unices
+      $r-&gt;filename(&quot;/usr/bin/banner&quot;);
+      $r-&gt;args(&quot;-w40+Hello%20World&quot;);
+      $r-&gt;call_exec;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This example is very similar to the previous, but shows how can you pass
+arguments to the external process. It passes the string to print as a
+banner to via a subprocess.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::SubProcess ();
+  my $r = shift;
+  $r-&gt;send_http_header('text/plain');
+  
+  use vars qw($String);
+  $String = &quot;hello world&quot;;
+  my($out, $in, $err) = $r-&gt;spawn_child(\&amp;echo);
+  print $out $String;
+  $r-&gt;send_fd($in);
+  
+  sub echo {
+      my $r = shift;
+      $r-&gt;subprocess_env(CONTENT_LENGTH =&gt; length $String);
+      $r-&gt;filename(&quot;/tmp/pecho&quot;);
+      $r-&gt;call_exec;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The last example shows how you can have a full access to STDIN, STDOUT and
+STDERR streams of the spawned sub process, so you can pipe data to a
+program and send its output to the browser. The <CODE>echo()</CODE>
+function is similar to the earlier example's <CODE>env()</CODE> function.
+The <EM>/tmp/pecho</EM> is as follows:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  !/usr/bin/perl 
+  read STDIN, $buf, $ENV{CONTENT_LENGTH}; 
+  print &quot;STDIN: `$buf' ($ENV{CONTENT_LENGTH})\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So in the last example a string is defined as a global variable, so it's
+length could be calculated in the <CODE>echo()</CODE> function. The
+subprocess reads from STDIN, to which the main process writes the string (<EM>hello
+world</EM>). It reads only a number of bytes specified by 
+<CODE>CONTENT_LENGTH</CODE> passed to the external program via environment variable. Finally the
+external program prints the data that it read to STDOUT, the main program
+intercepts it and sends to the client's socket (browser in most cases).
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./browserbugs.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./snippets.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/26/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

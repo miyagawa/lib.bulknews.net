@@ -1,0 +1,30 @@
+*** Monkeywrench.pm.orig        Tue Jan 23 16:16:30 2001
+--- Monkeywrench.pm     Tue Jan 23 18:00:01 2001
+***************
+*** 425,426 ****
+!       my $req         = HTTP::Request->new($method => $click->{'urls'}->[-1] . (($method eq 'GET') ? '?'.$click->{'params'} : ''));
+!
+--- 425,426 ----
+!       my $req         = HTTP::Request->new($method => $click->{'urls'}->[-1] . (($method eq 'GET' && ! $click->{'REDIRECT'}) ? '?'.$click->{'params'} : ''));
+!
+***************
+*** 428 ****
+--- 429 ----
++       $req->content_length(length($click->{'params'})) if ($method eq 'POST');
+***************
+*** 433,434 ****
+!       my $res = $self->ua->request($req);
+!
+--- 434,435 ----
+! #     my $res = $self->ua->request($req);
+!       my $res = $self->ua->simple_request($req);
+***************
+*** 439 ****
+-
+--- 439 ----
+***************
+*** 442 ****
+!               push(@{ $click->{'urls'} },$res->header('Location'));
+--- 442,443 ----
+!               my $url = URI->new_abs($res->header('Location'), $res->base);
+!               push(@{ $click->{'urls'} },$url);

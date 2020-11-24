@@ -1,0 +1,29 @@
+<H2>INSTALL</H2>
+<BLOCKQUOTE><PRE>
+% wget <A href="eijiro.gz">eijiro.gz</A>
+% gunzip eijiro.gz
+# cp eijiro /usr/local/bin
+</PRE></BLOCKQUOTE>
+<H2>PREREQUISTICS</H2>
+以下の Perl モジュールが必要です。CPAN shell からインストールしてください。<P>
+<UL>
+<LI>Jcode
+<LI>LWP::Simple
+<LI>URI::Escape
+<LI>HTML::FormatText
+<LI>HTML::TreeBuilder
+<LI>Term::ReadLine
+</UL>
+<H2>USAGE</H2>
+コマンドラインから <CODE>eijiro 単語名</CODE> として実行。和英・英和は自動切換です。引数なしで実行するとインタラクティブモードになります。インタラクティブモードは C-d で抜けます。<P>
+検索の結果は HTMLレンダリングされ、<CODE>$ENV{PAGER}</CODE> によって表示されます。<P>
+<BLOCKQUOTE><PRE>
+% eijiro foobar
+% eijiro ほげほげ
+% eijiro
+eijiro> ほげほげ
+eijiro> ^D
+</PRE></BLOCKQUOTE>
+<H2>AUTHOR</H2>
+Tatsuhiko Miyagawa (<TT>miyagawa@cpan.org</TT>)
+

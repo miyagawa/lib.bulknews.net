@@ -1,0 +1,575 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Protecting Your Site </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Protecting Your Site 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./correct_headers.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./databases.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#The_Importance_of_Your_site_s_Se">The Importance of Your site's Security</A>
+	<LI><A HREF="#Illustrated_Security_Scenarios">Illustrated Security Scenarios</A>
+	<UL>
+
+		<LI><A HREF="#Non_authenticated_access_for_int">Non authenticated access for internal IPs, Authenticated for external IPs</A>
+	</UL>
+
+	<LI><A HREF="#Authentication_code_snippets">Authentication code snippets</A>
+	<UL>
+
+		<LI><A HREF="#Forcing_re_authentication">Forcing re-authentication</A>
+		<LI><A HREF="#OK_AUTH_REQUIRED_and_FORBIDDEN_">OK, AUTH_REQUIRED and FORBIDDEN in Authentication handlers</A>
+	</UL>
+
+	<LI><A HREF="#Apache_Auth_modules">Apache:Auth* modules</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="The_Importance_of_Your_site_s_Se">The Importance of Your site's Security</A></H1></CENTER>
+<P>
+Let's face it, your site or service can easily become a target for Internet
+``terrorists''. It can be because of something you said, the success of
+your site, or for no obvious reason whatever. If your site security is
+compromised, all your data can be deleted or important information can be
+stolen. You may risk legal action or the sack if this happens.
+
+<P>
+Your site can be paralyzed through a _simple_ <EM>denial of service</EM>
+(DoS) attack.
+
+<P>
+Whatever you do, as long as you are connected to the network your site will
+be vulnerable. Cut the connections, turn off your machine and put it into a
+safe. Now it is protected--but useless.
+
+<P>
+So what can you do?
+
+<P>
+Let's first get acquainted with some security related terminology:
+
+<DL>
+<P><DT><STRONG><A NAME="item_Authentication">Authentication</A></STRONG><DD>
+<P>
+When you want to make sure that a user is who he claims to be, you
+generally ask her for a username and a password. Once you have both, you
+can check them against your <A HREF="././databases.html#">database of username/password pairs</A>. If they match, the user has passed the
+<STRONG>Authentication</STRONG> stage. From now on if you keep the
+<A HREF="././modules.html#Apache_Session_Maintain_sessi">session</A> open all you need to do is to remember the username.
+
+<P><DT><STRONG><A NAME="item_Authorization">Authorization</A></STRONG><DD>
+<P>
+You might want to allow user <STRONG>foo</STRONG> to have access to some resource, but restrict her from accessing another
+resource, which in turn is accessible only for user <STRONG>bar</STRONG>. The process of checking access rights is called <STRONG>Authorization</STRONG>. For <STRONG>Authorization</STRONG> all you need is an authenticated username or some other attribute which you
+can authorize against. For example, you can authorize against IP number,
+allowing only your local users to use some service. But be warned that IP
+numbers or session_ids can be spoofed (forged), and that is why you should
+not do
+<STRONG>Authorization</STRONG> without <STRONG>Authentication</STRONG>.
+
+</DL>
+<P>
+Actually you've been familiar with both these concepts for a while.
+
+<P>
+When you telnet to your account on some machine you go through a login
+process (<STRONG>Authentication</STRONG>).
+
+<P>
+When you try to read some file from your file systems, the kernel checks
+the permissions on this file (<STRONG>Authorization</STRONG>). You may hear about <STRONG>Access control</STRONG> which is another name for the same thing.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Illustrated_Security_Scenarios">Illustrated Security Scenarios</A></H1></CENTER>
+<P>
+I am going to present some real world security requirements and their
+implementations.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Non_authenticated_access_for_int">Non authenticated access for internal IPs, Authenticated for external IPs</A></H2></CENTER>
+<P>
+An <STRONG>Extranet</STRONG> is very similar to an <STRONG>Intranet</STRONG>, but at least partly accessible from outside your organization. If you run
+an Extranet you might want to let your internal users have unrestricted
+access to your web server. If these same users call from outside your
+organization you might want to make sure that they are in fact your
+employees.
+
+<P>
+These requirements are achieved very simply by putting the IP patterns of
+the organization in a Perl Access Handler in an
+<CODE>.htaccess</CODE> file. This sets the REMOTE_USER environment variable to the organization's
+generic username. Scripts can test the
+<CODE>REMOTE_USER</CODE> environment variable to determine whether to allow unrestricted access or
+else to require authentication.
+
+<P>
+Once a user passes the authentication stage, either bypassing it because of
+his IP address or after entering a correct login/password pair, the
+<CODE>REMOTE_USER</CODE> variable is set. Then we can talk about authorization.
+
+<P>
+Let's see the implementation of the authentication stage. First we modify
+&lt;httpd.conf&gt;:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule My::Auth
+  
+  &lt;Location /private&gt;
+    PerlAccessHandler My::Auth::access_handler
+    PerlSetVar Intranet &quot;10.10.10.1 =&gt; userA, 10.10.10.2 =&gt; userB&quot;
+    PerlAuthenHandler My::Auth::authen_handler
+    AuthName realm
+    AuthType Basic
+    Require valid-user
+    Order deny, allow
+    Deny from all
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the code of My/Auth.pm:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    sub access_handler {
+  
+        my $r = shift;
+  
+        unless ($r-&gt;some_auth_required) {
+                $r-&gt;log_reason(&quot;No authentication has been configured&quot;);
+                return FORBIDDEN;
+        }
+        # get list of IP addresses
+        my %ips = split /\s*(?:=&gt;|,)\s*/, $r-&gt;dir_config(&quot;Intranet&quot;);
+  
+        if (my $user = $ips{$r-&gt;connection-&gt;remote_ip}) {
+  
+                # update connection record
+                $r-&gt;connection-&gt;user($user);
+  
+                # do not ask for a password
+                $r-&gt;set_handlers(PerlAuthenHandler =&gt; [\&amp;OK]);
+        }
+        return OK;
+    }
+     
+    sub authen_handler {
+  
+        my $r = shift;
+  
+        # get user's authentication credentials
+        my ($res, $sent_pw) = $r-&gt;get_basic_auth_pw;
+        return $res if $res != OK;
+        my $user = $r-&gt;connection-&gt;user;
+  
+        # authenticate through DBI
+        my $reason = authen_dbi($r, $user, $sent_pw);
+  
+        if ($reason) {
+                $r-&gt;note_basic_auth_failure;
+                $r-&gt;log_reason($reason, $r-&gt;uri);
+                return AUTH_REQUIRED;
+        }
+        return OK;
+    }
+     
+    sub authen_dbi{
+      my ($r, $user, $sent_pw) = @_;
+  
+      # validate username/passwd
+  
+      return 0 if (*PASSED*) # replace with real code!!!
+  
+      return &quot;Failed for X reason&quot;;
+  
+    }
+    # don't forget 1;
+    1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can implement your own <CODE>authen_dbi()</CODE> routine, or you can replace
+<CODE>authen_handler()</CODE> with an existing authentication handler such as
+<CODE>Apache::AuthenDBI</CODE>.
+
+<P>
+If one of the IP addresses is matched, <CODE>access_handler()</CODE> sets
+<CODE>REMOTE_USER</CODE> to be either <CODE>userA</CODE> or <CODE>userB</CODE>.
+
+<P>
+If neither IP address is matched, <CODE>PerlAuthenHandler</CODE> will not be set to OK, and the Authentication stage will ask the user for a
+login and password.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Authentication_code_snippets">Authentication code snippets</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Forcing_re_authentication">Forcing re-authentication</A></H2></CENTER>
+<P>
+To force an authenticated user to reauthenticate just send the following
+header to the browser:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  WWW-Authenticate: Basic realm=&quot;My Realm&quot;
+  HTTP/1.0 401 Unauthorized</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will pop-up (in Netscape at least) a window saying
+<STRONG>Authorization Failed.  Retry?</STRONG> with <STRONG>OK</STRONG> and a <STRONG>Cancel</STRONG> buttons. When that window pops up you know that the password has been
+discarded. If the user hits the <STRONG>Cancel</STRONG> button the username will also be discarded. If she hits the <STRONG>OK</STRONG> button, the authentication window will be brought up again with the
+previous username already in place.
+
+<P>
+In the Perl API you would use the <CODE>note_basic_auth_failure()</CODE>
+method to force reauthentication.
+
+<P>
+This may not work! The browser's behaviour is in no way guaranteed.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="OK_AUTH_REQUIRED_and_FORBIDDEN_">OK, AUTH_REQUIRED and FORBIDDEN in Authentication handlers</A></H2></CENTER>
+<P>
+When your authentication handler returns OK, it means that user has
+correctly authenticated and now <CODE>$r-&gt;connection-&gt;user</CODE> will have the username set for subsequent requests. For <CODE>Apache::Registry</CODE>
+and friends, where the environment variable settings weren't erased, an
+equivalent <CODE>$ENV{REMOTE_USER}</CODE> variable will be available. 
+
+<P>
+The password is available only through the Perl API with the help of the
+<CODE>get_basic_auth_pw()</CODE> method.
+
+<P>
+If there is a failure, unless it's the first time, the <CODE>AUTH_REQUIRED</CODE>
+flag will tell the browser to pop up an authentication window, to try
+again. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   my($status, $sent_pw) = $r-&gt;get_basic_auth_pw;
+   unless($r-&gt;connection-&gt;user and $sent_pw) {
+       $r-&gt;note_basic_auth_failure;
+       $r-&gt;log_reason(&quot;Both a username and password must be provided&quot;);
+       return AUTH_REQUIRED;
+   }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Let's say that you have a mod_perl authentication handler, where the user's
+credentials are checked against a database. It returns either
+<CODE>OK</CODE> or <CODE>AUTH_REQUIRED</CODE>. One of the possible authentication failure case might happen when the
+username/password are correct, but the user's account has been suspended
+temporarily.
+
+<P>
+If this is the case you would like to make the user aware of this, by
+displaying a page, instead of having the browser pop up the authentication
+dialog again. You will also refuse authentication, of course.
+
+<P>
+The solution is to return <CODE>FORBIDDEN</CODE>, but before that you should set a custom error page for this specific
+handler, with help of
+<CODE>$r-&gt;custom_response</CODE>. It looks something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(:common);
+  $r-&gt;custom_response(SERVER_ERROR, &quot;/errors/suspended_account.html&quot;);
+   
+  return FORBIDDEN if $suspended;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Auth_modules">Apache:Auth* modules</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_PerlAuthenHandler">PerlAuthenHandler's</A></STRONG>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::AuthAny           Authenticate with any username/password 
+  Apache::AuthenCache       Cache authentication credentials        
+  Apache::AuthCookie        Authen + Authz via cookies              
+  Apache::AuthenDBI         Authenticate via Perl's DBI             
+  Apache::AuthExpire        Expire Basic auth credentials           
+  Apache::AuthenGSS         Generic Security Service (RFC 2078)     
+  Apache::AuthenIMAP        Authentication via an IMAP server       
+  Apache::AuthenPasswdSrv   External authentication server          
+  Apache::AuthenPasswd      Authenticate against /etc/passwd        
+  Apache::AuthLDAP          LDAP authentication module              
+  Apache::AuthPerLDAP       LDAP authentication module (PerLDAP)    
+  Apache::AuthenNIS         NIS authentication                      
+  Apache::AuthNISPlus       NIS Plus authentication/authorization   
+  Apache::AuthenRaduis      Authentication via a Radius server      
+  Apache::AuthenSmb         Authenticate against NT server          
+  Apache::AuthenURL         Authenticate via another URL            
+  Apache::DBILogin          Authenticate to backend database        
+  Apache::DCELogin          Obtain a DCE login context              
+  Apache::PHLogin           Authenticate via a PH database          
+  Apache::TicketAccess      Ticket based access/authentication      </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_PerlAuthzHandler">PerlAuthzHandler's</A></STRONG>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::AuthCookie        Authen + Authz via cookies              
+  Apache::AuthzAge          Authorize based on age                  
+  Apache::AuthzDCE          DFS/DCE ACL based access control        
+  Apache::AuthzDBI          Group authorization via Perl's DBI      
+  Apache::AuthzGender       Authorize based on gender               
+  Apache::AuthzNIS          NIS authorization                       
+  Apache::AuthzPasswd       Authorize against /etc/passwd           
+  Apache::AuthzSSL          Authorize based on client cert          
+  Apache::RoleAuthz         Role-based authorization                </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_PerlAccessHandler">PerlAccessHandler's</A></STRONG>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::AccessLimitNum    Limit user access by number of requests 
+  Apache::BlockAgent        Block access from certain agents        
+  Apache::DayLimit          Limit access based on day of week       
+  Apache::IPThrottle        Limit bandwith consumption by IP        
+  Apache::RobotLimit        Limit access of robots                  
+  Apache::SpeedLimit        Control client request rate             </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./correct_headers.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./databases.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 08/20/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

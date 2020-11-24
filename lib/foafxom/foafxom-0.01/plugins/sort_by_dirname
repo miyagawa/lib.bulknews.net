@@ -1,0 +1,12 @@
+package sort_by_dirname;
+
+sub start { 1 }
+
+sub sort {
+    return sub {
+	my($files_ref, $others_ref) = @_;
+	return sort keys %$files_ref; # lexical sort
+    }
+}
+
+1;

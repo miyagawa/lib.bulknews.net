@@ -1,0 +1,18 @@
+foafxom - set of blosxom plugins and flavours for FOAF
+
+* Install
+
+Edit blosxom script (and you'd like to rename it to 'foaf'), move it
+to cgi executable directory and just access it from your favourite web
+browser. Your friends, interests and other profiles can be edited as a
+blog entry of blosxom.  See samples directory for how to manage your
+data. samples directory also has a suitable 'rdf' flavours to display
+your blog as FOAF.
+
+* Copyright
+
+  foafxom: Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+  blosxom: Rael Dornafest http://www.blosxom.com/license.html
+
+  This software is free software; you can redistribute it and/or modify it
+  under the same terms as Perl itself.

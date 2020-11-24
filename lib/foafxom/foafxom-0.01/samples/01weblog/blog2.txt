@@ -1,0 +1,2 @@
+Blog2
+meta-resource: http://blog2.example.net/

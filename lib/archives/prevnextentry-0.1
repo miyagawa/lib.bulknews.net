@@ -1,0 +1,58 @@
+package prevnextentry;
+use strict;
+use vars qw($put_after_entry $prev_entry $next_entry);
+
+$put_after_entry = 1; # 0 if you want it *before* entry
+$prev_entry;
+$next_entry;
+
+use FileHandle;
+
+sub start {
+    return unless $blosxom::path_info =~ /\./;
+    while (<DATA>) {
+	last if /^__END__/;
+	my($flavour, $comp, $text) = split ' ', $_, 3;
+	$text =~ s/\\n/\n/g;
+	$blosxom::template{$flavour}{$comp} = $text;
+    }
+    return 1;
+}
+
+sub story {
+    my($pkg, $path, $filename, $story_ref, $title_ref, $body_ref) = @_;
+    my @path_info = $blosxom::sort->($blosxom::entries->());
+    my %path2idx = map { $path_info[$_] => $_ } 0..$#path_info;
+    my $index = $path2idx{"$blosxom::datadir$path/$filename.$blosxom::file_extension"};
+
+    $prev_entry = make_link($index + 1, \@path_info) if $index < $#path_info;
+    $next_entry = make_link($index - 1, \@path_info) if $index;
+
+    my $template = $blosxom::template->('', 'prevnext', $blosxom::flavour);
+    my $links = $blosxom::interpolate->($template);
+
+    $$story_ref = $put_after_entry ? $$story_ref . $links : $links . $$story_ref;
+}
+
+sub make_link {
+    my($array_index, $pi) = @_;
+    my $file = $pi->[$array_index];
+
+    my($path, $fn) = $file =~ m!^$blosxom::datadir/(?:(.*)/)?(.*)\.$blosxom::file_extension!;
+    my $title = '';
+
+    my $fh = FileHandle->new();
+    if (-f $file && $fh->open("< $file")) {
+	chomp($title = <$fh>);
+	$fh->close;
+    }
+
+    return qq(<a href="$blosxom::url/$path/$fn.$blosxom::flavour">$title</a>);
+}
+
+
+1;
+__DATA__
+html prevnext <div class="prevnext">?{$prevnextentry::prev_entry Prev: $prevnextentry::prev_entry}<br />?{$prevnextentry::next_entry Next: $prevnextentry::next_entry}</div>
+__END__
+

@@ -1,0 +1,37 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.28
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. News Flash ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Larry Wall の黙示録シリーズ Part 3
+
+  Apocalypse 3 
+  http://www.perl.com/pub/a/2001/10/02/apocalypse3.html
+
+ようやく、でました。今回は operator が題材になっています。
+
+
+また、最近 SysAdmin Magazine の一部になった(らしい) The Perl Journal 
+の Back Issue のコンテンツがすべてオンラインで読めるようになりました。
+
+  http://www.samag.com/tpj/issues/
+
+
+2. Documetation in Japanese ＿＿＿＿＿＿＿＿＿＿＿
+
+Perl モジュールをつくって CPAN にコントリビュートするにはどうすればい
+いのでしょう。Perl 5.7 以降に付属している perlnewmod.pod にそのステッ
+プが詳しく解説されています。
+
+  http://bulknews.net/lib/doc-ja/perlnewmod.ja.html
+
+に和訳を載せてみました。CPAN に公開したいモジュールをお持ちの方は、ご
+一読を。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

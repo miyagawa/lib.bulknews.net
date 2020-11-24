@@ -1,0 +1,407 @@
+<HTML>
+<HEAD>
+<LINK REL="stylesheet" href="perldoc.css">
+<TITLE>NAME</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#_">導入</A>
+	<LI><A HREF="#_">クロスサイトスクリプティングとは何か</A>
+	<LI><A HREF="#_">ソリューション</A>
+	<LI><A HREF="#mod_perl_">mod_perl でのソリューション</A>
+	<LI><A HREF="#Tainting_Apache_Request_A">Tainting + Apache::Request.... Apache::TaintRequest</A>
+	<LI><A HREF="#_">結論</A>
+	<LI><A HREF="#_">リソース</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+Preventing Cross-site Scripting Attacks
+
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+Published on <STRONG>Perl.com</STRONG> <A
+HREF="http://www.perl.com/pub/a/2002/02/20/css.html">http://www.perl.com/pub/a/2002/02/20/css.html</A>
+
+
+<P>
+<STRONG>By</STRONG> Paul Lindner (Translation by Tatsuhiko Miyagawa)
+
+<P>
+<HR>
+<H1><A NAME="_">導入</A></H1>
+<P>
+クロスサイトスクリプティングアタックは、今日の Web デベロッパーが直面
+している、見逃せないセキュリティ問題の1つです。ウェブサイトが脆弱にな
+るのは、ユーザが submit したコンテンツを、悪意あるタグについてチェック
+することなく表示してしまうときです。
+
+<P>
+幸運にも、Perl と mod_perl を使えばこの問題に簡単に対処することができ
+るのです。こうした問題に対応するビルトインについて解説し、新しい mod_perl
+モジュール <EM>Apache::TaintRequest</EM> を紹介します。このモジュー ルを使うと、perl の強力な taint ルールを HTML
+に適用して mod_perl アプ リケーションをセキュアに保つことができます。
+
+<P>
+<HR>
+<H1><A NAME="_">クロスサイトスクリプティングとは何か</A></H1>
+<P>
+近頃、Webサイトのセキュリティ問題に関するレポートがニュースを騒がせて
+います。最近では以下のようなぞっとするニュースがヘッドラインにでていま
+した: Microsoft Wallet のセキュリティホール, Schwab フィナンシャルサイ
+トの脆弱性、Webサービスを脅かす攻撃。こうした問題の根源となっているの は、<EM>クロスサイトスクリプティング</EM> アタックです。サーバのオペレーショ ンシステムや
+Webサーバソフトウェアのホールを突くのではなく、サイトを訪
+れるユーザを攻撃の対象とします。ユーザをだまして、攻撃対象のサイトの動
+的フォームに、スクリプトコード (JavaScript, Jscript など) をサブミット
+させます。対象のWebサイトが入力のスクリプトコードをチェックしないと、
+そのまま通過してユーザのブラウザにコードを表示してしまい、攻撃が行われ
+るのです。
+
+<P>
+以下のURLをみてください。
+
+<P>
+<CODE>http://www.example.com/search.pl?text=&amp;lt;script&amp;gt;alert(document.cookie)&amp;lt;/script&amp;gt;</CODE>
+
+
+
+
+<P>
+アタッカーがこうしたリンクにユーザを誘導して、Web アプリケーションがこ
+の入力をバリデートしていないと、現在の cookie の内容がブラウザ上にポッ
+プアップされます。このサンプルは無害ですが、アタッカーができることはこ
+れだけではありません。パスワードを盗んだり、スタートページを書き換えた
+り、別の Web サイトに誘導させたりといったことができます。
+
+<P>
+さらに悪いことに、こうしたリンクに誘導させる必要すらないのです。アタッ
+カーがあなたのアプリケーションにHTMLを表示させることができれば、それだ
+けで問題です。<STRONG>IMG</STRONG> タグと <STRONG>IFRAME</STRONG> タグを使えば、HTMLが表示された瞬
+間に別のURLをロードすることができます。たとえば、以下のHTML断片は、
+BadTrans ワームが送出するもおのです。このワームは IFRAME の「見た瞬間
+にロードする」という性質を使って、Outlook と Outlook Express を攻撃し
+ます。
+
+<P>
+<PRE>  --====_ABC1234567890DEF_====
+  Content-Type: multipart/alternative;
+           boundary=&quot;====_ABC0987654321DEF_====&quot;
+</PRE>
+<P>
+<PRE>  --====_ABC0987654321DEF_====
+  Content-Type: text/html;
+           charset=&quot;iso-8859-1&quot;
+  Content-Transfer-Encoding: quoted-printable
+</PRE>
+<P>
+<PRE>  &lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY bgColor=3D#ffffff&gt;
+  &lt;iframe src=3Dcid:EA4DMGBP9p height=3D0 width=3D0&gt;
+  &lt;/iframe&gt;&lt;/BODY&gt;&lt;/HTML&gt;
+  --====_ABC0987654321DEF_====--
+</PRE>
+<P>
+<PRE>  --====_ABC1234567890DEF_====
+  Content-Type: audio/x-wav;
+           name=&quot;filename.ext.ext&quot;
+  Content-Transfer-Encoding: base64
+  Content-ID: &lt;EA4DMGBP9p&gt;
+</PRE>
+<P>
+このサンプルでは、ターゲットとなるコンピュータ上でコードを実行すること
+になります。アタッカーがこのようなHTMLを表示させるのは上述したような
+URLを使って、簡単にできます:
+
+<P>
+<CODE>&amp;lt;iframe
+src=&quot;http://www.example.com/search.pl?text=&amp;lt;script&amp;gt;alert(document.cookie)&amp;lt;/script&amp;gt;&quot;&amp;gt;</CODE>
+
+
+
+
+<P>
+``クロスサイトスクリプティング'' の ``クロスサイト'' の部分が効いてくるの
+は、ウェブブラウザの Cookie に対する制約を扱うときです。モダンなブラウ
+ザに搭載されているJavaScript エンジンは、Cookie を生成したサイトからし
+か、その Cookie にアクセスすることはできません。ちょっとしたまずいスク
+リプトを利用することによって、アタッカーはこの制約をバイパスすることが
+できるのです。
+
+<P>
+Perl にしろ何にしろ、まずいコードがターゲットとなります。クロスサイト
+スクリプティングアタックを防ぐカギは、Webブラウザからのデータを絶対に、
+信頼しないことです。すべての入力データはあやしいと思ってのぞまなくては
+なりません。
+
+<P>
+<HR>
+<H1><A NAME="_">ソリューション</A></H1>
+<P>
+こうした問題を Perl や mod_perl を用いたシステムで解決するには、いくつ
+か方法があります。どれもとてもシンプルなもので、ユーザの入力がブラウザ
+に表示される可能性がある場合には、必ず使うべきです。
+
+<P>
+以下のスクリプト <EM>search.pl</EM> をみてください。シンプルな CGIスクリプト で、'text'
+というパラメータを受け取って、それを表示します。
+
+<P>
+<PRE>        #!/usr/bin/perl
+        use CGI;
+</PRE>
+<P>
+<PRE>        my $cgi = CGI-&gt;new();
+        my $text = $cgi-&gt;param('text');
+</PRE>
+<P>
+<PRE>        print $cgi-&gt;header();
+        print &quot;You entered $text&quot;;
+</PRE>
+<P>
+このスクリプトはサブミットされたデータをそのまま表示しているため、クロ
+スサイトスクリプティングアタックに対して脆弱です。この脆弱性をとりのぞ
+くには、入力のバリデーションを組み込むか、表示する前に HTMLエスケープ
+されるようにします。
+
+<P>
+バリデーションを組み込むには、以下のコードを出力の前に付け加えます。こ
+のコードは英数字とスペース以外をすべて除去します。
+
+<P>
+<PRE>        $text =~ s/[^A-Za-z0-9 ]*/ /g;
+</PRE>
+<P>
+こうした入力バリデーションははっきりいって面倒です。もう1つの解法は、
+サブミットされたデータをHTMLエスケープすることです。libwww-perl の
+CPANディストリビューションに含まれている HTML::Entities モジュールがこ
+の機能をもっています。このモジュールは、HTML文字をHTMLエンティティ参照
+にエンコードします。たとえば、<STRONG>&lt;</STRONG> は <STRONG>&lt;</STRONG> に、<STRONG>"</STRONG> は 
+<STRONG>&quot;</STRONG> に、といった具合に変換されます。<EM>search.pl</EM> にこの機能を付 け加えると以下のようになります。
+
+<P>
+<PRE>        #!/usr/bin/perl
+        use CGI;
+        use HTML::Entities;
+</PRE>
+<P>
+<PRE>        my $cgi = CGI-&gt;new();
+        my $text = $cgi-&gt;param('text');
+</PRE>
+<P>
+<PRE>        print $cgi-&gt;header();
+        print &quot;You entered &quot;, HTML::Entities::encode($text);
+</PRE>
+<P>
+<HR>
+<H1><A NAME="mod_perl_">mod_perl でのソリューション</A></H1>
+<P>
+上のような解法は mod_perl でのプログラミングでも同様に有効です。
+Apache::Registry スクリプトや mod_perl ハンドラも同じようにしてクロス
+サイトスクリプティングを防ぐことがでっきます。高いパフォーマンスを得る
+には、HTML::Entities::encode() ではなく、mod_perl に付属している、より
+高速な Apache::Util::escape_html() を使うとよいでしょう。<EM>search.pl</EM> 
+の Apache::Registry スクリプトバージョンを以下に示します。
+
+<P>
+<PRE>        use Apache::Util;
+        use Apache::Request;
+</PRE>
+<P>
+<PRE>        my $apr = Apache::Request-&gt;new(Apache-&gt;request);
+</PRE>
+<P>
+<PRE>        my $text = $apr-&gt;param('text');
+</PRE>
+<P>
+<PRE>        $r-&gt;content_type(&quot;text/html&quot;);
+        $r-&gt;send_http_header;
+        $r-&gt;print(&quot;You entered &quot;, Apache::Util::html_encode($text));
+</PRE>
+<P>
+そのうち、Apache::Util::html_encode() を何度も何度もタイプするのがおっ
+くうになってくるでしょう。とくに、ある場所では入力バリデーションをして
+おり、他ではしていない、というような場合に。こうした状況をシンプルにす
+るには、Apache::TaintRequest モジュールを使ってみてください。このモジュー
+ルは CPAN や mod_perl Developer's Cookbook のサイトから入手できます。
+
+<P>
+Apache::TaintRequest はこうした退屈な HTMLエスケープ処理を自動化します。
+このモジュールは、mod_perl の Apache モジュールの print メカニズムをオー
+バーライドします。<EM>print</EM> メソッドでテキストが taint （汚染している） かどうかチェックします。taint
+であった場合には、出力する前に HTML エス ケープします。
+
+<P>
+Perl には、taint-mode として知られる、ビルトインのセキュリティチェック
+機能があります。このチェックによって、プログラムの外側からやってきた
+<EM>tainted</EM> なデータがそのままファイルやプロセス、ディレクトリに対して
+実行されることを防御することができます。Apache::TaintRequest はこの<EM>危険な</EM>
+操作リストを拡張して、Web クライアントにHTMLを表示することも追
+加します。データを <EM>untaint</EM> （汚染をとりのぞく）するには、通常の正規 表現で処理するだけです。Tainting
+は、Perl Web デベロッパーにとって、最
+も強力なセキュリティガードになります。<STRONG>perlsec</STRONG> ドキュメントも参照し
+て、あなたが書くWebアプリケーションすべてに適用してください。
+
+<P>
+Apache::TaintRequest を有効にするには、まず以下のディレクティブを
+httpd.conf に追加します。
+
+<P>
+<PRE>       PerlTaintCheck on    
+</PRE>
+<P>
+This activates taint mode for the entire mod_perl server.
+
+<P>
+これによって、mod_perl サーバ全体に taint モードが有効になります。
+
+<P>
+つぎにやるべきことは、スクリプトやハンドラを、Apache::Request のかわり に
+Apache::TaintRequest を使うように修正することです。上のスクリプトは
+以下のようになります:
+
+<P>
+<PRE>        use Apache::TaintRequest;
+</PRE>
+<P>
+<PRE>        my $apr = Apache::TaintRequest-&gt;new(Apache-&gt;request);
+</PRE>
+<P>
+<PRE>        my $text = $apr-&gt;param('text');
+</PRE>
+<P>
+<PRE>        $r-&gt;content_type(&quot;text/html&quot;);
+        $r-&gt;send_http_header;
+</PRE>
+<P>
+<PRE>        $r-&gt;print(&quot;You entered &quot;, $text);
+</PRE>
+<P>
+<PRE>        $text =~ s/[^A-Za-z0-9 ]//;
+        $r-&gt;print(&quot;You entered &quot;, $text);
+</PRE>
+<P>
+スクリプトではまず tainted なフォームデータ 'text' を <CODE>$text</CODE>
+に格納しま す。このデータを出力すると、自動的に HTML
+エスケープされます。次に、デー
+タに対してバリデーションを実行します。その次の print 文では、自動的に
+HTMLエスケープされることはありません。
+
+<P>
+<HR>
+<H1><A NAME="Tainting_Apache_Request_A">Tainting + Apache::Request.... Apache::TaintRequest</A></H1>
+<P>
+Apache::TaintRequest の実装コードはとてもシンプルです。Apache::Request
+モジュールのサブクラスで、フォームフィールドと出力の処理を提供します。
+<EM>print</EM> メソッドをオーバーライドして、データをHTMLエスケープします。
+<EM>new</EM> メソッドもオーバーライドして、Apache の TIEHANDLE インタフェー スを利用して
+STDOUT への出力も <CODE>print()</CODE> で処理できるようにします。
+
+<P>
+出力データを受け取ったら、それが 汚染されているかどうかを判別する必要
+があります。ここでは <EM>Taint</EM> モジュール (CPAN から入手できます) が便 利です。<EM>print</EM> メソッドの中で、このモジュールを使って、文字列が汚染
+されているかどうか、HTMLエスケープする必要があるかをチェックします。汚
+染されている場合には、mod_perl の Apache::Util::html_escape() で HTML
+エスケープします。
+
+<P>
+<PRE> package Apache::TaintRequest;
+</PRE>
+<P>
+<PRE> use strict;
+ use warnings;
+ 
+ use Apache;
+ use Apache::Util qw(escape_html);
+ use Taint qw(tainted);
+ 
+ $Apache::TaintRequest::VERSION = '0.10';
+ @Apache::TaintRequest::ISA = qw(Apache);
+ 
+ sub new {
+   my ($class, $r) = @_;
+ 
+   $r ||= Apache-&gt;request;
+ 
+   tie *STDOUT, $class, $r;
+ 
+   return tied *STDOUT;
+ }
+ 
+</PRE>
+<P>
+<PRE> sub print {
+   my ($self, @data) = @_;
+ 
+   foreach my $value (@data) {
+     # Dereference scalar references.
+     $value = $$value if ref $value eq 'SCALAR';
+ 
+     # Escape any HTML content if the data is tainted.
+     $value = escape_html($value) if tainted($value);
+   }
+ 
+   $self-&gt;SUPER::print(@data);
+ }
+</PRE>
+<P>
+モジュールの最後に、<EM>new()</EM> メソッドで使っているTIEHANDLE インターフェー
+スを定義する必要があります。以下のコードで <EM>TIEHANDLE</EM> と <EM>PRINT</EM> メ ソッドを実装しています。
+
+<P>
+<PRE> 
+ sub TIEHANDLE {
+   my ($class, $r) = @_;
+ 
+   return bless { r =&gt; $r }, $class;
+ }
+ 
+ sub PRINT {
+   shift-&gt;print(@_);
+ }
+</PRE>
+<P>
+この結果、汚染されたデータはエスケープされ、汚染されていないデータはそ
+のままWebクライアントに返されます。
+
+<P>
+<HR>
+<H1><A NAME="_">結論</A></H1>
+<P>
+クロスサイトスクリプティングは深刻な問題です。解決策は、入力チェックと
+HTMLエスケープであってとてもシンプルですが、すべての場合に適用しなくて
+はなりません。1つでもフォームフィールドのチェックを忘れると、なにもチェッ
+クをしていないのと同様にセキュアでなくなってしまいます。
+
+<P>
+つねに、すべてのデータをチェックしていることを保証するために
+Apache::TaintRequest は開発されました。Perl の強力なデータ tainting 機
+能を使って、バリデートされていない入力データが出力されるときには、自動
+でHTMLエスケープします。
+
+<P>
+<HR>
+<H1><A NAME="_">リソース</A></H1>
+<UL>
+<LI><STRONG><A NAME="item_CERT">CERT Advisory CA-2000-02 Malicious HTML Tags Embedded in Client
+Web Requests</A></STRONG>
+<LI><STRONG><A NAME="item_The">The mod_perl Developer's Cookbook</A></STRONG>
+<LI><STRONG><A NAME="item_Download">Download Apache::TaintRequest</A></STRONG>
+</UL>
+<P>
+<STRONG>Perl.com</STRONG> Compilation Copyright &copy; 1998-2000 O'Reilly &amp; Associates, Inc.
+
+</BODY>
+
+</HTML>

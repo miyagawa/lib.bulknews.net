@@ -1,0 +1,132 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.25
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. O'Reilly Open Source Convention ＿＿＿＿＿＿＿＿
+
+7/23-27 に アメリカ San Diego で O'Reilly Open Source Convention が行
+われました。Perl, Apache, Linux, BSD, Python, MySQL など、様々なオープ
+ンソーステクノロジーに関するカンファレンスが催されたようです (筆者は行っ
+てません。行きたかったです)。
+
+今年の Perl Conference 5 はこの Open Source Convention の一環として開
+催されました。
+
+
+2. The State of the Onion 5 ＿＿＿＿＿＿＿＿＿＿＿
+
+TPC の keynote speech は Larry Wall の State of the Onion。今年の内容
+は Perl.com のサイトで紹介されている通り、Perl 6 についてが中心。
+
+今年の talk はいつもと違って、本当に Perl の話をしたようです。しかも、
+Lightning Talks 形式で、55秒 x 33個の Perl6 に関する talk による内容だっ
+たようです。ベルを鳴らしたのは Larry の娘 Heidi だったとか。
+
+* -> は . に
+
+すでに Apocalypse で明らかになっている通り、矢印演算子 -> は . (ドット)
+になります。 $obj = Class.new; というわけです。今まで . は文字列連結演
+算子として使われてきましたので、それの代わりを考えなくてはなりません。
+これは多分 ~(チルダ) になるだろう、ということです。
+
+  $obj = Class.new;
+  $string = "My name is " ~ $name ~ ".\n";
+
+
+* switch 文
+
+待望の(?) switch 文の登場です。でも、シンタクスは switch ではありませ
+ん。英語らしさにこだわる Larry の手にかかると、switch ... case は、
+given ... when になります。
+
+
+* local 
+
+local は temp と改名されます。たしかに Perl 5 になってからの local は、
+本来のローカルなスコープとしての役割は my に譲っており、ハッシュの一要
+素や特殊変数を一時的に変更するために使われることが多く、この改名は妥当
+といえますね。
+
+  temp $/ = undef;
+
+
+* pseudo-hash must die!
+
+perl 5.5 から実験的に導入された psuedo-hash は廃止されます。配列のよう
+にコンパクトなハッシュは別の方法で提供されるようです。
+
+
+* デリファレンス
+
+デリファレンスはスカラ変数の直後にカッコをつけることで行います。
+$foo->[0] が $foo[0] になるというわけです。これは Damian Conway の 
+Exegesis 2 を読んだ人ならわかりますよね。
+
+  http://bulknews.net/lib/doc-ja/exegesis2.ja.html
+
+
+* クラスとモジュール
+
+クラスとモジュールには明確な区別がつけられるようになります。(具体的な
+記述はわかりませんが) また、クラスやモジュールの中に、サブパッケージを
+つくることができます。Unix の相対パスのような記述法ができるようになり、
+長いパッケージ名 Myclass::SubclassA::SubclassB をタイプする必要はなく
+なるそうです。
+
+
+* クラスとメタデータ
+
+モジュール内にアトリビュートを宣言すると、クラス内部では変数として扱う
+ことが出来ます。クラス外部からはアクセサメソッドによってアクセスします。
+こういった仕組みが言語レベルで提供されるようになるというのは、OO に対
+するアプローチとしては大きな変化といえそうです。
+
+
+* スレッド
+
+Perl 6 の基本的なスレッドモデルは、5.6 で採用された ithread (インタプ
+リタベースのスレッド) になりそうです。モジュールは基本的にスレッドセー
+フでなければならず、モジュール内のメタデータによってスレッド安全性を宣
+言する必要があります。モジュールを作る人にとっては気になるところですね。
+
+
+* Perl parser
+
+Perl でかかれた Perl パーサができます。eval をパーザに渡して、小さな 
+Virtual Machine 上で実行させるとか、いろんなことが出来そうです。
+
+
+* POD
+
+POD 中にテストを書くことが出来るようになります。これは以前紹介した 
+Pod::Tests でしょうね。
+
+  http://search.cpan.org/search?dist=Pod-Tests
+
+
+* 特殊変数の扱い
+
+$_ はそのまま残ります。$( はなくなるので、$(...) が使えるようになると
+いうことです。
+
+
+
+
+以上、かいつまんで紹介しましたが、詳しい内容は、Perl.com の Simon
+Cozens さんの article をご覧ください。
+
+  http://www.perl.com/pub/a/2001/07/25/onion.html
+
+また、use Perl; の Nathan Takington さんの journal から、mp3 で講演内
+容を聞くことが出来ます。
+
+  http://use.perl.org/journal.pl?op=display&uid=29
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

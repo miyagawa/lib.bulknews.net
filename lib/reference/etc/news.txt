@@ -1,0 +1,3 @@
+http://search.cpan.org/recent
+http://use.perl.org/
+http://news.perl.org/

@@ -1,0 +1,8 @@
+Revision history for Perl extension WebService::Bloglines
+
+0.02  Thu Sep 30 19:54:36 JST 2004
+	- Added XML::RSS to PREREQ_PM
+	- Encode module is now optional for Perl < 5.8
+
+0.01  Mon Aug 16 22:27:32 2004
+	- original version

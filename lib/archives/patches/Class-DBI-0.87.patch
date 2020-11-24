@@ -1,0 +1,256 @@
+diff -ruP Class-DBI-0.87.orig/MANIFEST Class-DBI-0.87/MANIFEST
+--- Class-DBI-0.87.orig/MANIFEST	Fri Mar 29 21:02:14 2002
++++ Class-DBI-0.87/MANIFEST	Tue Apr  9 00:08:48 2002
+@@ -19,6 +19,7 @@
+ t/12-filter.t
+ t/13-constraint.t
+ t/14-might_have.t
++t/15-multikeys.t
+ t/testlib/Actor.pm
+ t/testlib/Blurb.pm
+ t/testlib/CDBase.pm
+@@ -30,3 +31,4 @@
+ t/testlib/MyFoo.pm
+ t/testlib/MyVideo.pm
+ t/testlib/OtherFilm.pm
++t/testlib/MyMulti.pm
+diff -ruP Class-DBI-0.87.orig/lib/Class/DBI.pm Class-DBI-0.87/lib/Class/DBI.pm
+--- Class-DBI-0.87.orig/lib/Class/DBI.pm	Sat Mar 30 23:47:51 2002
++++ Class-DBI-0.87/lib/Class/DBI.pm	Tue Apr  9 00:01:09 2002
+@@ -30,17 +30,17 @@
+ __PACKAGE__->set_sql('Flesh', <<'');
+ SELECT %s
+ FROM   %s
+-WHERE  %s = ?
++WHERE  %s
+ 
+ __PACKAGE__->set_sql('commit', <<"");
+ UPDATE %s
+ SET    %s
+-WHERE  %s = ?
++WHERE  %s
+ 
+ __PACKAGE__->set_sql('DeleteMe', <<"");
+ DELETE
+ FROM   %s
+-WHERE  %s = ?
++WHERE  %s
+ 
+ __PACKAGE__->set_sql('Nextval', <<'');
+ SELECT NEXTVAL ('%s')
+@@ -122,12 +122,21 @@
+   my $class = shift;
+   my $group = $class->__columns;
+   if (my $col = $group->{Primary}) {
+-    return $col->[0];
++    return wantarray ? @$col : $col->[0];
+   }
+   return ($class->columns(Primary => ($class->essential)[0]))[0];
+ }
+ 
+-sub id { my $self = shift; $self->get($self->primary) }
++sub _identifier_clause {
++  my $proto = shift;
++  return join ' AND ', map { "$_ = ?" } $proto->primary;
++}
++
++sub id {
++    my $self = shift;
++    my @ids = $self->get($self->primary);
++    return wantarray ? @ids : $ids[0];
++}
+ 
+ sub essential {
+   my $class = shift;
+@@ -260,8 +269,8 @@
+   $class->has_column($_) or croak "$_ is not a column of $class" 
+     foreach keys %$data;
+ 
+-  my $primary = $class->primary;
+-  $data->{$primary} ||= $class->_next_in_sequence if $class->sequence;
++  my @primary = $class->primary;
++  $data->{$primary[0]} ||= $class->_next_in_sequence if $class->sequence;
+ 
+   $class->normalize_hash($data);
+   {
+@@ -273,7 +282,7 @@
+ 
+   my $self = $class->_init;
+   $self->_insert_row($data) or croak "Can't insert row";
+-  $self->{$primary} = $data->{$primary};
++  @{$self}{@primary} = @{$data}{@primary};
+   $self->call_trigger('after_create');
+   $self->call_trigger('create'); # For historic reasons...
+   return $self;
+@@ -307,7 +316,8 @@
+       join(', ', map $self->_column_placeholder($_), keys %$data),
+     );
+     $sth->execute(values %$data);
+-    $data->{$self->primary} ||= $self->_auto_increment_value;
++    my @primary = $self->primary;
++    $data->{$primary[-1]} ||= $self->_auto_increment_value;
+   };
+   if($@) {
+     $self->DBIwarn("New $class", 'MakeNewObj');
+@@ -321,12 +331,23 @@
+ 
+ sub retrieve {
+   my $class = shift;
+-  my $id = shift or return;
+-  croak "Cannot retrieve a reference" if ref($id);
+-  my @rows = $class->search($class->primary => $id);
++  my @id = @_;
++  my %search; @search{$class->primary} = @id;
++  my @rows = $class->search(%search);
+   return $rows[0];
+ }
+ 
++sub search {
++    my($class, @args) = @_;
++    my %fields = ref($args[0]) ? %{$args[0]} : @args;
++    my $sql_clause = join ' AND ', map "$_ = ?", keys %fields;
++    my $sth = $class->_run_query('Flesh', $sql_clause, [ values %fields ]);
++    my (%data, @rows);
++    $sth->bind_columns( \( @data{ @{$sth->{NAME} } } ));
++    push @rows, { %data } while $sth->fetch;
++    return $class->_ids_to_objects(@rows);
++}
++
+ # Get the data, as a hash, but setting certain values to whatever
+ # we pass. Used by copy() and move().
+ # This can take either a primary key, or a hashref of all the columns
+@@ -335,10 +356,15 @@
+   my $self     = shift;
+   my @columns  = $self->columns;
+   my %data; @data{@columns} = $self->get(@columns);
+-  delete $data{$self->primary};
++  delete @data{$self->primary};
+   if (@_) {
+     my $arg = shift;
+-    my %arg = ref($arg) ? %$arg : ( $self->primary => $arg );
++    my %arg = ref($arg) ? %$arg : do {
++	unshift @_, $arg;
++	my %data;
++	@data{$self->primary} = @_;
++	%data;
++    };
+     @data{keys %arg} = values %arg;
+   }
+   return \%data;
+@@ -379,7 +405,7 @@
+   $self->call_trigger('delete');
+   $self->_cascade_delete;
+   eval {
+-    my $sth = $self->sql_DeleteMe($self->table, $self->columns('Primary'));
++    my $sth = $self->sql_DeleteMe($self->table, $self->_identifier_clause);
+     $sth->execute($self->id);
+   };
+   if($@) {
+@@ -432,7 +458,7 @@
+ 
+   $self->call_trigger('before_update');
+   if (my @changed_cols = $self->is_changed) {
+-    my $sth = $self->sql_commit($table, $self->_commit_line, $self->primary);
++    my $sth = $self->sql_commit($table, $self->_commit_line, $self->_identifier_clause);
+     eval {
+       $sth->execute($self->_commit_vals, $self->id);
+     };
+@@ -499,7 +525,7 @@
+   my ($self, @groups) = @_;
+   my @want = grep !exists $self->{$_}, $self->_groups2cols(@groups);
+   if (@want) {
+-    my $sth = $self->_run_query('Flesh', $self->primary, $self->id, \@want);
++    my $sth = $self->_run_query('Flesh', $self->_identifier_clause, [ $self->id ], \@want);
+     my @row = $sth->fetchrow_array;
+     $sth->finish;
+     @{$self}{@want} = @row;
+@@ -574,7 +600,6 @@
+ 
+ __PACKAGE__->make_filter(retrieve_all => '');
+ __PACKAGE__->make_filter(search_like => '%s LIKE ?');
+-__PACKAGE__->make_filter(search => '%s = ?');
+ __PACKAGE__->make_filter(ordered_search => '%s = ? ORDER BY %s');
+ __PACKAGE__->make_filter(between => '%s >= ? AND %s <= ?');
+ 
+@@ -908,7 +933,7 @@
+   foreach my $meth (@methods) {
+     *{"$class\::$meth"} = sub {
+       my $self = shift;
+-			my $for_obj = $self->$method() or return;
++      my $for_obj = $self->$method() or return;
+       $for_obj->$meth(@_);
+     };
+   }
+diff -ruP Class-DBI-0.87.orig/t/15-multikeys.t Class-DBI-0.87/t/15-multikeys.t
+--- Class-DBI-0.87.orig/t/15-multikeys.t	Thu Jan  1 09:00:00 1970
++++ Class-DBI-0.87/t/15-multikeys.t	Tue Apr  9 00:12:24 2002
+@@ -0,0 +1,44 @@
++$|=1;
++use strict;
++use vars qw/$TESTS/;
++
++use Test::More;
++
++BEGIN {
++    $TESTS = 9;
++    eval { require './t/testlib/MyMulti.pm'; };
++    plan $@ ? (skip_all => 'no MySQL here') : (tests => $TESTS);
++}
++
++{
++    my $film = MyMulti->create({
++	title => 'foo',
++	director => 'bar',
++	rating => 1,
++    });
++    ok $film, 'create';
++
++    is $film->title, 'foo';
++    is $film->director, 'bar';
++    is $film->rating, 1;
++
++    $film->rating(10);
++    $film->commit;
++}
++
++{
++    my $film = MyMulti->retrieve('foo', 'bar');
++    ok $film;
++
++
++    is $film->title, 'foo';
++    is $film->director, 'bar';
++    is $film->rating, 10;
++
++    $film->delete;
++}
++
++{
++    my $film = MyMulti->retrieve('foo', 'bar');
++    ok ! $film;
++}
+diff -ruP Class-DBI-0.87.orig/t/testlib/MyMulti.pm Class-DBI-0.87/t/testlib/MyMulti.pm
+--- Class-DBI-0.87.orig/t/testlib/MyMulti.pm	Thu Jan  1 09:00:00 1970
++++ Class-DBI-0.87/t/testlib/MyMulti.pm	Mon Apr  8 23:46:10 2002
+@@ -0,0 +1,21 @@
++package MyMulti;
++
++require './t/testlib/MyBase.pm';
++@ISA = 'MyBase';
++use strict;
++
++__PACKAGE__->set_table();
++__PACKAGE__->columns(Primary => qw/title director/);
++__PACKAGE__->columns(All => qw/title director rating/);
++
++sub create_sql {
++  return qq{
++    title varchar(50) not null default '',
++    director varchar(50) not null default '',
++    rating int unsigned not null default 0,
++    PRIMARY KEY(title, director)
++  };
++}
++
++1;
++

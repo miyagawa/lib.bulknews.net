@@ -1,0 +1,17 @@
+Revision history for Perl extension WebService::Bloglines
+
+0.04  Sat Jan 15 21:09:35 JST 2005
+	- $update->items returns arrayref in scalar context. It still
+	  returns array in a list context.
+
+0.03  Wed Jan 12 18:25:07 JST 2005
+	* $bloglines->getitems() returns array of Entries in a list
+ 	  context. It allows you to fetch all unread items in a single
+	  getitems(0) call.
+
+0.02  Thu Sep 30 19:54:36 JST 2004
+	- Added XML::RSS to PREREQ_PM
+	- Encode module is now optional for Perl < 5.8
+
+0.01  Mon Aug 16 22:27:32 2004
+	- original version

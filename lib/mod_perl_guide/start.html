@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Guide's Overview </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Guide's Overview 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./intro.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./perl.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#What_s_inside_">What's inside?</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="What_s_inside_">What's inside?</A></H1></CENTER>
+<P>
+Before you start a mod_perl installation, you should have an overall
+picture of this wonderful technology. There is more than one way to use a
+mod_perl-enabled webserver. You have to decide which mod_perl scheme you
+want to use. <A HREF="././strategy.html#">Picking the Right Strategy</A> chapter presents various approaches and discusses their pros and cons.
+
+<P>
+Once you know what best fits your requirements, you should proceed to <A HREF="././scenario.html#">Real World Scenarios Implementation</A>. This chapter provides very detailed scenarios of the schemes discussed in
+the
+<A HREF="././strategy.html#">Picking the Right Strategy</A> chapter.
+
+<P>
+The <A HREF="././install.html#">Server Installation</A> chapter follows on from the <A HREF="././scenario.html#">Real World Scenarios Implementaion</A> chapter by providing more in-depth installation details.
+
+<P>
+The <A HREF="././config.html#">Server Configuration</A> chapter adds to the basic configurations presented in the <A HREF="././scenario.html#">Real World Scenarios Implementaion</A> chapter with extended configurations and various configuration examples.
+
+<P>
+The <A HREF="././frequent.html#">Frequent mod_perl problems</A> chapter is a collection of links to other chapters. It is an attempt to
+stress some of the most frequently encountered mod_perl problems. So this
+is the first place you should check if you have got a problem.
+
+<P>
+Probably the most important chapter is <A HREF="././porting.html#">CGI to mod_perl Porting. mod_perl Coding guidelines</A>. It explains the differences between scripts running under mod_cgi and
+mod_perl, and what should be done in order to make existing scripts run
+under mod_perl. Along with the porting notes it provides guidelines for
+proper mod_perl programming.
+
+<P>
+<A HREF="././performance.html#">Performance. Benchmarks</A> is the biggest and a very important chapter. It explains the details of
+tuning mod_perl and the scripts running under it, so you can squeeze every
+ounce of the power from your server. A large part of the chapter is
+benchmarks, the numbers that IT managers love to read. But these are
+different benchmarks: they are not comparing mod_perl with similar
+technologies, rather with different configurations of mod_perl servers, to
+guide you through the tuning process. I have to admit, performance tuning
+is a very hard task, and demands a lot of understanding and experience. But
+once you acquire this knowledge you can make magic with your server.
+
+<P>
+While developing your mod_perl applications, you will begin to understand
+that an <CODE>error_log</CODE> file is your best friend. It tells you all the intimate details of what is
+happening to your scripts. But the problem is that it speaks a secret
+language. To learn the alphabet and the grammar of this language, refer to
+the chapter <A HREF="././troubleshooting.html#">Warnings and Errors: Where and Why</A>.
+
+<P>
+<A HREF="././security.html#">Protecting Your Site</A> - All about security.
+
+<P>
+If you are into driving relational databases with your cgi scripts, the <A HREF="././databases.html#">mod_perl and Relational Databases</A> chapter will tell you all about the database-related goodies mod_perl has
+prepared for you.
+
+<P>
+If you are using good old dbm files for your databases, the <A HREF="././dbm.html#">mod_perl and dbm files</A> chapter explains how to utilize them better under mod_perl.
+
+<P>
+More and more Internet Service Providers (ISPs) are evaluating the
+possibility of providing mod_perl services to their users. Is this
+possible? Is it secure? Will it work? What resources does it take? The <A HREF="././multiuser.html#">mod_perl for ISPs. mod_perl and Virtual Hosts</A>
+chapter answers all these questions. If you want to run a mod_perl- enabled
+server, but do not have root access, read this chapter as well, either to
+learn how to do it yourself, or maybe to persuade your ISP to provide this
+service.
+
+<P>
+If you have to administer your Apache mod_perl server the
+<A HREF="././control.html#">Controlling and Monitoring the Server</A> chapter is for you. Among the topics are: server restarting and monitoring
+techniques, preventing the server from eating up all your disk space in a
+matter of minutes, and more.
+
+<P>
+(META: fix this) The <A HREF="././config.html#">mod_perl Status. Peeking into the Server's Perl Innards</A>
+chapter shows you the ways you can peek at what is going on in a
+mod_perl-enabled server while it is running. Like looking at the value of
+some global variable, what database connections are open, looking up what
+modules are loaded and their paths, what is the value of
+<CODE>@INC</CODE>, and much more.
+
+<P>
+Every programmer needs to know how to debug her program. It is an _easy_
+task with plain Perl. Just invoke the program with the <CODE>-d</CODE>
+flag and debug it. Is it possible to do the same under mod_perl? After all
+you cannot debug every CGI script by executing it from the command line:
+some scripts will not run from the command line. The <A HREF="././debug.html#">Debugging mod_perl</A> chapter proves debugging under mod_perl is possible.
+
+<P>
+Sometimes browsers that interact with our servers have bugs, which cause
+big headaches for CGI developers. Coping with these bugs is discussed in
+the <A HREF="././browserbugs.html#">Workarounds for some known bugs in browsers</A> chapter.
+
+<P>
+Many modules were written to extend mod_perl's core functionality. Some
+important modules are covered in the <A HREF="././modules.html#">Apache::* modules</A> chapter.
+
+<P>
+Some folks decide to go with mod_perl even though they are not experienced
+Perl programmers. mod_perl is a demanding environment which does not permit
+the `casual' programming style which plain Perl allows. Lack of
+knowledge/experience with Perl need not be any barrier; Perl comes with
+copious and high quality on-line documentation and there are many Perl
+books available which will get you up to speed. Get a good Perl book and
+start reading. The <A HREF="././perl.html#">Perl Reference</A> chapter gives some basic, mod_perl specific Perl lessons, delivering the
+knowledge without which you cannot start to program mod_perl scripts.
+
+<P>
+The <A HREF="././snippets.html#">Code Snippets</A> chapter is just a collection of code snippets I have found useful while
+writing the scripts.
+
+<P>
+The <A HREF="././hardware.html#">Choosing an Operating System and Hardware</A> chapter gives you an idea on how to choose the software and hardware for
+the webserver.
+
+<P>
+The <A HREF="././advocacy.html#">mod_perl Advocacy</A> tries to make it easier to advocate mod_perl around the world.
+
+<P>
+The <A HREF="././help.html#">Getting Help and Further Learning</A> chapter refers you to other related information resources, like learning
+Perl programming and SQL, understanding security, building databases, and
+more.
+
+<P>
+<A HREF="././download.html#">Appendix A: Downloading software and documentation</A>
+includes pointers to the software that was explained and/or mentioned in
+this guide.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./intro.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./perl.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 06/20/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

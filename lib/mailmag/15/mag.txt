@@ -1,0 +1,179 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.15
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+とても間があいてしまいました。見捨てられないように、発行しましょう。最
+近、XP (eXtreme Programming) ってのに興味を持っています。シンプルデザ
+イン、Test First, ペアプログラミングといったプラクティスを実践しながら、
+バグの少ないソフトウェアを効率よくつくろうという開発手法です。
+
+今回はそのXPを Perl を使ったプロジェクトで実践してみましょうというお話
+を少しだけ。
+
+*1 http://www.xprogramming.com/
+*2 http://www.esm.co.jp/eXtremeProgramming/
+
+2. Test::Unit ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+XP のプログラミング的側面として重要なのは、やはり Test First です。テ
+ストにも単体テストと結合テストがありますが、今回は単体テストについて考
+えてみます。
+
+単体テストを支援するフレームワークとして、XP の生みの親 Kent Beck が考
+え出したのが、xUnit です。Smalltalk, Java などのツールがよく知られてい
+ます。実はこれの Perl 版もあって、Test::Unit がそれです。
+
+  http://cpan2.org/Asset/display?dist=Test-Unit
+
+
+Test::Unit は単体テストおよびオブジェクト指向テストの両方をサポートし
+ています。シンプルなテストであれば、以下のように書くことができます。
+
+  use Test::Unit;
+
+  # ここにコードを書く
+
+  sub foo { return 23 };
+  sub bar { return 42 };
+
+  # テストを定義する
+
+  sub test_foo { assert(foo() == 23); }
+  sub test_bar { assert(bar() == 42); }
+
+  # set_up と tear_down はテストに使う変数などの宣言、解放に使う
+
+  sub set_up    { print "hello world\n"; }
+  sub tear_down { print "leaving world again\n"; }
+
+  # テストする
+
+  create_suite();
+  run_suite();
+
+
+set_up(), tear_down() のメソッドで前準備、終った後の後始末をおこないま
+す。テストしたい関数は、関数名を test_* のようにしておき、assert() で
+真となるべき文を表明します。これが false となるようであれば、Test が失
+敗していることになるわけです。
+
+オブジェクト指向版はちょっと手間がかかります。
+
+  package FooBar;
+  use base qw(Test::Unit::TestCase);
+
+  sub new {
+      my $self = shift()->SUPER::new(@_);
+      # fixture の宣言
+      return $self;
+  }
+
+  sub set_up {
+      # fixture の準備
+  }
+  sub tear_down {
+      # 後かたづけ
+  }
+  sub test_foo {
+      # test the foo feature
+  }
+  sub test_bar {
+      # test the bar feature
+  }
+
+
+Test::Unit::TestCase を継承する以外は、基本的には同じです。"fixture" 
+はテストに使うリソースを表しています。
+
+
+※ Ruby 版の RubyUnit についての書籍「Ruby を 256倍使う本 極道編」とい
+   うのがでていますね。時間があったら読みたいと思っています。
+
+*3 http://www.xprogramming.com/software.htm
+
+3. Test, Test::Harness  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Test::Unit を使わずとも、Perl の古きよきテストツールも健在です。Perl 
+モジュールのインストールの時に、
+
+  % perl Makefile.PL
+  % make
+  % make test
+
+こんなことしますよね。この make test を簡単に行うツールが, Perl バンド
+ルで提供されています。Test モジュールと Test::Harness モジュールがそれ
+です。
+
+Perl のテストは (Perl らしく) "ok" "not ok" といった出力を通して行われます。
+
+  「いまから 3つのテストを行う。1つめは ok, 2つめも ok, 3つめは失敗」
+
+簡単にいうと、このように出力をすればよいです。でも、これはちょっとかっ
+たるい。出力を簡単にしてくれるのが Test モジュールです。上に書いたよう
+な流儀でテスト出力をするには、以下のようにします。
+
+  use Test;
+  BEGIN { plan tests => 3 }
+
+  ok(hoge() == 1);
+  ok(foo(), 4);
+  ok(barbar(), qr/goooo/);
+
+
+これでOKです。ok() の3つの文は、さきほど Test::Unit で紹介した 
+assert() と同じです。ok() の引数には、
+
+* 真偽を返す文 ($foo == 1 など)
+* 2つの値 それが等しいかどうか
+* 値と、正規表現 それにマッチするかどうか
+
+をとります。
+
+これで出力される、ok, not ok といった文字列を解析して、以下のようなき
+れいな出力にしてくれるのが、Test::Harness です。
+
+  use Test::Harness 'runtests';
+  
+  @testfiles = glob('tests/*.pl');
+  runtests(@testfiles);
+
+このようにすれば、tests/ ディレクトリの .pl ファイルをテストスクリプト
+とみなして実行してくれます。OK ならば、
+
+  t/test.p.........ok
+  All tests successful.
+  Files=1,  Tests=6,  0 wallclock secs ( 0.27 cusr +  0.04 csys =  0.30 CPU)
+
+失敗したら、
+
+  t/test.p.........FAILED test 6
+          Failed 1/6 tests, 83.33% okay
+  Failed Test  Status Wstat Total Fail  Failed  List of failed
+  -------------------------------------------------------------------------------
+  t/00_word.pl                  6    1  16.67%  6
+  Failed 1/1 test scripts, 0.00% okay. 1/6 subtests failed, 83.33% okay.
+
+このような出力になります。非常に分かりやすく、直観的ですね。
+
+
+4. まとめ  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+Perl でテストを扱うモジュールをいくつか紹介しました。これらのツールを
+組み合わせて、バッチ処理による自動化テスト等を行えば、バグ検出に大きな
+威力を発揮するでしょう。
+
+次回は、Web のテストツール HTTP::Monkeywrench, HTTP::WebTest を紹介し
+ます。
+
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

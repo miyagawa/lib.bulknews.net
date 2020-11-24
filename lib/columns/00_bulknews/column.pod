@@ -1,0 +1,330 @@
+=head1 NAME
+
+bulknews - ニュースサイトの見出しの自動取得
+
+=head1 APPLICATIONS
+
+bulknews ( http://bulknews.net/ ) は主に3つのアプリケーションより構成
+されています。
+
+  crawl.pl	各ニュースサイトを巡回する。
+  mail.pl	ユーザの登録状況にあわせ、メール配信する。
+  index.cgi	指定された日付のヘッドラインを表示する。
+
+WWWサーバは Apache, データベースには MySQL を利用。ウェブアプリケーショ
+ンは C<Apache::Registry> を利用して高速化をはかっています。
+C<Apache::DBI> によって永続コネクションを行っていますので、接続の際の
+オーバーヘッドがありません。
+
+MySQLデータベースにはいくつかのテーブルが用意してありますが、主要なも
+のは、サイト情報を記録する site と、見出し情報を格納する headlines で
+す。テーブル定義は以下のようにしています。
+
+  CREATE TABLE site (
+    id tinyint(3) unsigned DEFAULT '0' NOT NULL auto_increment,
+    name varchar(128) DEFAULT '' NOT NULL,
+    url varchar(255) DEFAULT '' NOT NULL,
+    PRIMARY KEY (id)
+  );
+
+  CREATE TABLE headlines (
+    id int(10) unsigned DEFAULT '0' NOT NULL auto_increment,
+    url varchar(255) DEFAULT '' NOT NULL,
+    headline varchar(255) DEFAULT '' NOT NULL,
+    site_id tinyint(3) unsigned DEFAULT '0' NOT NULL,
+    timestamp timestamp(14),
+    PRIMARY KEY (id),
+    KEY timestamp (timestamp)
+  );
+
+=head2 crawl.pl
+
+ニュースサイトを巡回するためのアプリケーション。Regexp を用いて、記事
+リストを取得し、MySQL データベースと照合して、新しいものを INSERT して
+いきます。
+
+     1    #!/usr/local/bin/perl
+     2    # crawl.pl - Fetch news
+     3
+     4    use strict;
+     5    use DBI;
+     6    use WWW::Headline;
+     7    use vars qw(%Config);
+     8
+     9    use Bulknews::Config;
+    10    *Config = \%Bulknews::Config::Config;
+    11
+    12    # for Command Line
+    13    $Config{site} = \@ARGV if @ARGV;
+    14
+    15    # Connect to DB
+    16    my $dbh = DBI->connect($Config{dsn}, $Config{db_user}, $Config{db_passwd}, {
+    17        RaiseError => 1
+    18    }) or die $DBI::errstr;
+    19
+    20    my $crawler = new WWW::Headline::Crawler({ dbh => $dbh });
+    21    # Crawler IS-A LWP::UserAgent
+    22    $crawler->timeout($Config{timeout});
+    23    $crawler->agent('Mozilla/4.0 (Bulknews 1.0)');
+    24
+    25    for my $class (@{$Config{site}}) {
+    26        eval "require WWW::Headline::Site::${class};";
+    27        my $target = "WWW::Headline::Site::${class}"->new({ dbh => $dbh });
+    28        $crawler->crawl($target);
+    29    }
+    30
+    31    $dbh->disconnect;
+    32
+
+
+9,10 行目は設定ファイルの読み込み。http://www.perlmonth.com/ にて紹
+介されていたので、それ以来気に入って使用してます。F<Config.pm> に、
+C<%Config> というハッシュを定義し、C<*main::Config> をリファレンスにし
+てしまうことで、無用の変数EXPORTを減らしています。ただ、ハッシュの場合
+は、use strict にならないのが残念。C<-w> フラグで少しはチェックできま
+すが、pseudo-hash を使うのが賢いかもしれないですね。
+
+20 行目で、C<WWW::Headline::Crawler> インスタンスを生成。ニュースサイ
+トの巡回を行います。このクラスは C<LWP::UserAgent> クラスを継承してい
+るので、HTTP通信に関するメソッドは定義しなおす必要はありません。ニュー
+スサイトに関する情報を取得するメソッドをいくつか持っているだけです。
+
+25行目では、実際に巡回するサイトに対して for ループをかけています。1サ
+イトが1クラスとなっており、それぞれアブストラクトクラス 
+C<WWW::Headline::Site> クラスを継承しています。
+
+
+     1  package WWW::Headline::Site;
+     2
+     3  use strict;
+     4  $WWW::Headline::Site::VERSION = 0.01;
+     5
+     6  use URI;
+     7  use Carp;
+     8  use HTML::Entities;
+     9
+    10  sub new {
+    11      my $proto = shift;
+    12      my $self = bless { }, ref($proto) || $proto;
+    13      my ($arg) = @_;
+    14
+    15      # database handler
+    16      $self->{dbh} = $arg->{dbh};
+    17
+    18      $self->_init();
+    19      return $self;
+    20  }
+    21
+    22  # by default, url is consistent.
+    23  sub url { $_[0]->{url} }
+    24
+    25  # Previous checked time
+    26  sub prev_modified {
+    27      my $self = shift;
+    28      my $sth = $self->{dbh}->prepare('SELECT UNIX_TIMESTAMP(MAX(timestamp)) FROM headlines WHERE site_id = ?');
+    29      $sth->execute($self->id);
+    30
+    31      # if nothing, NULL is returned
+    32      my $time = $sth->fetchrow_arrayref->[0];
+    33      $sth->finish;
+    34      return $time;
+    35  }
+    36
+    37  # Site Table
+    38  sub id {
+    39      my $self = shift;
+    40      return $self->{_cached_id} ? $self->{_cached_id} : $self->_get_id;
+    41  }
+    42
+    43  sub _get_id {
+    44      my $self = shift;
+    45      my $sth = $self->{dbh}->prepare('SELECT id FROM site WHERE name = ?');
+    46      $sth->execute($self->{name});
+    47
+    48      if (my ($id) = $sth->fetchrow_array) {
+    49          $sth->finish;
+    50          return $self->{_cached_id} = $id;
+    51      }
+    52
+    53      # else, INSERT!
+    54      $sth->finish;
+    55      $sth = $self->{dbh}->prepare('INSERT INTO site (name, url) VALUES (?, ?)');
+    56      $sth->execute($self->{name}, $self->{source});
+    57      return $self->{_cached_id} = $self->{dbh}->{mysql_insertid};
+    58  }
+    59
+    60
+    61  sub parse {
+    62      ABSTRACT METHOD;
+    63
+    64      # parse() accepts $content.
+    65      # will parse 'em and call $self->match($url, $headline);
+    66
+    67  }
+    68
+    69  sub matches {
+    70      my $self = shift;
+    71      if (ref($self->{_matched_articles}) ne 'ARRAY') {
+    72          carp "no match for ", $self->{source};
+    73          return;
+    74      }
+    75      return @{$self->{_matched_articles}};
+    76  }
+    77
+    78  sub match {
+    79      my $self = shift;
+    80      my ($url, $headline) = @_;
+    81
+    82      # URI is converted to absolute form.
+    83      # Headline is pretty-printed
+    84
+    85      my $uri = URI->new_abs($url, $self->url);
+    86      $headline =~ s/<.*?>//g;            # quick & dirty way!
+    87      $headline =~ s/\r|\n|\t//g;
+    88      $headline = decode_entities($headline);
+    89
+    90      # Empty title.
+    91      return if $headline =~ /^\s*$/;
+    92
+    93      push @{$self->{_matched_articles}}, { url => $uri->as_string,
+    94                                            headline => $headline };
+    95  }
+    96
+    97  1;
+
+C<WWW::Headline::Site> クラスの実装は上の通り。このクラスはアブストラ
+クトクラスなので、巡回したいサイトができたらこのクラスを継承して、
+_init(), parse() のそれぞれのメソッドを適当にオーバーライドして
+やれば、巡回して登録するところまでを面倒みてくれるようになります。
+
+各メソッドはそれぞれ、_init() がサイトの情報、parse() が見出しを 
+parse するための正規表現を定義する役割を持っています。
+
+たとえば Ascii24 http://www.ascii24.com/ での実装は以下のようになり
+ます。
+
+     1  package WWW::Headline::Site::Ascii24;
+     2
+     3  use strict;
+     4
+     5  use WWW::Headline::Site;
+     6  use vars qw(@ISA);
+     7  @ISA = qw(WWW::Headline::Site);
+     8
+     9  sub _init {
+    10      my $self = shift;
+    11      $self->{source}     = 'http://www.ascii24.com/ascii24/dailyindex/today.html';
+    12      $self->{url}        = $self->{source};
+    13      $self->{name}       = 'ASCII24';
+    14  }
+    15
+    16  sub parse {
+    17      my $self = shift;
+    18      my ($content) = @_;
+    19
+    20      while ($content =~ m{<A HREF="(/24/news/.*?)"><FONT SIZE="2">(.*?)</FONT></A><SMALL>}g) {
+    21          $self->match($1, $2);
+    22      }
+    23  }
+    24
+    25
+    26  1;
+
+20行目が parse するための Regexp になります。タイトルとURLをマッチさせ、
+match() メソッドを呼び出すことで、新しい記事かどうかの判別から、DB
+への登録までが自動で行われるようになります。
+
+=head2 mail.pl
+
+ユーザへのメール配信は、毎時0分に行われます。headlines の各レコードは 
+timestamp カラムをもっていますので、例えば 3時間おきの配信を希望してい
+るユーザであれば、3時間以内に登録されている見出しを配信すればいいこと
+になります。
+
+ユーザの登録状況は MySQL データベース上に user テーブルと site_user テー
+ブルを作成し、格納しています。
+
+
+  CREATE TABLE user (
+    email varchar(128) DEFAULT '' NOT NULL,
+    password varchar(16) DEFAULT '' NOT NULL,
+    hourunit tinyint(2) unsigned DEFAULT '0' NOT NULL,
+    timestamp timestamp(14),
+    PRIMARY KEY (email)
+  )
+
+  CREATE TABLE site_user (
+    email varchar(128) DEFAULT '' NOT NULL,
+    site_id tinyint(3) unsigned DEFAULT '0' NOT NULL,
+    KEY email (email)
+  );
+
+
+user テーブルに Email をキーとして、レコードを生成。各ユーザについて、
+配信したいサイトは複数選択可能なので、site_user テーブルでリレーション
+をとっています。
+
+ユーザ登録はWWWから行います。メールアドレスが妥当かどうかの整合のため、
+以下のステップで登録を行います。
+
+=over 4
+
+=item フォームに Email を入力
+
+Apache::Session にて新たなセッションを発行。セッションに対して Email 
+を格納します。該当 Email アドレスにセッションIDをQuery String にもつ 
+URIを記載したメールを送信します。
+
+=item URIにブラウザからアクセス
+
+セッションIDに関連するEmail が認証状態となり、設定画面へ遷移します。配
+信するサイト、時間単位などを設定した後、user, site_user テーブルへの 
+INSERT が行われます。
+
+=back
+
+=head2 index.cgi
+
+各レコードには timestamp がついているため、各条件に合致するレコードを
+SELECT文にて集計後、サイトごとにグループ分けして表示します。
+
+グループ分けは C<HTML::Template> によるループ機能を用いています。各サ
+イトごとのレコード表示もループを用いており、ネストした構造となっていま
+す。
+
+WWWからのインタフェースにはこれ以外にも、見出しカラムからのLIKE検索を
+行う F<search.cgi> や、iモードから閲覧可能なCGIなどを用意してあります。
+
+=head1 FUTURE IMPLEMENTATION
+
+Dynamic HTML + JavaScript を利用して、見出しを Marquee 表示するスクリ
+プトを準備中です ( http://www.jiji.co.jp/ のような)。ただ、ブラウザ
+の問題で、ウィンドウサイズの調節がうまくいっておらず、調整中です。
+
+また、各サイトのコンテンツ情報をあらわす規格である RSS への対応も考え
+ています。XML::RSS を利用して。(Perl Conference で岡部さんのセッション
+を聞いただけなので、そもそもRSSについてよくわかってないんですけどね)
+
+=head1 SEE ALSO
+
+=over 4 
+
+=item DBI
+
+http://www.symbolstone.org/technology/perl/DBI
+
+=item HTML::Template
+
+http://search.cpan.org/search?dist=HTML-Template
+
+=item Apache::Session
+
+http://search.cpan.org/search?dist=Apache-Session
+
+=back
+
+=head1 AUTHOR
+
+Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+
+=cut

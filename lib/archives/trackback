@@ -1,0 +1,509 @@
+#!/usr/bin/perl -w
+# Copyright 2002 Benjamin Trott.
+# This code is released under the Artistic License.
+use strict;
+
+my $Charset = 'utf-8';
+my $DataDir = "/path/to/trackbackdir";
+my $RSSDir = "/path/to/rssdir";
+my $GenerateRSS = 0;
+my $Header = "./header.txt";
+my $Footer = "./footer.txt";
+my $Password = "yourpass";
+my $NotifyEmail = 'youremailaddress';
+my $TrackbackUrl = 'http://example.com/trackback';
+
+use vars qw( $VERSION );
+$VERSION = '1.02';
+
+use CGI qw( :standard );
+use File::Spec::Functions;
+
+sub enc {
+    use Jcode;
+    return $_[0] ? Jcode->new($_[0])->utf8 : $_[0];
+}
+
+charset $Charset;
+
+my $mode = param('__mode');
+unless ($mode) {
+    my $tb_id = munge_tb_id(get_tb_id());
+    respond_exit("No TrackBack ID (tb_id)") unless $tb_id;
+    my $i = { map { $_ => scalar param($_) } qw(title excerpt url blog_name) };
+    $i->{title} ||= $i->{url};
+    $i->{timestamp} = time;
+    respond_exit("No URL (url)") unless $i->{url};
+    my $data = load_data($tb_id);
+    unshift @$data, $i;
+    store_data($tb_id, $data);
+    if ($GenerateRSS && open(FH, ">" . catfile($RSSDir, $tb_id . '.xml'))) {
+        print FH generate_rss($tb_id, $data, 15);
+        close FH;
+    }
+    if ($NotifyEmail) {
+	notify_email($NotifyEmail, $i, $tb_id);
+    }
+    respond_exit();
+} elsif ($mode eq 'list') {
+    my $tb_id = munge_tb_id(get_tb_id());
+    die("No TrackBack ID (tb_id)") unless $tb_id;
+    my $me = url();
+    print header(-charset => $Charset), from_file($Header), <<URL;
+<div class="url">TrackBack URL for this entry:
+<div class="ping-url">$me/$tb_id</div>
+</div>
+URL
+    my $data = load_data($tb_id);
+    my $tmpl = <<TMPL;
+<a target="new" href="%s">%s</a><br />
+<div class="head">&#187;  %s</div>
+<div class="excerpt">"%s"</div>
+<div class="footer">Tracked: %s %s</div>
+TMPL
+    my $i = 0;
+    require POSIX;
+    my $logged_in = is_logged_in();
+    for my $item (@$data) {
+        my $ts = POSIX::strftime("%B %d, %Y %I:%M %p",
+            localtime $item->{timestamp});
+        printf $tmpl,
+            $item->{url}, enc($item->{title}),
+            enc($item->{blog_name}) || "[No blog name]",
+            enc($item->{excerpt}) || "[No excerpt]",
+            $ts,
+            $logged_in ? qq(<a class="delete" href="$me?__mode=delete&tb_id=$tb_id&index=$i">[DELETE]</a>) : '';
+        $i++;
+    }
+    unless ($logged_in) {
+        print <<HTML;
+<div align="right">[Is this your site? <a href="$me?__mode=login">Log in</a> to delete pings.]</div>
+HTML
+    } else {
+        print <<HTML;
+<div align="right">[<a href="$me?__mode=logout">Log out</a>]</div>
+HTML
+    }
+    print from_file($Footer);
+} elsif ($mode eq 'delete') {
+    die "You are not authorized" unless is_logged_in();
+    my $tb_id = munge_tb_id(get_tb_id());
+    die("No TrackBack ID (tb_id)") unless $tb_id;
+    my $data = load_data($tb_id);
+    my $index = param('index') || 0;
+    splice @$data, $index, 1;
+    store_data($tb_id, $data);
+    print redirect(url() . "?__mode=list&tb_id=$tb_id");
+} elsif ($mode eq 'rss') {
+    my $tb_id = munge_tb_id(get_tb_id());
+    respond_exit("No TrackBack ID (tb_id)") unless $tb_id;
+    my $data = load_data($tb_id);
+    respond_exit(undef, generate_rss($tb_id, $data));
+} elsif ($mode eq 'send_ping') {
+    require LWP::UserAgent;
+    my $ua = LWP::UserAgent->new;
+    $ua->agent("TrackBack/$VERSION");
+    my @qs = map $_ . '=' . encode_url(param($_) || ''),
+             qw( title url excerpt blog_name );
+    push @qs, "charset=$Charset";
+    my $ping = param('ping_url') or ping_form_exit("No ping URL");
+    my $req;
+    if ($ping =~ /\?/) {
+        $req = HTTP::Request->new(GET => $ping . '&' . join('&', @qs));
+    } else {
+        $req = HTTP::Request->new(POST => $ping);
+        $req->content_type('application/x-www-form-urlencoded');
+        $req->content(join('&', @qs));
+    }
+    my $res = $ua->request($req);
+    ping_form_exit("HTTP error: " . $res->status_line) unless $res->is_success;
+    my($e, $msg) = $res->content =~ m!<error>(\d+).*<message>(.+?)</message>!s;
+    $e ? ping_form_exit("Error: $msg") : ping_form_exit("Ping successfuly sent");
+} elsif ($mode eq 'send_form') {
+    ping_form_exit();
+} elsif ($mode eq 'login') {
+    print header(), login_form();
+} elsif ($mode eq 'do_login') {
+    my $key = param('key');
+    unless ($key eq $Password) {
+        print header(), login_form("Invalid login");
+        exit;
+    }
+    require CGI::Cookie;
+    my @alpha = ('a'..'z', 'A'..'Z', 0..9);
+    my $salt = join '', map $alpha[rand @alpha], 1..2;
+    my $cookie = CGI::Cookie->new(-name => 'key',
+        -value => crypt($key, $salt));
+    print header(-cookie => $cookie), from_file($Header),
+        "Logged in", from_file($Footer);
+} elsif ($mode eq 'logout') {
+    require CGI::Cookie;
+    my $cookie = CGI::Cookie->new(-name => 'key', -value => '',
+        -expire => '-1y');
+    print header(-cookie => $cookie), login_form("Logged out");
+}
+
+sub get_tb_id {
+    my $tb_id = param('tb_id');
+    unless ($tb_id) {
+        if (my $pi = path_info()) {
+            ($tb_id = $pi) =~ s!^/!!;
+        }
+    }
+    $tb_id;
+}
+
+sub munge_tb_id {
+    my($id) = @_;
+    return '' unless $id;
+    $id =~ tr/a-zA-Z0-9/_/cs;
+    $id;
+}
+
+sub is_logged_in {
+    require CGI::Cookie;
+    my %cookies = CGI::Cookie->fetch;
+    return unless $cookies{key};
+    my $key = $cookies{key}->value || return;
+    $key eq crypt $Password, substr $key, 0, 2;
+}
+
+sub load_data {
+    my($tb_id) = @_;
+    my $tb_file = catfile($DataDir, $tb_id . '.stor');
+    require Storable;
+    scalar eval { Storable::retrieve($tb_file) } || [];
+}
+
+sub store_data {
+    my($tb_id, $data) = @_;
+    my $tb_file = catfile($DataDir, $tb_id . '.stor');
+    require Storable;
+    Storable::store($data, $tb_file);
+}
+
+sub generate_rss {
+    my($tb_id, $data, $limit) = @_;
+    my $rss = qq(<rss version="0.91"><channel><title>TB: $tb_id</title>\n);
+    my $max = $limit ? $limit - 1 : $#$data;
+    for my $i (@{$data}[0..$max]) {
+        $rss .= sprintf "<item>%s%s%s</item>\n", xml('title', $i->{title}),
+                xml('link', $i->{url}), xml('description', $i->{excerpt}) if $i;
+    }
+    $rss . qq(</channel></rss>);
+}
+
+sub notify_email {
+    my($email, $info, $tb_id) = @_;
+    $info = { map { $_ => enc($info->{$_}) } keys %$info };
+    my $body =<<MAIL;
+New trackback ping arrived to $tb_id!
+
+  Title: $info->{title}
+  Blog:  $info->{blog_name}
+  URL:   $info->{url}
+  Excerpt: $info->{excerpt}
+
+$TrackbackUrl?__mode=list&tb_id=$tb_id
+MAIL
+    ;
+
+    require MIME::Lite;
+    my $msg = MIME::Lite->new(
+	From => $email,
+	To => $email,
+	Subject => Jcode->new("New Trackback Ping: $info->{title}")->mime_encode,
+	Type => "text/plain; charset=$Charset",
+	Data => $body,
+    );
+    $msg->send();
+}
+
+sub respond_exit {
+    print "Content-Type: text/xml\n\n";
+    print qq(<?xml version="1.0" encoding="utf-8"?>\n<response>\n);
+    if ($_[0]) {
+        printf qq(<error>1</error>\n%s\n), xml('message', $_[0]);
+    } else {
+        print qq(<error>0</error>\n) . ($_[1] ? $_[1] : '');
+    }
+    print "</response>\n";
+    exit;
+}
+
+sub ping_form_exit {
+    print header(), from_file($Header);
+    print "@_" if @_;
+    print <<HTML;
+<h2>Send a TrackBack ping</h2>
+<form method="post"><input type="hidden" name="__mode" value="send_ping" />
+<table border="0" cellspacing="3" cellpadding="0">
+<tr><td>TrackBack Ping URL:</td><td><input name="ping_url" size="60" /></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td>Title:</td><td><input name="title" size="35" /></td></tr>
+<tr><td>Blog name:</td><td><input name="blog_name" size="35" /></td></tr>
+<tr><td>Excerpt:</td><td><input name="excerpt" size="60" /></td></tr>
+<tr><td>Permalink URL:</td><td><input name="url" size="60" /></td></tr>
+</table>
+<input type="submit" value="Send">
+</form>
+HTML
+    print from_file($Footer);
+    exit;
+}
+
+sub login_form {
+    my $str = from_file($Header);
+    $str .= "<p>@_</p>" if @_;
+    $str .= <<HTML . from_file($Footer);
+<form method="post">
+<input type="hidden" name="__mode" value="do_login" />
+Password: <input name="key" type="password" />
+<input type="submit" value="Log in" />
+</form>
+HTML
+    $str;
+}
+my(%Map, $RE);
+BEGIN {
+    %Map = ('&' => '&amp;', '"' => '&quot;', '<' => '&lt;', '>' => '&gt;');
+    $RE = join '|', keys %Map;
+}
+sub xml {
+    (my $s = defined $_[1] ? $_[1] : '') =~ s!($RE)!$Map{$1}!g;
+    "<$_[0]>" . enc($s) . "</$_[0]>\n";
+}
+
+sub encode_url {
+    (my $str = $_[0]) =~ s!([^a-zA-Z0-9_.-])!uc sprintf "%%%02x", ord($1)!eg;
+    $str;
+}
+
+sub from_file {
+    my($file) = @_;
+    local *FH;
+    open FH, $file;
+    my $c;
+    { local $/; $c = <FH> }
+    close FH;
+    $c;
+}
+
+__END__
+
+=head1 NAME
+
+tb-standalone - Standalone TrackBack
+
+=head1 DESCRIPTION
+
+The standalone TrackBack tool serves two purposes: 1) it allows non-Movable
+Type users to use TrackBack with the tool of their choice, provided they meet
+the installation requirements; 2) it serves as a reference point to aid
+developers in implementing TrackBack in their own systems. This tool is a
+single CGI script that accepts TrackBack pings through HTTP requests, stores
+the pings locally in the filesystem, and can return a list of pings either
+in RSS or in a browser-viewable format. It can also be used to send pings
+to other sites.
+
+It is released under the Artistic License. The terms of the Artistic License
+are described at I<http://www.perl.com/language/misc/Artistic.html>.
+
+=head1 REQUIREMENTS
+
+You'll need a webserver capable of running CGI scripts (this means, for
+example, that this won't work with BlogSpot-hosted blogs). You'll also need
+perl, and the following Perl modules:
+
+=over 4
+
+=item * File::Spec
+
+=item * Storable
+
+=item * CGI
+
+=item * CGI::Cookie
+
+=item * LWP
+
+=back
+
+The first four are core modules as of perl 5.6.0, I believe, and LWP is
+installed on most hosts. Furthermore LWP is only required if you wish to
+B<send> TrackBack pings.
+
+=head1 INSTALLATION
+
+Installation of the standalone TrackBack tool is very simple. It's just one
+CGI script, F<tb.cgi>, along with two text files that define the header and
+footer HTML for the public list of TrackBack pings.
+
+=over 4
+
+=item 1. Configure tb.cgi
+
+You'll need to edit the script to change the I<$DataDir>, I<$RSSDir>,
+and I<$Password> settings.
+
+B<BE SURE TO CHANGE THE I<$Password> BEFORE INSTALLING THE TOOL.>
+
+I<$DataDir> is the path to the directory where the TrackBack data
+files will be stored; I<$RSSDir> is the path to the directory where the static
+RSS files will be generated; I<$Password> is your secret password that will
+allow you to delete TrackBack pings, when logged in.
+
+After setting I<$DataDir> and I<$RSSDir>, you'll need to create both of these
+directories and make them writeable by the user running the CGI scripts. In
+most cases, this means that you must set the permissions on these directories
+to 777.
+
+=item 2. Upload Files
+
+After editing the settings, upload F<tb.cgi>, F<header.txt>, and F<footer.txt>
+in ASCII mode to your webserver into a directory where you can run CGI
+scripts. Set the permissions on F<tb.cgi> to 755.
+
+=back
+
+=head1 USAGE
+
+=head2 Sending Pings
+
+To send pings from the tool, go to the following URL:
+
+    http://yourserver.com/cgi-bin/tb.cgi?__mode=send_form
+
+where I<http://yourserver.com/cgi-bin/tb.cgi> is the URL where you
+installed F<tb.cgi>. Fill out the fields in the form, then press I<Send>.
+
+=head2 Receiving Pings
+
+To use the tool in your existing pages, you'll need to do two things:
+
+=over 4
+
+=item 1. Link to TrackBack listing
+
+First, you'll need to add a link to each of your weblog entries with a
+link to the list of TrackBack pings for that entry. You can do this by
+adding the following HTML to your template:
+
+    <a href="http://yourserver.com/cgi-bin/tb.cgi?__mode=list&tb_id=[TrackBack ID]" onclick="window.open(this.href, 'trackback', 'width=480,height=480,scrollbars=yes,status=yes'); return false">TrackBack</a>
+
+You'll need to change C<http://yourserver.com/cgi-bin/tb.cgi> to the proper
+URL for I<tb.cgi> on your server. And, depending on the weblogging tool that
+you use, you'll need to change C<[TrackBack ID]> to a unique post ID. See
+the L<conversion table below|Conversion Table> to determine the proper tag to
+use for the tool that you use, to generate a unique post ID.
+
+=item 2. Add RDF
+
+TrackBack uses RDF embedded within your web page to auto-discover
+TrackBack-enabled entries on your pages. It also uses this information when
+building a threaded list of a cross-weblog "discussion". For these purposes,
+it is useful to embed the RDF into your page.
+
+Add the following to your weblog template so that it is displayed for each
+of the entries on your page:
+
+    <!--
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+             xmlns:dc="http://purl.org/dc/elements/1.1/"
+             xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+    <rdf:Description
+        rdf:about="[Entry Permalink]"
+        dc:title="[Entry Title]"
+        dc:identifier="[Entry Permalink]" />
+        trackback:ping="http://yourserver.com/cgi-bin/tb.cgi/[TrackBack ID]"
+    </rdf:RDF>
+    -->
+
+As above, the tags that you should use for C<[TrackBack ID]>,
+C<[Entry Title]>, and C<[Entry Permalink]> all depend on the weblogging tool
+that you are using. See the L<conversion table below|Conversion Table>.
+
+=back
+
+=head2 Conversion Table
+
+=over 4
+
+=item * Blogger
+
+TrackBack ID = C<E<lt>$BlogItemNumber$E<gt>>
+
+Entry Title = C<E<lt>PostSubjectE<gt>E<lt>$BlogItemSubject$E<gt>E<lt>/PostSubjectE<gt>>
+
+Entry Permalink = C<E<lt>$BlogItemArchiveFileName$E<gt>#E<lt>$BlogItemNumber$E<gt>>
+
+=item * GreyMatter
+
+TrackBack ID = C<{{entrynumber}}>
+
+Entry Title = C<{{entrysubject}}>
+
+Entry Permalink = C<{{pagelink}}>
+
+=item * b2
+
+TrackBack ID = C<E<lt>?php the_ID() ?E<gt>>
+
+Entry Title = C<E<lt>?php the_title() ?E<gt>>
+
+Entry Permalink = C<E<lt>?php permalink_link() ?E<gt>>
+
+=item * pMachine
+
+TrackBack ID = C<%%id%%>
+
+Entry Title = C<%%title%%>
+
+Entry Permalink = C<%%comment_permalink%%>
+
+=item * Bloxsom
+
+TrackBack ID = C<$fn>
+
+Entry Title = C<$title>
+
+Entry Permalink = C<$url/$yr/$mo/$da#$fn>
+
+Thanks to Rael for this list of conversions.
+
+=back
+
+=head1 POSSIBLE USES
+
+=over 4
+
+=item 1. Content repository
+
+Like Movable Type's TrackBack implementation, this standalone script can
+be used to power a distributed content repository. The value of the I<tb_id>
+parameter does not necessarily have to be an integer, because all it is used
+for is a filename (B<note> that this is not true of most other TrackBack
+implementations). For example, if you run a site about cats, and want to have
+a way for users to ping your site with entries they write about their own
+cats, you could set up a TrackBack URL like
+F<http://www.foo.com/bar/tb.cgi?tb_id=cats>, then give that URL out on your
+site. End users could then associate this URL with a I<Cats> category in
+their own blog, and ping you whenever they wrote about cats.
+
+=item 2. Building block
+
+You can use this simple implementation as a building block, or a guide, for
+implementing TrackBack in your own system. It illustrates the core
+functionality of the TrackBack framework, onto which you could add bells
+and whistles (IP banning, password-protected TrackBacks, etc).
+
+=item 3. Centralized tool
+
+This TrackBack tool requires that the end user have the ability to run CGI
+scripts on their server. For many users (eg BlogSpot users), this is not
+an option. For such users, a centralized system (based on this tool, perhaps)
+would be ideal.
+
+=back
+
+=cut

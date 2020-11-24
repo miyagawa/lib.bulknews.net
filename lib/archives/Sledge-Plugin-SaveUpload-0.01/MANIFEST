@@ -1,0 +1,8 @@
+Changes
+MANIFEST
+Makefile.PL
+lib/Sledge/Plugin/SaveUpload.pm
+t/00_compile.t
+t/01_save.t
+t/lib/Sledge/TestPages.pm
+t/upload.txt

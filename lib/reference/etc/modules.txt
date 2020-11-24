@@ -1,0 +1,7 @@
+http://www.symbolstone.org/technology/perl/DBI/
+http://perl.apache.org/guide/
+http://www.pagekit.org/
+http://axkit.org/
+http://www.2shortplanks.com/xmas/
+http://www.glay.ne.jp/~hoyama/jde/
+http://www.template-toolkit.org/index.html

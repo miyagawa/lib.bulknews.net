@@ -1,0 +1,225 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.24
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. アトリビュートのカプセル化 ＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl のオブジェクトにはカプセル化が標準装備されているわけではありませ
+ん。たとえば無名ハッシュベースでインスタンスを生成した場合、言語コアで
+はハッシュへのアクセス制限はありませんから、内部実装を知っていれば、任
+意のキーを外部から操作することが可能になってしまいます。
+
+この辺は基本的に紳士協定的な部分が大きく、それゆえ Perl のオブジェクト
+指向は性善説を前提としているともいわれます。とはいえ、実際問題それでは
+困ってしまうので、今回はクラス外部からのアトリビュートへのアクセスを制
+限する方法を考えます。
+
+
+2. アクセス制限 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+アトリビュートへのアクセスを制限する方法としては2つ考えられます。
+
+  a) 何らかのハックを使って、そもそもアクセスできなくてしまう
+  b) アトリビュートへのアクセサを提供し、クライアントにはそれを利用させる。
+
+a) の方法を実現しているモジュールとして、Tie::SecureHash[1] や、
+Class::Fields[2] が挙げられます。
+
+Tie::SecureHash は Damian Conway 作のモジュールで、ハッシュの各キーに
+対して public, private, protected といったフラグをつけることができます。
+Class::Fields は Michael Schwern 作のモジュールで、パッケージ変数 
+%FIELDS を操作することによって、Tie::SecureHash 同様に public, private 
+などのアトリビュート属性を操作できます。
+
+ただ、pseudo-hash そのものの機能は EXPERIMENTAL であるばかりか、最近は
+「実験は失敗だった」として、使えなくなる方向性が示されています[3]。も
+ちろん fields.pm, base.pm による backward compatibility は維持されるは
+ずですが、今後積極的に pseudo-hash 操作を行うことは避けた方がよいでしょ
+う。
+
+[1] http://search.cpan.org/search?dist=Tie-SecureHash
+[2] http://search.cpan.org/search?dist=Class-Fields
+[3] http://use.perl.org/article.pl?sid=01/07/16/127257&mode=thread&threshold= 
+
+
+今回は b) のアクセサを作る方法を紹介します。アクセサを作る場合、Java 
+などで見られる set_foo(), get_foo() という2種類を用意するのではなく、
+foo() というメソッドで set/get 兼用にするのが Perl 流です。
+
+ここでは、Birds というクラスを考えてみます。Birds クラスはアトリビュー
+トとして species, size, squalk, color を持ちます。
+
+    package Birds;
+
+    sub new {
+        my $class = shift;
+        my $obj = { species => 'parrot',
+                    size    => 'small',
+                    squalk  => 'PING!',
+                    color   => 'blue',
+                  };
+        bless $obj, $class;
+        return $obj;
+    }
+
+デフォルトのコンストラクタを定義しました。次に、各アトリビュートに対し
+てアクセサメソッドを定義します。
+
+    sub species {
+        my($self) = shift;
+        $self->{species} = shift if @_;
+        $self->{species};
+    }
+
+    sub size {
+        my($self) = shift;
+        $self->{size} = shift if @_;
+        $self->{size};
+    }
+
+    # squalk(), color() も同様
+
+  
+こんな感じです。が、4つのメソッドはハッシュのキーが違うだけでほとんど
+一緒ですね。実際、こういったコードを書く際にはコピー&ペーストがほとん
+どになってしまうでしょう。ということで、ちょっと一般化してみます。
+
+    sub _accessor {
+        my($self, $name, $data) = @_;
+        $self->{$name} = $data if (@_ == 3);
+        $self->{$name};
+    }
+
+    sub species {
+        my($self) = shift;
+        return $self->_accessor('species', @_);
+    }
+
+    sub size {
+        my($self) = shift;
+        return $self->_accessor('size', @_);
+    }
+
+    sub color {
+        my($self) = shift;
+        return $self->_accessor('color', @_);
+    }
+
+    sub squalk {
+        my($self) = shift;
+        return $self->_accessor('squalk', @_);
+    }
+
+
+_accessor() というメソッドによってハッシュ操作を内部的にもカプセル化し
+ました。すこしはスッキリとした感じです。ここで、メソッド名とキーが一緒
+であることに注目すれば、AUTOLOAD を使うアイデアを思い付くでしょう。
+
+
+    sub _accessor {
+        my($self, $name, $data) = @_;
+        $self->{$name} = $data if @_ == 3;
+        $self->{$name};
+    }
+
+    # アクセサのリスト
+    my %Accessors = map { $_ => 1 } qw(species size color squalk);
+
+    sub AUTOLOAD {
+        my($self) = shift;
+
+        my($class, $method) = $AUTOLOAD =~ /^(.+)::([^:]+)$/;
+
+        if( $Accessors{$method} ) {
+            # ほんとは goto のほうがいい
+            return $self->_accessor($method, @_);
+        }
+        else {
+            die qq{Can't locate object method "$method" via package "$class"};
+        }
+    }
+
+
+AUTOLOAD はクラス内にメソッドがみつからなかった際に呼ばれるメソッドで、
+クラス名とメソッド名が :: で連結されて、$AUTOLOAD というパッケージ変数
+に格納されて呼ばれます。
+
+たとえば、
+
+    $b = Birds->new;
+    $b->squalk;
+
+と呼び出されると、$AUTOLOAD == 'Birds::squalk'; となっています。ここで
+は、%Accessors に登録があるもののみ、_accessor() を呼び出し、それ以外
+はデフォルトの例外を上げるようにしています。(die ... の部分)
+
+こうして、%Accessors を操作するだけで、アトリビュートへのアクセサを定
+義できるようにはなりました。ただ、AUTOLOAD を使う場合、以下のようなデ
+メリットがあります。(詳細はまたの機会に)
+
+  * パフォーマンスがよくない
+  * 継承と AUTOLOAD の併用で問題が起こる
+  * can() が効かない
+
+
+よって、ここでは別の方法として、クロージャを利用します。シンボルテーブ
+ルをいじって、各アトリビュートの名前のメソッドを run-time に生成してし
+まう方法です。
+
+
+    # アクセサのリスト
+    my @Accessors = qw(species size color squalk);
+
+    for my $accessor (@Accessors) {
+        my $closure = sub {
+             my $self = shift;
+             $self->{$accessor} = shift if @_;
+             $self->{$accessor};
+        };
+        *{$accessor} = $closure;
+    }
+
+
+typeglob にサブルーチンリファレンスを入れることによって、アクセサメソッ
+ドが定義できます。このスクリプトは use strict 'refs' な環境ではエラー
+になりますので、このシンボルテーブル操作部分のスコープのみ、no strict 'refs' 
+をつけるとよいでしょう。
+
+これを汎用化して使えるようにしたモジュールに Class::Accessor[4] があり
+ます。アクセサを装備したいクラスは、まず Class::Accessor を継承し、ク
+ラスメソッド mk_accessors() をコールするだけで、アクセサが定義できるす
+ぐれものです。この Class::Accessor の内部の実装は、まさに上記の方法を
+採用しています。
+
+
+     package Birds;
+     use base qw(Class::Accessor);
+     Birds->mk_accessors(qw(species size color squalk));
+
+これだけで、アクセサ species(), size(), color(), squalk() が利用できま
+す。実際には、コンストラクタ new() も定義されているので、自ら定義する
+ことなく、利用することが出来ます。(オーバーライドしても問題ありません)
+
+     package main;
+     my $penguin = Birds->new;
+     $penguin->size('Big');
+     $penguin->color('pink');
+
+
+[4] http://search.cpan.org/search?dist=Class-Accessor
+
+
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Class::Accessor モジュールを利用すると、コピペに終始してしまいがちなア
+クセサメソッドの定義が簡単に出来て、非常に便利です。筆者の場合、アトリ
+ビュートが3つ以上になったら、このモジュールを使うようにしています。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

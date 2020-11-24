@@ -1,0 +1,62 @@
+NAME
+    WebService::Google::Suggest - Google Suggest as an API
+
+SYNOPSIS
+      use WebService::Google::Suggest;
+
+      my $suggest = WebService::Google::Suggest->new();
+      my @suggestions = $suggest->complete("goog");
+      for my $suggestion (@suggestions) {
+          print "$suggestion->{query}: $suggestion->{results} results\n";
+      }
+
+DESCRIPTION
+    WebService::Google::Suggest allows you to use Google Suggest as a Web
+    Service API to retrieve completions to your search query or partial
+    query. This module is based on Adam Stiles' hack
+    (http://www.adamstiles.com/adam/2004/12/hacking_google_.html).
+
+METHODS
+    new
+          $suggest = WebService::Google::Suggest->new();
+
+        Creates new WebService::Google::Suggest object.
+
+    complete
+          @suggestions = $suggest->complete($query);
+
+        Sends your $query to Google web server and fetches suggestions for
+        the query. Suggestions are in a list of hashrefs, for example with
+        query "Google":
+
+          @suggestions = (
+            { query => "google", results => 122000000 },
+            { query => "google toolbar", results => 2620000 },
+            ...
+          );
+
+        Note that "results" value does NOT contain commas and "results"
+        text.
+
+    ua
+          $ua = $suggest->ua;
+
+        Returns underlying LWP::UserAgent object. It allows you to change
+        User-Agent (Windows IE by default), timeout seconds and various
+        properties.
+
+AUTHOR
+    Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+    This module gives you NO WARRANTY.
+
+SEE ALSO
+    http://www.adamstiles.com/adam/2004/12/hacking_google_.html
+
+    http://www.google.com/webhp?complete=1&hl=en
+
+    http://labs.google.com/suggest/faq.html
+

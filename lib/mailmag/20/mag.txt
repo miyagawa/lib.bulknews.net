@@ -1,0 +1,60 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.20
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Topics ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+O'Reilly の Perl.com[1] で Perl 6 に関する記事がいくつかでています。
+Larry Wall の Appocalypse 2, そして Damian Conway の Exegesis 2 をセッ
+トで読むと、Perl 6 がいったいどんな言語になっていくのかわかると思いま
+す。
+
+Larry's Appocalypse 2
+http://www.perl.com/pub/2001/05/03/wall.html
+
+Damian Conway's Exegesis 2
+http://www.perl.com/pub/2001/05/08/exegesis2.html
+
+
+詳しくは原文を読んでください、としかいえないんですが、興味深い大きな変
+更は以下のような感じです。
+
+* オブジェクトのメソッドコールは -> でなく . に
+
+* property という概念 : is
+  e.g.) my int $pi is constant = 3.14;
+
+* $ @ % の見直し
+  Perl5 では @foo の 1番目の要素は $foo[1] でしたが、Perl6 では @foo[1]
+  となるようです。ハッシュも同様です。代わりに、スライス用の新しい記法が
+  用意されます。
+
+
+[1] http://www.perl.com/
+
+2. おしらせ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+* YARPC 19101
+
+2001/5/26 に YARPC (Yet Another Ruby/Perl Conference) 19101 が開催され
+ます。セッションの詳細が公式サイト[2] からたどれるページ
+
+  http://www.tokyo.pm.org/YARPC_WIP.html
+
+からご覧になれます。関東近郊の方はぜひご来場ください。
+
+[2] http://yarpc.tokyo.pm.org/
+
+
+3. 次回予告 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Damian Conway の NEXT.pm について紹介したいと思います。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

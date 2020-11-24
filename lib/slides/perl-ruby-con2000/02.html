@@ -1,0 +1,24 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="01.html">[prev]</A> <A href="03.html">[next]</A></DIV>
+<!-- /navi -->
+<H2>一番簡単なモジュール</H2>
+<HR>
+<BLOCKQUOTE><PRE><CODE>package Foo::Bar;
+1;	# require is happy
+</CODE></PRE></BLOCKQUOTE>
+<UL>
+<LI><CODE>Foo/Bar.pm</CODE> として保存<BR>
+　　　→ 何もしないモジュール
+<LI>スクリプトから <CODE>use Foo::Bar;</CODE> と呼び出す
+<LI><CODE>require Foo::Bar;</CODE> でもよい<BR>
+　　　→ どう違う？
+</UL>
+
+</BODY>
+</HTML>

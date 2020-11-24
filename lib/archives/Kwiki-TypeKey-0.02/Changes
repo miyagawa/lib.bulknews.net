@@ -1,0 +1,9 @@
+Revision history for Perl extension Kwiki::TypeKey
+
+0.02  Wed Mar 30 04:47:19 JST 2005
+	- add PREREQ to Makefile.PL
+	* Fixed umask in plugin/users creation.
+	  Make sure plugins/users is writable by Kwiki user
+
+0.01  Wed Mar 30 04:12:27 2005
+	- original version

@@ -1,0 +1,15 @@
+Changes
+MANIFEST			This list of files
+Makefile.PL
+README
+lib/HTTP/MobileAgent.pm
+lib/HTTP/MobileAgent/DoCoMo.pm
+lib/HTTP/MobileAgent/EZweb.pm
+lib/HTTP/MobileAgent/JPhone.pm
+lib/HTTP/MobileAgent/NonMobile.pm
+lib/HTTP/MobileAgent/Request.pm
+t/00_compile.t
+t/01_request.t
+t/02_docomo.t
+t/03_j_phone.t
+t/04_ezweb.t

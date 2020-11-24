@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+<TITLE>Mail::Address::Classify::mobile_jp - classificatin for mobile mail in Japan</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+	<LI><A HREF="#ACKNOWLEDGEMENT">ACKNOWLEDGEMENT</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+Mail::Address::Classify::mobile_jp - classificatin for mobile mail in Japan
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
+<P>
+<PRE>  use Mail::Address::Classify;
+</PRE>
+<P>
+<PRE>  my $addr = Mail::Address::Classify-&gt;new('fooooooo@docomo.ne.jp')
+  if ($addr-&gt;belongs('mobile_jp')) { }
+</PRE>
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+Mail::Address::Classify::mobile_jp is a plugin module for
+Mail::Address::Classify, which validates whether an address belongs to
+mobile mail address in Japan or not.
+
+<P>
+This module should be updated heavily :)
+
+<P>
+<HR>
+<H1><A NAME="AUTHOR">AUTHOR</A></H1>
+<P>
+Tatsuhiko Miyagawa &lt;<A HREF="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A>&gt;
+
+
+
+<P>
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+<P>
+<HR>
+<H1><A NAME="ACKNOWLEDGEMENT">ACKNOWLEDGEMENT</A></H1>
+<P>
+Thanks to Nobuwo &lt;<A HREF="mailto:milano@edge.co.jp">milano@edge.co.jp</A>&gt; for giving me the idea of this module and pointing me for the latest
+resource on the web.
+
+<P>
+<HR>
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
+<P>
+<A HREF="/Mail/Address/Classify.html">Mail::Address::Classify</A>, <A
+HREF="http://www.mag2.com/faq/mobile.htm">http://www.mag2.com/faq/mobile.htm</A>
+
+
+</BODY>
+
+</HTML>

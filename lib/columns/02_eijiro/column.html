@@ -1,0 +1,301 @@
+<HTML>
+<HEAD>
+<TITLE>英辞郎 - コマンドラインから和英/英和単語翻訳</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#libwww_perl">libwww-perl</A>
+	<LI><A HREF="#URI_Escape">URI::Escape</A>
+	<LI><A HREF="#Term_ReadLine">Term::ReadLine</A>
+	<LI><A HREF="#IMPLEMENTATION">IMPLEMENTATION</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+英辞郎 - コマンドラインから和英/英和単語翻訳
+
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+英辞郎というサイトがあります。ALCという会社のサイト上で、フォームから和英/英和の単語翻訳ができる優れものです。技術用語なども豊富なのでなかなか使い勝手があります。
+
+
+<P>
+これを、シェル上から使えるようにしたい、というのが今回の企画です。職場
+で英語の技術書を読んでいるとき、またドキュメントを英語でかく必要がでて
+きたとき、いちいち重いブラウザを使うことなく (w3m や lynx を常用してい
+るひとならそれでも構いませんが)、コマンドラインからちょっとした単語の
+訳が出せると、非常に便利だと思うのです。
+
+<P>
+インターフェースとしては、nslookup コマンドのように、
+
+<P>
+<PRE>  $ eijiro.pl foo
+  $ eijiro.pl ほげほげ
+  $ eijiro.pl
+  eijjiro&gt; foo
+  
+引数で渡すものと、インタラクティブなシェルのものの双方をサポートしよう
+と思います。
+</PRE>
+<P>
+<HR>
+<H1><A NAME="libwww_perl">libwww-perl</A></H1>
+<P>
+ブラウザのフォームからCGIをたたく部分を実装するには、Perl の libwww-perl
+パッケージを使うと簡単です。LWP は、Gisle Aas さんによって
+メンテナンスされており、HTTP 通信まわりを、すっきりとしたクラス階層で
+実装しています。
+
+<P>
+簡単な使い方として、LWP::Simple というクラスが提供されています。単純に
+あるURLからコンテンツやヘッダ情報を取得したり、ローカルディスクに保存
+したりするのであれば、この LWP::Simple モジュールによって提供される関 数
+<CODE>get(),</CODE> <CODE>head(),</CODE> <CODE>mirror()</CODE>
+などを使って簡単に実装することができます。
+
+<P>
+たとえば、ある URL に対してGETリクエストを投げ、HTMLを取得して表示する
+スクリプトは以下のようになります。
+
+<P>
+<PRE>     1  #!/usr/local/bin/perl
+     2
+     3  use strict;
+     4  use LWP::Simple;
+     5
+     6  print get('<A HREF="http://www.asahi.com/">http://www.asahi.com/</A>');
+</PRE>
+<P>
+簡単ですね。
+
+<P>
+単純に GET|HEAD を投げるだけでなく、パラメータも投げる、Cookie も受け
+渡す、プロキシを通す、Basic 認証を行う、となると LWP::Simple では厳し
+くなってきます。この場合、LWP::UserAgent クラスを使って実装することが
+できます。
+
+<P>
+あるサイトに対して Basic 認証を行い、正しく反応がかえってきた場合に、
+その内容を表示するスクリプトは以下のようになります。
+
+<P>
+<PRE>     1  #!/usr/local/bin/perl
+     2
+     3  use strict;
+     4  use LWP::UserAgent;
+     5
+     6  my $url         = '<A HREF="http://www.some.domain/auth_required/">http://www.some.domain/auth_required/</A>';
+     7  my $username    = 'user';
+     8  my $password    = 'XXXX';
+     9
+    10  my $ua = LWP::UserAgent-&gt;new;
+    11  my $request = <A HREF="HTTP::Request-&gt">HTTP::Request-&gt</A>;new(GET =&gt; $url);
+    12  $request-&gt;authorization_basic($username, $password);
+    13  my <A HREF="HTTP::Response">HTTP::Response</A> $response = $ua-&gt;request($request);
+    14
+    15  if ($response-&gt;is_success) {
+    16      print $response-&gt;as_string;
+    17  }
+</PRE>
+<P>
+このように、LWP::UserAgent の <CODE>request()</CODE> メソッドに
+HTTP::Request クラ スを渡すことにより、HTTP::Response
+クラスが返ってくるという仕様になっ ています。HTTP::Request, HTTP::Response
+は双方とも HTTP::Message のサ ブクラスとして実装されています。詳細は
+perldoc lwpcook をみてください。
+
+<P>
+<HR>
+<H1><A NAME="URI_Escape">URI::Escape</A></H1>
+<P>
+和英翻訳の場合、日本語をフォームに入力することになりますが、HTTPリクエ
+ストにそのまま日本語を渡すのではなく、ブラウザが非ASCII文字を URI-escape
+という方式でエンコードして渡しています。
+
+<P>
+URI エスケープの仕様は非常に簡単です。ある文字列 <CODE>$str</CODE>
+をエンコードする には、以下のようにします。
+
+<P>
+<PRE>  $str =~ s/(\W)/'%' . unpack('H2', $1)/eg;
+</PRE>
+<P>
+<CODE>sprintf()</CODE> と <CODE>ord()</CODE>
+を使うなどいろいろな方法がありますが、モジュールを 使うのであれば
+URI::Escape が用意されています。使い方は以下の通りです。
+
+<P>
+<PRE>     1  #!/usr/local/bin/perl
+     2
+     3  use strict;
+     4  use URI::Escape;
+     5
+     6  my $query = 'エスケープ=escape';
+     7  print uri_escape($query, '\W');
+</PRE>
+<P>
+ここで <CODE>uri_escape()</CODE> の第2引数に <CODE>\W</CODE> を渡しているところがポイントです。 uri_escape
+関数は、デフォルトでは「URIに使ってはいけない文字」を escape
+します。今回、CGIに入力した値のエスケープを考えていますから、こ
+れではまずいのです。<CODE>=</CODE>, <CODE>&amp;</CODE> といった文字は、URI としては使用可能で すが、CGI
+のパラメータとして渡す場合、<CODE>=</CODE> や <CODE>&amp;</CODE> は特殊な意味を持ち ます。ですから、<CODE>[a-zA-Z0-9_]</CODE> でない文字はすべて escape しなければなりま せん。
+
+<P>
+<HR>
+<H1><A NAME="Term_ReadLine">Term::ReadLine</A></H1>
+<P>
+以上の2つで、引数から翻訳結果を表示するものはできそうです。インタラク
+ティブにそれ自身、シェルとして実行するものはどうすればよいでしょうか。
+
+<P>
+CPAN モジュールをインストールするときに、
+
+<P>
+<PRE>  perl -MCPAN -e shell
+</PRE>
+<P>
+で立ち上がる CPAN シェル、これのシェル部分を実装している Term::ReadLine
+が使えます。実際には Term::ReadLine::Perl, Term::ReadLine::Gnu
+のどちらかを利用するのですが、これによって Ctrl-P
+でヒストリをさかのぼったり、といったことが簡単にできるようになります。
+
+<P>
+<HR>
+<H1><A NAME="IMPLEMENTATION">IMPLEMENTATION</A></H1>
+<P>
+準備は整いました。あとはユーザの入力を受け取って、HTTPリクエストを生成 し
+eijiro に問い合わせ、結果を表示すればよいことになります。
+
+<P>
+細かい実装として以下のところを工夫しています。
+
+<P>
+まず和英/英和モードの切り替えは、正規表現によって自動で行います。また、
+返ってくる HTML を、シェルで見やすくするためにはレンダリングエンジンが
+必要になってきますが、ここでは HTML::TreeBuilder, HTML::FormatText を
+使用しています。
+
+<P>
+インタラクティブシェルの場合には、終了して次に立ち上げた際にヒストリ補
+完できるよう、ヒストリファイルに記録する、といったこともしています。イ
+ンタラクティブモードは Ctrl-D もしくは !exit という入力で終了するよう
+になっています。
+
+<P>
+<PRE>     1  #!/usr/local/bin/perl
+     2  # eijiro.pl - <A HREF="http://www.alc.co.jp/eijiro/">http://www.alc.co.jp/eijiro/</A>
+     3
+     4  use strict;
+     5  use Jcode;
+     6  use LWP::Simple;
+     7  use FileHandle;
+     8  use URI::Escape;
+     9  use HTML::FormatText;
+    10  use HTML::TreeBuilder;
+    11  use Term::ReadLine;
+    12
+    13  my $historyfile = $ENV{HOME} . '/.eijirohistory';
+    14  my $pager = $ENV{PAGER} || 'less';
+    15
+    16  my $action = '<A HREF="http://www.alc.co.jp/eijiro351.php3">http://www.alc.co.jp/eijiro351.php3</A>';
+    17
+    18  # Terminal mode / Argv mode
+    19  if (@ARGV) {
+    20      my $line = join ' ', @ARGV;
+    21      translate($line);
+    22  } else {
+    23      my $term = Term::ReadLine-&gt;new('Eijiro');
+    24      # read history
+    25      if (my $fh = FileHandle-&gt;new($historyfile)) {
+    26          my @h = $fh-&gt;getlines;
+    27          chomp @h;
+    28          $fh-&gt;close;
+    29          my %seen;
+    30          $term-&gt;addhistory($_) foreach (grep { /\S/ &amp;&amp; !$seen{$_}++ } @h);
+    31      }
+    32      # readline &amp; translate
+    33      while ( defined ($_ = $term-&gt;readline('eijiro&gt; ')) ) {
+    34          exit if /^!exit/;
+    35          translate($_);
+    36          # Add history
+    37          {
+    38              my $fh = FileHandle-&gt;new(&quot;&gt;&gt;$historyfile&quot;) or die $!;
+    39              $fh-&gt;print(&quot;$_\n&quot;);
+    40              $fh-&gt;close;
+    41          }
+    42          $term-&gt;addhistory($_) if /\S/;
+    43      }
+    44  }
+    45
+    46  sub translate {
+    47      my $line = shift or return;
+    48
+    49      # ej or je
+    50      my $type_in = $line =~ /^[\x00-\x7f]*$/ ? 'ej' : 'je';
+    51
+    52      # URI-Escape
+    53      my $word_in = Jcode-&gt;new($line)-&gt;sjis;
+    54      $word_in = uri_escape($word_in, '\W');
+    55
+    56      # get Simply
+    57      my $url = sprintf '%s?word_in=%s&amp;type_in=%s', $action, $word_in, $type_in;
+    58      my $content = LWP::Simple::get($url) or die $!;
+    59
+    60      my $parser = new HTML::TreeBuilder;
+    61      my $html = $parser-&gt;parse(Jcode-&gt;new($content)-&gt;euc);
+    62      my $format = new HTML::FormatText(leftmargin=&gt;0);
+    63
+    64      my $p = new FileHandle &quot;| $pager&quot;;
+    65      $p-&gt;print($format-&gt;format($html));
+    66      $p-&gt;close;
+    67  }
+</PRE>
+<P>
+<HR>
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_libwww">libwww-perl</A></STRONG><DD>
+<P>
+<A
+HREF="http://search.cpan.org/search?dist=libwww-perl">http://search.cpan.org/search?dist=libwww-perl</A>
+
+
+<DT><STRONG><A NAME="item_Term">Term::ReadLine::Perl</A></STRONG><DD>
+<P>
+<A
+HREF="http://search.cpan.org/search?dist=Term-ReadLine-Perl">http://search.cpan.org/search?dist=Term-ReadLine-Perl</A>
+
+
+<DT><STRONG><A NAME="item__">英辞郎</A></STRONG><DD>
+<P>
+<A HREF="http://www.alc.co.jp/">http://www.alc.co.jp/</A> <A
+HREF="http://member.nifty.ne.jp/eijiro/index.html">http://member.nifty.ne.jp/eijiro/index.html</A>
+
+
+</DL>
+<P>
+<HR>
+<H1><A NAME="AUTHOR">AUTHOR</A></H1>
+<P>
+Tatsuhiko Miyagawa &lt;<A
+HREF="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A>&gt;
+
+</BODY>
+
+</HTML>

@@ -1,0 +1,10 @@
+<knows>
+<Person>
+  <name>$title</name>
+<?$meta::nick>  <nick>$meta::nick</nick></?>
+  <mbox_sha1sum>$meta::mbox_sha1sum</mbox_sha1sum>
+<?$meta::foaf>  <rdfs:seeAlso rdf:resource="$meta::foaf" /></?>
+<?$meta::weblog>  <weblog rdf:resource="$meta::weblog" /></?>
+<?$meta::homepage>  <homepage rdf:resource="$meta::homepage" /></?>
+</Person>
+</knows>

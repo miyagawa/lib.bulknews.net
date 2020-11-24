@@ -1,0 +1,4 @@
+http://www.pm.org/
+http://kansai.pm.org/japanese/index.html
+http://www.tokyo.pm.org/
+http://www.freeml.com/ml_info.php?ml=perl-oo

@@ -1,0 +1,2368 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Code Snippets </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Code Snippets 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./modules.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./hardware.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Redirecting_Errors_to_the_Client">Redirecting Errors to the Client Instead of error_log</A>
+	<LI><A HREF="#Reusing_Data_from_POST_request">Reusing Data from POST request</A>
+	<LI><A HREF="#Redirecting_POST_Requests">Redirecting POST Requests</A>
+	<LI><A HREF="#Redirecting_While_Maintaining_En">Redirecting While Maintaining Environment Variables</A>
+	<LI><A HREF="#Terminating_a_Child_Process_on_R">Terminating a Child Process on Request Completion</A>
+	<LI><A HREF="#More_on_Relative_Paths">More on Relative Paths</A>
+	<LI><A HREF="#Watching_the_error_log_File_With">Watching the error_log File Without Telneting to the Server</A>
+	<LI><A HREF="#Accessing_Variables_from_the_Cal">Accessing Variables from the Caller's Package</A>
+	<LI><A HREF="#Handling_Cookies">Handling Cookies</A>
+	<LI><A HREF="#Sending_Multiple_Cookies_with_th">Sending Multiple Cookies with the Perl API</A>
+	<LI><A HREF="#Sending_Cookies_in_REDIRECT_Resp">Sending Cookies in REDIRECT Response</A>
+	<LI><A HREF="#Passing_and_Preserving_Custom_Da">Passing and Preserving Custom Data Structures Between Handlers</A>
+	<LI><A HREF="#Passing_Notes_Between_mod_perl_a">Passing Notes Between mod_perl and other (non-Perl) Apache Modules</A>
+	<LI><A HREF="#Passing_Environment_Variables_Be">Passing Environment Variables Between Handlers</A>
+	<LI><A HREF="#CGI_params_in_the_mod_perl_ish_">CGI::params in the mod_perl-ish Way</A>
+	<LI><A HREF="#Subclassing_Apache_Request">Subclassing Apache::Request</A>
+	<LI><A HREF="#Sending_Email_from_mod_perl">Sending Email from mod_perl</A>
+	<LI><A HREF="#A_Simple_Handler_To_Print_The_En">A Simple Handler To Print The Environment Variables</A>
+	<LI><A HREF="#mod_rewrite_in_Perl">mod_rewrite in Perl</A>
+	<LI><A HREF="#URI_Rewrite_in_PerlTransHandler">URI Rewrite in PerlTransHandler </A>
+	<LI><A HREF="#Setting_PerlHandler_Based_on_MIM">Setting PerlHandler Based on MIME Type</A>
+	<LI><A HREF="#SSI_and_Embperl_Doing_Both">SSI and Embperl - Doing Both</A>
+	<LI><A HREF="#Getting_the_Front_end_Server_s_N">Getting the Front-end Server's Name in the Back-end Server</A>
+	<LI><A HREF="#Authentication_Snippets">Authentication Snippets</A>
+	<LI><A HREF="#Emulating_the_Authentication_Mec">Emulating the Authentication Mechanism</A>
+	<LI><A HREF="#An_example_of_using_Apache_Sess">An example of using Apache::Session::DBI with cookies</A>
+	<LI><A HREF="#Using_DESTROY_to_Finalize_Output">Using DESTROY to Finalize Output</A>
+	<LI><A HREF="#Setting_Environment_Variables_Fo">Setting Environment Variables For Scripts Called From CGI.</A>
+	<LI><A HREF="#Mysql_Backup_and_Restore_Scripts">Mysql Backup and Restore Scripts</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Redirecting_Errors_to_the_Client">Redirecting Errors to the Client Instead of error_log</A></H1></CENTER>
+<P>
+Many error conditions result in an <EM>exception</EM> (or <EM>signal</EM> -- same thing) which is <EM>raised</EM> in order to tell the operating system that a condition has arisen which
+needs more urgent attention than can be given by other means. One of the
+most familiar ways of raising a signal is to hit <CODE>Ctrl-C</CODE> on your terminal's keyboard. The signal interrupts the processor. In the
+case of <CODE>Ctrl-C</CODE> the <CODE>INT</CODE> signal is generated and the interrupt is usually <EM>trapped</EM> by a default
+<EM>signal handler</EM> supplied by OS, which causes the operating system to stop the process
+currently attached to the terminal.
+
+<P>
+Under mod_perl, a Perl runtime error causes an exception. By default this
+exception is trapped by default mod_perl handler. The handler logs
+information about the error (such as the date and time that the error
+occurred) to <EM>error_log</EM>. If you want to redirect this information to the client instead of to <EM>error_log</EM> you have to take the responsibility yourself, by writing your own exception
+handler to implement this behaviour. See the section ``<A HREF="././perl.html#Exception_Handling_for_mod_perl">Exception Handling for mod_perl</A>'' for more information.
+
+<P>
+The code examples below can be useful with your own exception handlers as
+well as with the default handlers.
+
+<P>
+META: Integrate the 2 sections
+
+<P>
+The CGI::Carp package implements handlers for signals. To trap (almost) all
+Perl run-time errors and send the output to the client instead of to
+Apache's <CODE>error_log</CODE> add this line to your script:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI::Carp qw(fatalsToBrowser);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Refer to the <CODE>CGI::Carp</CODE> man page for more detailed information.
+
+<P>
+You can trap individual exceptions: for example you can write custom
+<CODE>__DIE__</CODE> and <CODE>__WARN__</CODE> signal handlers. The special <CODE>%SIG</CODE> hash contains references to signal handlers. The signal handler is just a
+subroutine, in the example below it is called ``mydie''. To install the
+handler we assign a reference to our handler to the appropriate element of
+the <CODE>%SIG</CODE> hash. This causes the signal handler to call
+<CODE>mydie(error_message)</CODE> whenever the <CODE>die()</CODE> sub is called as a result of something which happened when our script was
+executing.
+
+<P>
+Do not forget the <CODE>local</CODE> keyword! If you do, then after the signal handler has been loaded it will
+be called whenever <CODE>die()</CODE> is called by <EM>any</EM> script executed by the same process. Probably that's not what you want. If
+it is, you can put the assignment statement in any module, as long as it
+will be executed at the right time.
+
+<P>
+Here is an example of a handler which I wrote because I wanted users to
+know that there was an error, without displaying the error message, but
+instead email it to me. If the error is caused by user (e.g. uploading
+image whose size is bigger than the limit I had set) I want to tell them
+about it. I wrote this handler for the mod_perl environment, but it works
+correctly when called from the shell. The code shown below is a
+stripped-down version with additional comments.
+
+<P>
+The following code must be added to the script:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # Using the local() keyword restricts the scope of the directive to 
+  # the block in which it is found, so this line must be added at the 
+  # right place in the right script.  It will not affect other blocks 
+  # unless the local() keyword is removed.  Usually you will want the 
+  # directive to affect the entire script, so you just place it near 
+  # the beginning of the file, where the innermost enclosing block is 
+  # the file itself.
+  local $SIG{__DIE__} = \&amp;mydie;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # The line above assumes that the subroutine &quot;mydie&quot; is in the same script.
+  # Alternatively you can create a separate module for the error handler.
+  # If you put the signal handler in a separate module, e.g. Error.pm,
+  # you must explicitly give the package name to set the handler in your
+  # script, using a line like this instead of the one above:
+  local $SIG{__DIE__} = \&amp;Error::mydie;
+  # again within the script!
+  
+  # Do not forget the C&lt;local()&gt;, unless you want this signal handler to
+  # be invoked every time any scripts dies (including events where this
+  # treatment may be undesirable).</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $max_image_size = 100*1024; # 100k
+  my $admin_email    = 'foo@example.com';</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # and the handler itself
+  # Here is the handler itself:
+  # The handler is called with a text message in a scalar argument
+  sub mydie{
+    my $why = shift;
+  
+    chomp $why;
+    my $orig_why = $why;                # an ASCII copy for email report
+  
+    # handle the shell execution case (so we will not get all the HTML)
+    print(&quot;Error: $why\n&quot;), exit unless $ENV{MOD_PERL};
+  
+    my $should_email = 0;
+    my $message = '';
+  
+    $why =~ s/[&lt;&amp;&gt;]/&quot;&amp;#&quot;.ord($&amp;).&quot;;&quot;/ge;    # entity escape
+  
+    # Now we need to trap various kinds of errors that come from CGI.pm
+    # We don't want these errors to be emailed to us, since
+    # they aren't programmatical errors
+    if ($orig_why =~ /Client attempted to POST (\d+) bytes/o) {
+  
+      $message = qq{
+                  You cannot POST messages bigger than 
+                  @{[1024*$max_image_size]} bytes.&lt;BR&gt;
+                  You have tried to post $1 bytes&lt;BR&gt;
+                  If you are trying to upload an image, make sure its
+                  size is no bigger than @{[1024*$max_image_size]}
+                  bytes.&lt;P&gt;
+                  Thank you!
+                 };
+  
+    } elsif ($orig_why =~ /Malformed multipart POST/o) {
+  
+      $message = qq{
+                  Have you tried to upload an image in the wrong way?&lt;P&gt;
+                  To sucessfully upload an image you must use a browser that supports
+                  image upload and use the 'Browse' button to select that image.
+                  DO NOT type the path to the image into the upload field.&lt;P&gt;
+                  Thank you!
+                 };
+  
+    } elsif ($orig_why =~ /closed socket during multipart read/o) {
+  
+      $message = qq{
+                  Have you pressed a 'STOP' button?&lt;BR&gt;
+                  Please try again!&lt;P&gt;
+                  Thank you!
+                 };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    } else {
+  
+      $message = qq{
+                  &lt;B&gt;You need take no action since
+                  the error report has already been 
+                  sent to the webmaster. &lt;BR&gt;&lt;P&gt;
+                  &lt;B&gt;Thank you for your patience!&lt;/B&gt;
+                 };
+  
+      $should_email = 1;
+    }
+  
+  
+    print qq{Content-type: text/html
+  
+  &lt;HTML&gt;&lt;BODY BGCOLOR=&quot;white&quot;&gt;
+  &lt;B&gt;Oops, Something went wrong.&lt;/B&gt;&lt;P&gt;
+  $message
+  &lt;/BODY&gt;&lt;/HTML&gt;};      
+  
+      # send email report if appropriate
+    if ($should_email){
+  
+        # import sendmail subs
+      use Mail ();
+        # prepare the email error report:
+      my $subject =&quot;Error Report&quot;;
+      my $body = qq|
+    An error has happened:
+  
+    $orig_why
+  
+      |;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>        # send error reports to admin 
+      send_mail($admin_email,$admin_email,$subject,$body);
+      print STDERR &quot;[&quot;.scalar localtime().&quot;] [SIGDIE] Sending Error Email\n&quot;;
+    }
+  
+       # print to error_log so we will know there was an error
+    print STDERR &quot;[&quot;.scalar localtime().&quot;] [SIGDIE] $orig_why \n&quot;;
+  
+    exit 1;
+  }                             # end of sub mydie
+  </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You may have noticed that I trap the CGI.pm's <CODE>die()</CODE> calls
+here, I don't see any reason why my users should see ugly error messages,
+but that's the way CGI.pm written. The workaround is to trap them yourself.
+
+<P>
+Please note that as of version 2.49, CGI.pm provides the
+<CODE>cgi_error()</CODE> method to print the errors and won't
+<CODE>die()</CODE> unless you want it to.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Reusing_Data_from_POST_request">Reusing Data from POST request</A></H1></CENTER>
+<P>
+What happens if you need to access the POSTed data more than once, say to
+reuse it on subsequent requests? POSTed data comes directly from the
+socket, and at the low level data can only be read from a socket once. So
+you have to store it to make it available for reuse.  
+
+<P>
+There is an experimental option for <CODE>Makefile.PL</CODE> called
+<CODE>PERL_STASH_POST_DATA</CODE>. If you turn it on, you can get at it again with <CODE>$r-&gt;subprocess_env("POST_DATA")</CODE>. This is not <EM>enabled</EM>
+by default because it adds a processing overhead for each POST request.
+
+<P>
+But what do we do with large multipart file uploads? Because <CODE>POST</CODE>
+data is not all read in one clump, it's a problem that's not easy to solve
+in a general way. A transparent way to do this is to switch the request
+method from POST to GET, and store the POST data in the query string. This
+handler does exactly this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache/POST2GET.pm
+  ------------------
+  package Apache::POST2GET;
+  use Apache::Constants qw(M_GET OK DECLINED);
+  
+  sub handler {
+    my $r = shift;
+    return DECLINED unless $r-&gt;method eq &quot;POST&quot;;
+    $r-&gt;args(scalar $r-&gt;content);
+    $r-&gt;method('GET');
+    $r-&gt;method_number(M_GET);
+    $r-&gt;headers_in-&gt;unset('Content-length');
+    return OK;
+  }
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In <EM>httpd.conf</EM> add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlInitHandler Apache::POST2GET</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or even this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Limit POST&gt;
+    PerlInitHandler Apache::POST2GET
+  &lt;/Limit&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To save a few more cycles, so the handler will be called only for POST
+requests.
+
+<P>
+Effectively, this trick turns the POST request into a GET request
+internally. Now when <CODE>CGI.pm</CODE>, <CODE>Apache::Request</CODE> or whatever module parses the client data, it can do so more than once
+since
+<CODE>$r-&gt;args</CODE> doesn't go away (unless you make it go away by resetting it).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Redirecting_POST_Requests">Redirecting POST Requests</A></H1></CENTER>
+<P>
+Under mod_cgi it's not easy to redirect POST requests to some other
+location. With mod_perl you can easily redirect POST requests. All you have
+to do is read in the content, set the method to <CODE>GET</CODE>, populate <CODE>args()</CODE> with the content to be forwarded and finally do the redirect:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(M_GET);
+  my $r = shift;
+  my $content = $r-&gt;content;
+  $r-&gt;method(&quot;GET&quot;);
+  $r-&gt;method_number(M_GET);
+  $r-&gt;headers_in-&gt;unset(&quot;Content-length&quot;);
+  $r-&gt;args($content);
+  $r-&gt;internal_redirect_handler(&quot;/new/url&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course that last line can be any other kind of redirect.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Redirecting_While_Maintaining_En">Redirecting While Maintaining Environment Variables</A></H1></CENTER>
+<P>
+Let's say you have a module that sets some environment variables.
+
+<P>
+If you redirect, that's most likely telling the web browser to fetch the
+new page. This makes it a totally new request, so no environment variables
+are preserved.
+
+<P>
+However, if you're using <CODE>internal_redirect(),</CODE> you can make the
+environment variables seen in the sub-process via
+<CODE>subprocess_env().</CODE> The only nuance is that the <CODE>%ENV</CODE> keys will be prefixed with <CODE>REDIRECT_</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Terminating_a_Child_Process_on_R">Terminating a Child Process on Request Completion</A></H1></CENTER>
+<P>
+If you want to terminate the child process serving the current request,
+upon completion of processing anywhere in the code call:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;child_terminate;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Apache won't actually terminate the child until everything it needs to do
+is done and the connection is closed.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="More_on_Relative_Paths">More on Relative Paths</A></H1></CENTER>
+<P>
+Many people use relative paths for <CODE>require</CODE>, <CODE>use</CODE>, etc., and when they open files in their scripts they make assumptions
+about the current directory. This will fail if you don't <CODE>chdir()</CODE> to the correct directory first (as could easily happen if you have another
+script which calls the first script by its full path).
+
+<P>
+For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /home/httpd/perl/test.pl:
+  -------------------------
+  #!/usr/bin/perl
+  open IN, &quot;./foo.txt&quot;;
+  -------------------------</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This snippet would work if we call the script like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % chdir /home/httpd/perl
+  % ./test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+since <CODE>foo.txt</CODE> is located in the current directory. But when the current directory isn't <EM>/home/httpd/perl</EM>, if we call the script like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /home/httpd/perl/test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then the script will fail to find <CODE>foo.txt</CODE>. Think about 
+<CODE>crontab</CODE>s!
+
+<P>
+Notice that you cannot use the <CODE>FindBin.pm</CODE> package, something that you'd do in the regular Perl scripts, because it
+relies on the
+<CODE>BEGIN</CODE> block it won't work under mod_perl. It's loaded and executed only for the
+first script executed inside the process, all the others will use the
+cached value, which would be probably incorrect if they reside in different
+directories.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Watching_the_error_log_File_With">Watching the error_log File Without Telneting to the Server</A></H1></CENTER>
+<P>
+I wrote this script a long time ago, when I had to debug my CGI scripts but
+didn't have access to the <CODE>error_log</CODE> file. I asked the admin to install this script and have used it happily
+since then.
+
+<P>
+If your scripts are running on these 'Get-free-site' servers, and you
+cannot debug your script because you can't telnet to the server or can't
+see the <CODE>error_log</CODE>, you can ask your sysadmin to install this script.
+
+<P>
+Note, that it was written for plain Apache, and isn't prepared to handle
+the complex multiline error and warning messages generated by mod_perl. It
+also uses a <CODE>system()</CODE> call to do the main work with the
+<CODE>tail()</CODE> utility, probably a more efficient perl implementation
+is due (take a look at <CODE>File::Tail</CODE> module). You are welcome to fix it and contribute it back to mod_perl
+community. Thank you!
+
+<P>
+Here is the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # !/usr/bin/perl -Tw
+  
+  use strict;
+  
+  my $default   = 10;
+  my $error_log = &quot;/usr/local/apache/logs/error_log&quot;;
+  use CGI;
+  
+  # untaint $ENV{PATH}
+  $ENV{'PATH'} = '/bin:/usr/bin';
+  delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+    
+  my $q = new CGI;
+  
+  my $counts = (defined $q-&gt;param('count') and $q-&gt;param('count'))
+    ? $q-&gt;param('count') : $default;
+  
+  print $q-&gt;header,
+        $q-&gt;start_html(-bgcolor =&gt; &quot;white&quot;,
+                     -title   =&gt; &quot;Error logs&quot;),
+        $q-&gt;start_form,
+        $q-&gt;center(
+                 $q-&gt;b('How many lines to fetch? '),
+                 $q-&gt;textfield('count',10,3,3),
+                 $q-&gt;submit('', 'Fetch'),
+                 $q-&gt;reset,
+                ),
+        $q-&gt;end_form,
+        $q-&gt;hr;
+  
+  # untaint $counts
+  $counts = ($counts =~ /(\d+)/) ? $1 : 0;
+  
+  print($q-&gt;b(&quot;$error_log doesn't exist!!!&quot;)),exit unless -e $error_log;
+  
+  open LOG, &quot;tail -$counts $error_log|&quot; 
+    or die &quot;Can't tail $error_log :$!\n&quot;;
+  my @logs = &lt;LOG&gt;;
+  close LOG;
+    # format and colorize each line nicely
+  foreach (@logs) {
+      s{
+       \[(.*?)\]\s* # date
+       \[(.*?)\]\s* # type of error 
+       \[(.*?)\]\s* # client part
+       (.*)         # the message
+      }
+      {
+        &quot;[$1] &lt;BR&gt; [&quot;.
+        colorize($2,$2).
+        &quot;] &lt;BR&gt; [$3] &lt;PRE&gt;&quot;.
+        colorize($2,$4).
+        &quot;&lt;/PRE&gt;&quot;
+      }ex;
+    print &quot;&lt;BR&gt;$_&lt;BR&gt;&quot;; 
+  }
+  
+  
+  
+  #############
+  sub colorize{
+    my ($type,$context) = @_;
+  
+    my %colors = 
+      (
+       error  =&gt; 'red',
+       crit   =&gt; 'black',
+       notice =&gt; 'green',
+       warn   =&gt; 'brown',
+      );
+  
+    return exists $colors{$type}
+        ? qq{&lt;B&gt;&lt;FONT COLOR=&quot;$colors{$type}&quot;&gt;$context&lt;/FONT&gt;&lt;/B&gt;}
+        : $context;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Accessing_Variables_from_the_Cal">Accessing Variables from the Caller's Package</A></H1></CENTER>
+<P>
+Sometimes you want to access variables from the caller's package. One way
+is to do something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    no strict 'vars' ;
+    my $caller = caller;
+    print qq[$caller --- ${&quot;${caller}::var&quot;}];
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Handling_Cookies">Handling Cookies</A></H1></CENTER>
+<P>
+Unless you use some well known module like <CODE>CGI::Cookie</CODE> or
+<CODE>Apache::Cookie</CODE>, you need to handle cookies yourself.
+
+<P>
+Cookies come in the <CODE>$ENV{HTTP_COOKIE}</CODE> variable. You can print the raw cookie string as <CODE>$ENV{HTTP_COOKIE}</CODE>.
+
+<P>
+Here is a fairly well-known bit of code to take cookie values and put them
+into a hash:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub get_cookies {
+      # cookies are seperated by a semicolon and a space, this will
+      # split them and return a hash of cookies
+    local(@rawCookies) = split (/; /,$ENV{'HTTP_COOKIE'});
+    local(%cookies);
+  
+    foreach(@rawCookies){
+      ($key, $val) = split (/=/,$_);
+      $cookies{$key} = $val;
+    }
+  
+    return %cookies;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Or a slimmer version:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    sub get_cookies {
+        map { split /=/, $_, 2 } split /; /, $ENV{'HTTP_COOKIE'} ;
+    }
+        </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Sending_Multiple_Cookies_with_th">Sending Multiple Cookies with the Perl API</A></H1></CENTER>
+<P>
+Given that you have prepared your cookies in <CODE>@cookies</CODE>, the following code will submit all the cookies:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  for (@cookies){
+   $r-&gt;headers_out-&gt;add( 'Set-Cookie' =&gt; $_ );
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Sending_Cookies_in_REDIRECT_Resp">Sending Cookies in REDIRECT Response</A></H1></CENTER>
+<P>
+You should use <CODE>err_headers_out()</CODE> and not
+<CODE>headers_out()</CODE> when you want to send cookies in the <CODE>REDIRECT</CODE> response.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(REDIRECT OK);
+  my $r = shift;
+  # prepare the cookie in $cookie
+  $r-&gt;err_headers_out-&gt;add('Set-Cookie' =&gt; $cookie);
+  $r-&gt;headers_out(Location =&gt; $location);
+  $r-&gt;status(REDIRECT);
+  $r-&gt;send_http_header;
+  return OK;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Passing_and_Preserving_Custom_Da">Passing and Preserving Custom Data Structures Between Handlers</A></H1></CENTER>
+<P>
+Let's say that you wrote a few handlers to process a request, and they all
+need to share some custom Perl data structure. The <CODE>pnotes()</CODE>
+method comes to your rescue.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   # a handler that gets executed first
+   my %my_data = (foo =&gt; 'mod_perl', bar =&gt; 'rules');
+   $r-&gt;pnotes('my_data' =&gt; \%my_data);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The handler prepares the data in hash <CODE>%my_data</CODE> and calls <CODE>pnotes()</CODE> method to store the data internally for
+other handlers to re-use. All the subsequently called handlers can retrieve
+the stored data in this way:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   my $info = $r-&gt;pnotes('my_data');
+   print $info-&gt;{foo};</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+prints:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  mod_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The stored information will be destroyed at the end of the request.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Passing_Notes_Between_mod_perl_a">Passing Notes Between mod_perl and other (non-Perl) Apache Modules</A></H1></CENTER>
+<P>
+The <CODE>notes()</CODE> method can be used to make various Apache modules
+talk to each other. In the following snippet the PHP module talks to the
+mod_perl code (PHP code):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if (isset($user) &amp;&amp; substr($user,0,1) == &quot;+&quot;) {
+    apache_note(&quot;user&quot;, substr($user,1));
+    virtual(&quot;/internal/getquota&quot;);
+    $quota      = apache_note(&quot;quota&quot;);
+    $usage_pp   = apache_note(&quot;usage_pp&quot;);
+    $percent_pp = apache_note(&quot;percent_pp&quot;);
+    if ($quota)
+      $message .= &quot; | Using $percent_pp% of $quota_pp limit&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The PHP code sets the <EM>user</EM> and the username pair using the notes mechanism. Then issuing a sub-request
+to a perl handler:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(REDIRECT OK);
+  my $r = shift;
+  my $notes = $r-&gt;main-&gt;notes();
+  my ($quota,usage_pp,percent_pp) = getquota($notes-&gt;{user}||'');
+  $r-&gt;notes('quota',$quota);
+  $r-&gt;notes('usage_pp',$usage_pp);
+  $r-&gt;notes('percent_pp',$percent_pp);
+  return OK;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which retrieves the username from the notes (using
+<CODE>$r-&gt;main-&gt;notes</CODE>), uses some <CODE>getquota()</CODE> function to get the quota related data
+and then sets the acquired data in the notes for the PHP code. Now the PHP
+code reads the data from the notes and proceeds with setting <CODE>$message</CODE> if <CODE>$quota</CODE> is set.
+
+<P>
+So any Apache modules can communicate with each other over the Apache
+<CODE>notes()</CODE> mechanism.
+
+<P>
+You can use notes along with the sub-request methods
+<CODE>lookup_uri()</CODE> and <CODE>lookup_filename()</CODE> too. To make
+it work, you need to set a note in the sub-request. For example if you want
+to call a php sub-request from within mod_perl and pass it a note, you can
+do it in the following way:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    my $subr = $r-&gt;lookup_uri('wizard.php3');
+    $subr-&gt;notes('answer' =&gt; 42);
+    $subr-&gt;run;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As of the time of this writing you cannot access the parent request tables
+from a PHP handler, therefore you must set this note for the sub-request.
+Whereas if the sub-request is running in the mod_perl domain, you can
+always keep the notes in the parent request notes table and access them via
+the method <CODE>main():</CODE>
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;main-&gt;notes('answer');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Passing_Environment_Variables_Be">Passing Environment Variables Between Handlers</A></H1></CENTER>
+<P>
+This is a simple example of passing environment variables between handlers:
+
+<P>
+Having a configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlAccessHandler My::Access
+  PerlLogHandler My::Log</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and in <EM>startup.pl</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub My::Access::handler {
+    my $r = shift;
+    $r-&gt;subprocess_env(TICKET =&gt; $$);
+    $r-&gt;notes(TICKET =&gt; $$);
+  }
+  
+  sub My::Log::handler {
+    my $r = shift;
+    my $env = $r-&gt;subprocess_env('TICKET');
+    my $note = $r-&gt;notes('TICKET');
+    warn &quot;env=$env, note=$note\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Adding <CODE>%{TICKET}e</CODE> and <CODE>%{TICKET}n</CODE> to the <CODE>LogFormat</CODE> for access_log works fine too.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="CGI_params_in_the_mod_perl_ish_">CGI::params in the mod_perl-ish Way</A></H1></CENTER>
+<P>
+You can retrieve the request parameters in a similar to <CODE>CGI::params</CODE>
+way using this technique:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r = shift;  # or $r = Apache-&gt;request
+  my %params = $r-&gt;method eq 'POST' ? $r-&gt;content : $r-&gt;args;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+assuming that all your variables are single key-value pairs.
+
+<P>
+Also take a look at <CODE>Apache::Request</CODE> which has the same API as
+<CODE>CGI.pm</CODE> for extracting and setting request parameters.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Subclassing_Apache_Request">Subclassing Apache::Request</A></H1></CENTER>
+<P>
+To subclass a package you simply modify @ISA, for example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::TestAPR;
+    
+  use strict;
+  use vars qw/@ISA/;
+  @ISA = qw/Apache::Request/;
+  
+  sub new {
+        my ($proto, $apr) = @_;
+        my $class = ref($proto) || $proto;
+        bless { _r =&gt; $apr }, $class;
+  }
+  
+  sub param {
+        my ($self, $key) = @_;
+        my $apr = $self-&gt;{_r};
+        # Here we are calling the Apache::Request object's param method
+        $apr-&gt;param($key);
+  }
+  
+  sub sum {
+        my ($self, $key) = @_;
+        my $apr = $self-&gt;{_r};
+        my @values = $apr-&gt;param($key);
+        my $sum = 0;
+        for (@values) {
+                $sum += $_;
+        }
+        $sum;
+  }
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Sending_Email_from_mod_perl">Sending Email from mod_perl</A></H1></CENTER>
+<P>
+There is nothing special about sending email from mod_perl, it's just that
+we do it a lot. There are a few important issues. The most widely used
+approach is starting a <CODE>sendmail</CODE> process and piping the headers and the body to it. The problem is that <CODE>sendmail</CODE> is a very heavy process and it makes mod_perl processes less efficient.
+
+<P>
+If you don't want your process to wait until delivery is complete, you can
+tell <CODE>sendmail</CODE> not to deliver the email straight away, but either do it in the background
+or just queue the job until the next queue run. This can significantly
+reduce the delay for the mod_perl process which would otherwise have to
+wait for the <CODE>sendmail</CODE> process to complete. This can be specified for all deliveries in
+<EM>sendmail.cf</EM> or on each invocation on the sendmail command line:
+
+<UL>
+<P><LI>
+<P>
+<CODE>-odb</CODE> (deliver in the background)
+
+<P><LI>
+<P>
+<CODE>-odq</CODE> (queue-only) or
+
+<P><LI>
+<P>
+<CODE>-odd</CODE> (queue, and also defer the DNS/NIS lookups).
+
+</UL>
+<P>
+The trend is to move away from <CODE>sendmail(1)</CODE> and switch to using
+lighter mail delivery programs like <CODE>qmail(1)</CODE> or
+<CODE>postfix(1).</CODE> You should check the manpage of your favorite
+mailer application for equivalent configuration presented for
+<CODE>sendmail(1).</CODE>
+
+<P>
+The most efficient approach is to talk directly to the SMTP server. Luckily <CODE>Net::SMTP</CODE> modules makes this very easy. The only problem is when &lt;Net::SMTP&gt; fails to deliver the mail, because the destination peer
+server is temporarily down. But from the other side <CODE>Net::SMTP</CODE>
+allows you to send email much much faster, since you don't have to invoke a
+dedicated process. Here is an example of a subroutine that sends email.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Net::SMTP ();
+  use Carp qw(carp verbose);
+  
+  #
+  # Sends email by using the SMTP Server
+  #
+  # The SMTP server as defined in Net::Config 
+  # Alternatively you can hardcode it here, look for $smtp_server below 
+  #
+  sub send_mail{
+    my ($from, $to, $subject, $body) = @_;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    carp &quot;From missing&quot; unless defined $from ; # Prefer to exit early if errors
+    carp &quot;To missing&quot;   unless defined $to ;
+  
+    my $mail_message = &lt;&lt;__END_OF_MAIL__;
+  To: $to
+  From: $from
+  Subject: $subject
+  
+  $body
+  
+  __END_OF_MAIL__
+  
+      # Set this parameter if you don't have a valid Net/Config.pm
+      # entry for SMTP host and uncomment it in the Net::SMTP-&gt;new
+      # call
+    # my $smtp_server = 'localhost';
+  
+      # init the server
+    my $smtp = Net::SMTP-&gt;new(
+                            # $smtp_server,
+                            Timeout =&gt; 60, 
+                            Debug   =&gt; 0,
+                           );
+  
+    $smtp-&gt;mail($from) or carp (&quot;Failed to specify a sender [$from]\n&quot;);
+    $smtp-&gt;to($to) or carp (&quot;Failed to specify a recipient [$to]\n&quot;);
+    $smtp-&gt;data([$mail_message]) or carp (&quot;Failed to send a message\n&quot;);
+  
+    $smtp-&gt;quit or carp (&quot;Failed to quit\n&quot;);
+  
+  } #  end of sub send_mail</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="A_Simple_Handler_To_Print_The_En">A Simple Handler To Print The Environment Variables</A></H1></CENTER>
+<P>
+The code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package MyEnv;
+  use Apache;
+  use Apache::Constants;
+  sub handler{ 
+    my $r = shift; 
+    print $r-&gt;send_http_header(&quot;text/plain&quot;); 
+    print map {&quot;$_ =&gt; $ENV{$_}\n&quot;} keys %ENV;
+    return OK;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule MyEnv
+  &lt;Location /env&gt;
+    SetHandler perl-script
+    PerlHandler MyEnv
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The invocation:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://localhost/env">http://localhost/env</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_rewrite_in_Perl">mod_rewrite in Perl</A></H1></CENTER>
+<P>
+We can easily implement everything mod_rewrite does in Perl. We do this
+with help of PerlTransHandler, which is invoked at the beginning of request
+processing. For example consider that we need to perform a redirect based
+on query string and URI, the following handler does that.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::MyRedirect;
+  use Apache::Constants qw(OK REDIRECT);
+  use constant DEFAULT_URI =&gt; '<A HREF="http://www.example.org">http://www.example.org</A>';
+  
+  sub handler {
+    my $r    = shift;
+    my %args = $r-&gt;args;
+    my $path = $r-&gt;uri;
+  
+    my $uri = (($args{'uri'}) ? $args{'uri'} : DEFAULT_URI) . $path;
+  
+    $r-&gt;header_out(Location =&gt; $uri);
+    $r-&gt;status(REDIRECT);
+    $r-&gt;send_http_header;
+  
+    return OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Set it up in <EM>httpd.conf</EM> as:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlTransHandler Apache::MyRedirect</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The code consists of three parts: request data retrieval, deciding what to
+do based on this data and finally setting the headers and the status and
+issuing redirect.
+
+<P>
+So if a client submits a request of this kind:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://www.example.com/news/?uri=http://www.example-2.com/">http://www.example.com/news/?uri=http://www.example-2.com/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>$uri</CODE> will hold <EM>http://www.example-2.com/news/</EM> and that's where the request will be redirected.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="URI_Rewrite_in_PerlTransHandler">URI Rewrite in PerlTransHandler</A></H1></CENTER>
+<P>
+Suppose that before a content handler is invoked you want to make this
+translation:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /articles/10/index.html  =&gt;  /articles/index.html?id=10</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This <EM>TransHandler</EM> will do that for you:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  My/Trans.pm
+  -----------
+  package My::Trans;
+  use Apache::Constants qw(:common);
+  sub handler {
+    my $r = shift;
+    my $uri = $r-&gt;uri;
+    my ($id) = ($uri =~ m|^/articles/(.*?)/|);
+    $r-&gt;uri(&quot;/articles/index.html&quot;);
+    $r-&gt;args(&quot;id=$id&quot;);
+    return DECLINED;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and in <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule My::Trans 
+  PerlTransHandler My::Trans</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The handler code retrieves the request object and the URI. Then it
+retrieves the <EM>id</EM> using the regular expression. Finally it sets the new value of the URI and
+the arguments string. The handler returns
+<CODE>DECLINED</CODE> so the default Apache transhandler will take care of URI to filename
+remapping.
+
+<P>
+Notice the technique to set the arguments. By the time the Apache-request
+object has been created, arguments are handled in a separate slot, so you
+cannot just push them into the original URI. Therefore the
+<CODE>args()</CODE> method should be used.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Setting_PerlHandler_Based_on_MIM">Setting PerlHandler Based on MIME Type</A></H1></CENTER>
+<P>
+It's very easy to implement a dispatching module based on the MIME type of
+request. So a different content handler will be called for a different MIME
+type. This is an example of such a dispatcher:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::MimeTypeDispatch;
+  use Apache::Constants qw(DECLINED);
+  
+  my %mime_types = (
+    'text/html'  =&gt; \&amp;HTML::Template::handler,
+    'text/plain' =&gt; \&amp;My::Text::handler,
+  );
+  
+  sub handler {
+    my $r = shift;
+    if (my $h = $mime_types{$r-&gt;content_type}) {
+      $r-&gt;push_handlers(PerlHandler =&gt; $h);
+      $r-&gt;handler('perl-script');
+    }
+  return DECLINED;
+  }
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And in <EM>httpd.conf</EM> we add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlFixupHandler My::MimeTypeDispatch</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After declaring the package name and importing constants, we set a
+translation table of MIME types and corresponding handlers to be called.
+Then comes the handler, where the request object is retrieved and if its
+MIME type is found in our translation table we set the handler that should
+handle this request. Otherwise we do nothing. At the end we return <CODE>DECLINED</CODE> so some other fixup handler could take over.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="SSI_and_Embperl_Doing_Both">SSI and Embperl -- Doing Both</A></H1></CENTER>
+<P>
+This handler lets you use both SSI and Embperl in the same request:
+
+<P>
+Use it in a <CODE>&lt;FilesMatch&gt;</CODE> Section or similar:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::EmbperlFilter Apache::SSI
+  &lt;FilesMatch &quot;\.epl&quot;&gt;
+     PerlSetVar Filter On
+     PerlHandler Apache::EmbperlFilter Apache::SSI
+  &lt;/FilesMatch&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::EmbperlFilter;
+  
+  use Apache::Util qw(parsedate);
+  use HTML::Embperl;
+  use Apache::SSI ();
+  use Apache::Constants;
+  
+  use strict;
+  use vars qw($VERSION);
+  
+  $VERSION = '0.03';
+  my ($r, %param, $input, $output);
+  
+  sub handler {
+      $r = shift;
+      my ($fh, $status) = $r-&gt;filter_input();
+      unless ($status == OK) {
+          return $status
+      }
+      local $/ = undef;
+      $input = scalar(&lt;$fh&gt;);
+      %param = ();
+      $param{input} = \$input;
+      $param{req_rec} = $r;
+      $param{output} = \$output;
+      $param{mtime} = mtime();
+      $param{inputfile} = $r-&gt;filename();
+      HTML::Embperl::ScanEnvironement(\%param);
+      HTML::Embperl::Execute(\%param);
+      print $output;
+      return OK;
+  }
+  
+  sub mtime {
+      my $mtime = undef;
+      if (my $last_modified = $r-&gt;headers_out-&gt;{'Last-Modified'}) {
+          $mtime = parsedate $last_modified;
+      }
+      $mtime;
+  }
+  
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Getting_the_Front_end_Server_s_N">Getting the Front-end Server's Name in the Back-end Server</A></H1></CENTER>
+<P>
+Assume that you have more than one front-end server, and you want to
+dynamically figure out the front-end server name in the back-end server.
+mod_proxy and mod_rewrite provide the solution.
+
+<P>
+Compile apache with both mod_proxy and mod_rewrite, then use a directive
+something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine On
+  RewriteLog /somewhere/rewrite.log
+  RewriteLogLevel 3
+  RewriteRule ^/foo/bar(.*)$ \
+  <A HREF="http://example.com:8080/foo/bar/">http://example.com:8080/foo/bar/</A>$1?IP=%{REMOTE_HOST} [QSA,P]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will have all the urls starting with <EM>/some/url</EM> proxied off to the other server at the same url. It will append the <CODE>REMOTE_HOST</CODE>
+header as a query string argument. (QSA = Query String Append, P = Proxy).
+There is probably a way to remap it as an X-Header of some sort, but if
+query string is good enough for you, then this should work really nicely.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Authentication_Snippets">Authentication Snippets</A></H1></CENTER>
+<P>
+Getting the authenticated username: <CODE>$r-&gt;connection-&gt;user()</CODE>, or <CODE>$ENV{REMOTE_USER}</CODE> if you're in a CGI emulation.
+
+<P>
+Example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r = shift;
+  
+  my ($res, $sent_pwd) = $r-&gt;get_basic_auth_pw;
+  return $res if $res; #decline if not Basic
+  
+  my $user = $r-&gt;connection-&gt;user;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Emulating_the_Authentication_Mec">Emulating the Authentication Mechanism</A></H1></CENTER>
+<P>
+You can provide your own mechanism to authenticate users, instead of the
+standard one. If you want to make Apache think that the user was
+authenticated by the standard mechanism, set the username with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;connection-&gt;user('username');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you can use this information for example during the logging, so that
+you can have your ``username'' passed as if it was transmitted to Apache
+through HTTP authentication.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="An_example_of_using_Apache_Sess">An example of using Apache::Session::DBI with cookies</A></H1></CENTER>
+<P>
+META: should be annotated at some point. (an example was posted to the
+mod_perl list)
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;
+  use DBI;
+  use Apache::Session::DBI;
+  use CGI;
+  
+  # [...]
+  
+  # Initiate a session ID
+  my $session = ();
+  my $opts = {  autocommit =&gt; 0, 
+                lifetime   =&gt; 3600 };     # 3600 is one hour
+  
+  # Read in the cookie if this is an old session
+  my $r = Apache-&gt;request;
+  my $no_cookie = '';
+  my $cookie = $r-&gt;header_in('Cookie');
+  {
+      # eliminate logging from Apache::Session::DBI's use of `warn'
+      local $^W = 0;      
+  
+      if (defined($cookie) &amp;&amp; $cookie ne '') {
+          $cookie =~ s/SESSION_ID=(\w*)/$1/;
+          $session = Apache::Session::DBI-&gt;open($cookie, $opts);
+          $no_cookie = 'Y' unless defined($session);
+      }
+      # Could have been obsolete - get a new one
+      $session = Apache::Session::DBI-&gt;new($opts) unless defined($session);
+  }
+  
+  # Might be a new session, so let's give them a cookie back
+  if (! defined($cookie) || $no_cookie) {
+      local $^W = 0;
+  
+      my $session_cookie = &quot;SESSION_ID=$session-&gt;{'_ID'}&quot;;
+      $r-&gt;header_out(&quot;Set-Cookie&quot; =&gt; $session_cookie);
+  }
+  </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Using_DESTROY_to_Finalize_Output">Using DESTROY to Finalize Output</A></H1></CENTER>
+<P>
+Well, as always with Perl -- TMTOWTDI (There's More Than One Way To Do It),
+one of the readers is using <CODE>DESTROY</CODE> to finalize output, and as a cheap means of buffering.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package buffer;
+  use Apache;
+  
+  sub new {
+     my $class = shift;
+     my $self = bless {
+         'r' =&gt; shift,
+         'message' =&gt; &quot;&quot;
+     }, $class;
+     $self-&gt;{apr} = Apache::Request-&gt;new($self-&gt;{r},
+                                         POST_MAX=&gt;(32*1024));
+     $self-&gt;content_type('text/plain');
+     $self-&gt;{r}-&gt;no_cache(1);
+  }
+  
+  sub message {
+        my $self = shift;
+        $self-&gt;{message} .= join(&quot;\n&quot;, @_);
+  }
+  
+  sub DESTROY {
+        my $self = shift;
+        $self-&gt;{apr}-&gt;send_http_header;
+        $self-&gt;{apr}-&gt;print($self-&gt;{message});
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you can have perl scripts like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use buffer;
+  my $b = new buffer(shift);
+  
+  $b-&gt;message(p(&quot;Hello World&quot;));
+  # end</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and save a bunch of duplicate code across otherwise inconvenient gaggles of
+small scripts.
+
+<P>
+But suppose you also want to redirect the client under some circumstances,
+and send the HTTP status code 302. You might try this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub redir {
+        my $self = shift;
+        $self-&gt;{redirect} = shift;
+        exit;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and re-code <CODE>DESTROY</CODE> as:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub DESTROY {
+        my $self = shift;
+        if ($self-&gt;{redirect}) {
+                $self-&gt;{apr}-&gt;status{REDIRECT};
+                $self-&gt;{apr}-&gt;header_out(&quot;Location&quot;, $self-&gt;{redirect});
+                $self-&gt;{apr}-&gt;send_http_header;
+                $self-&gt;{apr}-&gt;print($self-&gt;{redirect});
+        } else {
+                $self-&gt;{apr}-&gt;send_http_header;
+                $self-&gt;{apr}-&gt;print($self-&gt;{message});
+        }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But you'll find that while the browser redirects itself, mod_perl logs the
+result code as 200. It turns out that <CODE>status()</CODE> only touches
+the Apache response, and the log message is determined by the Apache return
+code.
+
+<P>
+Aha! So we'll change the <CODE>exit()</CODE> in <CODE>redir()</CODE> to
+<CODE>exit(REDIRECT).</CODE> This fixes the log code, but causes a bogus <EM>"[error] 302"</EM> line in the
+<EM>error_log</EM>. That comes from <CODE>Apache::Registry</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $errsv = &quot;&quot;;
+  if($@) {
+      $errsv = $@;
+      $@ = ''; #XXX fix me, if we don't do this Apache::exit() breaks
+      $@{$uri} = $errsv;
+  }
+  
+  if($errsv) {
+      $r-&gt;log_error($errsv);
+      return SERVER_ERROR unless $Debug &amp;&amp; $Debug &amp; 2;
+      return Apache::Debug::dump($r, SERVER_ERROR);
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So you see that any time the return code causes <CODE>$@</CODE> to return true, we'll get an error line. Not wanting this, what can we do?
+
+<P>
+We can hope that a future version of mod_perl will allow us to set the HTTP
+result code independent from the handler return code (perhaps a
+<CODE>log_status()</CODE> method? or at least an <CODE>Apache::LOG_HANDLER_RESULT</CODE>
+config variable?).
+
+<P>
+In the meantime, there's
+<A HREF="././modules.html#Apache_RedirectLogFix">Apache::RedirectLogFix</A>.
+
+<P>
+Put this in your <EM>httpd.conf</EM>
+
+
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlLogHandler Apache::RedirectLogFix</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and take a look at the source code below. Note that it requires us to
+return the HTTP status code 200.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Apache::RedirectLogFix;
+  
+  use Apache::Constants qw(OK DECLINED REDIRECT);
+  
+  sub handler {
+     my $r = shift;
+     return DECLINED unless $r-&gt;handler &amp;&amp; ($r-&gt;handler eq &quot;perl-script&quot;);
+  
+     if(my $loc = $r-&gt;header_out(&quot;Location&quot;)) {
+         if($r-&gt;status == 200 and substr($loc, 0, 1) ne &quot;/&quot;) {
+             $r-&gt;status(REDIRECT);
+             return OK
+         }
+     }
+     return DECLINED;
+  }
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now, if we wanted to do the same sort of thing for an error 500 handler, we
+could write another <CODE>PerlLogHandler</CODE> (call it
+<CODE>ServerErrorLogFix</CODE>). But we'll leave that as an exercise for the reader, and hope that it
+won't be needed in the next mod_perl release. After all, it's a little
+awkward to need a <CODE>LogHandler</CODE> to clean up after ourselves....
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Setting_Environment_Variables_Fo">Setting Environment Variables For Scripts Called From CGI.</A></H1></CENTER>
+<P>
+Perl uses <CODE>sh()</CODE> for its <CODE>system()</CODE> and <CODE>open()</CODE> calls. So if you want to set a temporary variable when you call a script
+from your CGI you do something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> open UTIL, &quot;USER=stas ; script.pl | &quot; or die &quot;...: $!\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  system &quot;USER=stas ; script.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is useful, for example, if you need to invoke a script that uses
+CGI.pm from within a mod_perl script. We are tricking the Perl script into
+thinking it's a simple CGI, which is not running under mod_perl.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  open(PUBLISH, &quot;GATEWAY_INTERFACE=CGI/1.1 ; script.cgi
+       \&quot;param1=value1&amp;param2=value2\&quot; |&quot;) or die &quot;...: $!\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Make sure that the parameters you pass are shell safe -- all ``unsafe''
+characters like single-quote and back-tick should be properly escaped.
+
+<P>
+Unfortunately mod_perl uses <CODE>fork()</CODE> to run the script, so you
+have probably thrown out the window most of the performance gained from
+using mod_perl. To avoid the fork, change script.cgi to a module containing
+a subroutine which you can then call directly from your mod_perl script.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Mysql_Backup_and_Restore_Scripts">Mysql Backup and Restore Scripts</A></H1></CENTER>
+<P>
+This is somewhat off-topic, but since many of us use mysql or some other
+RDBMS in their work with mod_perl driven sites, it's good to know how to
+backup and restore the databases in case of database corruption.
+
+<P>
+First we should tell mysql to log all the clauses that modify the databases
+(we don't care about SELECT queries for database backups). Modify the <CODE>safe_mysql</CODE> script by adding the
+<EM>--log-update</EM> options to the <CODE>mysql</CODE> server startup parameters and restart the server. From now on all the
+non-select queries will be logged to the <EM>/var/lib/mysql/www.bar.com</EM> logfile. Your hostname will show up instead of <EM>www.bar.com</EM>.
+
+<P>
+Now create a <EM>dump</EM> directory under <EM>/var/lib/mysql/</EM>. That's where the backups will be stored (you can name the directory as
+you wish of course).
+
+<P>
+Prepare the backup script and store it in a file, e.g:
+<EM>/usr/local/sbin/mysql/mysql.backup.pl</EM>
+
+
+
+
+	       <p><a href="code/mysql-3.22.29_backup.pl"><code>mysql-3.22.29_backup.pl</code></a> -- This is the original code 
+
+</p>
+	      
+	       <p><a href="code/mysql-3.22.30+_backup.pl"><code>mysql-3.22.30+_backup.pl</code></a> -- This is the code modified to work with
+mysql-3.22.30+ 
+
+</p>
+	      <P>
+You might need to change the executable paths according to your system.
+List the names of the databases you want to backup using the <CODE>db_names</CODE> array.
+
+<P>
+Now make the script executable and arrange the crontab entry to run the
+backup script nightly. Note that the disk space used by the backups will
+grow without bound and you should remove the old backups. Here is a sample
+crontab entry to run the script at 4am every day:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  0 4 * * * /usr/local/sbin/mysql/mysql.backup.pl &gt; /dev/null 2&gt;&amp;1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So now at any moment we have the dump of the databases from the last
+execution of the backup script and the log file of all the clauses that
+have updated the databases since then. If the database gets corrupted we
+have all the information to restore it to the state it was in at our last
+backup. We restore it with the following script, which I put in: <EM>/usr/local/sbin/mysql/mysql.restore.pl</EM>
+
+
+
+
+	       <p><a href="code/mysql-3.22.29_restore.pl"><code>mysql-3.22.29_restore.pl</code></a> -- This is the original code
+
+</p>
+	      
+	       <p><a href="code/mysql-3.22.30+_restore.pl"><code>mysql-3.22.30+_restore.pl</code></a> -- This is the code modified to work with
+mysql-3.22.30+
+
+</p>
+	      <P>
+These are kinda dirty scripts, but they work... if you come up with cleaner
+scripts, please contribute them... thanks
+
+<P>
+Update: there is now a ``mysqlhotcopy'' utility distributed with MySQL that
+can make an atomic snapshot of a database. (by Tim Bunce) So you may
+consider using it instead.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./modules.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./hardware.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/21/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

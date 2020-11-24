@@ -1,0 +1,12 @@
+$virtual1 = {
+              'slash' => {
+                           'driver' => 'mysql',
+                           'username' => 'slash',
+                           'attributes' => {},
+                           'port' => '8306',
+                           'database' => 'slash',
+                           'password' => '__PASSWORD__',
+                           'host' => '__HOST__',
+                           'connect' => 'DBI:mysql:database=slash;host=__HOST__;port=8306'
+                         }
+            };

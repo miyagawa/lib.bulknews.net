@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>Image::HTML - converts any image to HTML table</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+Image::HTML - converts any image to HTML table
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
+<P>
+<PRE>  use Image::HTML;
+</PRE>
+<P>
+<PRE>  my $image = Image::HTML-&gt;new;
+  $image-&gt;read($file);
+  my $html = $image-&gt;html;
+</PRE>
+<P>
+<PRE>  # functional
+  use Image::HTML qw(image2html);
+  my $html = image2html('foo.gif');
+</PRE>
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+No images for web pages! Image::HTML converts <STRONG>ANY</STRONG> images to HTML table.
+
+<P>
+<HR>
+<H1><A NAME="AUTHOR">AUTHOR</A></H1>
+<P>
+Original code by Hiroyuki Oyama &lt;<A
+HREF="mailto:oyama@crayfish.co.jp">oyama@crayfish.co.jp</A>&gt; and
+Takefumi Kimura &lt;<A
+HREF="mailto:takefumi@takefumi.com">takefumi@takefumi.com</A>&gt;
+
+<P>
+Maintained by Tatsuhiko Miyagawa &lt;<A
+HREF="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A>&gt;
+
+<P>
+<HR>
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
+<P>
+<A HREF="/Image/Magick.html">Image::Magick</A>
+
+
+
+</BODY>
+
+</HTML>

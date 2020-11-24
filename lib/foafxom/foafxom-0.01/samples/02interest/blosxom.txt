@@ -1,0 +1,2 @@
+blosxom
+meta-resource: http://www.blosxom.com/

@@ -1,0 +1,31 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="08.html">[prev]</A> <A href="10.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2><CODE>bless</CODE>とは</H2>
+<HR>
+<BLOCKQUOTE><PRE><CODE>$obj = bless { }, "ClassName";
+</CODE></PRE></BLOCKQUOTE>
+<UL>
+<LI>Perl の変数をクラス名に結び付ける
+<LI>1引数の場合, 現在のパッケージに <CODE>bless</CODE>される
+<LI>継承で混乱しないため, 2引数で呼ぶべき
+</UL>
+<BLOCKQUOTE><PRE><CODE>package Child;
+@ISA = qw(Person);		# 継承
+sub new {
+    my $class = shift;		# クラス名
+    my $self = $class->SUPER::new(@_);	# 親クラスの new
+						# $self は Child クラス!
+    $self->do_my_own_thing;	# Child クラスのメソッド
+    return $self;
+}
+</CODE></PRE></BLOCKQUOTE>
+</BODY>
+</HTML>

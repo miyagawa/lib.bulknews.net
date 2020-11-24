@@ -1,0 +1,30 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="10.html">[prev]</A> <A href="12.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>モジュールを作ってみよう</H2>
+<HR>
+<UL>
+<LI>名前を決める(いちばん大事)
+<LI>決まったら, <CODE>h2xs</CODE>
+<OL>
+<LI>Cとのインタフェース XS用ツール
+<LI>汎用テンプレートとしても使える
+</OL>
+<LI><CODE>h2xs -A -X -n TV::Program</CODE>
+<OL>
+<LI><CODE>Program.pm</CODE>
+<LI><CODE>Makefile.PL</CODE>
+<LI><CODE>test.pl</CODE>
+<LI><CODE>Changes</CODE>
+<LI><CODE>MANIFEST</CODE>
+</OL>
+</UL>
+</BODY>
+</HTML>

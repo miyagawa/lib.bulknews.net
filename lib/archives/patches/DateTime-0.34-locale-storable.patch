@@ -1,0 +1,54 @@
+=== lib/DateTime.pm
+==================================================================
+--- lib/DateTime.pm	(revision 5795)
++++ lib/DateTime.pm	(local)
+@@ -1668,6 +1668,8 @@
+     if (@_)
+     {
+         ( $locale, $tz, $formatter ) = @_;
++        my $loc = (ref($locale) =~ /(\w+)$/)[0];
++        $locale = DateTime::Locale->load($loc);
+     }
+     else
+     {
+=== t/23storable.t
+==================================================================
+--- t/23storable.t	(revision 5795)
++++ t/23storable.t	(local)
+@@ -8,7 +8,7 @@
+ 
+ if ( eval { require Storable; 1 } )
+ {
+-    plan tests => 16;
++    plan tests => 21;
+ }
+ else
+ {
+@@ -28,7 +28,7 @@
+ 
+     foreach my $dt (@dt)
+     {
+-        my $copy = Storable::thaw( Storable::nfreeze($dt) );
++        my $copy   = Storable::thaw( Storable::nfreeze($dt) );
+ 
+         is( $copy->time_zone->name, $dt->time_zone->name,
+             'Storable freeze/thaw preserves tz' );
+@@ -48,6 +48,18 @@
+ }
+ 
+ {
++    my $dt1 = DateTime->now(locale => 'en_us');
++    my $dt2 = Storable::dclone($dt1);
++    my $dt3 = Storable::thaw(Storable::nfreeze($dt2));
++
++    is $dt1->iso8601, $dt2->iso8601;
++    is $dt2->iso8601, $dt3->iso8601;
++    is $dt1->locale->name, 'English';
++    is $dt2->locale->name, 'English';
++    is $dt3->locale->name, 'English';
++}
++
++{
+     my $has_ical = eval { require DateTime::Format::ICal; 1 };
+ 
+  SKIP:

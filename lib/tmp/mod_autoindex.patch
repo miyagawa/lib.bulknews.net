@@ -1,0 +1,64 @@
+--- local/src/apache_1.3.24/src/modules/standard/mod_autoindex.c~	Thu Mar 14 06:05:33 2002
++++ local/src/apache_1.3.24/src/modules/standard/mod_autoindex.c	Fri Apr 26 03:45:02 2002
+@@ -156,7 +156,7 @@
+     int icon_width;
+     int icon_height;
+     char *default_order;
+-
++    char *css;
+     array_header *icon_list;
+     array_header *alt_list;
+     array_header *desc_list;
+@@ -198,9 +198,22 @@
+  */
+ static void emit_preamble(request_rec *r, char *title)
+ {
+-    ap_rvputs(r, DOCTYPE_HTML_3_2,
+-	      "<HTML>\n <HEAD>\n  <TITLE>Index of ", title,
+-	      "</TITLE>\n </HEAD>\n <BODY>\n", NULL);
++    autoindex_config_rec *d = (autoindex_config_rec *) ap_get_module_config(r->per_dir_config,
++						      &autoindex_module);
++    char *css_link;
++    if(d->css){
++	css_link = ap_psprintf(r->pool, "<LINK rel=\"stylesheet\" href=\"%s\" type=\"text/css\">\n", d->css);
++	ap_rvputs(r, DOCTYPE_HTML_3_2,
++		  "<HTML>\n <HEAD>\n  <TITLE>Index of ", title,
++		  "</TITLE>\n",
++		  css_link,
++		  "</HEAD>\n <BODY>\n", NULL);
++    }
++    else {
++	ap_rvputs(r, DOCTYPE_HTML_3_2,
++		  "<HTML>\n <HEAD>\n  <TITLE>Index of ", title,
++		  "</TITLE>\n </HEAD>\n <BODY>\n", NULL);
++    }
+ }
+ 
+ static void push_item(array_header *arr, char *type, char *to, char *path,
+@@ -600,6 +613,9 @@
+     {"DefaultIcon", ap_set_string_slot,
+      (void *) XtOffsetOf(autoindex_config_rec, default_icon),
+      DIR_CMD_PERMS, TAKE1, "an icon URL"},
++    {"IndexCSS", ap_set_string_slot,
++     (void *) XtOffsetOf(autoindex_config_rec, css),
++     DIR_CMD_PERMS, TAKE1, "a CSS URL"},
+     {NULL}
+ };
+ 
+@@ -624,7 +640,7 @@
+     new->incremented_opts = 0;
+     new->decremented_opts = 0;
+     new->default_order = NULL;
+-
++    new->css = NULL;
+     return (void *) new;
+ }
+ 
+@@ -639,6 +655,7 @@
+                                           : base->default_icon;
+     new->icon_height = add->icon_height ? add->icon_height : base->icon_height;
+     new->icon_width = add->icon_width ? add->icon_width : base->icon_width;
++    new->css = add->css != NULL ? add->css : base->css;
+ 
+     new->alt_list = ap_append_arrays(p, add->alt_list, base->alt_list);
+     new->ign_list = ap_append_arrays(p, add->ign_list, base->ign_list);

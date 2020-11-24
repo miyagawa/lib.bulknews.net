@@ -1,0 +1,30 @@
+This patch adds configurration option for Apache::Session::MySQL,
+specifying lock timeout.
+
+
+--- MySQL.pm~	Thu Sep 13 16:04:26 2001
++++ MySQL.pm	Thu Sep 13 16:06:02 2001
+@@ -16,6 +16,8 @@
+ 
+ $VERSION = '1.00';
+ 
++$Apache::Session::Lock::MySQL::LockTimeout = 3600;
++
+ sub new {
+     my $class = shift;
+     
+@@ -49,9 +51,11 @@
+     
+     #MySQL requires a timeout on the lock operation.  There is no option
+     #to simply wait forever.  So we'll wait for a hour.
+-    
+-    my $sth = $self->{dbh}->prepare_cached(q{SELECT GET_LOCK(?, 3600)}, {}, 1);
+-    $sth->execute($self->{lockid});
++
++    my $timeout = $session->{args}->{LockTimeout} ||
++	$Apache::Session::Lock::MySQL::LockTimeout;
++    my $sth = $self->{dbh}->prepare_cached(q{SELECT GET_LOCK(?, ?)}, {}, 1);
++    $sth->execute($self->{lockid}, $timeout);
+     
+     $self->{lock} = 1;
+ }

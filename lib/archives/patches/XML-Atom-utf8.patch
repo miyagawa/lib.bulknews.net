@@ -1,0 +1,33 @@
+--- lib/XML/Atom/Client.pm~	2004-06-02 01:56:28.000000000 +0900
++++ lib/XML/Atom/Client.pm	2004-06-24 16:19:36.000000000 +0900
+@@ -73,6 +73,7 @@
+     my $req = HTTP::Request->new(POST => $uri);
+     $req->content_type('application/x.atom+xml');
+     my $xml = $entry->as_xml;
++    _utf8_off($xml);
+     $req->content_length(length $xml);
+     $req->content($xml);
+     my $res = $client->make_request($req);
+@@ -87,6 +88,7 @@
+     my $req = HTTP::Request->new(PUT => $url);
+     $req->content_type('application/x.atom+xml');
+     my $xml = $entry->as_xml;
++    _utf8_off($xml);
+     $req->content_length(length $xml);
+     $req->content($xml);
+     my $res = $client->make_request($req);
+@@ -225,6 +227,14 @@
+     return $client->username, $client->password;
+ }
+ 
++sub _utf8_off {
++    my $val = shift;
++    if ($] >= 5.008) {
++        require Encode;
++        Encode::_utf8_off($val);
++    }
++}
++
+ sub DESTROY {
+     my $self = shift;
+     delete $ClientOf{$self};

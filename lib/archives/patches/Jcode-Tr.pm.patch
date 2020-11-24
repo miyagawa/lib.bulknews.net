@@ -1,0 +1,11 @@
+--- Jcode/Tr.pm.orig	Thu May 31 22:02:01 2001
++++ Jcode/Tr.pm	Thu May 31 22:01:16 2001
+@@ -48,7 +48,7 @@
+     my @from = $from =~ /$RE{EUC_0212}|$RE{EUC_KANA}|$RE{EUC_C}|[\x00-\xff]/go;
+     my @to   = $to   =~ /$RE{EUC_0212}|$RE{EUC_KANA}|$RE{EUC_C}|[\x00-\xff]/go;
+ 
+-    push @to, $to[-1] x $#from - $#to if $#to < $#from && $opt !~ /d/;
++    push @to, ($opt =~ /d/ ? '' : $to[-1]) x ($#from - $#to) if $#to < $#from;
+     @_TABLE{@from} = @to;
+ 
+ }

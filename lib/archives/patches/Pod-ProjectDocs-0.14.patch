@@ -1,0 +1,259 @@
+diff -ruP Pod-ProjectDocs-0.14.orig/MANIFEST Pod-ProjectDocs-0.14/MANIFEST
+--- Pod-ProjectDocs-0.14.orig/MANIFEST	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/MANIFEST	2005-09-10 10:00:52.450000000 +0000
+@@ -1,18 +1,21 @@
+-Changes
+-Makefile.PL
+-MANIFEST
+-README
+-t/00_compile.t
+ bin/pod2projdocs
++Changes
+ lib/Pod/ProjectDocs.pm
+-lib/Pod/ProjectDocs/File.pm
+-lib/Pod/ProjectDocs/CSS.pm
+ lib/Pod/ProjectDocs/ArrowImage.pm
++lib/Pod/ProjectDocs/Config.pm
++lib/Pod/ProjectDocs/CSS.pm
+ lib/Pod/ProjectDocs/Doc.pm
+ lib/Pod/ProjectDocs/DocManager.pm
+-lib/Pod/ProjectDocs/Template.pm
++lib/Pod/ProjectDocs/File.pm
+ lib/Pod/ProjectDocs/IndexPage.pm
+-lib/Pod/ProjectDocs/Config.pm
+ lib/Pod/ProjectDocs/Parser.pm
+ lib/Pod/ProjectDocs/Parser/PerlPod.pm
+-META.yml                                 Module meta-data (added by MakeMaker)
++lib/Pod/ProjectDocs/Template.pm
++Makefile.PL
++MANIFEST
++META.yml			Module meta-data (added by MakeMaker)
++README
++t/00_compile.t
++t/01_project.t
++t/sample/lib/Sample/Module.pm
++t/sample/lib/Sample/Project.pm
+diff -ruP Pod-ProjectDocs-0.14.orig/bin/pod2projdocs Pod-ProjectDocs-0.14/bin/pod2projdocs
+--- Pod-ProjectDocs-0.14.orig/bin/pod2projdocs	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/bin/pod2projdocs	2005-09-10 09:02:11.300000000 +0000
+@@ -7,7 +7,7 @@
+ use Pod::Usage;
+ use Pod::ProjectDocs;
+ 
+-my($help, $out, $lib, $title, $desc, $charset, $index, $verbose);
++my($help, $out, $lib, $title, $desc, $charset, $index, $verbose, $forcegen);
+ 
+ my %opt = (
+ 	'help|?'		=> \$help,
+@@ -18,6 +18,7 @@
+ 	'charset|c=s'	=> \$charset,
+ 	'index!'		=> \$index,
+ 	'verbose|v'		=> \$verbose,
++        'forcegen!'             => \$forcegen,
+ );
+ 
+ GetOptions(%opt);
+@@ -32,6 +33,7 @@
+ 	charset	=> $charset,
+ 	index	=> $index,
+ 	verbose	=> $verbose,
++        forcegen => $forcegen,
+ );
+ $p->gen;
+ 
+diff -ruP Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Config.pm Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Config.pm
+--- Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Config.pm	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Config.pm	2005-09-10 09:06:23.110000000 +0000
+@@ -14,6 +14,7 @@
+     index
+     outroot
+     libroot
++    forcegen
+ /);
+ 
+ Readonly my $DEFAULT_TITLE   => qq/MyProject's Libraries/;
+@@ -36,6 +37,7 @@
+     $self->index(   $args{index}                       );
+     $self->outroot( $args{outroot}                     );
+     $self->libroot( $args{libroot}                     );
++    $self->forcegen( $args{forcegen}                   );
+ }
+ 
+ 1;
+diff -ruP Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Parser/PerlPod.pm Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Parser/PerlPod.pm
+--- Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Parser/PerlPod.pm	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Parser/PerlPod.pm	2005-09-10 09:25:56.440000000 +0000
+@@ -10,7 +10,7 @@
+     my $components = $args{components};
+     my $mgr_desc   = $args{desc};
+     $self->_prepare($doc, $components, $mgr_desc);
+-    local $SIG{__WARN__} = sub { };
++#    local $SIG{__WARN__} = sub { };
+     $self->parse_from_file($doc->origin);
+     my $title = $self->_get_title;
+     $doc->title($title);
+diff -ruP Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Parser.pm Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Parser.pm
+--- Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs/Parser.pm	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs/Parser.pm	2005-09-10 09:59:00.780000000 +0000
+@@ -3,6 +3,7 @@
+ use warnings;
+ use base qw/Pod::Parser Class::Accessor::Fast Class::Data::Inheritable/;
+ use Pod::ParseUtils;
++use URI::Escape;
+ 
+ # most of code is borrowed from Pod::Xhtml
+ __PACKAGE__->mk_accessors(qw/components/);
+@@ -528,7 +529,6 @@
+     my ($self, $link) = @_;
+     $self->{LinkParser}->parse( $link );
+ 
+-    my $page = _htmlEscape( $self->{LinkParser}->page );
+     my $kind = $self->{LinkParser}->type;
+     my $string = '';
+ 
+@@ -536,25 +536,29 @@
+         my $targ = _htmlEscape( $self->{LinkParser}->node );
+         my $text = _htmlEscape( $self->{LinkParser}->text );
+         $string = qq(<a href="$targ">$text</a>);
+-    } elsif ($page eq '') {    # a link to this page
++    } elsif ($self->{LinkParser}->page eq '') {    # a link to this page
+         # Post-process these links so we can things up to the correct sections
+         my $targ = $self->{LinkParser}->node;
+-        $string = $self->{LinkParser}->markup;
+-        $string =~ s|Q<(.+?)>|qq(<a href="#<<<$targ>>>">) . _htmlEscape( $1 ) . '</a>'|e;
+-    } elsif ($link !~ /\|/) {    # a link off-page with _no_ alt text
+-        $string = $self->{LinkParser}->markup;
+-        $string =~ s|Q<(.+?)>|'<b>' . _htmlEscape( $1 ) . '</b>'|e;
+-        $string =~ s|P<(.+?)>|'<cite>' . _htmlEscape( $1 ) . '</cite>'|e;
+-    } else {    # a link off-page with alt text
+         my $text = _htmlEscape( $self->{LinkParser}->text );
+-        my $targ = _htmlEscape( $self->{LinkParser}->node );
+-        $string = "<b>$text</b> (";
+-        $string .= "<b>$targ</b> in " if $targ;
+-        $string .= "<cite>$page</cite>)";
++        $string = qq(<a href="#<<<$targ>>>">$text</a>);
++    } elsif ($kind eq 'item') {    # link to the other page
++        my $targ = $self->_resolvePage($self->{LinkParser}->page);
++        my $node = $self->{LinkParser}->node;
++        my $text = _htmlEscape( $self->{LinkParser}->text );
++        $string = qq(<a href="$targ#$node">$text</a>);
++    } else {
++        my $targ = $self->_resolvePage($self->{LinkParser}->page);
++        my $text = _htmlEscape( $self->{LinkParser}->text );
++        $string = qq(<a href="$targ">$text</a>);
+     }
+     return $string;
+ }
+ 
++sub _resolvePage {
++    my($self, $page) = @_;
++    return "http://search.cpan.org/perldoc?" . URI::Escape::uri_escape($page);
++}
++
+ sub seqS {
+     my $text = $_[1];
+     $text =~ s/\s/&nbsp;/g;
+diff -ruP Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs.pm Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs.pm
+--- Pod-ProjectDocs-0.14.orig/lib/Pod/ProjectDocs.pm	2005-09-10 10:00:07.220000000 +0000
++++ Pod-ProjectDocs-0.14/lib/Pod/ProjectDocs.pm	2005-09-10 09:52:10.670000000 +0000
+@@ -39,6 +39,9 @@
+         : File::Spec->rel2abs($_, File::Spec->curdir)
+     } @{ $args{libroot} } ];
+ 
++    # check mtime by default, but can be overridden
++    $args{forcegen} ||= 0;
++
+     $self->config( Pod::ProjectDocs::Config->new(%args) );
+ 
+     $self->_setup_components();
+@@ -90,7 +93,7 @@
+     foreach my $manager ( @{ $self->managers } ) {
+         my $ite = $manager->doc_iterator();
+         while ( my $doc = $ite->next ) {
+-            if ( $doc->is_modified ) {
++            if ( $self->config->forcegen || $doc->is_modified ) {
+                 $doc->copy_src();
+                 my $html = $manager->parser->gen_html(
+                     doc        => $doc,
+@@ -197,6 +200,10 @@
+ whether you want to show messages on your shell or not.
+ set 1 or 0.
+ 
++=item forcegen
++
++whether you want to generate HTML document even if source files are not updated. default is 0.
++
+ =back
+ 
+ =head1 pod2projdocs
+diff -ruP Pod-ProjectDocs-0.14.orig/t/01_project.t Pod-ProjectDocs-0.14/t/01_project.t
+--- Pod-ProjectDocs-0.14.orig/t/01_project.t	1970-01-01 00:00:00.000000000 +0000
++++ Pod-ProjectDocs-0.14/t/01_project.t	2005-09-10 09:56:21.140000000 +0000
+@@ -0,0 +1,20 @@
++use strict;
++use FindBin;
++use Test::More 'no_plan';
++use Pod::ProjectDocs;
++
++Pod::ProjectDocs->new(
++    outroot => "$FindBin::Bin/output",
++    libroot => "$FindBin::Bin/sample",
++    forcegen => 1,
++)->gen;
++
++# using XML::XPath might be better
++open my $fh, "$FindBin::Bin/output/lib/Sample/Project.pm.html";
++my $html = join '', <$fh>;
++
++like $html, qr!See <a href="#SYNOPSIS">SYNOPSIS</a> for its usage!;
++like $html, qr!<a href="http://www.perl.org/">http://www.perl.org/</a>!;
++like $html, qr!<a href="http://search.cpan.org/perldoc\?perlpod">Perl POD Syntax</a>!;
++
++
+diff -ruP Pod-ProjectDocs-0.14.orig/t/sample/lib/Sample/Module.pm Pod-ProjectDocs-0.14/t/sample/lib/Sample/Module.pm
+--- Pod-ProjectDocs-0.14.orig/t/sample/lib/Sample/Module.pm	1970-01-01 00:00:00.000000000 +0000
++++ Pod-ProjectDocs-0.14/t/sample/lib/Sample/Module.pm	2005-09-10 08:35:19.340000000 +0000
+@@ -0,0 +1,18 @@
++package Sample::Module;
++
++1;
++
++__END__
++
++=head1 NAME
++
++Sample::Module - Sample Module
++
++=head1 SYNOPSIS
++
++  blah blah blah
++
++=head1 SEE ALSO
++
++L<Sample::Project>
++
+diff -ruP Pod-ProjectDocs-0.14.orig/t/sample/lib/Sample/Project.pm Pod-ProjectDocs-0.14/t/sample/lib/Sample/Project.pm
+--- Pod-ProjectDocs-0.14.orig/t/sample/lib/Sample/Project.pm	1970-01-01 00:00:00.000000000 +0000
++++ Pod-ProjectDocs-0.14/t/sample/lib/Sample/Project.pm	2005-09-10 09:10:10.660000000 +0000
+@@ -0,0 +1,21 @@
++package Sample::Project;
++
++1;
++
++__END__
++
++=head1 NAME
++
++Sample::Project - Sample project for testing Pod::ProjectDocs
++
++=head1 SYNOPSIS
++
++  blah blah blah
++
++=head1 DESCRIPTION
++
++I<foo>. See L</SYNOPSIS> for its usage and L<Sample::Module/SYNOPSIS> for Sample::Module.
++
++=head1 SEE ALSO
++
++L<perl>, L<Sample::Module>, L<Pod::ProjectDocs>, L<http://www.perl.org/>, L<Perl POD Syntax|perlpod>

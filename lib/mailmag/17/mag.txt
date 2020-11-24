@@ -1,0 +1,120 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.17
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+mod_perl[1] の環境で、デバッグ/テストに利用できるモジュール、
+Apache::FakeRequest を紹介します。
+
+2. Apache::FakeRequest  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl でかかれた Web アプリケーションの高速化という観点から、mod_perl 
+の注目度が高まっています。mod_perl は Doug MacEachern さんによってメン
+テナンスされている Apache のモジュールです。"Apache のモジュールを 
+Perl で書ける" という特徴を持っています。
+
+中でも、CGI スクリプトのインターフェースを保ったまま、コンパイルして動
+作することにより、ドラスティックに高速化することができる 
+Apache::Registry, Apache::PerlRun などがよく利用されています。
+
+しかし先に述べた通り、mod_perl 自体は Apache API を Perl から触れるよ
+うにしたもので、Apache の各フェーズのハンドラに自作のクラスのハンドラ
+を登録することで、CGI では実現できなかったようなアプリケーションを作成
+することが可能です。この辺のことは、オライリージャパン[2] 発行の 
+"Apache 拡張ガイド(上)"[3,4] に記述されていますので、是非ごらんになっ
+てください。
+
+
+ここでは、mod_perl でハンドラを作成するにあたって、ユニットテスト作成
+に利用できるモジュール Apache::FakeRequest を紹介します。
+
+前回マガジンで紹介した HTTP::Monkeywrench は LWP::UserAgent を利用した、
+クライアントサイドからのテストツールでした。XP でいうところの 
+Acceptance Test で利用すると効果的かもしれません。
+
+mod_perl でハンドラを作成する場合、アプリケーションをクラスレベルで扱
+うことになります。各メソッドも単体テストで扱えるようにしておくと非常に
+便利です。
+
+たとえばここでは、ユーザの REMOTE_HOST を表示するハンドラを作成し、そ
+のテストを Apache::FakeRequest で記述してみましょう。
+
+ハンドラは以下のようになります。
+
+package Apache::EchoRemoteHost;
+use Apache::Constants;
+
+sub handler {
+    my $r = shift;
+    $r->send_http_header('text/plain');
+    $r->print('Yur remote host is: ", $r->get_remote_host, "\n");
+    return OK;
+}
+
+1;
+
+
+HTTP::Monkeywrench のようなツールでは、クライアントサイドの情報しか設
+定できないため、REMOTE_HOST のようなパラメータをいじることができません。
+ここでは Apache::FakeRequest で偽造したリクエストオブジェクトをハンド
+ラに渡してテストしてみます。
+
+Apache::FakeRequest でシミュレートするスクリプトは以下のようになります。
+
+#!/usr/local/bin/perl
+use Apache::EchoRemoteHost;
+use Apache::FakeRequest;
+
+my $r = Apache::FakeRequest->new(get_remote_host => 'www.foo.com');
+Apache::EchoRemoteHost::handler($r);
+
+
+このスクリプトを実行すれば、標準出力に、
+
+  Your remote host is: www.foo.com
+
+と出力されます。
+
+テストスクリプトとして動作させるには、以下のようにすればよいでしょう。
+ここでは IO::Scalar モジュールで STDOUT をトラップしています。Test の
+方法については、Vol.15[5] の Test モジュールの利用法を参照してください。
+
+
+#!/usr/local/bin/perl
+use strict;
+use Test;
+BEGIN { plan tests => 1 }
+
+use IO::Scalar;
+use Apache::EchoRemoteHost;
+use Apache::FakeRequest;
+
+my $stdout;
+tie *STDOUT, 'IO::Scalar', \$stdout;
+
+my $r = Apache::FakeRequest->new(get_remote_host => 'www.foo.com');
+Apache::EchoRemoteHost::handler($r);
+
+ok($stdout, 'Your remote host is: www.foo.com');
+untie *STDOUT;
+
+
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+mod_perl ハンドラでのオフラインユニットテスト作成について解説しました。
+次回は、クラス内の Pod にテストを埋め込んでみます。
+
+
+[1] http://perl.apache.org/guide/
+[2] http://www.oreilly.co.jp/
+[3] http://www.oreilly.co.jp/BOOK/wrapmod1/
+[4] http://www.modperl.com/
+[5] http://bulknews.net/lib/mailmag/15/mag.txt
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

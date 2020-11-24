@@ -1,0 +1,120 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.22
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Perl の継承  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+ご存知のように、Perl は言語としてクラスの継承をサポートしています。た
+だし、原則としてメソッドの探索に使われるのみで、アトリビュートの継承は
+サポートされていません。(*1)
+
+    Person
+      |
+    Worker
+
+のような継承関係においては、Worker は Person クラスで実装されているメ
+ソッドを使用でき、またオーバーライドすることもできます。クラスの実装は
+以下のようになります。
+
+  package Person;
+
+  use strict;
+  
+  sub new {
+      my $class = shift;
+      bless {}, $class;
+  }
+
+  sub speak {
+      my $self = shift;
+      print "my name is ", $self->{name}, ".\n";
+  }
+
+  package Worker;
+  use strict;
+  @Worker::ISA = qw(Person);
+
+
+利用するコードは以下のようになります。
+
+  package main;
+
+  my $p = Person->new;
+  $p->{name} = 'John';
+  $p->speak;
+
+  my $w = Worker->new;
+  $w->{name} = 'Jack';
+  $w->speak;
+
+実行すると、
+
+  my name is John.
+  my name is Jack.  
+  
+のような結果が得られます。
+
+
+*1 Class::Fields などを用いると pseudo-hash を用いてアトリビュートの継
+   承などが可能になります。
+
+
+2. 多重継承 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl で Mixin を実装するには、素直に多重継承を使います。Java の 
+interface に相当します。(実装を強要したりできないため、interface とは
+多少概念が異なります)
+
+Person クラスは speak メソッドしか実装していませんでしたが、日本語を話
+せる JapaneseSpeakable クラスをつくり、Worker クラスに Mixin として加
+えてみます。
+
+  package Person;
+  # 上と同じ
+
+  package JapaneseSpeakable;
+  use strict;
+
+  sub speak {
+      my $self = shift;
+      print "わたしの名前は ", $self->{name}, " です。\n"
+  }
+
+  package Worker;
+  use strict;
+  @Worker::ISA = qw(JapaneseSpeakable Person);
+
+これで、Worker クラスのインスタンスは日本語を話すことが出来るようにな
+りました。先に作ったクライアントコードを実行すると、
+
+  my name is John.
+  わたしの名前は Jack です。
+
+このようになります。この @ISA 配列の順番を変更すると、思ったような結果
+が得られません。
+
+  $w = Worker->new;
+  $w->{name} = 'Jack';
+  $w->speak;
+
+の speak 行では以下のようなことがおこっています。
+
+  1. Worker クラスの speak メソッドを探す: 定義されてない
+  2. Worker クラスの AUTOLOAD メソッドを探す: 定義されていない
+  3. @ISA の先頭、JapaneseSpeakable の speak メソッドを探す: 定義されている
+
+@ISA 配列は depth-first で探索されるため、この順番を変更すると動作に影
+響するわけです。
+
+
+REFERENCES:
+* Class-Fields
+  http://cpan2.org/Asset/display?dist=Class-Fields
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+

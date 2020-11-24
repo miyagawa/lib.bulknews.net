@@ -1,0 +1,6996 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl Installation </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl Installation 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./perl.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./config.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#A_Summary_of_a_Basic_mod_perl_In">A Summary of a Basic mod_perl Installation</A>
+	<LI><A HREF="#The_Gory_Details">The Gory Details</A>
+	<UL>
+
+		<LI><A HREF="#Source_Configuration_perl_Makef">Source Configuration (perl Makefile.PL ...)</A>
+		<UL>
+
+			<LI><A HREF="#Configuration_parameters">Configuration parameters</A>
+			<UL>
+
+				<LI><A HREF="#APACHE_SRC">APACHE_SRC</A>
+				<LI><A HREF="#DO_HTTPD_NO_HTTPD_PREP_HTTPD">DO_HTTPD, NO_HTTPD, PREP_HTTPD</A>
+				<LI><A HREF="#Callback_Hooks">Callback Hooks</A>
+				<LI><A HREF="#EVERYTHING">EVERYTHING</A>
+				<LI><A HREF="#PERL_TRACE">PERL_TRACE</A>
+				<LI><A HREF="#APACHE_HEADER_INSTALL">APACHE_HEADER_INSTALL</A>
+				<LI><A HREF="#PERL_STATIC_EXTS">PERL_STATIC_EXTS</A>
+				<LI><A HREF="#APACI_ARGS">APACI_ARGS</A>
+				<LI><A HREF="#APACHE_PREFIX">APACHE_PREFIX</A>
+			</UL>
+
+			<LI><A HREF="#Environment_Variables">Environment Variables</A>
+			<UL>
+
+				<LI><A HREF="#APACHE_USER_and_APACHE_GROUP">APACHE_USER and APACHE_GROUP</A>
+			</UL>
+
+			<LI><A HREF="#Reusing_Configuration_Parameters">Reusing Configuration Parameters</A>
+			<LI><A HREF="#Discovering_Whether_Some_Option_">Discovering Whether Some Option Was Configured</A>
+			<LI><A HREF="#Using_an_Alternative_Configurati">Using an Alternative Configuration File</A>
+			<LI><A HREF="#perl_Makefile_PL_Troubleshooting">perl Makefile.PL Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="#_A_test_compilation_with_your_Ma">&quot;A test compilation with your Makefile configuration failed...&quot;</A>
+				<LI><A HREF="#Missing_or_Misconfigured_libgdbm">Missing or Misconfigured libgdbm.so</A>
+				<LI><A HREF="#About_gdbm_db_and_ndbm_librarie">About gdbm, db and ndbm libraries</A>
+				<LI><A HREF="#Undefined_reference_to_PL_perl_">Undefined reference to `PL_perl_destruct_level'</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="#mod_perl_Building_make_">mod_perl Building (make)</A>
+		<UL>
+
+			<LI><A HREF="#make_Troubleshooting">make Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="#Undefined_reference_to_Perl_new">Undefined reference to 'Perl_newAV'</A>
+				<LI><A HREF="#Unrecognized_format_specifier_fo">Unrecognized format specifier for...</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="#Built_Server_Testing_make_test_">Built Server Testing (make test)</A>
+		<UL>
+
+			<LI><A HREF="#Manual_Testing">Manual Testing</A>
+			<LI><A HREF="#make_test_Troubleshooting">make test Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="#make_test_fails">make test fails</A>
+				<LI><A HREF="#mod_perl_c_is_incompatible_with_">mod_perl.c is incompatible with this version of Apache</A>
+				<LI><A HREF="#make_test_skipping_test_on_">make test......skipping test on this platform</A>
+				<LI><A HREF="#make_test_Fails_Due_to_Misconfig">make test Fails Due to Misconfigured localhost Entry</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="#Installation_make_install_">Installation (make install)</A>
+		<LI><A HREF="#Building_Apache_and_mod_perl_by_">Building Apache and mod_perl by Hand</A>
+	</UL>
+
+	<LI><A HREF="#Installation_Scenarios_for_Stand">Installation Scenarios for Standalone mod_perl </A>
+	<UL>
+
+		<LI><A HREF="#The_All_In_One_Way">The All-In-One Way</A>
+		<LI><A HREF="#The_Flexible_Way">The Flexible Way</A>
+		<LI><A HREF="#Build_mod_perl_as_a_DSO_inside_t">Build mod_perl as a DSO inside the Apache Source Tree via APACI</A>
+		<UL>
+
+			<LI><A HREF="#libperl_so_and_libperl_a">libperl.so and libperl.a</A>
+		</UL>
+
+		<LI><A HREF="#Build_mod_perl_as_a_DSO_outside_">Build mod_perl as a DSO outside the Apache Source Tree via APXS</A>
+	</UL>
+
+	<LI><A HREF="#Installation_Scenarios_for_mod_p">Installation Scenarios for mod_perl and Other Components</A>
+	<UL>
+
+		<LI><A HREF="#mod_perl_and_mod_ssl_openssl_">mod_perl and mod_ssl (+openssl)</A>
+		<LI><A HREF="#mod_perl_and_mod_ssl_Rolled_from">mod_perl and mod_ssl Rolled from RPMs</A>
+		<LI><A HREF="#mod_perl_and_apache_ssl_openss">mod_perl and apache-ssl (+openssl)</A>
+		<LI><A HREF="#mod_perl_and_Stronghold">mod_perl and Stronghold</A>
+		<UL>
+
+			<LI><A HREF="#Note_For_Solaris_2_5_users">Note For Solaris 2.5 users</A>
+		</UL>
+
+		<LI><A HREF="#mod_perl_and_Raven_SSL">mod_perl and Raven SSL</A>
+		<UL>
+
+			<LI><A HREF="#Dynamic_DSO_mod_perl_and_Raven">Dynamic (DSO) mod_perl and Raven SSL Installation</A>
+			<LI><A HREF="#Static_mod_perl_and_dynamic_Rave">Static mod_perl and dynamic Raven SSL Installation</A>
+		</UL>
+
+		<LI><A HREF="#mod_perl_and_mod_php">mod_perl and mod_php</A>
+	</UL>
+
+	<LI><A HREF="#mod_perl_Installation_with_the_C">mod_perl Installation with the CPAN.pm Interactive Shell</A>
+	<LI><A HREF="#Installing_on_multiple_machines">Installing on multiple machines</A>
+	<LI><A HREF="#using_RPM_and_other_packages_to_">using RPM and other packages to install mod_perl</A>
+	<UL>
+
+		<LI><A HREF="#A_word_on_mod_perl_RPM_packages">A word on mod_perl RPM packages</A>
+		<LI><A HREF="#Getting_Started">Getting Started</A>
+		<LI><A HREF="#Compiling_RPM_source_files">Compiling RPM source files</A>
+		<LI><A HREF="#Mix_and_Match_RPM_and_source">Mix and Match RPM and source</A>
+		<LI><A HREF="#Installing_a_single_apache_mod_p">Installing a single apache+mod_perl RPM</A>
+		<LI><A HREF="#Compiling_libapreq_Apache_Requ">Compiling libapreq (Apache::Request) with the RH 6.0 mod_perl RPM</A>
+		<LI><A HREF="#Installing_separate_Apache_and_m">Installing separate Apache and mod_perl RPMs</A>
+		<LI><A HREF="#Testing_the_mod_perl_API">Testing the mod_perl API</A>
+	</UL>
+
+	<LI><A HREF="#Installation_Without_Superuser_P">Installation Without Superuser Privileges</A>
+	<UL>
+
+		<LI><A HREF="#Installing_Perl_Modules_into_a_D">Installing Perl Modules into a Directory of Choice</A>
+		<LI><A HREF="#Making_Your_Scripts_Find_the_Loc">Making Your Scripts Find the Locally Installed Modules</A>
+		<LI><A HREF="#The_CPAN_pm_Shell_and_Locally_In">The CPAN.pm Shell and Locally Installed Modules</A>
+		<LI><A HREF="#Making_a_Local_Apache_Installati">Making a Local Apache Installation</A>
+		<LI><A HREF="#Manual_Local_mod_perl_Enabled_Ap">Manual Local mod_perl Enabled Apache Installation</A>
+		<UL>
+
+			<LI><A HREF="#Resource_Usage">Resource Usage</A>
+		</UL>
+
+		<LI><A HREF="#Local_mod_perl_Enabled_Apache_In">Local mod_perl Enabled Apache Installation with CPAN.pm</A>
+	</UL>
+
+	<LI><A HREF="#Automating_installation">Automating installation</A>
+	<LI><A HREF="#How_can_I_tell_whether_mod_perl_">How can I tell whether mod_perl is running?</A>
+	<UL>
+
+		<LI><A HREF="#Checking_the_error_log">Checking the error_log</A>
+		<LI><A HREF="#Testing_by_viewing_perl_status">Testing by viewing /perl-status</A>
+		<LI><A HREF="#Testing_via_telnet">Testing via telnet</A>
+		<LI><A HREF="#Testing_via_a_CGI_script">Testing via a CGI script</A>
+		<LI><A HREF="#Testing_via_lwp_request">Testing via lwp-request</A>
+	</UL>
+
+	<LI><A HREF="#General_Notes">General Notes</A>
+	<UL>
+
+		<LI><A HREF="#Is_it_possible_to_run_mod_perl_e">Is it possible to run mod_perl enabled Apache as suExec?</A>
+		<LI><A HREF="#Should_I_Rebuild_mod_perl_if_I_h">Should I Rebuild mod_perl if I have Upgraded Perl?</A>
+		<LI><A HREF="#Perl_installation_requirements">Perl installation requirements</A>
+		<LI><A HREF="#mod_auth_dbm_nuances">mod_auth_dbm nuances</A>
+		<LI><A HREF="#Stripping_Apache_to_make_it_almo">Stripping Apache to make it almost a Perl-server</A>
+		<LI><A HREF="#Saving_the_config_status_Files_w">Saving the config.status Files with mod_perl, php, ssl and Other Components</A>
+		<LI><A HREF="#What_Compiler_Should_Be_Used_to_">What Compiler Should Be Used to Build mod_perl?</A>
+	</UL>
+
+	<LI><A HREF="#OS_Related_Notes">OS Related Notes</A>
+	<LI><A HREF="#Pros_and_Cons_of_Building_mod_pe">Pros and Cons of Building mod_perl as DSO</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="A_Summary_of_a_Basic_mod_perl_In">A Summary of a Basic mod_perl Installation</A></H1></CENTER>
+<P>
+The following 10 commands summarize the execution steps required to build
+and install a basic mod_perl enabled Apache server on almost any standard
+flavor of Unix OS.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src
+  % lwp-download <A HREF="http://www.apache.org/dist/apache_x.x.x.tar.gz">http://www.apache.org/dist/apache_x.x.x.tar.gz</A>
+  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A>
+  % tar xzvf apache_x.x.x.tar.gz
+  % tar xzvf mod_perl-x.xx.tar.gz
+  % cd mod_perl-x.xx
+  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1
+  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course you should replace <EM>x.xx</EM> and <EM>x.x.x</EM> with the real version numbers of mod_perl and Apache.
+
+<P>
+All that's left is to add a few configuration lines to <CODE>httpd.conf</CODE>, the Apache configuration file, start the server and enjoy mod_perl.
+
+<P>
+If you have stumbled upon a problem at any of the above steps, don't
+despair, the next sections will explain in detail each and every step.
+
+<P>
+Of course there is a way of installing mod_perl in only a couple of minutes
+if you are using a Linux distribution that uses RPM packages:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -i apache-xx.xx.rpm
+  % rpm -i mod_perl-xx.xx.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or apt system:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % apt-get install libapache-mod-perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+These should set up both Apache and mod_perl correctly for your system.
+Using a packaged distribution can make installing and reinstalling a lot
+quicker and easier. (Note that the filenames will vary, and <EM>xx.xx</EM> will differ.)
+
+<P>
+Since mod_perl can be configured in many different ways (features can be
+enabled or disabled, directories can be modified, etc.) it's preferable to
+use a manual installation, as a prepackaged version might not suit your
+needs. Manual installation will allow you to make the fine tuning for the
+best performance as well.
+
+<P>
+In this chapter we will talk extensively about the prepackaged versions,
+and ways to prepare your own packages for reuse on many machines.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_Gory_Details">The Gory Details</A></H1></CENTER>
+<P>
+We saw that the basic mod_perl installation is quite simple and takes about
+10 commands. You can copy and paste them from these pages. The parameter <CODE>EVERYTHING=1</CODE> selects a lot of options, but sometimes you will need different ones. You
+may need to pass only specific parameters, to bundle other components with
+mod_perl etc. You may want to build mod_perl as a loadable object instead
+of compiling it into Apache, so that it can be upgraded without rebuilding
+Apache itself.
+
+<P>
+To accomplish this you will need to understand various techniques for
+mod_perl configuration and building. You need to know what configuration
+parameters are available to you and when and how to use them.
+
+<P>
+As with Perl, with mod_perl simple things are simple. But when you need to
+accomplish more complicated tasks you may have to invest some time to gain
+a deeper understanding of the process. In this chapter I will take the
+following route. I'll start with a detailed explanation of the four stages
+of the mod_perl installation process, then continue with the different
+paths each installation might take according to your goal, followed by a
+few copy-and-paste real world installation scenarios. Towards the end of
+the chapter I will show you various approaches that make the installations
+easier, automating most of the steps. Finally I'll cover some of the
+general issues that can cause new users to stumble while installing
+mod_perl.
+
+<P>
+We can clearly separate the installation process into the following stages:
+
+<UL>
+<P><LI><STRONG><A NAME="item_Source">Source Configuration,</A></STRONG>
+<P><LI><STRONG><A NAME="item_Building">Building,</A></STRONG>
+<P><LI><STRONG><A NAME="item_Testing">Testing and</A></STRONG>
+<P><LI><STRONG><A NAME="item_Installation">Installation.</A></STRONG>
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Source_Configuration_perl_Makef">Source Configuration (perl Makefile.PL ...)</A></H2></CENTER>
+<P>
+Before building and installing mod_perl you have to configure it. You
+configure mod_perl just like any other Perl module:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL [parameters]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In this section we will go through most of the parameters mod_perl can
+accept and explain each one of them.
+
+<P>
+First let's see what configuration mechanisms we have available. Basically
+they all define a special set of parameters to be passed to
+<CODE>perl Makefile.PL</CODE>. Depending on the chosen configuration, the final product might be a
+stand-alone httpd binary or a loadable object.
+
+<P>
+The source configuration mechanism in Apache 1.3 provides four major
+features (which of course are available to mod_perl):
+
+<DL>
+<P><DT><STRONG><A NAME="item_Per">Per-module configuration scripts (ConfigStart/End)</A></STRONG><DD>
+<P>
+This is a mechanism modules can use to link themselves into the
+configuration process. It is useful for automatically adjusting the
+configuration and build parameters from the modules sources. It is
+triggered by <CODE>ConfigStart</CODE>/<CODE>ConfigEnd</CODE> sections inside
+<EM>modulename.module</EM> files (e.g. <EM>libperl.module</EM>).
+
+<P><DT><STRONG><A NAME="item_Apache">Apache Autoconf-style Interface (APACI)</A></STRONG><DD>
+<P>
+This is the new top-level <CODE>configure</CODE> script from Apache 1.3 which provides a GNU Autoconf-style interface. It is
+useful for configuring the source tree without manually editing any <EM>src/Configuration</EM>
+files. Any parameterization can be done via command line options to the <CODE>configure</CODE> script. Internally this is just a nifty wrapper to the old <CODE>src/Configure</CODE> script.
+
+<P>
+Since Apache 1.3 this is the way to install mod_perl as cleanly as
+possible. Currently this is a pure Unix-based solution because at present
+the complete Apache 1.3 source configuration mechanism is only available
+under Unix. It doesn't work on the Win32 platform for example.
+
+<P><DT><STRONG><A NAME="item_Dynamic">Dynamic Shared Object (DSO) support</A></STRONG><DD>
+<P>
+Besides Windows NT support this is one of most interesting features in
+Apache 1.3. Its a way to build Apache modules as so-called <EM>dynamic
+shared objects</EM> (usually named <EM>modulename.so</EM>) which can be loaded via the <CODE>LoadModule</CODE> directive in Apache's <EM>httpd.conf</EM> file. The benefit is that the modules are part of the <CODE>httpd</CODE> executable only on demand, i.e. only when the user wants a module it is
+loaded into the address space of the <CODE>httpd</CODE> executable. This is interesting for instance in relation to memory
+consumption and upgrading.
+
+<P>
+The DSO mechanism is provided by Apache's <CODE>mod_so</CODE> module which needs to be compiled into the <CODE>httpd</CODE> binary. This is done automatically when DSO is enabled for module <CODE>mod_foo</CODE> via:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --enable-module=foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or by explicitly adding <CODE>mod_so</CODE> via:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --enable-module=so&gt;.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><DT><STRONG><A NAME="item_APache">APache eXtenSion (APXS) support tool</A></STRONG><DD>
+<P>
+This is a new support tool from Apache 1.3 which can be used to build an
+Apache module as a DSO even <STRONG>outside</STRONG> the Apache source-tree. One can say <CODE>APXS</CODE> is for Apache what <CODE>MakeMaker</CODE> and <CODE>XS</CODE> are for Perl. It knows the platform dependent build parameters for making
+DSO files and provides an easy way to run the build commands with them.
+
+<P>
+(<CODE>MakeMaker</CODE> allows an easy automatic configuration, build, testing and installation of
+the Perl modules, and <CODE>XS</CODE> allows to call functions implemented in C/C++ from Perl code.)
+
+</DL>
+<P>
+Taking these four features together provides a way to integrate mod_perl
+into Apache in a very clean and smooth way.  <EM>No patching</EM>
+of the Apache source tree is needed in the standard situation and in the
+APXS situation not even the Apache source tree is needed.
+
+<P>
+To benefit from the above features a new hybrid build environment was
+created for the Apache side of mod_perl. The Apache-side consists of the
+mod_perl C source files which have to be compiled into the
+<CODE>httpd</CODE> program. They are usually copied to the subdirectory
+<EM>src/modules/perl/</EM> in the Apache source tree. To integrate this subtree into the Apache build
+process a lot of adjustments were done by mod_perl's <EM>Makefile.PL</EM> in the past. And additionally the
+<CODE>Makefile.PL</CODE> controlled the Apache build process.
+
+<P>
+This approach is problematic in several ways. It is very restrictive and
+not very clean because it assumes that mod_perl is the only third-party
+module which has to be integrated into Apache.
+
+<P>
+The new approach described below avoids these problems. It prepares only
+the <EM>src/modules/perl/</EM> subtree inside the Apache source tree
+<EM>without</EM> adjusting or editing anything else. This way, no conflicts can occur.
+Instead, mod_perl is activated later (when the Apache source tree is
+configured, via APACI calls) and then it configures itself.
+
+<P>
+We will return to each of the above configuration mechanisms when
+describing different installation passes, once the overview of the four
+building steps is completed.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Configuration_parameters">Configuration parameters</A></H3></CENTER>
+<P>
+The command <CODE>perl Makefile.PL</CODE>, which is also known as a
+<EM>"configuration stage"</EM>, accepts various parameters. In this section we will learn what they are,
+and when should they be used.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="APACHE_SRC">APACHE_SRC</A></H4></CENTER>
+<P>
+If you specify neither the <CODE>DO_HTTPD</CODE> nor the <CODE>NO_HTTPD</CODE> parameters you will be asked the following question during the
+configuration stage:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Configure mod_perl with ../apache_x.x.x/src ?</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>APACHE_SRC</CODE> should be used to define Apache's source tree directory. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  APACHE_SRC=../apache_x.x.x/src</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Unless <CODE>APACHE_SRC</CODE> is specified, <EM>Makefile.PL</EM> makes an intelligent guess by looking at the directories at the same level
+as the mod_perl sources and suggests a directory with the highest version
+of Apache found there.
+
+<P>
+Answering <EM>'y'</EM> confirms either <EM>Makefile.PL</EM>'s guess about the location of the tree, or the directory you have
+specified with
+<CODE>APACHE_SRC</CODE>.
+
+<P>
+If you use <CODE>DO_HTTPD=1</CODE> or <CODE>NO_HTTPD</CODE>, the first Apache source tree found or the one you have defined will be
+used for the rest of the build process.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="DO_HTTPD_NO_HTTPD_PREP_HTTPD">DO_HTTPD, NO_HTTPD, PREP_HTTPD</A></H4></CENTER>
+<P>
+Unless any of <CODE>DO_HTTPD</CODE>, <CODE>NO_HTTPD</CODE> or <CODE>PREP_HTTPD</CODE> is used, you will be prompted by the following question:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Shall I build httpd in ../apache_x.x.x/src for you?</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Answering <EM>'y'</EM> will make sure an httpd binary will be built in
+<EM>../apache_x.x.x/src</EM> when you run <CODE>make</CODE>.
+
+<P>
+To avoid this prompt when the answer is <EM>Yes</EM> specify the following argument:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  DO_HTTPD=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that if you set <CODE>DO_HTTPD=1</CODE>, but do not use
+<CODE>APACHE_SRC=../apache_x.x.x/src</CODE> then the first apache source tree found will be used to configure and build
+against. Therefore it's highly advised to always use an explicit <CODE>APACHE_SRC</CODE> parameter, to avoid confusion.
+
+<P>
+<CODE>PREP_HTTPD=1</CODE> just means default '<CODE>n</CODE>' to the latter prompt, meaning: <EM>Do not build (make) httpd in the Apache source tree</EM>. But it will still ask you about Apache's source location even if you have
+used the <CODE>APACHE_SRC</CODE> parameter. Providing the <CODE>APACHE_SRC</CODE>
+parameter will just eliminate the need for <CODE>perl Makefile.PL</CODE> to make a guess.
+
+<P>
+To avoid the two prompts:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Configure mod_perl with ../apache_x.x.x/src ?
+  Shall I build httpd in ../apache_x.x.x/src for you?</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and avoid building httpd, use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  NO_HTTPD=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you choose not to build the binary you will have to do that manually. We
+will talk about it later. In any case you will need to run <CODE>make install</CODE> in the mod_perl source tree, so the Perl side of mod_perl will be
+installed. Note that, <CODE>make test</CODE> won't work until you have built the server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="Callback_Hooks">Callback Hooks</A></H4></CENTER>
+<P>
+A callback hook (abbrev. <EM>callback</EM>) is a reference to a subroutine. In Perl we create callbacks with the $callback&nbsp;=
+\&subroutine syntax, where in this example, <CODE>$callback</CODE> contains a reference to the subroutine called <EM>"subroutine"</EM>. Callbacks are used when we want some action (subroutine call) to occur
+when some event takes place. Since we don't know exactly when the event
+will take place we give the event handler a callback to the subroutine we
+want executed. The handler will call our subroutine at the right time.
+
+<P>
+By default, most of the callback hooks except for
+<CODE>PerlHandler</CODE>,<CODE>PerlChildInitHandler</CODE>, <CODE>PerlChildExitHandler</CODE>,
+<CODE>PerlConnectionApi</CODE>, and <CODE>PerlServerApi</CODE> are turned off. You may enable them by editing <EM>src/modules/perl/Makefile</EM>, or when running
+<CODE>perl Makefile.PL</CODE>.
+
+<P>
+The possible parameters for the appropriate hooks are:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PERL_POST_READ_REQUEST
+  PERL_TRANS
+  PERL_INIT
+  PERL_RESTART (experimental)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PERL_HEADER_PARSER
+  PERL_AUTHEN
+  PERL_AUTHZ
+  PERL_ACCESS
+  PERL_TYPE
+  PERL_FIXUP
+  PERL_LOG
+  PERL_CLEANUP
+  PERL_CHILD_INIT
+  PERL_CHILD_EXIT
+  PERL_DISPATCH
+  
+  PERL_STACKED_HANDLERS
+  PERL_METHOD_HANDLERS
+  PERL_SECTIONS
+  PERL_SSI</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As with any parameters that are either defined or not, use
+<CODE>PERL_hookname=1</CODE> to enable them (e.g. <CODE>PERL_AUTHEN=1</CODE>).
+
+<P>
+To enable all, but the last 4 callback hooks use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ALL_HOOKS=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="EVERYTHING">EVERYTHING</A></H4></CENTER>
+<P>
+To enable everything set:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="PERL_TRACE">PERL_TRACE</A></H4></CENTER>
+<P>
+To enable <A HREF="././debug.html#Debug_Tracing">debug tracing</A> set: <CODE>PERL_TRACE=1</CODE>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="APACHE_HEADER_INSTALL">APACHE_HEADER_INSTALL</A></H4></CENTER>
+<P>
+By default, the Apache source headers files are installed into the
+<EM>$Config{sitearchexp}/auto/Apache/include</EM> directory.
+
+<P>
+The reason for installing the header files is to make life simpler for
+module authors/users when building/installing a module that taps into some
+Apache C functions, e.g. <CODE>Embperl</CODE>, <CODE>Apache::Peek</CODE>, etc.
+
+<P>
+If you don't wish to install these files use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  APACHE_HEADER_INSTALL=0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="PERL_STATIC_EXTS">PERL_STATIC_EXTS</A></H4></CENTER>
+<P>
+Normally, if an extension is statically linked with Perl it is listed in
+<CODE>Config.pm</CODE>'s <CODE>$Config{static_exts}</CODE>, in which case mod_perl will also statically link this extension with
+httpd. However, if an extension is statically linked with Perl after it is
+installed, it is not listed in
+<CODE>Config.pm</CODE>. You may either edit <CODE>Config.pm</CODE> and add these extensions, or configure mod_perl like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> perl Makefile.PL &quot;PERL_STATIC_EXTS=Something::Static Another::One&quot; </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="APACI_ARGS">APACI_ARGS</A></H4></CENTER>
+<P>
+When you use the <CODE>USE_APACI=1</CODE> parameter, you can tell <CODE>Makefile.PL</CODE>
+to pass any arguments you want to the Apache <CODE>./configure</CODE> utility, e.g:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL USE_APACI=1 \
+  APACI_ARGS='--sbindir=/usr/local/httpd_perl/sbin, \
+         --sysconfdir=/usr/local/httpd_perl/etc, \
+         --localstatedir=/usr/local/httpd_perl/var, \
+         --runtimedir=/usr/local/httpd_perl/var/run, \
+         --logfiledir=/usr/local/httpd_perl/var/logs, \
+         --proxycachedir=/usr/local/httpd_perl/var/proxy'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Notice that <STRONG>all</STRONG>  <CODE>APACI_ARGS</CODE> (above) must be passed as one long line if you work with <CODE>t?csh</CODE>!!! However it works correctly as shown above (breaking the long lines with
+'<CODE>\</CODE>') with <CODE>(ba)?sh</CODE>. If you use <CODE>t?csh</CODE> it does not work, since <CODE>t?csh</CODE> passes the <CODE>APACI_ARGS</CODE>
+arguments to <CODE>./configure</CODE> leaving the newlines untouched, but stripping the backslashes. This causes
+all the arguments except the first to be ignored by the configuration
+process.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="APACHE_PREFIX">APACHE_PREFIX</A></H4></CENTER>
+<P>
+Alternatively to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  APACI_ARGS='--prefix=/usr/local/httpd_perl'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+from the previous section you can use the <CODE>APACHE_PREFIX</CODE> parameter. When <CODE>USE_APACI</CODE> is enabled, this attribute will specify the
+<EM>--prefix</EM> option just like the above setting does.
+
+<P>
+In addition when the <CODE>APACHE_PREFIX</CODE> option is used <CODE>make install</CODE>
+be executed in the Apache source directory, which makes these two
+equivalent:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1 \
+    APACI_ARGS='--prefix=/usr/local/httpd_perl'
+  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1 \
+    APACHE_PREFIX=/usr/local/httpd_perl'
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you can pick your favorite installation method.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Environment_Variables">Environment Variables</A></H3></CENTER>
+<P>
+There are a few enviroment variables that influence the build/test process.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="APACHE_USER_and_APACHE_GROUP">APACHE_USER and APACHE_GROUP</A></H4></CENTER>
+<P>
+You can use the environment variables <CODE>APACHE_USER</CODE> and
+<CODE>APACHE_GROUP</CODE> to override the default <CODE>User</CODE> and <CODE>Group</CODE> settings in the <EM>httpd.conf</EM> used for 'make&nbsp;test' stage. (Introduced in mod_perl v1.23.)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Reusing_Configuration_Parameters">Reusing Configuration Parameters</A></H3></CENTER>
+<P>
+When you have to upgrade the server, it's quite hard to remember what
+parameters were used in a mod_perl build. So it's better to save them in a
+file. For example if you create a file at
+<EM>~/.mod_perl_build_options</EM>, with contents:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  APACHE_SRC=../apache_x.x.x/src DO_HTTPD=1 USE_APACI=1 \
+  EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can build the server with the following command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL `cat ~/.mod_perl_build_options`
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But mod_perl has a standard method to perform this trick. If a file named <EM>makepl_args.mod_perl</EM> is found in the same directory as the mod_perl build location with any of
+these options, it will be read in by <EM>Makefile.PL</EM>. Parameters supplied at the command line will override the parameters
+given in this file.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ls -1 /usr/src
+  apache_x.x.x/
+  makepl_args.mod_perl
+  mod_perl-x.xx/
+  
+  % cat makepl_args.mod_perl
+  APACHE_SRC=../apache_x.x.x/src DO_HTTPD=1 USE_APACI=1 \
+  EVERYTHING=1
+  
+  % cd mod_perl-x.xx
+  % perl Makefile.PL
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the parameters from <EM>makepl_args.mod_perl</EM> file will be used, as if they were directly typed in.
+
+<P>
+Notice that this file can be located in your home directory or in the
+<EM>../</EM> directory relative to the mod_perl distribution directory. This file can
+also start with dot (<EM>.makepl_args.mod_perl</EM>) so you can keep it nicely hidden along with the rest of the dot files in
+your home directory.
+
+<P>
+There is a sample <EM>makepl_args.mod_perl</EM> in the <EM>eg/</EM> directory of the mod_perl distribution package, in which you might find a
+few options to enable experimental features to play with too!
+
+<P>
+If you are faced with a compiled Apache and no trace of the parameters used
+to build it, you can usually still find them if the sources were not <CODE>make clean</CODE>'d. You will find the Apache specific parameters in
+<CODE>apache_x.x.x/config.status</CODE> and the mod_perl parameters in
+<CODE>mod_perl_x.xx/apaci/mod_perl.config</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Discovering_Whether_Some_Option_">Discovering Whether Some Option Was Configured</A></H3></CENTER>
+<P>
+mod_perl version 1.25 has introduced <CODE>Apache::Myconfig</CODE>, which provides access to the various hooks and features set when mod_perl
+is built. This circumvents the need to set up a live server just to find
+out if a certain callback hook is available.
+
+<P>
+To see whether some feature was built in or not, check the
+<CODE>%Apache::MyConfig::Setup</CODE> hash. For example after installing mod_perl with the following options:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  panic% perl Makefile.PL EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+but on the next day we don't remember what callback hooks were enabled, and
+we want to know whether <CODE>PERL_LOG</CODE> callback hook is enabled. One of the ways to find this out is to run the
+following code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  panic% perl -MApache::MyConfig \
+  -e 'print $Apache::MyConfig::Setup{PERL_LOG}'
+  1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which prints '1'--meaning that <CODE>PERL_LOG</CODE> callback hook was enabled. (That's because <CODE>EVERYTHING=1</CODE> enables them all.)
+
+<P>
+Another approach is to configure <CODE>Apache::Status</CODE> as explain on page XXX of Chapter YYY and run <A
+HREF="http://localhost/perl-status?hooks">http://localhost/perl-status?hooks</A>
+to check for enabled hooks.
+
+<P>
+You also may try to look at the symbols inside the httpd executable with
+help of <CODE>nm(1)</CODE> or a similar utility. For example if you want to see whether you enabled <CODE>PERL_LOG=1</CODE> while building mod_perl, we can search for a symbol with the same name but
+in lowercase:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  panic% nm httpd | grep perl_log
+  08071724 T perl_logger</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Indeed we can see that in our example <CODE>PERL_LOG=1</CODE> was enabled. But this will only work if you have an unstripped httpd
+binary. By default, <CODE>make install</CODE> strips the binary before installing it. Use the <CODE>--without-execstrip</CODE>  <CODE>./Configure</CODE> option to prevent stripping during <EM>make install</EM> phase.
+
+<P>
+Yet another approach that will work in most of the cases is to try to use
+the feature in question. If it wasn't configured Apache will give an error
+message
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Using_an_Alternative_Configurati">Using an Alternative Configuration File</A></H3></CENTER>
+<P>
+By default mod_perl provides its own copy of the <EM>Configuration</EM> file to Apache's <CODE>./configure</CODE> utility. If you wish to pass it your own version, do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL CONFIG=Configuration.custom</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Where <EM>Configuration.custom</EM> is the pathname of the file <EM>relative
+to the Apache source tree you build against</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="perl_Makefile_PL_Troubleshooting">perl Makefile.PL Troubleshooting</A></H3></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="_A_test_compilation_with_your_Ma">&quot;A test compilation with your Makefile configuration failed...&quot;</A></H4></CENTER>
+<P>
+When you see this during the <CODE>perl Makefile.PL</CODE> stage:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ** A test compilation with your Makefile configuration
+  ** failed. This is most likely because your C compiler
+  ** is not ANSI. Apache requires an ANSI C Compiler, such
+  ** as gcc. The above error message from your compiler
+  ** will also provide a clue.
+   Aborting!</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+you've got a problem with your compiler. It is possible that it's
+improperly installed or not installed at all. Sometimes the reason is that
+your Perl executable was built on a different machine, and the software
+installed on your machine is not the same. Generally this happens when you
+install the prebuilt packages, like RPM or deb. The dependencies weren't
+properly defined in the Perl binary package and you were allowed to install
+it, although some essential package is not installed.
+
+<P>
+The most frequent pitfall is a missing gdbm library. See <A HREF="././install.html#Missing_or_Misconfigured_libgdbm">Missing or Misconfigured libgdbm.so</A> for more info.
+
+<P>
+But why guess, when we can actually see the real error message and
+understand what the real problem is. To get a real error message, edit the
+Apache <EM>src/Configure</EM> script. Down around line 2140 you will see a line like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   if ./helpers/TestCompile sanity; then</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+change it to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   if ./helpers/TestCompile -v sanity; then</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and try again. Now you should get a useful error message.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="Missing_or_Misconfigured_libgdbm">Missing or Misconfigured libgdbm.so</A></H4></CENTER>
+<P>
+On some Linux RedHat systems you might encounter a problem during the
+<CODE>perl Makefile.PL</CODE> stage, when the installed from the rpm package Perl was built with the <CODE>gdbm</CODE> library, but the library isn't actually installed. If this is your
+situation make sure you install it before proceeding with the build
+process.
+
+<P>
+You can check how Perl was built by running the <CODE>perl -V</CODE> command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -V | grep libs</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+On my machine I get:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  libs=-lnsl -lndbm -lgdbm -ldb -ldl -lm -lc -lposix -lcrypt</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Sometimes the problem is even more obscure: you do have <CODE>libgdbm</CODE>
+installed but it's not properly installed. Do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ls /usr/lib/libgdbm.so*</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you get at least three lines like I do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  lrwxrwxrwx   /usr/lib/libgdbm.so -&gt; libgdbm.so.2.0.0
+  lrwxrwxrwx   /usr/lib/libgdbm.so.2 -&gt; libgdbm.so.2.0.0
+  -rw-r--r--   /usr/lib/libgdbm.so.2.0.0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+you are all set. On some installations the <EM>libgdbm.so</EM> symbolic link is missing, so you get only:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  lrwxrwxrwx   /usr/lib/libgdbm.so.2 -&gt; libgdbm.so.2.0.0
+  -rw-r--r--   /usr/lib/libgdbm.so.2.0.0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To fix this problem add the missing symbolic link:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/lib
+  % ln -s libgdbm.so.2.0.0 libgdbm.so</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you should be able to build mod_perl without any problems.
+
+<P>
+Note that you might need to prepare this symbolic link as well:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  lrwxrwxrwx   /usr/lib/libgdbm.so.2 -&gt; libgdbm.so.2.0.0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ln -s libgdbm.so.2.0.0 libgdbm.so.2</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course if when you read this a new version of the <CODE>libgdbm</CODE>
+library will be released, you will have to adjust the version numbers. We
+didn't use the usual <EM>xx.xx</EM> version replacement here, to make it easier to understand how the symbolic
+links should be set.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="About_gdbm_db_and_ndbm_librarie">About gdbm, db and ndbm libraries</A></H4></CENTER>
+<P>
+Both the gdbm and db libraries offer ndbm emulation, which is the interface
+that Apache actually uses, so when you build mod_perl you end up with
+whichever library was linked first by the perl compile. If you build apache
+without mod_perl you end up with whatever appears to be be your ndbm
+library which will vary between systems, and especially Linux
+distributions. You may have to work a bit to get both Apache and Perl to
+use the same library and you are likely to have trouble copying the dbm
+file from one system to another or even using it after an upgrade.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="Undefined_reference_to_PL_perl_">Undefined reference to `PL_perl_destruct_level'</A></H4></CENTER>
+<P>
+When manually building mod_perl using the shared library:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cd mod_perl-x.xx
+  perl Makefile.PL PREP_HTTPD=1
+  make
+  make test
+  make install
+  
+  cd ../apache_x.x.x
+  ./configure --with-layout=RedHat --target=perlhttpd 
+  --activate-module=src/modules/perl/libperl.a</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+you might get:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  gcc -c  -I./os/unix -I./include   -DLINUX=2 -DTARGET=\&quot;perlhttpd\&quot; -DUSE_HSREGEX 
+  -DUSE_EXPAT -I./lib/expat-lite `./apaci` buildmark.c
+  gcc  -DLINUX=2 -DTARGET=\&quot;perlhttpd\&quot; -DUSE_HSREGEX -DUSE_EXPAT 
+  -I./lib/expat-lite `./apaci`    \
+        -o perlhttpd buildmark.o modules.o modules/perl/libperl.a 
+  modules/standard/libstandard.a main/libmain.a ./os/unix/libos.a ap/libap.a 
+  regex/libregex.a lib/expat-lite/libexpat.a  -lm -lcrypt
+  modules/perl/libperl.a(mod_perl.o): In function `perl_shutdown':
+  mod_perl.o(.text+0xf8): undefined reference to `PL_perl_destruct_level'
+  mod_perl.o(.text+0x102): undefined reference to `PL_perl_destruct_level'
+  mod_perl.o(.text+0x10c): undefined reference to `PL_perl_destruct_level'
+  mod_perl.o(.text+0x13b): undefined reference to `Perl_av_undef'
+  [more errors snipped]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This happens when you have Perl built statically linked, with no shared <EM>libperl.a</EM>. Build a dynamically linked Perl (with
+<EM>libperl.a</EM>) and the problem will disappear.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_Building_make_">mod_perl Building (make)</A></H2></CENTER>
+<P>
+After completing the configuration you build the server, by calling:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which compiles the source files and creates an httpd binary and/or a
+separate library for each module, which can either be inserted into the
+httpd binary when <CODE>make</CODE> is called from the Apache source directory or loaded later, at run time.
+
+<P>
+Note: don't put the mod_perl directory inside the Apache directory. This
+confuses the build process.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="make_Troubleshooting">make Troubleshooting</A></H3></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="Undefined_reference_to_Perl_new">Undefined reference to 'Perl_newAV'</A></H4></CENTER>
+<P>
+This and similar error messages may show up during the <CODE>make</CODE>
+process. Generally it happens when you have a broken Perl installation.
+Make sure it's not installed from a broken RPM or another binary package.
+If it is, build Perl from source or use another properly built binary
+package. Run <CODE>perl -V</CODE> to learn what version of Perl you are using and other important details.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="Unrecognized_format_specifier_fo">Unrecognized format specifier for...</A></H4></CENTER>
+<P>
+This error usually reported due to the problems with some versions of SFIO
+library. Try to use the latest version to get around this problem. Or if
+you don't really need SFIO, rebuild Perl without this library.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Built_Server_Testing_make_test_">Built Server Testing (make test)</A></H2></CENTER>
+<P>
+After building the server, it's a good idea to test it throughly, by
+calling:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make test</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Fortunately mod_perl comes with a bunch of tests, which attempt to use all
+the features you asked for at the configuration stage. If any of the tests
+fails, the <CODE>make test</CODE> stage will fail.
+
+<P>
+Running <CODE>make test</CODE> will start a freshly built httpd on port 8529 running under the uid and gid
+of the <CODE>perl Makefile.PL</CODE> process. The httpd will be terminated when the tests are finished.
+
+<P>
+Each file in the testing suite generally includes more than one test, but
+when you do the testing, the program will only report how many tests were
+passed and the total number of tests defined in the test file. However if
+only some of the tests in the file fail you want to know which ones failed.
+To gain this information you should run the tests in verbose mode. You can
+enable this mode by using the <CODE>TEST_VERBOSE</CODE>
+parameter:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make test TEST_VERBOSE=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To change the default port (8529) used for the test do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL PORT=xxxx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To start the newly built Apache:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make start_httpd</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To shutdown Apache:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make kill_httpd</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+NOTE to Ben-SSL users: httpsd does not seem to handle <EM>/dev/null</EM> as the location of certain files (for example some of the configuration
+files mentioned in <EM>httpd.conf</EM> can be ignored by reading them from
+<EM>/dev/null</EM>) so you'll have to change these by hand. The tests are run with the <CODE>SSLDisable</CODE> directive.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Manual_Testing">Manual Testing</A></H3></CENTER>
+<P>
+Tests are invoked by running the <CODE>./TEST</CODE> script located in the
+<EM>./t</EM> directory. Use the <EM>-v</EM> option for verbose tests. You might run an individual test like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % t/TEST -v modules/file.t</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or all tests in a test sub-directory:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % t/TEST modules</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>TEST</CODE> script starts the server before the test is executed. If for some reason it
+fails to start, use <CODE>make start_httpd</CODE> to start it manually.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="make_test_Troubleshooting">make test Troubleshooting</A></H3></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="make_test_fails">make test fails</A></H4></CENTER>
+<P>
+You cannot run <CODE>make test</CODE> before you build Apache, so if you told
+<CODE>perl Makefile.PL</CODE> not to build the httpd executable, there is no httpd to run the test
+against. Go to the Apache source tree and run
+<CODE>make</CODE>, then return to the mod_perl source tree and continue with the server
+testing.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="mod_perl_c_is_incompatible_with_">mod_perl.c is incompatible with this version of Apache</A></H4></CENTER>
+<P>
+If you had a stale old Apache header layout in one of the <EM>include</EM>
+paths during the build process you will see this message when you try to
+execute httpd. Run the <CODE>find</CODE> (or <CODE>locate</CODE>) utility in order to locate the file <EM>ap_mmn.h</EM>. Delete it and rebuild Apache. RedHat installed a copy of <EM>/usr/local/include/ap_mmn.h</EM> on my system.
+
+<P>
+For all RedHat fans, before you build Apache yourself, do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -e apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to remove the pre-installed RPM package first!
+
+<P>
+Users with apt systems would do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % apt-get remove apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+instead.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="make_test_skipping_test_on_">make test......skipping test on this platform</A></H4></CENTER>
+<P>
+While doing <CODE>make test</CODE> you will notice that some of the tests are reported as <EM>skipped</EM>. The reason is that you are missing some optional modules for these test
+to be passed. For a hint you might want to peek at the content of each test
+(you will find them all in the <CODE>./t</CODE> directory (mnemonic - t, tests). I'll list a few examples, but of course
+things may change in the future.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  modules/cookie......skipping test on this platform
+  modules/request.....skipping test on this platform</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install libapreq package which includes among others the
+<CODE>Apache::Request</CODE> and <CODE>Apache::Cookie</CODE> modules.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  modules/psections...skipping test on this platform</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install <CODE>Devel::Symdump</CODE> and <CODE>Data::Dumper</CODE>
+
+
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  modules/sandwich....skipping test on this platform</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install Apache::Sandwich
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  modules/stage.......skipping test on this platform</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install Apache::Stage
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  modules/symbol......skipping test on this platform</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install Devel::Symdump
+
+<P>
+Chances are that all of these are installed if you use <CODE>CPAN.pm</CODE> to
+<CODE>install Bundle::Apache</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H4><A NAME="make_test_Fails_Due_to_Misconfig">make test Fails Due to Misconfigured localhost Entry</A></H4></CENTER>
+<P>
+The <CODE>make test</CODE> suite uses <EM>localhost</EM> to run the tests that require a network. Make sure you have this entry in <EM>/etc/hosts</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  127.0.0.1       localhost.localdomain   localhost</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Also make sure that you have the loopback device [lo] configured. [Hint:
+try 'ifconfig lo' to test for its existence.]
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installation_make_install_">Installation (make install)</A></H2></CENTER>
+<P>
+After testing the server, the last step left is to install it. First
+install all the Perl side files:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then go to the Apache source tree and complete the Apache installation
+(installing the configuration files, httpd and utilities):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the installation should be considered complete. You may now configure
+your server and start using it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Building_Apache_and_mod_perl_by_">Building Apache and mod_perl by Hand</A></H2></CENTER>
+<P>
+If you wish to build httpd separately from mod_perl, you should use the <CODE>NO_HTTPD=1</CODE> option during the <CODE>perl Makefile.PL</CODE> (mod_perl build) stage. Then you will need to configure various things by
+hand and proceed to build Apache. You shouldn't run <CODE>perl Makefile.PL</CODE>
+before following the steps described in this section.
+
+<P>
+If you choose to manually build mod_perl, there are three things you may
+need to set up before the build stage:
+
+<DL>
+<P><DT><STRONG><A NAME="item_mod_perl">mod_perl's Makefile</A></STRONG><DD>
+<P>
+When <CODE>perl Makefile.PL</CODE> is executed,
+<EM>$APACHE_SRC/modules/perl/Makefile</EM> may need to be modified to enable various options (e.g. <CODE>ALL_HOOKS=1</CODE>).
+
+<P>
+Optionally, instead of tweaking the options during <CODE>perl Makefile.PL</CODE>
+you may edit <EM>mod_perl-x.xx/src/modules/perl/Makefile</EM> before running
+<CODE>perl Makefile.PL</CODE>.
+
+<P><DT><STRONG><A NAME="item_Configuration">Configuration</A></STRONG><DD>
+<P>
+Add to <EM>apache_x.x.x/src/Configuration</EM> :
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  AddModule modules/perl/libperl.a</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We suggest you add this entry at the end of the <EM>Configuration</EM> file if you want your <A HREF="././install.html#Callback_Hooks">callback hooks</A> to have precedence over core handlers.
+
+<P>
+Add the following to <CODE>EXTRA_LIBS</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  EXTRA_LIBS=`perl -MExtUtils::Embed -e ldopts`</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Add the following to <CODE>EXTRA_CFLAGS</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  EXTRA_CFLAGS=`perl -MExtUtils::Embed -e ccopts` </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><DT><STRONG><A NAME="item_mod_perl">mod_perl Source Files</A></STRONG><DD>
+<P>
+Return to the mod_perl directory and copy the mod_perl source files into
+the apache build directory:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cp -r src/modules/perl apache_x.x.x/src/modules/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </DL>
+<P>
+When you have done with the configuration parts, run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL NO_HTTPD=1 DYNAMIC=1  EVERYTHING=1\
+   APACHE_SRC=../apache_x.x.x/src</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>DYNAMIC=1</CODE> enables a build of the shared mod_perl library. Add other options if
+required.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you may proceed with the plain Apache build process. Note that in order
+for your changes to the <EM>apache_x.x.x/src/Configuration</EM> file to take effect, you must run <CODE>apache_x.x.x/src/Configure</CODE> instead of the default <EM>apache_x.x.x/configure</EM> script:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache_x.x.x/src
+  % ./Configure
+  % make
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Installation_Scenarios_for_Stand">Installation Scenarios for Standalone mod_perl</A></H1></CENTER>
+<P>
+There are various ways available to build Apache with the new hybrid build
+environment (using <CODE>USE_APACI=1</CODE>):
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_All_In_One_Way">The All-In-One Way</A></H2></CENTER>
+<P>
+If your goal is just to build and install Apache with mod_perl out of their
+source trees and have no special interest in further adjusting or enhancing
+Apache proceed as before:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xzvf apache_x.x.x.tar.gz
+  % tar xzvf mod_perl-x.xx.tar.gz
+  % cd mod_perl-x.xx
+  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1
+  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This builds Apache statically with mod_perl, installs Apache under the
+default <CODE>/usr/local/apache</CODE> tree and mod_perl into the <CODE>site_perl</CODE>
+hierarchy of your existing Perl installation. All in one step.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Flexible_Way">The Flexible Way</A></H2></CENTER>
+<P>
+This is the normal situation where you want to be flexible while building.
+Statically building mod_perl into the Apache binary (<CODE>httpd</CODE>) but via different steps, so you have a chance to include other
+third-party Apache modules, etc.
+
+<OL>
+<P><LI><STRONG><A NAME="item_Prepare_the_Apache_source_tree">Prepare the Apache source tree</A></STRONG>
+<P>
+The first step is as before, extract the distributions:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf apache_x.x.x.tar.gz
+  % tar xzvf mod_perl-x.xx.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_Install_mod_perl_s_Perl_side_and">Install mod_perl's Perl-side and prepare the Apache-side</A></STRONG>
+<P>
+The second step is to install the Perl-side of mod_perl into the Perl
+hierarchy and prepare the <CODE>src/modules/perl/</CODE> subdirectory inside the Apache source tree:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $ cd mod_perl-x.xx
+  $ perl Makefile.PL \
+      APACHE_SRC=../apache_x.x.x/src \
+      NO_HTTPD=1 \
+      USE_APACI=1 \
+      PREP_HTTPD=1 \
+      EVERYTHING=1 \
+      [...]
+  $ make
+  $ make install
+  $ cd ..</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>APACHE_SRC</CODE> option sets the path to your Apache source tree, the
+<CODE>NO_HTTPD</CODE> option forces this path and only this path to be used, the
+<CODE>USE_APACI</CODE> option triggers the new hybrid build environment and the
+<CODE>PREP_HTTPD</CODE> option forces preparation of the
+<CODE>APACHE_SRC/modules/perl/</CODE> tree but no automatic build.
+
+<P>
+Then the configuration process prepares the Apache-side of mod_perl in the
+Apache source tree but doesn't touch anything else in it. It then just
+builds the Perl-side of mod_perl and installs it into the Perl installation
+hierarchy.
+
+<P>
+<STRONG>Important:</STRONG> If you use <CODE>PREP_HTTPD</CODE> as described above, to complete the build you must go into the Apache
+source directory and run <CODE>make</CODE>
+and <CODE>make install</CODE>.
+
+<P><LI><STRONG><A NAME="item_Additionally_prepare_other_third">Additionally prepare other third-party modules</A></STRONG>
+<P>
+Now you have a chance to prepare third-party modules. For instance the PHP
+language can be added in a manner similar to the mod_perl procedure.
+
+<P><LI><STRONG><A NAME="item_Build_the_Apache_Package">Build the Apache Package</A></STRONG>
+<P>
+Finally it's time to build the Apache package and thus also the Apache-side
+of mod_perl and any other third-party modules you've prepared:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $ cd apache_x.x.x
+  $ ./configure \
+      --prefix=/path/to/install/of/apache \
+      --activate-module=src/modules/perl/libperl.a \
+      [...]
+  $ make
+  $ make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>--prefix</CODE> option is needed if you want to change the default target directory of the
+Apache installation and the
+<CODE>--activate-module</CODE> option activates mod_perl for the configuration process and thus also for
+the build process. If you choose
+<CODE>--prefix=/usr/share/apache</CODE> the Apache directory tree will be installed in <EM>/usr/share/apache</EM>.
+
+<P>
+The last three steps build, test and install the Apache-side of the
+mod_perl enabled server. Presumably your new server includes third-party
+components, otherwise you probably won't choose this method of building.
+
+</OL>
+<P>
+The method described above enables you to insert mod_perl into Apache
+without having to mangle the Apache source tree for mod_perl. It also gives
+you the freedom to add third-party modules.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Build_mod_perl_as_a_DSO_inside_t">Build mod_perl as a DSO inside the Apache Source Tree via APACI</A></H2></CENTER>
+<P>
+<STRONG>Warning</STRONG>:  <EM>This is still experimental, so be warned!</EM>
+
+
+
+<P>
+With Apache 1.3 there is support for building modules as Dynamic Shared
+Objects (DSO). So there is support for DSO in mod_perl now, too. Your
+mileage may vary. Almost certainly it will.
+
+<P>
+We have already said that the new mod_perl build environment (<CODE>USE_APACI</CODE>) is a hybrid. What does it mean? It means for instance that the same <CODE>src/modules/perl/</CODE> stuff can be used to build mod_perl as a DSO or not, without having to edit
+anything especially for this. When you want to build <CODE>libperl.so</CODE> all you have to do is to add one single option to the above steps.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="libperl_so_and_libperl_a">libperl.so and libperl.a</A></H3></CENTER>
+<P>
+<CODE>libmodperl.so</CODE> would be more correct for the mod_perl file, but the name has to be <CODE>libperl.so</CODE> because of prehistoric Apache issues. Don't confuse the <CODE>libperl.so</CODE> for mod_perl with the file of the same name which comes with Perl itself.
+They are two different things. It is unfortunate that they happen to have
+the same name.
+
+<P>
+There is also a <CODE>libperl.a</CODE> which comes with the Perl installation. That's different too.
+
+<P>
+You have two options here, depending on which way you have chosen above: If
+you choose the All-In-One way from above then add
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  USE_DSO=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to the <CODE>perl Makefile.PL</CODE> options. If you choose the Flexible way then add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  --enable-shared=perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to Apache's <CODE>./configure</CODE> options.
+
+<P>
+As you can see only an additional <CODE>USE_DSO=1</CODE> or
+<CODE>--enable-shared=perl</CODE> option is needed. Everything else is done automatically: <CODE>mod_so</CODE> is automatically enabled, the Makefiles are adjusted automatically and even
+the <CODE>install</CODE> target from APACI now additionally installs <CODE>libperl.so</CODE> into the Apache installation tree. And even more: the <CODE>LoadModule</CODE> and <CODE>AddModule</CODE> directives (which dynamically load and insert mod_perl into httpd) are
+automatically added to <EM>httpd.conf</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Build_mod_perl_as_a_DSO_outside_">Build mod_perl as a DSO outside the Apache Source Tree via APXS</A></H2></CENTER>
+<P>
+Above we've seen how to build mod_perl as a DSO <EM>inside</EM> the Apache source tree. But there is a nifty alternative: building mod_perl
+as a DSO <EM>outside</EM> the Apache source tree via the new Apache 1.3 support tool <CODE>apxs</CODE> (APache eXtension). The advantage is obvious: you can extend an already
+installed Apache with mod_perl even if you don't have the sources (for
+instance, you may have installed an Apache binary package from your
+vendor).
+
+<P>
+Here are the build steps:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xzvf mod_perl-x.xx.tar.gz
+  % cd mod_perl-x.xx
+  % perl Makefile.PL \
+    USE_APXS=1 \
+    WITH_APXS=/path/to/bin/apxs \
+    EVERYTHING=1 \
+     [...]
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will build the DSO <CODE>libperl.so</CODE>  <EM>outside</EM> the Apache source tree with the new Apache 1.3 support tool <CODE>apxs</CODE> and install it into the existing Apache hierarchy.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Installation_Scenarios_for_mod_p">Installation Scenarios for mod_perl and Other Components</A></H1></CENTER>
+<P>
+([ReaderMETA]: Please send more scenarios of mod_perl + other components
+installation guidelines. Thanks!)
+
+<P>
+You have now seen very detailed installation instructions for specific
+cases, but since mod_perl is used with many other components that plug into
+Apache, you will definitely want to know how to build them together with
+mod_perl.
+
+<P>
+Since all the steps are simple, and assuming that you now understand how
+the build process works, I'll show only the commands to be executed with no
+comments unless there is something we haven't discussed before.
+
+<P>
+Generally every example that I'm going to show consist of:
+
+<OL>
+<P><LI>
+<P>
+downloading the source distributions of the components to be used
+
+<P><LI>
+<P>
+un-packing them
+
+<P><LI>
+<P>
+configuring them
+
+<P><LI>
+<P>
+building Apache using the parameters appropriate to each component
+
+<P><LI>
+<P>
+<CODE>make test</CODE> and <CODE>make install</CODE>.
+
+</OL>
+<P>
+All these scenarios were tested on a Linux platform, you might need to
+refer to the specific component's documentation if something doesn't work
+for you as described below. The intention of this section is not to show
+you how to install other non-mod_perl components alone, but how to do this
+in a bundle with mod_perl.
+
+<P>
+Also, notice that the links I've used below are very likely to have changed
+by the time you read this document. That's why I have used the <EM>x.x.x</EM> convention, instead of using hardcoded version numbers. Remember to replace
+the <EM>x.xx</EM> place-holders with the version numbers of the distributions you are about
+to use. To find out the latest stable version number, visit the components'
+sites. So if I say <A
+HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A>
+, go to <A
+HREF="http://perl.apache.org/dist/">http://perl.apache.org/dist/</A> in
+order to learn the version number of the latest stable release and download
+the appropriate file.
+
+<P>
+Unless otherwise noted, all the components install themselves into a
+default location. When you run <CODE>make install</CODE> the installation program tells you where it's going to install the files.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_mod_ssl_openssl_">mod_perl and mod_ssl (+openssl)</A></H2></CENTER>
+<P>
+mod_ssl provides strong cryptography for the Apache 1.3 webserver via the
+Secure Sockets Layer (SSL v2/v3) and Transport Layer Security (TLS v1)
+protocols by the help of the Open Source SSL/TLS toolkit OpenSSL, which is
+based on SSLeay from Eric A. Young and Tim J. Hudson.
+
+<P>
+Download the sources:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://www.apache.org/dist/apache_x.xx.tar.gz">http://www.apache.org/dist/apache_x.xx.tar.gz</A>
+  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A>
+  % lwp-download <A HREF="http://www.modssl.org/source/mod_ssl-x.x.x-x.x.x.tar.gz">http://www.modssl.org/source/mod_ssl-x.x.x-x.x.x.tar.gz</A>
+  % lwp-download <A HREF="http://www.openssl.org/source/openssl-x.x.x.tar.gz">http://www.openssl.org/source/openssl-x.x.x.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Un-pack:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf mod_perl-x.xx
+  % tar xvzf apache_x.x.x.tar.gz
+  % tar xvzf mod_ssl-x.x.x-x.x.x.tar.gz
+  % tar xvzf openssl-x.x.x.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Configure, build and install openssl:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd openssl-x.x.x
+  % ./config
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Configure:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_ssl-x.x.x-x.x.x
+  % ./configure --with-apache=../apache_x.x.x
+  % cd ../mod_perl-x.xx
+  % perl Makefile.PL USE_APACI=1 EVERYTHING=1 \
+        DO_HTTPD=1 SSL_BASE=/usr/local/ssl \
+        APACHE_PREFIX=/usr/local/apachessl \
+        APACHE_SRC=../apache_x.x.x/src \
+        APACI_ARGS='--enable-module=ssl,--enable-module=rewrite'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note: Do not forget that if you use <CODE>csh</CODE> or <CODE>tcsh</CODE> you may need to put all the arguments to `perl Makefile.PL' on a single
+command line.
+
+<P>
+Build, test and install:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make certificate
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now proceed with the mod_ssl and mod_perl parts of the server configuration
+before starting the server.
+
+<P>
+When the server starts you should see the following or similar in the
+<EM>error_log</EM> file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  [Fri Nov 12 16:14:11 1999] [notice] Apache/1.3.9 (Unix)
+  mod_perl/1.21_01-dev mod_ssl/2.4.8 OpenSSL/0.9.4 configured
+  -- resuming normal operations</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_mod_ssl_Rolled_from">mod_perl and mod_ssl Rolled from RPMs</A></H2></CENTER>
+<P>
+As in the previous section this shows an installation of mod_perl and
+mod_ssl, but this time using sources/binaries prepackaged in RPMs.
+
+<P>
+As always, replace <EM>xxx</EM> with the proper version numbers. And replace <CODE>i386</CODE> with the identifier for your platform if it is different.
+
+<OL>
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % get apache-mod_ssl-x.x.x.x-x.x.x.src.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Source: <A HREF="http://www.modssl.org">http://www.modssl.org</A>
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % get openssl-x.x.x.i386.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Source: <A HREF="http://www.openssl.org/">http://www.openssl.org/</A>
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Source: <A
+HREF="http://perl.apache.org/dist">http://perl.apache.org/dist</A>
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://www.engelschall.com/sw/mm/mm-x.x.xx.tar.gz">http://www.engelschall.com/sw/mm/mm-x.x.xx.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Source: <A
+HREF="http://www.engelschall.com/sw/mm/">http://www.engelschall.com/sw/mm/</A>
+
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -ivh openssl-x.x.x.i386.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -ivh apache-mod_ssl-x.x.x.x-x.x.x.src.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/redhat/SPECS</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -bp apache-mod_ssl.spec</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/redhat/BUILD/apache-mod_ssl-x.x.x.x-x.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf mod_perl-x.xx.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_perl-x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+     DO_HTTPD=1 \
+     USE_APACI=1 \
+     PREP_HTTPD=1 \
+     EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Add or remove parameters if appropriate.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../mm-x.x.xx/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./configure --disable-shared</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../mod_ssl-x.x.x-x.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./configure \
+        --with-perl=/usr/bin/perl \
+        --with-apache=../apache_x.x.x\
+        --with-ssl=SYSTEM \
+        --with-mm=../mm-x.x.x \
+        --with-layout=RedHat \
+        --disable-rule=WANTHSREGEX \
+        --enable-module=all \
+        --enable-module=define \
+        --activate-module=src/modules/perl/libperl.a \
+        --enable-shared=max \
+        --disable-shared=perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make certificate </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with whatever option is suitable to your configuration.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </OL>
+<P>
+You should be all set.
+
+<P>
+Note: If you use the standard config for mod_ssl don't forget to run Apache
+like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % httpd -DSSL</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_apache_ssl_openss">mod_perl and apache-ssl (+openssl)</A></H2></CENTER>
+<P>
+Apache-SSL is a secure Webserver, based on Apache and SSLeay/OpenSSL. It is
+licensed under a BSD-style license which means, in short, that you are free
+to use it for commercial or non-commercial purposes, so long as you retain
+the copyright notices.
+
+<P>
+Download the sources:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://www.apache.org/dist/apache_x.x.x.tar.gz">http://www.apache.org/dist/apache_x.x.x.tar.gz</A>
+  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A>
+  % lwp-download <A HREF="http://www.apache-ssl.org/.../apache_x.x.x+ssl_x.xx.tar.gz">http://www.apache-ssl.org/.../apache_x.x.x+ssl_x.xx.tar.gz</A>
+  % lwp-download <A HREF="http://www.openssl.org/source/openssl-x.x.x.tar.gz">http://www.openssl.org/source/openssl-x.x.x.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Un-pack:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf mod_perl-x.xx
+  % tar xvzf apache_x.x.x.tar.gz
+  % tar xvzf openssl-x.x.x.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Configure and install openssl:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd openssl-x.x.x
+  % ./config
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Patch Apache with SSLeay paths
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd apache_x.xx
+  % tar xzvf ../apache_x.x.x+ssl_x.xx.tar.gz
+  % FixPatch
+  Do you want me to apply the fixed-up Apache-SSL patch for you? [n] y</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now edit the <EM>src/Configuration</EM> file if needed and then configure:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../mod_perl-x.xx
+  % perl Makefile.PL USE_APACI=1 EVERYTHING=1 \
+        DO_HTTPD=1 SSL_BASE=/usr/local/ssl \
+        APACHE_SRC=../apache_x.x.x/src</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Build, test and install:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make certificate
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that you might need to modify the 'make test' stage, as it takes much
+longer for this server to get started and <CODE>make test</CODE> waits only a few seconds for Apache to start before it times out.
+
+<P>
+Now proceed with configuration of the apache_ssl and mod_perl parts of the
+server configuration files, before starting the server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_Stronghold">mod_perl and Stronghold</A></H2></CENTER>
+<P>
+Stronghold is a secure SSL Web server for Unix which allows you to give
+your web site full-strength, 128-bit encryption.
+
+<P>
+You must first build and install Stronghold without mod_perl, following
+Stronghold's install procedure. For more information visit <A
+HREF="http://www.c2.net/products/sh2/">http://www.c2.net/products/sh2/</A>
+.
+
+<P>
+Having done that, download the sources:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Unpack:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf mod_perl-x.xx.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Configure (assuming that you have the Stronghold sources extracted at
+<EM>/usr/local/stronghold</EM>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_perl-x.xx
+  % perl Makefile.PL APACHE_SRC=/usr/local/stronghold/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Build:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Before running <CODE>make test</CODE>, you must add your <CODE>StrongholdKey</CODE> to
+<EM>t/conf/httpd.conf</EM>. If you are configuring by hand, be sure to edit
+<EM>src/modules/perl/Makefile</EM> and uncomment the <CODE>#APACHE_SSL</CODE>
+directive.
+
+<P>
+Test and Install:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make test &amp;&amp; make install
+  % cd /usr/local/stronghold
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Note_For_Solaris_2_5_users">Note For Solaris 2.5 users</A></H3></CENTER>
+<P>
+There has been a report related to the <CODE>REGEX</CODE> library that comes with Stronghold, that after building Apache with
+mod_perl it would produce core dumps. To work around this problem, in
+<EM>$STRONGHOLD/src/Configuration</EM> change:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Rule WANTHSREGEX=default</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Rule WANTHSREGEX=no</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_Raven_SSL">mod_perl and Raven SSL</A></H2></CENTER>
+<P>
+The following are the installation notes for the static and DSO mod_perl.
+Please consult <A
+HREF="http://www.covalent.net/support">http://www.covalent.net/support</A>
+if you have additional questions regarding Raven SSL.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Dynamic_DSO_mod_perl_and_Raven">Dynamic (DSO) mod_perl and Raven SSL Installation</A></H3></CENTER>
+<P>
+To install Raven SSL and mod_perl dynamically:
+
+<OL>
+<P><LI>
+<P>
+Un-tar and un-gunzip Raven SSL and mod_perl into their respective
+directories.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd raven_ssl-x.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install Raven SSL and Apache via:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./setup --with-apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_perl_x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL USE_APXS=1 \
+     WITH_APXS=/usr/local/apache/bin/apxs \
+     EVERYTHING=1
+     [...]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make ; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Move the <CODE>LoadModule mod_perl.c</CODE> and <CODE>Addmodule mod_perl.c</CODE> lines in
+<EM>httpd.conf</EM> above the <CODE>&lt;IfDefine SSL&gt;</CODE> section.
+
+</OL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Static_mod_perl_and_dynamic_Rave">Static mod_perl and dynamic Raven SSL Installation</A></H3></CENTER>
+<P>
+To installs Raven SSL dynamically and mod_perl statically:
+
+<OL>
+<P><LI>
+<P>
+Un-tar and un-gunzip Apache, Raven SSL and mod_perl into their respective
+directories
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd raven_ssl-x.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Install Raven SSL via
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./setup</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is an example of setup scenario:
+
+<UL>
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Please select the directory where you want to 
+  install Raven SSL and related packages
+  Directory [/usr/local]  -&gt; </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Accept the default or supply a different directory.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Installing the Apache binary is the easiest 
+  and quickest way to secure Apache with Raven SSL.
+  Do you want to install Apache? [Y/n]  -&gt; n</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Answer <CODE>n</CODE>, we want to install it from mod_perl sources.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Please select the directory where you want to
+  install Raven SSL.
+  Directory [/usr/local/raven]  -&gt; </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Accept the default or supply a different directory.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache will not be installed
+  Raven SSL will be installed in:
+  /usr/local/raven</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Sure, we know that :)
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Do you want to proceed with installation? [Y/n]  -&gt; Y</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Yes, we want to proceeed.
+
+<P><LI>
+<P>
+Now Raven completes the installation of its files.
+
+</UL>
+<P><LI>
+<P>
+Now it's a time to patch the Apache source with Raven.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /usr/local/raven/bin/raven_admin_tls
+     select Option 1, 'Export Raven'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note: this option exports the required EAPI patches and the needed Raven
+SSL module files into your Apache source tree
+
+<UL>
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Choose Apache version to export to:
+  Available Apache versions :
+  (1) 1.3.12
+  Selection?  -&gt; 1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Choose the version you want to build Raven with.
+
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Export Raven SSL Module to Apache source root:
+  Apache source root directory []  -&gt; </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Specify the Apache source root directory, e.g.:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/src/apache-1.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Back to the main menu:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Choose an action :
+  (1) Export Raven SSL
+  (2) Upgrade Raven SSL
+  (3) Exit
+  Selection? [1]  -&gt; 3</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Choose 3 to finish.
+
+</UL>
+<P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_perl-x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL APACHE_PREFIX=/path/to/apache_1.x.x \
+        APACHE_SRC=/path/to/apache_x.x.x \
+        EVERYTHING=1 \
+        USE_APACI=1 \
+        PREP_HTTPD=1 \
+        DO_HTTPD=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make ; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache-x.x.x</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./configure --target=httpsd \
+      --enable-module=most \
+      --enable-shared=max \
+      --enable-suexec \
+      --suexec-logfile=logs/suexec.log \
+      --activate-module=src/modules/perl/libperl.a</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make ; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+In the <EM>httpd.conf</EM> file make sure that the AddModule&nbsp;mod_perl.c
+line is above <CODE>&lt;IfDefine SSL&gt;</CODE> section.
+
+</OL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_perl_and_mod_php">mod_perl and mod_php</A></H2></CENTER>
+<P>
+This is a simple installation scenario of the mod_perl and mod_php in
+Apache server:
+
+<OL>
+<P><LI>
+<P>
+Configure Apache.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./configure --prefix=/usr/local/etc/httpd</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Build mod_perl.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../mod_perl-x.xx
+  % perl Makefile.PL APACHE_SRC=../apache_x.x.xx/src NO_HTTPD=1 \
+    USE_APACI=1 PREP_HTTPD=1 EVERYTHING=1
+  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Build mod_php.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../php-x.x.xx
+  % ./configure --with-apache=../apache_x.x.xx \
+     --with-mysql --enable-track-vars
+  % make
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Build Apache:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache_x.x.xx
+  % ./configure --prefix=/usr/local/etc/httpd \
+     --activate-module=src/modules/perl/libperl.a \
+     --activate-module=src/modules/php3/libphp3.a \
+     --enable-module=stats \
+     --enable-module=rewrite
+  % make</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Test and install mod_perl
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../mod_perl-x.xx
+  % make test
+  # make install.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+Complete the Apache installation.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache_x.x.xx
+  # make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </OL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_perl_Installation_with_the_C">mod_perl Installation with the CPAN.pm Interactive Shell</A></H1></CENTER>
+<P>
+Installation of mod_perl and all the required packages is much easier with
+help of the <CODE>CPAN.pm</CODE> module, which provides you among other features with a shell interface to
+the CPAN repository. CPAN is the Comprehensive Perl Archive Network, a
+repository of thousands of Perl modules, scripts as well as a vast amount
+of documentation. See <A HREF="http://cpan.org">http://cpan.org</A> for
+more information.
+
+<P>
+The first thing first is to download the Apache source code and unpack it
+into a directory -- the name of which you will need very soon.
+
+<P>
+Now execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -MCPAN -eshell</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If it's the first time that you have used it, <CODE>CPAN.pm</CODE> will ask you about a dozen questions to configure the module. It's quite
+easy to accomplish this task, and very helpful hints come along with the
+questions. When you are finished you will see the <CODE>CPAN</CODE> prompt:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It can be a good idea to install a special <CODE>CPAN</CODE> bundle of modules to make using the CPAN module easier. Installation is as
+simple as typing:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; install Bundle::CPAN</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>CPAN</CODE> shell can download mod_perl for you, unpack it, check for prerequisites,
+detect any missing third party modules, and download and install them. All
+you need to do to install mod_perl is to type at the prompt:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; install mod_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You will see (I'll use <CODE>x.xx</CODE> as a placeholder for real version numbers, since these change very
+frequently):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Running make for DOUGM/mod_perl-x.xx.tar.gz
+  Fetching with LWP:
+  <A HREF="http://www.perl.com/CPAN-local/authors/id/DOUGM/mod_perl-x.xx.tar.gz">http://www.perl.com/CPAN-local/authors/id/DOUGM/mod_perl-x.xx.tar.gz</A>
+  
+  CPAN.pm: Going to build DOUGM/mod_perl-x.xx.tar.gz
+  
+  Enter `q' to stop search
+  Please tell me where I can find your apache src
+  [../apache_x.x.x/src]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>CPAN.pm</CODE> will search for the latest Apache sources and suggest a directory. Here,
+unless the CPAN shell found it and suggested the right directory, you need
+to type the directory into which you unpacked Apache. The next question is
+about the <CODE>src</CODE> directory, which resides at the root level of the unpacked Apache
+distribution. In most cases the CPAN shell will suggest the correct
+directory.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Please tell me where I can find your apache src
+  [../apache_x.x.x/src] </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Answer yes to all the following questions, unless you have a reason not to
+do that.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Configure mod_perl with /usr/src/apache_x.x.x/src ? [y] 
+  Shall I build httpd in /usr/src/apache_x.x.x/src for you? [y] </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we will build Apache with mod_perl enabled. Quit the <CODE>CPAN</CODE>
+shell, or use use another terminal. Go to the Apache sources root directory
+and run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which will complete the installation by installing Apache's headers and the
+binary in the appropriate directories.
+
+<P>
+The only caveat of the process I've described is that you don't have
+control over the configuration process. Actually, that problem is easy to
+solve -- you can tell <CODE>CPAN.pm</CODE> to pass whatever parameters you want to <CODE>perl Makefile.PL</CODE>. You do this with <CODE>o conf
+makepl_arg</CODE> command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg 'DO_HTTPD=1 USE_APACI=1 EVERYTHING=1'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Just list all the parameters as if you were passing them to the familiar <CODE>perl Makefile.PL</CODE>. If you add the
+<CODE>APACHE_SRC=/usr/src/apache_x.x.x/src</CODE> and <CODE>DO_HTTPD=1</CODE> parameters, you will not be asked a single question. Of course you must
+give the correct path to the Apache source distribution.
+
+<P>
+Now proceed with <CODE>install mod_perl</CODE> as before. When the installation is completed, remember to unset the <CODE>makepl_arg</CODE> variable by executing:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg ''</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you have previously set <CODE>makepl_arg</CODE> to some value, before you alter it for the mod_perl installation you will
+probably want to save it somewhere so that you can restore it when you have
+finished with the mod_perl installation. To see the original value, use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can now install all the modules you might want to use with mod_perl.
+You install them all by typing a singe command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; install Bundle::Apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will install mod_perl if isn't yet installed, and many other packages
+such as: <CODE>ExtUtils::Embed</CODE>, <CODE>MIME::Base64</CODE>, <CODE>URI::URL</CODE>,
+<CODE>Digest::MD5</CODE>, <CODE>Net::FTP</CODE>, <CODE>LWP</CODE>, <CODE>HTML::TreeBuilder</CODE>, <CODE>CGI</CODE>,
+<CODE>Devel::Symdump</CODE>, <CODE>Apache::DB</CODE>, <CODE>Tie::IxHash</CODE>, <CODE>Data::Dumper</CODE> 
+etc.
+
+<P>
+A helpful hint: If you have a system with all the Perl modules you use and
+you want to replicate them all elsewhere, and if you cannot just copy the
+whole <CODE>/usr/lib/perl5</CODE> directory because of a possible binary incompatibility on the other system,
+making your own bundle is a handy solution. To accomplish this the command
+<CODE>autobundle</CODE> can be used on the CPAN shell command line. This command writes a bundle
+definition file for all modules that are installed for the currently
+running perl interpreter.
+
+<P>
+With the clever bundle file you can then simply say
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; install Bundle::my_bundle</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and after answering a few questions, go out for a coffee.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Installing_on_multiple_machines">Installing on multiple machines</A></H1></CENTER>
+<P>
+You may wish to build httpd once, then copy it to other machines. The Perl
+side of mod_perl needs the Apache headers files to compile. To avoid
+dragging and build Apache on all your other machines, there are a few
+Makefile targets to help you out:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make tar_Apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will tar all files mod_perl installs in your Perl's <EM>site_perl</EM>
+directory, into a file called <EM>Apache.tar</EM>. You can then unpack this under the <EM>site_perl</EM> directory on another machine.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make offsite-tar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will copy all the header files from the Apache source directory which
+you configured mod_perl against, then it will <CODE>make dist</CODE> which creates a mod_perl-x.xx.tar.gz, ready to unpack on another machine to
+compile and install the Perl side of mod_perl.
+
+<P>
+If you really want to make your life easy you should use one of the more
+advanced packaging systems. For example, almost all Linux OS distributions
+use packaging tools on top of plain tar.gz, allowing you to track
+prerequisites for each package, and providing easy installation, upgrade
+and cleanup. One of the most widely-used packagers is RPM (Red Hat Package
+Manager). See <A HREF="http://www.rpm.org">http://www.rpm.org</A> for more
+information.
+
+<P>
+All you have to do is prepare a SRPM (source distribution package), then
+build a binary release. This can be installed on any number of machines in
+a matter of seconds.
+
+<P>
+It will even work on live machines! If you have two identical machines
+(identical software and hardware, although depending on your setup hardware
+may be less critical). Let's say that one is a live server and the other is
+in development. You build an RPM with a mod_perl binary distribution,
+install it on the development machine and satisfy yourself that it is
+working and stable. You can then install the RPM package on the live server
+without any fear. Make sure that <EM>httpd.conf</EM> is correct, since it generally includes parameters such as hostname which
+are unique to the live machine.
+
+<P>
+When you have installed the package, just restart the server. It can be a
+good idea to keep a package of the previous system, in case something goes
+wrong. You can then easily remove the installed package and put the old one
+back.
+
+<P>
+([ReaderMETA]: Dear reader, Can you please share a step by step scenario of
+preparation of SRPMs for mod_perl? Thanks!!!)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="using_RPM_and_other_packages_to_">using RPM and other packages to install mod_perl</A></H1></CENTER>
+<P>
+[ReaderMETA]: Currently only RPM package. Please submit info about other
+available packages if you use such.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="A_word_on_mod_perl_RPM_packages">A word on mod_perl RPM packages</A></H2></CENTER>
+<P>
+The virtues of RPM packages is a subject of much debate among mod_perl
+users. While RPMs do take the pain away from package installation and
+maintenance for most applications, the nuances of mod_perl make RPMs
+somewhat less than ideal for those just getting started. The following help
+and advice is for those new to mod_perl, Apache, Linux, and RPMs. If you
+know what you are doing, this is probably Old Hat - contributing your past
+experiences is, as always, welcomed by the community.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Getting_Started">Getting Started</A></H2></CENTER>
+<P>
+If you are new to mod_perl and are using this Guide and the Eagle Book to
+help you on your way, it is probably better to grab the latest Apache and
+mod_perl sources and compile the sources yourself. Not only will you find
+that this is less daunting than you suspect, but it will probably save you
+a few headaches down the line for several reasons.
+
+<P>
+First, given the pace at which the open source community produces software,
+RPMs, especially those found on distribution CDs, are often several
+versions out of date. The most recent version will not only be more stable,
+but will likely incorporate some new functionality that you will eventually
+want to play with.
+
+<P>
+It is also unlikely that the file system layout of an RPM package will
+match what you see in the Eagle Book and this Guide. If you are new to
+mod_perl, Apache, or both you will probably want to get familiar with the
+file system layout used by the examples given here before trying something
+non-standard.
+
+<P>
+Finally, the RPMs found on a typical distribution's CDs use mod_perl built
+with Apache's Dynamic Shared Objects (<CODE>DSO</CODE>) support. While mod_perl can be successfully used as a DSO module, it adds
+a layer of complexity that you may want to live without for now.
+
+<P>
+All that being said, should you still feel that rolling your own mod_perl
+enabled Apache server is not likely, here are a few helpful hints...
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Compiling_RPM_source_files">Compiling RPM source files</A></H2></CENTER>
+<P>
+It is possible to compile the source files provided by RPM packages, but if
+you are using RPMs to ease mod_perl installation, that is not the way to do
+it. Both Apache and mod_perl RPMs are designed to be install-and-go. If you
+really want to compile mod_perl to your own specific needs, your best bet
+is to get the most recent sources from CPAN.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Mix_and_Match_RPM_and_source">Mix and Match RPM and source</A></H2></CENTER>
+<P>
+It is probably not the best idea to use a self-compiled Apache with a
+mod_perl RPM (or vice versa). Sticking with one format or the other at
+first will result in fewer headaches and more hair.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installing_a_single_apache_mod_p">Installing a single apache+mod_perl RPM</A></H2></CENTER>
+<P>
+If you use an Apache+mod_perl RPM, chances are <CODE>rpm -i</CODE> or <CODE>glint</CODE>
+(GUI for RPM) will have you up and running immediately, no compilation
+necessary. If you encounter problems, try downloading from another mirror
+site or searching <A HREF="http://rpmfind.net/">http://rpmfind.net/</A> for
+a different package - there are plenty out there to choose from.
+
+<P>
+David Harris has started an effort to build better RPM/SRPM mod_perl
+packages. You will find the link to David's site from <A
+HREF="http://perl.apache.org/distributions.html.">http://perl.apache.org/distributions.html.</A>
+
+
+<P>
+Features of this RPM:
+
+<UL>
+<P><LI>
+<P>
+Installs mod_perl as an ``add in'' to the RedHat Apache package, but does
+not install mod_perl as a DSO and all the problems that brings.
+
+<P><LI>
+<P>
+Includes the four header files required for building <CODE>libapreq</CODE>
+(<CODE>Apache::Request</CODE>)
+
+<P><LI>
+<P>
+Distributes plain text forms of the pod documentation files that come with
+mod_perl.
+
+<P><LI>
+<P>
+Checks the module magic number on the existing Apache package to see if
+things are compatible
+
+</UL>
+<P>
+Notes on this un-conventional RPM packaging of mod_perl
+
+<P>
+by David Harris &lt;<A
+HREF="mailto:dharris@drh.net">dharris@drh.net</A>&gt; on Oct 13, 1999
+
+<P>
+This package will install the mod_perl library files on your machine along
+with the following two Apache files:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/lib/apache/mod_include_modperl.so
+  /usr/sbin/httpd_modperl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This package does not install a complete Apache subtree built with
+mod_perl, but rather just the two above files that are different for
+mod_perl. This conceptually thinks of mod_perl as a kind of an ``add on''
+that we would like to add to the regular Apache tree. However, we are
+prevented from distributing mod_perl as an actual DSO, because it is not
+recommended by the mod_perl developers and various features must be turned
+off. So, instead, we distribute an httpd binary with mod_perl statically
+linked (httpd_modperl) and the special modified mod_include.so required for
+this binary (mod_include_modperl.so). You can use the exact same
+configuration files and other DSO modules, but you just ``enable'' the
+mod_perl ``add on'' by following the directions below.
+
+<P>
+To enable mod_perl, do the following:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  (1) Configure /etc/rc.d/init.d/httpd to run httpd_modperl instead of
+      httpd by changing the &quot;daemon&quot; command line.
+  (2) Replace mod_include.so with mod_include_modperl.so in the
+      module loading section of /etc/httpd/conf/httpd.conf
+  (3) Uncomment the &quot;AddModule mod_perl.c&quot; line in /etc/httpd/conf/httpd.conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Or run the following command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/sbin/modperl-enable on</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and to disable mod_perl:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/sbin/modperl-enable off</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Compiling_libapreq_Apache_Requ">Compiling libapreq (Apache::Request) with the RH 6.0 mod_perl RPM</A></H2></CENTER>
+<P>
+Libapreq provides the <A HREF="././download.html#Apache_Request">Apache::Request</A>
+module.
+
+<P>
+Despite many reports of libapreq not working properly with various RPM
+packages, it is possible to integrate libapreq with mod_perl RPMs. It just
+requires a few additional steps.
+
+<OL>
+<P><LI>
+<P>
+Make certain you have the <CODE>apache-devel-x.x.x-x.i386.rpm</CODE> package installed. Also, download the latest version of libapreq from CPAN.
+
+<P><LI>
+<P>
+Install the source RPM for your mod_perl RPM and then do a build prep,
+(with <CODE>rpm -bp apache-devel-x.x.x-x.src.rpm</CODE>) which unpacks the sources. From there, copy the four header files (<EM>mod_perl.h</EM>,
+<EM>mod_perl_version.h</EM>, <EM>mod_perl_xs.h</EM>, and <EM>mod_PL.h</EM>) to
+<CODE>/usr/include/apache</CODE>.
+
+<UL>
+<P><LI>
+<P>
+2.1 Get the SRPM from
+<CODE>somemirror.../redhat-x.x/SRPMS/mod_perl-x.xx-x.src.rpm</CODE>.
+
+<P><LI>
+<P>
+2.2 Install the SRPM. This creates files in <CODE>/usr/src/redhat/SPECS</CODE>
+and <CODE>/usr/src/redhat/SOURCES</CODE>. Run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % rpm -ih mod_perl-x.xx-x.src.rpm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+2.3 Do a <CODE>&quot;prep&quot;</CODE> build of the package, which just unpackages the sources and applies any
+patches.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % rpm -bp /usr/src/redhat/SPECS/mod_perl.spec
+  Executing: %prep
+  + umask 022
+  + cd /usr/src/redhat/BUILD
+  + cd /usr/src/redhat/BUILD
+  + rm -rf mod_perl-1.19
+  + /bin/gzip -dc /usr/src/redhat/SOURCES/mod_perl-1.19.tar.gz
+  + tar -xf -
+  + STATUS=0
+  + [ 0 -ne 0 ]
+  + cd mod_perl-1.19
+  ++ /usr/bin/id -u
+  + [ 0 = 0 ]
+  + /bin/chown -Rf root .
+  ++ /usr/bin/id -u
+  + [ 0 = 0 ]
+  + /bin/chgrp -Rf root .
+  + /bin/chmod -Rf a+rX,g-w,o-w .
+  + echo Patch #0:
+  Patch #0:
+  + patch -p1 -b --suffix .rh -s
+  + exit 0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+NOTE: Steps 2.1 through 2.3 are just a fancy un-packing of the source tree
+that builds the RPM into <CODE>/usr/src/redhat/BUILD/mod_perl-x.xx</CODE>. You could unpack the <CODE>mod_perl-x.xx.tar.gz</CODE> file somewhere and then do the following steps on that source tree. The
+method shown above is more ``pure'' because you're grabbing the header
+files from the same tree that built the RPM. But this does not matter
+because RedHat is not patching that file. So, it might be better if you
+just grab the mod_perl source and unpack it to get these files. Less fuss
+and mess.
+
+<P><LI>
+<P>
+2.4 Look at the files you will copy: (this is not really a step, but useful
+to show)
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % find /usr/src/redhat/BUILD/mod_perl-1.19 -name '*.h'
+  /usr/src/redhat/BUILD/mod_perl-1.19/src/modules/perl/mod_perl.h
+  /usr/src/redhat/BUILD/mod_perl-1.19/src/modules/perl/mod_perl_xs.h
+  /usr/src/redhat/BUILD/mod_perl-1.19/src/modules/perl/mod_perl_version.h
+  /usr/src/redhat/BUILD/mod_perl-1.19/src/modules/perl/perl_PL.h</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI>
+<P>
+2.5 Copy the files into <CODE>/usr/include/apache</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % find /usr/src/redhat/BUILD/mod_perl-1.19 -name '*.h' \
+    -exec cp {} /usr/include/apache \;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+NOTE: You should not have to do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % mkdir /usr/include/apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+because that directory should be created by apache-devel.
+
+</UL>
+<P><LI>
+<P>
+Apply this patch to libapreq: <A
+HREF="http://www.davideous.com/modperlrpm/distrib/libapreq-0.31_include.patch">http://www.davideous.com/modperlrpm/distrib/libapreq-0.31_include.patch</A>
+
+
+<P><LI>
+<P>
+Follow the libapreq directions as usual:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL
+  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </OL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installing_separate_Apache_and_m">Installing separate Apache and mod_perl RPMs</A></H2></CENTER>
+<P>
+If you are trying to install separate Apache and mod_perl RPMs, like those
+provided by the RedHat distributions, you may be in for a bit of a
+surprise. Installing the Apache RPM will go just fine, and <A
+HREF="http://localhost">http://localhost</A> will bring up some type of web
+page for you. However, after installation of the mod_perl RPM, the <A HREF="././install.html#How_can_I_tell_whether_mod_perl_">How can I tell whether mod_perl is running</A>
+test will show that Apache is not mod_perl enabled. This is because
+mod_perl needs to be added as a separate module using Apache's Dynamic
+Shared Objects.
+
+<P>
+To use mod_perl as a DSO, make the following modifications to your Apache
+configuration files:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd.conf:
+  ----------
+  LoadModule perl_module modules/libperl.so
+  AddModule mod_perl.c
+  
+  PerlModule Apache::Registry 
+  Alias /perl/ /home/httpd/perl/ 
+  &lt;Location /perl&gt;
+    SetHandler perl-script 
+    PerlHandler Apache::Registry 
+    PerlSendHeader On 
+    Options +ExecCGI
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After a complete shutdown and startup of the server, mod_perl should be up
+and running.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Testing_the_mod_perl_API">Testing the mod_perl API</A></H2></CENTER>
+<P>
+Some people have reported that even when the server responds positively to
+the <A HREF="././install.html#How_can_I_tell_whether_mod_perl_">How can I tell whether mod_perl is running</A> tests, the mod_perl API will not function properly. You may want to run the
+following script to verify the availability of the mod_perl API.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>        use strict;
+        my $r = shift;
+        $r-&gt;send_http_header('text/html');
+        $r-&gt;print(&quot;It worked!!!\n&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Installation_Without_Superuser_P">Installation Without Superuser Privileges</A></H1></CENTER>
+<P>
+As you have already learned, mod_perl enabled Apache consists of two main
+components: Perl modules and Apache itself. Let's tackle the tasks one at a
+time.
+
+<P>
+I'll show a complete installation example using <EM>stas</EM> as a username, assuming that <EM>/home/stas</EM> is the home directory of that user.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installing_Perl_Modules_into_a_D">Installing Perl Modules into a Directory of Choice</A></H2></CENTER>
+<P>
+Since without superuser permissions you aren't allowed to install modules
+into system directories like <EM>/usr/lib/perl5</EM>, you need to find out how to install the modules under your home
+directory. It's easy.
+
+<P>
+First you have to decide where to install the modules. The simplest
+approach is to simulate the portion of the <EM>/</EM> file system relevant to Perl under your home directory. Actually we need
+only two directories:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /home/stas/bin
+  /home/stas/lib</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We don't have to create them, since that will be done automatically when
+the first module is installed. 99% of the files will go into the
+<EM>lib</EM> directory. Occasionally, when some module distribution comes with Perl
+scripts, these will go into the <EM>bin</EM> directory. This directory will be created if it doesn't exist.
+
+<P>
+Let's install the <EM>CGI.pm</EM> package, which includes a few other
+<CODE>CGI::*</CODE> modules. As usual, download the package from the CPAN repository, unpack it
+and <CODE>chdir</CODE> to the newly-created directory.
+
+<P>
+Now do a standard <CODE>perl Makefile.PL</CODE> to prepare a <EM>Makefile</EM>, but this time tell <CODE>MakeMaker</CODE> to use your Perl installation directories instead of the defaults.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL PREFIX=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PREFIX=/home/stas</CODE> is the only part of the installation process which is different from usual.
+Note that if you don't like how
+<CODE>MakeMaker</CODE> chooses the rest of the directories, or if you are using an older version
+of it which requires an explicit declaration of all the target directories,
+you should do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL PREFIX=/home/stas \
+    INSTALLPRIVLIB=/home/stas/lib/perl5 \
+    INSTALLSCRIPT=/home/stas/bin \
+    INSTALLSITELIB=/home/stas/lib/perl5/site_perl \
+    INSTALLBIN=/home/stas/bin \
+    INSTALLMAN1DIR=/home/stas/lib/perl5/man  \
+    INSTALLMAN3DIR=/home/stas/lib/perl5/man3</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The rest is as usual:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make
+  % make test
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>make install</CODE> installs all the files in the private repository. Note that all the missing
+directories are created automatically, so there is no need to create them
+in first place. Here (slightly edited) is what it does :
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Installing /home/stas/lib/perl5/CGI/Cookie.pm
+  Installing /home/stas/lib/perl5/CGI.pm
+  Installing /home/stas/lib/perl5/man3/CGI.3
+  Installing /home/stas/lib/perl5/man3/CGI::Cookie.3
+  Writing /home/stas/lib/perl5/auto/CGI/.packlist
+  Appending installation info to /home/stas/lib/perl5/perllocal.pod</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you have to use the explicit target parameters, instead of a single
+<CODE>PREFIX</CODE> parameter, you will find it useful to create a file called for example <EM>~/.perl_dirs</EM> (where <EM>~</EM> is <CODE>/home/stas</CODE> in our example) containing:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PREFIX=/home/stas \
+    INSTALLPRIVLIB=/home/stas/lib/perl5 \
+    INSTALLSCRIPT=/home/stas/bin \
+    INSTALLSITELIB=/home/stas/lib/perl5/site_perl \
+    INSTALLBIN=/home/stas/bin \
+    INSTALLMAN1DIR=/home/stas/lib/perl5/man  \
+    INSTALLMAN3DIR=/home/stas/lib/perl5/man3</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+From now on, any time you want to install perl modules locally you simply
+execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL `cat ~/.perl_dirs`
+  % make
+  % make test
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Using this method you can easily maintain several Perl module repositories.
+For example, you could have one for production Perl and another for
+development:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL `cat ~/.perl_dirs.production`</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL `cat ~/.perl_dirs.develop`</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Making_Your_Scripts_Find_the_Loc">Making Your Scripts Find the Locally Installed Modules</A></H2></CENTER>
+<P>
+Perl modules are generally placed in four main directories. To find these
+directories, execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -V</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The output contains important information about your Perl installation. At
+the end you will see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Characteristics of this binary (from libperl):
+  Built under linux
+  Compiled at Apr  6 1999 23:34:07
+  @INC:
+    /usr/lib/perl5/5.00503/i386-linux
+    /usr/lib/perl5/5.00503
+    /usr/lib/perl5/site_perl/5.005/i386-linux
+    /usr/lib/perl5/site_perl/5.005
+    .</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It shows us the content of the Perl special variable <CODE>@INC</CODE>, which is used by Perl to look for its modules. It is equivalent to the <CODE>PATH</CODE>
+environment variable in Unix shells which is used to find executable
+programs.
+
+<P>
+Notice that Perl looks for modules in the <EM>.</EM> directory too, which stands for the current directory. It's the last entry
+in the above output.
+
+<P>
+Of course this example is from version <EM>5.00503</EM> of Perl installed on my x86 architecture PC running Linux. That's why you
+see
+<EM>i386-linux</EM> and <EM>5.00503</EM>. If your system runs a different version of Perl, operating system,
+processor or chipset architecture, then some of the directories will have
+different names.
+
+<P>
+I also have a perl-5.6.0 installed under <CODE>/usr/local/lib/</CODE>
+so when I do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /usr/local/bin/perl5.6.0 -V</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+I see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  @INC:
+    /usr/local/lib/perl5/5.6.0/i586-linux
+    /usr/local/lib/perl5/5.6.0
+    /usr/local/lib/site_perl/5.6.0/i586-linux
+    /usr/local/lib/site_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that it's still <EM>Linux</EM>, but the newer Perl version uses the version of my Pentium processor (thus
+the <EM>i586</EM> and not <EM>i386</EM>). This makes use of compiler optimizations for Pentium processors when the
+binary Perl extensions are created.
+
+<P>
+All the platform specific files, such as compiled C files glued to Perl
+with <CODE>XS</CODE> or <CODE>SWIG</CODE>, are supposed to go into the
+<CODE>i386-linux</CODE>-like directories.
+
+<P>
+<STRONG>Important:</STRONG> As we have installed the Perl modules into non-standard directories, we
+have to let Perl know where to look for the four directories. There are two
+ways to accomplish this. You can either set the <CODE>PERL5LIB</CODE> environment variable, or you can modify the
+<CODE>@INC</CODE> variable in your scripts.
+
+<P>
+Assuming that we use perl-5.00503, in our example the directories are:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    /home/sbekman/lib/perl5/5.00503/i386-linux
+    /home/sbekman/lib/perl5/5.00503
+    /home/sbekman/lib/perl5/site_perl/5.005/i386-linux
+    /home/sbekman/lib/perl5/site_perl/5.005</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As mentioned before, you find the exact directories by executing
+<CODE>perl -V</CODE> and replacing the global Perl installation's base directory with your home
+directory.
+
+<P>
+Modifying <CODE>@INC</CODE> is quite easy. The best approach is to use the
+<CODE>lib</CODE> module (pragma), by adding the following snippet at the top of any of your
+scripts that require the locally installed modules.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(/home/stas/lib/perl5/5.00503/
+             /home/stas/lib/perl5/site_perl/5.005);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Another way is to write code to modify <CODE>@INC</CODE> explicitly:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  BEGIN {
+    unshift @INC,
+      qw(/home/stas/lib/perl5/5.00503
+         /home/stas/lib/perl5/5.00503/i386-linux
+         /home/stas/lib/perl5/site_perl/5.005
+         /home/stas/lib/perl5/site_perl/5.005/i386-linux);
+        }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that with the <CODE>lib</CODE> module we don't have to list the corresponding architecture specific
+directories, since it adds them automatically if they exist (to be exact,
+when <EM>$dir/$archname/auto</EM>
+exists).
+
+<P>
+Also, notice that both approaches <EM>prepend</EM> the directories to be searched to <CODE>@INC</CODE>. This allows you to install a more recent module into your local
+repository and Perl will use it instead of the older one installed in the
+main system repository.
+
+<P>
+Both approaches modify the value of <CODE>@INC</CODE> at compilation time. The
+<CODE>lib</CODE> module uses the <EM>BEGIN</EM> block as well, but internally.
+
+<P>
+Now, let's assume the following scenario. I have installed the <CODE>LWP</CODE>
+package in my local repository. Now I want to install another module (e.g.
+mod_perl) and it has <CODE>LWP</CODE> listed in its prerequisites list. I know that I have <CODE>LWP</CODE> installed, but when I run <CODE>perl Makefile.PL</CODE>
+for the module I'm about to install I'm told that I don't have <CODE>LWP</CODE>
+installed.
+
+<P>
+There is no way for Perl to know that we have some locally installed
+modules. All it does is search the directories listed in <CODE>@INC</CODE>, and since the latter contains only the default four directories (plus the
+<EM>.</EM> directory), it cannot find the locally installed <CODE>LWP</CODE> package. We cannot solve this problem by adding code to modify <CODE>@INC</CODE>, but changing the <CODE>PERL5LIB</CODE> environment variable will do the trick. If you are using <CODE>t?csh</CODE> for interactive work, do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  setenv PERL5LIB /home/stas/lib/perl5/5.00503:
+  /home/stas/lib/perl5/site_perl/5.005</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It should be a single line with directories separated by colons (<CODE>:</CODE>) and no spaces. If you are a <CODE>(ba)?sh</CODE> user, do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  export PERL5LIB=/home/stas/lib/perl5/5.00503:
+  /home/stas/lib/perl5/site_perl/5.005</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Again make it a single line. If you use bash you can use multi-line
+commands by terminating split lines with a backslash (<CODE>\</CODE>), like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  export PERL5LIB=/home/stas/lib/perl5/5.00503:\
+  /home/stas/lib/perl5/site_perl/5.005</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As with <CODE>use lib</CODE>, perl automatically prepends the architecture specific directories to <CODE>@INC</CODE> if those exist.
+
+<P>
+When you have done this, verify the value of the newly configured
+<CODE>@INC</CODE> by executing <CODE>perl -V</CODE> as before. You should see the modified value of <CODE>@INC</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -V
+  
+  Characteristics of this binary (from libperl): 
+  Built under linux
+  Compiled at Apr  6 1999 23:34:07
+  %ENV:
+    PERL5LIB=&quot;/home/stas/lib/perl5/5.00503:
+    /home/stas/lib/perl5/site_perl/5.005&quot;
+  @INC:
+    /home/stas/lib/perl5/5.00503/i386-linux
+    /home/stas/lib/perl5/5.00503
+    /home/stas/lib/perl5/site_perl/5.005/i386-linux
+    /home/stas/lib/perl5/site_perl/5.005
+    /usr/lib/perl5/5.00503/i386-linux
+    /usr/lib/perl5/5.00503
+    /usr/lib/perl5/site_perl/5.005/i386-linux
+    /usr/lib/perl5/site_perl/5.005
+    .</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When everything works as you want it to, add these commands to your
+<EM>.tcshrc</EM> or <EM>.bashrc</EM> file. The next time you start a shell, the environment will be ready for
+you to work with the new Perl.
+
+<P>
+Note that if you have a <CODE>PERL5LIB</CODE> setting, you don't need to alter the <CODE>@INC</CODE> value in your scripts. But if for example someone else (who doesn't have
+this setting in the shell) tries to execute your scripts, Perl will fail to
+find your locally installed modules. The best example is a crontab script
+that <EM>might</EM> use a different SHELL environment and therefore the <CODE>PERL5LIB</CODE> setting won't be available to it.
+
+<P>
+So the best approach is to have both the <CODE>PERL5LIB</CODE> environment variable and the explicit <CODE>@INC</CODE> extension code at the beginning of the scripts as described above.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_CPAN_pm_Shell_and_Locally_In">The CPAN.pm Shell and Locally Installed Modules</A></H2></CENTER>
+<P>
+As we saw in the section describing the usage of the <CODE>CPAN.pm</CODE> shell to install mod_perl, it saves a great deal of time. It does the job
+for us, even detecting the missing modules listed in prerequisites,
+fetching and installing them. So you might wonder whether you can use
+<CODE>CPAN.pm</CODE> to maintain your local repository as well.
+
+<P>
+When you start the <CODE>CPAN</CODE> interactive shell, it searches first for the user's private configuration
+file and then for the system wide one. When I'm logged as user <CODE>stas</CODE> the two files on my setup are:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    /home/stas/.cpan/CPAN/MyConfig.pm
+    /usr/lib/perl5/5.00503/CPAN/Config.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If there is no <CODE>CPAN</CODE> shell configured on your system, when you start the shell for the first
+time it will ask you a dozen configuration questions and then create the <EM>Config.pm</EM> file for you.
+
+<P>
+If you've got it already system-wide configured, you should have a
+<CODE>/usr/lib/perl5/5.00503/CPAN/Config.pm</CODE>. If you have a different Perl version, alter the path to use your Perl's
+version number, when looking up the file. Create the directory (<CODE>mkdir -p</CODE> creates the whole path at once) where the local configuration file will go:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % mkdir -p /home/stas/.cpan/CPAN</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now copy the system wide configuration file to your local one.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cp /usr/lib/perl5/5.00503/CPAN/Config.pm \
+    /home/stas/.cpan/CPAN/MyConfig.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The only thing left is to change the base directory of <EM>.cpan</EM> in your local file to the one under your home directory. On my machine I
+replace <CODE>/usr/src/.cpan</CODE> (that's where my system's <CODE>.cpan</CODE> directory resides) with <CODE>/home/stas</CODE>. I use Perl of course!
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -pi -e 's|/usr/src|/home/stas|' \
+  /home/stas/.cpan/CPAN/MyConfig.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you have the local configuration file ready, you have to tell it what
+special parameters you need to pass when executing the <CODE>perl
+Makefile.PL</CODE> stage.
+
+<P>
+Open the file in your favorite editor and replace line:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  'makepl_arg' =&gt; q[],</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  'makepl_arg' =&gt; q[PREFIX=/home/stas],</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you've finished the configuration. Assuming that you are logged in as
+the same user you have prepared the local installation for (<EM>stas</EM>
+in our example), start it like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -MCPAN -e shell</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+From now on any module you try to install will be installed locally. If you
+need to install some system modules, just become the superuser and install
+them in the same way. When you are logged in as the superuser, the
+system-wide configuration file will be used instead of your local one.
+
+<P>
+If you have used more than just the <CODE>PREFIX</CODE> variable, modify
+<EM>MyConfig.pm</EM> to use them. For example if you have used these variables:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    perl Makefile.PL PREFIX=/home/stas \
+    INSTALLPRIVLIB=/home/stas/lib/perl5 \
+    INSTALLSCRIPT=/home/stas/bin \
+    INSTALLSITELIB=/home/stas/lib/perl5/site_perl \
+    INSTALLBIN=/home/stas/bin \
+    INSTALLMAN1DIR=/home/stas/lib/perl5/man  \
+    INSTALLMAN3DIR=/home/stas/lib/perl5/man3</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then replace <CODE>PREFIX=/home/stas</CODE> in the line:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  'makepl_arg' =&gt; q[PREFIX=/home/stas],</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with all the variables from above, so that the line becomes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  'makepl_arg' =&gt; q[PREFIX=/home/stas \
+    INSTALLPRIVLIB=/home/stas/lib/perl5 \
+    INSTALLSCRIPT=/home/stas/bin \
+    INSTALLSITELIB=/home/stas/lib/perl5/site_perl \
+    INSTALLBIN=/home/stas/bin \
+    INSTALLMAN1DIR=/home/stas/lib/perl5/man  \
+    INSTALLMAN3DIR=/home/stas/lib/perl5/man3],</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you arrange all the above parameters in one line, you can remove the
+backslashes (<CODE>\</CODE>).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Making_a_Local_Apache_Installati">Making a Local Apache Installation</A></H2></CENTER>
+<P>
+Just like with Perl modules, if you don't have permissions to install files
+into the system area you have to install them locally under your home
+directory. It's almost the same as a plain installation, but you have to
+run the server listening to a port number greater than 1024 since only root
+processes can listen to lower numbered ports.
+
+<P>
+Another important issue you have to resolve is how to add startup and
+shutdown scripts to the directories used by the rest of the system
+services. You will have to ask your system administrator to assist you with
+this issue.
+
+<P>
+To install Apache locally, all you have to do is to tell <CODE>.configure</CODE>
+in the Apache source directory what target directories to use. If you are
+following the convention that I use, which makes your home directory look
+like the <CODE>/</CODE> (base) directory, the invocation parameters would be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --prefix=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Apache will use the prefix for the rest of its target directories instead
+of the default <CODE>/usr/local/apache</CODE>. If you want to see what they are, before you proceed add the <EM>--show-layout</EM> option:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --prefix=/home/stas --show-layout</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You might want to put all the Apache files under <CODE>/home/stas/apache</CODE>
+following Apache's convention:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --prefix=/home/stas/apache</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to modify some or all of the names of the automatically created
+directories:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure --prefix=/home/stas/apache \
+    --sbindir=/home/stas/apache/sbin
+    --sysconfdir=/home/stas/apache/etc
+    --localstatedir=/home/stas/apache/var \
+    --runtimedir=/home/stas/apache/var/run \
+    --logfiledir=/home/stas/apache/var/logs \
+    --proxycachedir=/home/stas/apache/var/proxy</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That's all!
+
+<P>
+Also remember that you can start the script only under a user and group you
+belong to. You must set the <CODE>User</CODE> and <CODE>Group</CODE> directives in <EM>httpd.conf</EM> to appropriate values.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Manual_Local_mod_perl_Enabled_Ap">Manual Local mod_perl Enabled Apache Installation</A></H2></CENTER>
+<P>
+Now when we have learned how to install local Apache and Perl modules
+separately, let's see how to install mod_perl enabled Apache in our home
+directory. It's almost as simple as doing each one separately, but there is
+one wrinkle you need to know about which I'll mention at the end of this
+section.
+
+<P>
+Let's say you have unpacked the Apache and mod_perl sources under
+<EM>/home/stas/src</EM> and they look like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ls /home/stas/src
+  /home/stas/src/apache_x.x.x
+  /home/stas/src/mod_perl-x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+where <EM>x.xx</EM> are the version numbers as usual. You want the Perl modules from the
+mod_perl package to be installed under
+<EM>/home/stas/lib/perl5</EM> and the Apache files to go under
+<EM>/home/stas/apache</EM>. The following commands will do that for you:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL \
+  PREFIX=/home/stas \
+  APACHE_PREFIX=/home/stas/apache \
+  APACHE_SRC=../apache_x.x.x/src \
+  DO_HTTPD=1 \
+  USE_APACI=1 \
+  EVERYTHING=1
+  % make &amp;&amp; make test &amp;&amp; make install 
+  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you need some parameters to be passed to the <CODE>.configure</CODE> script, as we saw in the previous section use <CODE>APACI_ARGS</CODE>. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  APACI_ARGS='--sbindir=/home/stas/apache/sbin, \
+    --sysconfdir=/home/stas/apache/etc, \
+    --localstatedir=/home/stas/apache/var, \
+    --runtimedir=/home/stas/apache/var/run, \
+    --logfiledir=/home/stas/apache/var/logs, \
+    --proxycachedir=/home/stas/apache/var/proxy'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that the above multiline splitting will work only with
+<CODE>(ba)?sh</CODE>, <CODE>t?csh</CODE> users will have to list all the parameters on a single line.
+
+<P>
+Basically the installation is complete. The only remaining problem is the <CODE>@INC</CODE> variable. This won't be correctly set if you rely on the
+<CODE>PERL5LIB</CODE> environment variable unless you set it explicitly in a startup file which
+is <CODE>require</CODE>'d before loading any other module that resides in your local repository. A
+much nicer approach is to use the <CODE>lib</CODE> pragma as we saw before, but in a slightly different way--we use it in the
+startup file and it affects all the code that will be executed under
+mod_perl handlers. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlRequire /home/stas/apache/perl/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+where <CODE>startup.pl</CODE> starts with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(/home/stas/lib/perl5/5.00503/
+             /home/stas/lib/perl5/site_perl/5.005);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that you can still use the hard-coded <CODE>@INC</CODE> modifications in the scripts themselves, but be aware that scripts modify <CODE>@INC</CODE> in
+<CODE>BEGIN</CODE> blocks and mod_perl executes the <CODE>BEGIN</CODE> blocks only when it performs script compilation. As a result, <CODE>@INC</CODE> will be reset to its original value after the scripts are compiled and the
+hard-coded settings will be forgotten. See the section '<A HREF="././porting.html#_INC_and_mod_perl">@INC and mod_perl</A>' for more information.
+
+<P>
+The only place you can alter the ``original'' value is during the server
+configuration stage either in the startup file or by putting
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv Perl5LIB \
+  /home/stas/lib/perl5/5.00503/:/home/stas/lib/perl5/site_perl/5.005</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in <EM>httpd.conf</EM>, but the latter setting will be ignored if you use the <CODE>PerlTaintcheck</CODE> setting, and I hope you do use it.
+
+<P>
+The rest of the mod_perl configuration and use is just the same as if you
+were installing mod_perl as superuser.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Resource_Usage">Resource Usage</A></H3></CENTER>
+<P>
+Another important thing to keep in mind is the consumption of system
+resources. mod_perl is memory hungry. If you run a lot of mod_perl
+processes on a public, multiuser machine, most likely the system
+administrator of this machine will ask you to use less resources and may
+even shut down your mod_perl server and ask you to find another home for
+it. You have a few options:
+
+<UL>
+<P><LI>
+<P>
+Reduce resources usage (see <A HREF="././performance.html#Limiting_the_Size_of_the_Process">Limiting the size of the processes</A>).
+
+<P><LI>
+<P>
+Ask your ISP's system administrator whether they can setup a dedicated
+machine for you, so that you will be able to install as much memory as you
+need. If you get a dedicated machine the chances are that you will want to
+have root access, so you may be able to manage the administration yourself.
+Then you should consider keeping on the list of the system administrator's
+responsibilities the following items: a reliable electricity supply and
+network link. And of course making sure that the important security patches
+get applied and the machine is configured to be secure. Finally having the
+machine physically protected, so no one will turn off the power or break
+it.
+
+<P><LI>
+<P>
+Look for another ISP with lots of resources or one that supports mod_perl.
+You can find a list of these ISPs at <A
+HREF="http://perl.apache.org">http://perl.apache.org</A> .
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Local_mod_perl_Enabled_Apache_In">Local mod_perl Enabled Apache Installation with CPAN.pm</A></H2></CENTER>
+<P>
+Again, CPAN makes installation and upgrades simpler. You have seen how to
+install a mod_perl enabled server using <CODE>CPAN.pm</CODE>'s interactive shell. You have seen how to install Perl modules and Apache
+locally. Now all you have to do is to merge these techniques into a single
+``local mod_perl Enabled Apache Installation with CPAN.pm'' technique.
+
+<P>
+Assuming that you have configured <CODE>CPAN.pm</CODE> to install Perl modules locally, the installation is very simple. Start the <CODE>CPAN.pm</CODE> shell, set the arguments to be passed to <CODE>perl Makefile.PL</CODE> (modify the example setting to suit your needs), and tell &lt;CPAN.pm&gt;
+to do the rest for you:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -MCPAN -eshell
+  cpan&gt; o conf makepl_arg 'DO_HTTPD=1 USE_APACI=1 EVERYTHING=1 \
+        PREFIX=/home/stas APACHE_PREFIX=/home/stas/apache'
+  cpan&gt; install mod_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When you use <CODE>CPAN.pm</CODE> for local installations, after the mod_perl installation is complete you
+must make sure that the value of
+<CODE>makepl_arg</CODE> is restored to its original value.
+
+<P>
+The simplest way to do this is to quit the interactive shell by typing
+<EM>quit</EM> and reenter it. But if you insist here is how to make it work without
+quitting the shell. You really want to skip this :)
+
+<P>
+If you want to continue working with <CODE>CPAN</CODE> *without* quitting the shell, you must:
+
+<OL>
+<P><LI><STRONG><A NAME="item_remember_the_value_of_makepl_arg">remember the value of makepl_arg</A></STRONG>
+<P><LI><STRONG><A NAME="item_change_it_to_suit_your_new_insta">change it to suit your new installation</A></STRONG>
+<P><LI><STRONG><A NAME="item_build_and_install_mod_perl">build and install mod_perl</A></STRONG>
+<P><LI><STRONG><A NAME="item_restore_it_after_completing_mod_">restore it after completing mod_perl installation</A></STRONG>
+</OL>
+<P>
+this is quite a cumbersome task as of this writing, but I believe that
+<CODE>CPAN.pm</CODE> will eventually be improved to handle this more easily.
+
+<P>
+So if you are still with me, start the shell as usual:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -MCPAN -eshell</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+First, read the value of the <CODE>makepl_arg</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PREFIX=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It will be something like <CODE>PREFIX=/home/stas</CODE> if you configured
+<CODE>CPAN.pm</CODE> to install modules locally. Save this value:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg.save PREFIX=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Second, set a new value, to be used by the mod_perl installation process.
+(You can add parameters to this line, or remove them, according to your
+needs.)
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg 'DO_HTTPD=1 USE_APACI=1 EVERYTHING=1 \
+        PREFIX=/home/stas APACHE_PREFIX=/home/stas/apache'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Third, let &lt;CPAN.pm&gt; build and install mod_perl for you:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; install mod_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Fourth, reset the original value to <CODE>makepl_arg</CODE>. We do this by printing the value of the saved variable and assigning it
+to
+<CODE>makepl_arg</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg.save</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PREFIX=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cpan&gt; o conf makepl_arg PREFIX=/home/stas</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Not so neat, but a working solution. You could have written the value on a
+piece of paper instead of saving it to <CODE>makepl_arg.save</CODE>, but you are more likely to make a mistake that way.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Automating_installation">Automating installation</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_Apache">Apache Builder</A></STRONG>
+<P>
+James G Smith wrote an Apache Builder, that can install a combination of
+Apache, mod_perl, and mod_ssl -- it also has limited support for including
+mod_php in the mix.
+
+<P>
+<A
+HREF="http://hex.tamu.edu/build-apache">http://hex.tamu.edu/build-apache</A>
+(the actual Perl script)
+
+<P>
+<A
+HREF="http://hex.tamu.edu/generic.conf">http://hex.tamu.edu/generic.conf</A>
+(a sample configuration file)
+
+<P><LI><STRONG><A NAME="item_Aphid">Aphid Apache Installer</A></STRONG>
+<P>
+Aphid provides a facility for bootstrapping SSL-enabled Apache web servers
+(mod_ssl) with an embedded Perl interpreter (mod_perl). Source is
+downloaded from the Internet, compiled, and the resulting system is
+installed in the directory you specify.
+
+<P>
+<A
+HREF="http://sourceforge.net/projects/aphid/">http://sourceforge.net/projects/aphid/</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="How_can_I_tell_whether_mod_perl_">How can I tell whether mod_perl is running?</A></H1></CENTER>
+<P>
+There are a few ways. In older versions of apache ( &lt; 1.3.6 ?) you could check that by running <CODE>httpd -v</CODE>, but it no longer works. Now you should use <CODE>httpd -l</CODE>. Please note that it is not enough to have it installed, you have to
+configure it for mod_perl and restart the server too.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Checking_the_error_log">Checking the error_log</A></H2></CENTER>
+<P>
+When starting the server, just check the <CODE>error_log</CODE> file for the following message:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  [Thu Dec  3 17:27:52 1998] [notice] Apache/1.3.1 (Unix) mod_perl/1.15 configured 
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    -- resuming normal operations</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Testing_by_viewing_perl_status">Testing by viewing /perl-status</A></H2></CENTER>
+<P>
+Assuming that you have configured the &lt;Location
+/perl-status&gt; section in the server configuration file fetch: <A
+HREF="http://www.example.com/perl-status">http://www.example.com/perl-status</A>
+using your favorite Mozilla browser :-)
+
+<P>
+You should see something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Embedded Perl version 5.00503 for Apache/1.3.9 (Unix) mod_perl/1.21 
+  process 50880, running since Mon Dec 6 14:31:45 1999</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Testing_via_telnet">Testing via telnet</A></H2></CENTER>
+<P>
+Knowing the port you have configured apache to listen on, you can use
+<CODE>telnet</CODE> to talk directly to it.
+
+<P>
+Assuming that your mod_perl enabled server listens to port 8080, telnet to
+your server at port 8080, and type <CODE>HEAD / HTTP/1.0</CODE> then press the &lt;ENTER&gt; key TWICE:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % telnet localhost 8080&lt;ENTER&gt;
+  HEAD / HTTP/1.0&lt;ENTER&gt;&lt;ENTER&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You should see a response like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  HTTP/1.1 200 OK
+  Date: Mon, 06 Dec 1999 12:27:52 GMT
+  Server: Apache/1.3.9 (Unix) mod_perl/1.21
+  Connection: close
+  Content-Type: text/html
+  
+  Connection closed.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The line
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Server: Apache/1.3.9 (Unix) mod_perl/1.21</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+confirms that you have mod_perl installed and its version is <CODE>1.21</CODE>.
+
+<P>
+However, just because you have got mod_perl linked in there, that does not
+mean that you have configured your server to handle Perl scripts with
+mod_perl. You will find configuration assistance at
+<A HREF="././config.html#">ModPerlConfiguration</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Testing_via_a_CGI_script">Testing via a CGI script</A></H2></CENTER>
+<P>
+Another method is to invoke a CGI script which dumps the server's
+environment.
+
+<P>
+I assume that you have configured the server so that scripts running under
+location <EM>/perl/</EM> are handled by the <CODE>Apache::Registry</CODE>
+handler and that you have the <CODE>PerlSendHeader</CODE> directive set to
+<CODE>On</CODE>.
+
+<P>
+Copy and paste the script below (no need for a shebang line!). Let's say
+you name it <EM>test.pl</EM>, save it at the root of the CGI scripts and CGI root is mapped directly to
+the <EM>/perl</EM> location of your server.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  print &quot;Server's environment\n&quot;;
+  foreach ( keys %ENV ) {
+      print &quot;$_\t$ENV{$_}\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Make it readable and executable by server (you may need to tune these
+permissions on a public host):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % chmod a+rx test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now fetch the URL <CODE>http://www.example.com:8080/perl/test.pl</CODE> (replace 8080 with the port your mod_perl enabled server is listening to).
+You should see something like this (the output has been edited):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  SERVER_SOFTWARE Apache/1.3.10-dev (Unix) mod_perl/1.21_01-dev
+  GATEWAY_INTERFACE       CGI-Perl/1.1
+  DOCUMENT_ROOT   /home/httpd/docs
+  REMOTE_ADDR     127.0.0.1
+  [more environment variables snipped]
+  MOD_PERL        mod_perl/1.21_01-dev
+  [more environment variables snipped]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you see the that the value of <CODE>GATEWAY_INTERFACE</CODE> is
+<CODE>CGI-Perl/1.1</CODE> everything is OK. 
+
+<P>
+If there is an error you might have to add a shebang line
+<CODE>#!/usr/bin/perl</CODE> as a first line of the CGI script and then try it again. If you see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  GATEWAY_INTERFACE       CGI/1.1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+it means that you have configured this location to run under mod_cgi and
+not mod_perl.
+
+<P>
+Also note that there is a <CODE>MOD_PERL</CODE> environment variable if you run under a mod_perl handler, it's set to the
+release number you use.
+
+<P>
+Based on this difference you can write code like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  BEGIN {
+      # perl5.004 or better is a must under mod_perl
+    require 5.004 if $ENV{MOD_PERL};
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You might wonder why in the world you would need to know what handler you
+are running under. Well, for example you will want to use
+<CODE>Apache::exit()</CODE> and not <CODE>CORE::exit()</CODE> in your modules, but if you think that your script might be used in both
+environments (mod_cgi and mod_perl) you will have to override the <CODE>exit()</CODE> subroutine and to make decision what method to use at the runtime.  
+
+<P>
+Note that if you run scripts under the <CODE>Apache::Registry</CODE> handler, it takes care of overriding the <CODE>exit()</CODE> call for you, so it's not an issue. For reasons and implementations see: <A HREF="././porting.html#Terminating_requests_and_process">Terminating requests and processes, exit() function</A> and also <A HREF="././porting.html#">Writing Mod Perl scripts and Porting plain CGIs to it</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Testing_via_lwp_request">Testing via lwp-request</A></H2></CENTER>
+<P>
+Yet another one. Why do I show all these approaches? While here they serve
+a very simple purpose, they can be helpful in other situations.
+
+<P>
+Assuming you have the <CODE>libwww-perl</CODE> (<CODE>LWP</CODE>) package installed (you will need it installed in order to pass mod_perl's <CODE>make test</CODE> anyway):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-request -e -d <A HREF="http://www.example.com">http://www.example.com</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Will show you all the headers. The <CODE>-d</CODE> option disables printing the response content.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-request -e -d <A HREF="http://www.example.com">http://www.example.com</A> | egrep '^Server:'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To see the server version only.
+
+<P>
+Use <CODE>http://www.example.com:port_number</CODE> if your server is listening to a port other than port 80.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="General_Notes">General Notes</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Is_it_possible_to_run_mod_perl_e">Is it possible to run mod_perl enabled Apache as suExec?</A></H2></CENTER>
+<P>
+The answer is <STRONG>No</STRONG>. The reason is that you can't <EM>"suid"</EM> a part of a process. mod_perl lives inside the Apache process, so its UID
+and GID are the same as the Apache process.
+
+<P>
+You have to use mod_cgi if you need this functionality.
+
+<P>
+Another solution is to use a crontab to call some script that will check
+whether there is something to do and will execute it. The mod_perl script
+will be able to create and update this todo list.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Should_I_Rebuild_mod_perl_if_I_h">Should I Rebuild mod_perl if I have Upgraded Perl?</A></H2></CENTER>
+<P>
+Yes, you should. You have to rebuild the mod_perl enabled server since it
+has a hard-coded <CODE>@INC</CODE> variable. This points to the old Perl and it is probably linked to an old <CODE>libperl</CODE> library. If for some reason you need to keep the old Perl version around
+you can modify
+<CODE>@INC</CODE> in the startup script, but it is better to build afresh to save you getting
+into a mess.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Perl_installation_requirements">Perl installation requirements</A></H2></CENTER>
+<P>
+Make sure you have Perl installed! The latest stable version if possible.
+Minimum perl 5.004! If you don't have it, install it. Follow the
+instructions in the distribution's <CODE>INSTALL</CODE> file.
+
+<P>
+During the configuration stage (while running <CODE>./Configure</CODE>), to be able to dynamically load Perl module extensions, make sure you
+answer
+<CODE>YES</CODE> to the question:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Do you wish to use dynamic loading? [y]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_auth_dbm_nuances">mod_auth_dbm nuances</A></H2></CENTER>
+<P>
+If you are a <CODE>mod_auth_dbm</CODE> or <CODE>mod_auth_db</CODE> user you may need to edit Perl's <CODE>Config</CODE> module. When Perl is configured it attempts to find libraries for ndbm,
+gdbm, db, etc., for the DB*_File modules. By default, these libraries are
+linked with Perl and remembered by the
+<CODE>Config</CODE> module. When mod_perl is configured with apache, the
+<CODE>ExtUtils::Embed</CODE> module requires these libraries to be linked with httpd so Perl extensions
+will work under mod_perl. However, the order in which these libraries are
+stored in <STRONG>Config.pm</STRONG> may confuse
+<CODE>mod_auth_db*</CODE>. If <CODE>mod_auth_db*</CODE> does not work with mod_perl, take a look at the order with the following
+command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % perl -V:libs</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here's an example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> libs='-lnet -lnsl_s -lgdbm -lndbm -ldb -ldld -lm -lc -lndir -lcrypt';</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If <CODE>-lgdbm</CODE> or <CODE>-ldb</CODE> is before <CODE>-lndbm</CODE> (as it is in the example) edit <EM>Config.pm</EM> and move <CODE>-lgdbm</CODE> and <CODE>-ldb</CODE> to the end of the list. Here's how to find <EM>Config.pm</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % perl -MConfig -e 'print &quot;$Config{archlibexp}/Config.pm\n&quot;'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Under Solaris, another solution for building Apache/mod_perl+mod_auth_dbm
+is to remove the DBM and NDBM ``emulation'' from <EM>libgdbm.a</EM>. It seems that Solaris already provides its own DBM and NDBM, and in our
+installation we found there's no reason to build GDBM with them.
+
+<P>
+In our Makefile for GDBM, we changed
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  OBJS = $(DBM_OF) $(NDBM_OF) $(GDBM_OF)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+to
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  OBJS = $(GDBM_OF)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Rebuild libgdbm before Apache/mod_perl.  
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Stripping_Apache_to_make_it_almo">Stripping Apache to make it almost a Perl-server</A></H2></CENTER>
+<P>
+Since most of the functionality that various apache mod_* modules provide
+is implemented in the <A HREF="#item_Apache_">Apache::{*}</A> Perl modules, it was reported that one can build an Apache server with
+mod_perl only. If you can reduce the requirements to whatever mod_perl can
+handle, you can eliminate almost every other module. Then basically you
+will have a Perl-server, with C code to handle the tricky HTTP bits. The
+only module you will need to leave in is <CODE>mod_actions</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Saving_the_config_status_Files_w">Saving the config.status Files with mod_perl, php, ssl and Other Components</A></H2></CENTER>
+<P>
+Typically, when building the bloated Apache that sits behind Squid or
+whatever, you need mod_perl, php, mod_ssl and the rest. As you install each
+they typically overwrite each other's <CODE>config.status</CODE>
+files. Save them after each step, so you will be able to reuse them later.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="What_Compiler_Should_Be_Used_to_">What Compiler Should Be Used to Build mod_perl?</A></H2></CENTER>
+<P>
+All Perl modules that use C extensions must be compiled using the same
+compiler that your copy of Perl was built with.
+
+<P>
+When you run <CODE>perl Makefile.PL</CODE>, a <EM>Makefile</EM> is created. This
+<EM>Makefile</EM> includes the same compilation options that were used to build Perl itself.
+They are stored in the <EM>Config.pm</EM> module and can be displayed with the <CODE>Perl -V</CODE> command. All these options are re-applied when compiling Perl modules.
+
+<P>
+If you use a different compiler to build Perl extensions, chances are that
+the options that a different compiler uses won't be the same, or they might
+be interpreted in a completely different way. So the code either won't
+compile or it will dump core when run or maybe it will behave in most
+unexpected ways.
+
+<P>
+Since mod_perl uses Perl, Apache and third party modules, and they all work
+together, it's essential to use the same compiler while building each of
+the components.
+
+<P>
+You shouldn't worry about this when compliling Perl modules since Perl will
+choose what's right automatically. Unless you override things. If you do
+that, you are on your own...
+
+<P>
+If you compile a non-Perl component separately, you should make sure to use
+the same compiler and the same options used to build Perl. Hint: Take a
+look at the <EM>Config.pm</EM> module or the output of <CODE>perl
+-V</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="OS_Related_Notes">OS Related Notes</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+Gary Shea &lt;<A HREF="mailto:shea@xmission.com">shea@xmission.com</A>&gt;
+discovered a nasty BSDI bug (seen in versions 2.1 and 3.0) related to
+dynamic loading and found two workarounds:
+
+<P>
+It turns out that they use <CODE>argv[0]</CODE> to determine where to find the link tables at run-time, so if a program
+either changes <CODE>argv[0]</CODE>, or does a <CODE>chdir()</CODE> (like Apache!) it can easily confuse the
+dynamic loader. The short-term solutions to the problem are simple. Either
+of the following will work:
+
+<P>
+1) Call httpd with a full path, e.g. /opt/www/bin/httpd
+
+<P>
+2) Put the httpd you wish to run in a directory in your PATH <EM>before</EM>
+any other directory containing a version of httpd, then call it as 'httpd'.
+Don't use a relative path!
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Pros_and_Cons_of_Building_mod_pe">Pros and Cons of Building mod_perl as DSO</A></H1></CENTER>
+<P>
+On modern Unix derivatives there is a nifty mechanism usually called
+dynamic linking/loading of Dynamic Shared Objects (DSO), which provides a
+way to build a piece of program code in a special format for loading in at
+run-time into the address space of an executable program.
+
+<P>
+As of Apache 1.3, the configuration system supports two optional features
+for taking advantage of the modular DSO approach: compilation of the Apache
+core program into a DSO library for shared usage and compilation of the
+Apache modules into DSO files for explicit loading at run-time.
+
+<P>
+Should you use this method? Read the pros and cons and decide for yourself.
+
+<P>
+Pros:
+
+<UL>
+<P><LI>
+<P>
+The server package is more flexible at run-time because the actual server
+process can be assembled at run-time via <CODE>LoadModule</CODE>
+
+<EM>httpd.conf</EM> configuration commands instead of <EM>Configuration</EM>
+
+<CODE>AddModule</CODE> commands at build-time. For instance this way one is able to run different
+server instances (standard &amp; SSL version, with and without mod_perl)
+with only one Apache installation.
+
+<P><LI>
+<P>
+The server package can be easily extended with third-party modules even
+after installation. This is at least a great benefit for vendor package
+maintainers who can create an Apache core package and additional packages
+containing extensions like PHP3, mod_perl, mod_fastcgi, etc.
+
+<P><LI>
+<P>
+Easier Apache module prototyping because with the DSO/apxs pair you can
+both work outside the Apache source tree and only need an apxs
+-i command followed by an apachectl&nbsp;restart to bring a new version of your currently developed module into the running
+Apache server.
+
+</UL>
+<P>
+Cons:
+
+<UL>
+<P><LI>
+<P>
+The DSO mechanism cannot be used on every platform because not all
+operating systems support dynamic loading of code into the address space of
+a program.
+
+<P><LI>
+<P>
+The server starts up approximately 20% slower because of the symbol
+resolving overhead the Unix loader now has to do.
+
+<P><LI>
+<P>
+The server runs approximately 5% slower on some platforms because position
+independent code (PIC) sometimes needs complicated assembler tricks for
+relative addressing which are not necessarily as fast as absolute
+addressing.
+
+<P><LI>
+<P>
+Because DSO modules cannot be linked against other DSO-based libraries (ld
+-lfoo) on all platforms (for instance a.out-based platforms usually don't
+provide this functionality while ELF-based platforms do) you cannot use the
+DSO mechanism for all types of modules. Or in other words, modules compiled
+as DSO files are restricted to only use symbols from the Apache core, from
+the C library (libc) and all other dynamic or static libraries used by the
+Apache core, or from static library archives (libfoo.a) containing position
+independent code. The only way you can use other code is to either make
+sure the Apache core itself already contains a reference to it, loading the
+code yourself via <CODE>dlopen()</CODE> or enabling the SHARED_CHAIN rule
+while building Apache when your platform supports linking DSO files against
+DSO libraries.
+
+<P><LI>
+<P>
+Under some platforms (many SVR4 systems) there is no way to force the
+linker to export all global symbols for use in DSO's when linking the
+Apache httpd executable program. But without the visibility of the Apache
+core symbols no standard Apache module could be used as a DSO. The only
+workaround here is to use the SHARED_CORE feature because this way the
+global symbols are forced to be exported. As a consequence the Apache
+src/Configure script automatically enforces SHARED_CORE on these platforms
+when DSO features are used in the Configuration file or on the configure
+command line.
+
+</UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./perl.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./config.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 04/19/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+#!/bin/sh
+_HOME=/home/slash
+PERL=$_HOME/bin/perl
+PASSWORD=slash
+
+# perl 5.6.1
+tar xzvf perl-5.6.1.tar.gz
+(cd perl-5.6.1 && \
+ sh Configure -Dprefix=$_HOME -d && \
+ make && \
+ make install
+)
+
+# install CPAN module
+tar xzvf CPAN-1.60b.tar.gz
+(cd CPAN-1.60b && \
+ $PERL Makefile.PL && \
+ make && \
+ make install)
+
+# set CPAN/Config.pm
+cp CPAN-Config.pm $_HOME/lib/perl5/5.6.1/CPAN/Config.pm
+
+# install Bundles
+$PERL -MCPAN -e 'install("Bundle::CPAN", "Bundle::libnet", "Bundle::LWP")'
+
+
+# apache 1.3.24 + mod_perl 1.26
+tar xzvf apache_1.3.24.tar.gz
+tar xzvf mod_perl-1.26.tar.gz
+
+(cd mod_perl-1.26 && \
+ yes | $_HOME/bin/perl Makefile.PL APACHE_SRC=../apache_1.3.24/src \
+ USE_APACI=1 EVERYTHING=1 NO_HTTPD=1 PREP_HTTPD=1 && \
+ make && make install)
+
+(cd apache_1.3.24 && \
+ ./configure --prefix=$_HOME/apache \
+ --with-port=8080 \
+ --server-uid=slash \
+ --server-gid=slash \
+ --activate-module=src/modules/perl/libperl.a \
+ --enable-shared=max \
+ --disable-shared=perl \
+ --enable-module=all && \
+ make && make install)
+
+# install misc apache modules
+$PERL -MCPAN -e 'install Bundle::Apache'
+
+# install mysql
+tar xzvf mysql-3.23.49.tar.gz
+(cd mysql-3.23.49 &&
+ ./configure --prefix=$_HOME/mysql \
+ --with-charset=ujis --with-extra-charsets=complex --without-bench && \
+ make && \
+ make install)
+
+$_HOME/mysql/bin/mysql_install_db
+cat <<EOF > $_HOME/mysql/var/my.cnf
+[mysqld]
+port=8306
+basedir=$_HOME/mysql
+datadir=$_HOME/mysql/var
+user=slash
+socket=/tmp/mysql-slash.sock
+log-update
+pid-file=$_HOME/mysql/var/`hostname`.pid
+set-variable = key_buffer=8M
+set-variable = sort_buffer=4M
+set-variable = record_buffer=1M
+set-variable = max_connections=256
+set-variable = table_cache=512
+EOF
+
+# start mysqld
+TZ=GMT $_HOME/mysql/bin/safe_mysqld &
+
+
+# set slash's password
+SOCK=/tmp/mysql-slash.sock
+$_HOME/mysql/bin/mysqladmin -S $SOCK -u root create slash
+echo "INSERT INTO user VALUES ('`hostname`','slash',password('$PASSWORD'),'Y','Y','Y','Y','Y','Y','N','N','N','N','N','Y','Y','Y')" \
+| $_HOME/mysql/bin/mysql -S $SOCK -u root mysql
+$_HOME/mysql/bin/mysqladmin -S $SOCK -u root reload
+
+# DBIx::Password
+HOST=`hostname`
+
+tar xzvf DBIx-Password-1.8.tar.gz
+(cd DBIx-Password-1.8 &&
+ cp ../DP-cache .cache &&
+ $PERL -i -nlpe "s/__HOST__/$HOST/g; s/__PASSWORD__/$PASSWORD/g" .cache && \
+ yes | $PERL Makefile.PL &&
+ make && make test && \
+ make install)
+
+# install mysql related modules
+$PERL -MCPAN -e 'install DBI'
+
+tar xzvf DBD-mysql-2.1014.tar.gz
+PATH=$_HOME/mysql/bin:$PATH
+(cd DBD-mysql-2.1014 && \
+ $PERL Makefile.PL && \
+ make && \
+ make install)
+
+# install Bundle::Slash
+$PERL -MCPAN -e 'install Bundle::Slash'
+
+# install slash
+#tar xzvf slash-2.2.5.tar.gz
+#(cd slash-2.2.5 &&
+# yes | make install SLASH_PREFIX=$_HOME INIT=$_HOME/etc USER=slash GROUP=slash PERL=$PERL)
+chmod 644 $_HOME/httpd/slash.conf
+$_HOME/bin/install-slashsite -u slash
+ 
+  
+
+
+
+ 

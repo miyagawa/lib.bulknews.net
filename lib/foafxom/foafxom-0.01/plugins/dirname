@@ -1,0 +1,11 @@
+package dirname;
+use vars qw($dirname);
+
+sub start { 1 }
+
+sub story {
+    ($dirname = $blosxom::path) =~ s!.*/!!;
+    $dirname =~ s/^\d+//; # 00dirname
+}
+
+1;

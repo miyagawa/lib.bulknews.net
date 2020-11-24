@@ -1,0 +1,139 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.16
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+今回は、Web アプリケーション開発に役立ちそうなモジュールを紹介します。
+
+Webアプリケーションでの結合テストは、ブラウザで確認する必要があり、自
+動化には程遠いものです。HTTP クライアントをシミュレートし、テストがで
+きれば、自動テストによる品質向上が望めます。
+
+2. HTTP::Monkeywrench ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl でHTTPクライアントといえば、LWP::UserAgent(*1) が思い浮かびます。
+この LWP::UserAgent を利用して、簡単なテストスクリプト作成を支援してく
+れるのが HTTP::Monkeywrench (*2) です。
+
+*1 http://cpan2.org/Asset/display?dist=libwww-perl
+*2 http://cpan2.org/Asset/display?dist=Monkeywrench
+
+このモジュールの優れているところは "session", "click" という概念をサポー
+トしている点です。つまり、
+
++ 同一のセッションはひとまとめにしてテストできる
++ ページ遷移を連続して記録できる
+
+ことになります。Cookie (永続/セッション) をサポートしているため、
+Apache::Session::* などで Cookie を利用してセッション管理を行っている
+場合でも、受け取った Cookie を次ページのリクエストに付加するといった設
+定が行えます。
+
+またページ遷移をサポートしているため、ページA => ページB => ページC と
+いった遷移も順番として設定できます。
+
+テスト自体は前回の TestUnit などと同様にして行います。具体的には、
+$session という配列リファレンスを用意し、それぞれの要素が 1クリックを
+表すようにします。テストしたいページには success_res, error_res とい
+うキーで、成功/失敗した場合に出現する文字列を設定しておきます。
+
+a.cgi, b.cgi, c.cgi の順にページ遷移して、
+
++ b.cgi に OK という文字列が現れる
++ c.cgi に NG という文字列が現れない
+
+ことをテストするスクリプトは、以下のようになります。
+
+#!/usr/bin/perl
+use strict;
+use HTTP::Monkeywrench;
+
+my $settings = {
+    show_coolies => 1,
+    print_results => 1,
+};
+
+my $session = [ { url => 'http://your.com/a.cgi',
+                  acceptcookie => 1, },
+                { url => 'http://your.com/b.cgi',
+                  sendcookie => 1,
+                  success_res => [ 'OK' ], },
+                { url => 'http://your.com/c.cgi',
+                  sendcookie => 1,
+                  error_res => [ 'NG' ], } ];
+
+my $test = HTTP::Monkeywrench->new($settings);
+$test->test($session);
+
+
+SUCCEED / FAIL の結果が見やすく出力されます。結果をメール送信するオプ
+ションもありますので、自動テストなどにも向いています。このようなスクリ
+プトを1ヶ所に集めておいて夜間自動テストなどしておくと、問題の早期発見
+にもつながるでしょう。
+
+
+3. 問題点 / 応用 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+HTTP::Monkeywrench への要望としては、
+
+* sendcookie, acceptcookie は session ごとでなく setting で定義したい
+* 少々バグがある
+
+などがあります。作者さんにはメールしていますが、忙しいようでメンテはな
+かなかしてくれません。TODO List には プロキシサーバや mod_perl ハンド
+ラを利用した「レコーダツール」の作成、が挙げられています。これができる
+と相当便利になりそうな予感がします。
+
+少々のバグについては、パッチを作成してあります。Cookie 関連、相対URLリ
+ダイレクトへの対応、Squid 対策などが主なところです。Version 1.13 でご
+利用ください。
+
+http://bulknews.net/lib/mailmag/16/monkeywrench.patch
+*** Monkeywrench.pm.orig        Tue Jan 23 16:16:30 2001
+--- Monkeywrench.pm     Tue Jan 23 18:00:01 2001
+***************
+*** 425,426 ****
+!       my $req         = HTTP::Request->new($method => $click->{'urls'}->[-1] . (($method eq 'GET') ? '?'.$click->{'params'} : ''));
+!
+--- 425,426 ----
+!       my $req         = HTTP::Request->new($method => $click->{'urls'}->[-1] . (($method eq 'GET' && ! $click->{'REDIRECT'}) ? '?'.$click->{'params'} : ''));
+!
+***************
+*** 428 ****
+--- 429 ----
++       $req->content_length(length($click->{'params'})) if ($method eq 'POST');
+***************
+*** 433,434 ****
+!       my $res = $self->ua->request($req);
+!
+--- 434,435 ----
+! #     my $res = $self->ua->request($req);
+!       my $res = $self->ua->simple_request($req);
+***************
+*** 439 ****
+-
+--- 439 ----
+***************
+*** 442 ****
+!               push(@{ $click->{'urls'} },$res->header('Location'));
+--- 442,443 ----
+!               my $url = URI->new_abs($res->header('Location'), $res->base);
+!               push(@{ $click->{'urls'} },$url);
+
+
+3. まとめ  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Webアプリケーションテストツールを紹介しました。
+
+次回は、mod_perl な環境で利用できる Apache::FakeRequest について少し紹
+介します。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

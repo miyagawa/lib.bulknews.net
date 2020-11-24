@@ -1,0 +1,48 @@
+--- /usr/local/src/CPAN/build/Spreadsheet-WriteExcel-FromDB-0.03/lib/Spreadsheet/WriteExcel/FromDB.pm	Tue Aug 28 03:07:42 2001
++++ FromDB.pm	Wed Oct  3 01:09:41 2001
+@@ -20,6 +20,7 @@
+ 
+   my $ss = Spreadsheet::WriteExcel::FromDB->read($dbh, $table_name);
+      $ss->ignore_columns(qw/foo bar/);
++     $ss->filter(\&callback);
+ 
+   print $ss->as_xls;
+ 
+@@ -52,6 +53,7 @@
+      _table          => $table,
+      _dbh            => $dbh,
+      _ignore_columns => [],
++     _filter         => undef,
+    };
+    bless $self, $class;
+ }
+@@ -87,6 +89,19 @@
+   $self->{_ignore_columns} = [ @_ ];
+ }
+ 
++=head2 filter
++
++  $ss->filter(sub { return reverse shift });
++
++Adds subroutine ref for data filtering. Handy in code conversion etc.
++
++=cut
++
++sub filter {
++  my $self = shift;
++  $self->{_filter} = shift;
++}
++
+ =head2 as_xls
+ 
+ Return the table as an Excel spreadsheet.
+@@ -97,7 +112,8 @@
+   my $self  = shift;
+   my $ss = Spreadsheet::WriteExcel::Simple->new;
+      $ss->write_bold_row([$self->_columns_wanted]);
+-     $ss->write_row($_)
++     $ss->write_row($self->{_filter}
++			? [ map { $self->{_filter}->($_) } @$_ ] : $_)
+        foreach @{$self->dbh->selectall_arrayref($self->_data_query)};
+   return $ss->data;
+ }

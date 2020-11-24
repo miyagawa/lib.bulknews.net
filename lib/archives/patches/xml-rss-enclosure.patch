@@ -1,0 +1,96 @@
+diff -ruP XML-RSS-1.05/lib/RSS.pm XML-RSS-1.05-enclosures/lib/RSS.pm
+--- XML-RSS-1.05/lib/RSS.pm	2004-04-21 16:14:43.000000000 +0900
++++ XML-RSS-1.05-enclosures/lib/RSS.pm	2004-11-02 19:56:22.000000000 +0900
+@@ -410,6 +410,10 @@
+ 	}
+ );
+ 
++my %empty_ok_elements = (
++    enclosure => 1,
++);
++
+ sub new {
+     my $class = shift;
+     
+@@ -1439,7 +1443,7 @@
+     my $self = shift;
+     my $el   = shift;
+     my %attribs = @_;
+-	
++
+ 	# beginning of RSS 0.91
+     if ($el eq 'rss') {
+ 		if (exists($attribs{version})) {
+@@ -1556,6 +1560,9 @@
+ 			}
+ 		}
+ 	}
++        elsif ( $empty_ok_elements{$el} and $self->current_element eq 'item' ){
++	    $self->{items}->[$self->{num_items}-1]->{$el} = \%attribs;
++	}
+ }
+ 
+ sub append {
+diff -ruP XML-RSS-1.05/t/enclosures.t XML-RSS-1.05-enclosures/t/enclosures.t
+--- XML-RSS-1.05/t/enclosures.t	1970-01-01 09:00:00.000000000 +0900
++++ XML-RSS-1.05-enclosures/t/enclosures.t	2004-11-02 19:56:35.000000000 +0900
+@@ -0,0 +1,48 @@
++use strict;
++use Test::More;
++
++use constant RSS_VERSION       => "2.0";
++use constant RSS_CHANNEL_TITLE => "Example 2.0 Channel";
++
++use constant RSS_DOCUMENT      => qq(<?xml version="1.0"?>
++<rss version="2.0">
++ <channel>
++  <title>Example 2.0 Channel</title>
++  <link>http://example.com/</link>
++  <description>To lead by example</description>
++  <language>en-us</language>
++  <copyright>All content Public Domain, except comments which remains copyright the author</copyright> 
++  <managingEditor>editor\@example.com</managingEditor> 
++  <webMaster>webmaster\@example.com</webMaster>
++  <docs>http://backend.userland.com/rss</docs>
++  <category  domain="http://www.dmoz.org">Reference/Libraries/Library_and_Information_Science/Technical_Services/Cataloguing/Metadata/RDF/Applications/RSS/</category>
++  <generator>The Superest Dooperest RSS Generator</generator>
++  <lastBuildDate>Mon, 02 Sep 2002 03:19:17 GMT</lastBuildDate>
++  <ttl>60</ttl>
++
++  <item>
++   <title>News for September the Second</title>
++   <link>http://example.com/2002/09/02</link>
++   <description>other things happened today</description>
++   <comments>http://example.com/2002/09/02/comments.html</comments>
++   <author>joeuser\@example.com</author>
++   <pubDate>Mon, 02 Sep 2002 03:19:00 GMT</pubDate>
++   <guid isPermaLink="true">http://example.com/2002/09/02</guid>
++   <enclosure url="http://example.com/test.mp3" length="5352283" type="audio/mpeg" />
++  </item>
++
++ </channel>
++</rss>);
++
++plan tests => 4;
++
++use_ok("XML::RSS");
++
++my $xml = XML::RSS->new();
++isa_ok($xml,"XML::RSS");
++
++eval { $xml->parse(RSS_DOCUMENT); };
++is($@,'',"Parsed RSS feed");
++
++is_deeply($xml->{items}->[0]->{enclosure}, { url => "http://example.com/test.mp3", length => "5352283", type => "audio/mpeg" }, "got enclosure");
++
+diff -ruP XML-RSS-1.05/t/test_manifest XML-RSS-1.05-enclosures/t/test_manifest
+--- XML-RSS-1.05/t/test_manifest	2003-02-21 02:23:30.000000000 +0900
++++ XML-RSS-1.05-enclosures/t/test_manifest	2004-11-02 19:39:57.000000000 +0900
+@@ -7,4 +7,5 @@
+ 2.0-parse.t
+ 2.0-generate.t
+ encode-output.t
+-auto_add_modules.t
+\ No newline at end of file
++auto_add_modules.tenclosures.t
++enclosures.t

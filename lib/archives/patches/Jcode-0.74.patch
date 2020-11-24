@@ -1,0 +1,12 @@
+diff -ruP Jcode-0.74.orig/Jcode.pm Jcode-0.74/Jcode.pm
+--- Jcode-0.74.orig/Jcode.pm	Tue Jul 17 12:25:00 2001
++++ Jcode-0.74/Jcode.pm	Tue Jul 17 12:25:59 2001
+@@ -675,7 +675,7 @@
+     my $thingy = shift;
+     my $r_str = ref $thingy ? $thingy : \$thingy;
+     $$r_str =~ s{
+-	((:?$RE{EUC_C})+|(:?$RE{EUC_KANA})+|(:?$RE{EUC_0212})+)
++	((?:$RE{EUC_C})+|(?:$RE{EUC_KANA})+|(?:$RE{EUC_0212})+)
+ 	}{
+ 	    my $str = $1;
+ 	    my $esc = 

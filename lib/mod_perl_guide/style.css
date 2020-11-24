@@ -1,0 +1,69 @@
+
+body {	font-family: helvetica, arial, sans-serif; 
+	color: #000000; 
+	background-color: #ffffee;
+	margin: 1em 4em;
+     }	
+
+
+h1, h2, h3 { color: #005A9C }  
+h1, h2, h3, h4, h5, h6  { 
+	font-family: helvetica, arial, sans-serif;
+	}
+
+p, div, th, td {font-family: helvetica, arial, sans-serif;}
+
+ul, dl, li, dd {font-family: helvetica, arial, sans-serif;}
+
+big, small {	font-family: helvetica, arial, sans-serif;}
+
+strong, b {	font-family: helvetica, arial, sans-serif;}
+
+em, i {		font-family: helvetica, arial, sans-serif;}
+
+a:link {	font-family: helvetica, arial, sans-serif;}
+a:visited {	font-family: helvetica, arial, sans-serif; }
+a:active {	font-family: helvetica, arial, sans-serif; }
+a:hover {	font-family: helvetica, arial, sans-serif;}
+
+pre { 
+     	font-family: courier new, courier, monospace;
+      	color: #000000;
+    }
+
+code { 
+     	font-family: courier new, courier, monospace;
+    }
+
+div.notice { 
+	align: center;
+	padding: .25em; 
+	border: dashed green;
+}
+
+div.ad { 
+	padding: .25em; 
+	margin: .25em;
+	border: dashed red;
+      	color: #000000;
+}
+
+div.navbar { 
+	align: center;
+	padding: .25em; 
+	border: thin dashed blue;
+      	color: blue;
+}
+
+div.navbar a {text-decoration: none;}
+
+div.toc a {text-decoration: none;}
+
+div.search { 
+	align: center;
+	padding: .25em; 
+	border: thin dashed #eeeeee;
+	background-color: #eeeeee;
+      	color: black;
+	width: 70%
+}

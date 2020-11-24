@@ -1,0 +1,106 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.18
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+今回はちょっと普段の内容から離れて、DBI.pm のアップデート情報をお伝え
+します。
+
+
+2. DBI  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl でデータベースアプリケーションを作成する場合は必ずお世話になる 
+DBI.pm[1]。Tim Bunce さんが作成したデータベースインターフェースモジュー
+ルです。
+
+つい先日バージョンアップして 1.15[2] がリリースされました。変更点など
+は以下のようになっています。
+
+Changes in DBI 1.15,    28th March 2001
+
+  Added selectrow_arrayref
+  Added selectrow_hashref
+  Added selectall_hashref thanks to Leon Brocard.
+  Added DBI->connect(..., { dbi_connect_method => 'method' })
+  Added $dbh->{Statement} aliased to most recent child $sth->{Statement}.
+  Added $h->{ShowErrorStatement}=1 to cause the appending of the
+    relevant Statement text to the RaiseError/PrintError text.
+  Modified type_info to always return hash keys in uppercase and
+    to not require uppercase 'DATA_TYPE' key from type_info_all.
+    Thanks to Jennifer Tong and Rob Douglas.
+  Added \%attr param to tables() and table_info() methods.
+  Trace method uses warn() if it can't open the new file.
+  Trace shows source line and filename during global destruction.
+  Updated packages:
+    Updated Win32::DBIODBC (Win32::ODBC emulation) thanks to Roy Lee.
+    Updated DBD::ADO to much improved version 0.4 from Tom Lowery.
+    Updated DBD::Sponge to include $sth->{PRECISION} thanks to Tom Lowery.
+    Changed DBD::ExampleP to use lstat() instead of stat().
+  Documentation:
+    Documented $DBI::lasth (which has been there since day 1).
+    Documented SQL_* names.
+    Clarified and extended docs for $h->state thanks to Masaaki Hirose.
+    Clarified fetchall_arrayref({}) docs (thanks to, er, someone!).
+    Clarified type_info_all re lettercase and index values.
+    Updated DBI::FAQ to 0.38 thanks to Alligator Descartes.
+    Added cute bind_columns example thanks to Mark Dedlow.
+    Extended docs on \%attr arg to data_sources method.
+  Makefile.PL    
+    Removed obscure potential 'rm -rf /' (thanks to Ulrich Pfeifer).
+    Removed use of glob and find (thanks to Michael A. Chase).
+  Proxy: 
+    Removed debug messages from DBD::Proxy AUTOLOAD thanks to Brian McCauley.
+    Added fix for problem using table_info thanks to Tom Lowery.
+    Added better determination of where to put the pid file, and...
+    Added KNOWN ISSUES section to DBD::Proxy docs thanks to Jochen Wiedmann.
+  Shell: 
+    Updated DBI::Format to include DBI::Format::String thanks to Tom Lowery.
+    Added describe command thanks to Tom Lowery.
+    Added columnseparator option thanks to Tom Lowery (I think).
+    Added 'raw' format thanks to, er, someone, maybe Tom again.
+  Known issues:  
+    Perl 5.005 and 5.006 both leak memory doing local($handle->{Foo}).
+    Perl 5.004 doesn't. The leak is not a DBI or driver bug.
+
+
+ウェブアプリケーションを作っている方にとっては select*_hashref が大き
+な変更です。いままでも fetchall_arrayref({}) という方法で実現はできま
+したが、これで prepare, execute の手間もいらなくなりました。(*1)
+
+たとえば selectall_hashref を用いることで、
+
+  id | name  | email 
+  ---+-------+---------
+  1  | foo   | foo@bar
+  2  | bar   | bar@foo
+
+といったテーブルから、
+
+  [ { id => 1, name => 'foo', email => 'foo@bar' },
+    { id => 2, name => 'bar', email => 'bar@foo' } ]
+
+といった「ハッシュリファレンスの配列リファレンス」が簡単に取得できます。
+この場合であれば 
+
+  $dbh->selectall_hashref('SELECT id, name, email FROM users');
+
+のようにしてできるでしょう。この配列リファレンスを取得できてなにがうれ
+しいかというと、HTML::Template の TMPL_LOOP にそのまま代入できるという
+ことです。DBI と HTML::Template でウェブ+データベースのアプリケーショ
+ンを作成している人も多いかと思いますが、そんなときかなり有効になります
+ね。
+
+*1 もちろん何度も繰り返して execute する場合は prepare の方が有利です。
+
+
+[1] http://cpan2.org/Asset/display?dist=DBI
+[2] http://perldoc.anidea.com/other/DBI/Changes
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/
+
+

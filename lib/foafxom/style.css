@@ -1,0 +1,82 @@
+body {
+  font-size: 12px;
+  font-family: Verdana, Arial, Sans Serif;
+}
+a {
+  color: #00f;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+a:visited {
+  color: #00a;
+}
+
+#banner h1 { font-size: 1.4em }
+#banner a:hover { text-decoration: none }
+
+h1, h2, h3, h4 { font-size: 1.2em }
+#content {
+  width: 65%;
+  float: left;
+  padding-right: 10px;
+}
+
+#links {
+  margin-left: 10px;
+  float: left;
+  width: 28%;
+}
+#links ul {
+  margin: 0;
+/*  font-size: 1.0em; */
+  list-style: none;
+  line-height: 1.5em;
+/*  line-height:14px; */
+}
+#links li {
+  font-size: 11px;
+  margin: 0 0.4em;
+}
+.blogbody {
+  margin: 2em 0.4em;
+  line-height: 1.3em;
+}
+h3.title {
+  margin-bottom: 1em;
+}
+.pubinfo {
+  font-size: 11px;
+  margin: 0 0 1em 0;
+}
+.posted {
+  margin: 0.4em 0;
+  font-size: 11px;
+  text-align: right;
+}
+.sidetitle {
+  font-weight: bold;
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #000;
+}
+.side {
+  padding: 0.6em;
+  font-size: 11px;
+}
+.syndicate {
+  margin-top: 1em;
+  text-align: right;
+  font-size: 11px;
+}
+.powered {
+  text-align: right;
+  font-size: 11px;
+}  
+
+.breadcrumbs {
+  font-size: 11px;
+/*  text-align: right; */
+  margin: 1em 0;
+}

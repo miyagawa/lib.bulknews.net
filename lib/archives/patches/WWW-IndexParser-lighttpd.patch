@@ -1,0 +1,136 @@
+=== lib/WWW/IndexParser.pm
+==================================================================
+--- lib/WWW/IndexParser.pm	(revision 5436)
++++ lib/WWW/IndexParser.pm	(local)
+@@ -5,6 +5,7 @@
+ use HTML::Parser;
+ use Time::Local;
+ use WWW::IndexParser::Entry;
++use URI;
+ 
+ BEGIN {
+   our $VERSION = '0.5.1';
+@@ -54,6 +55,7 @@
+    $self->{debug} = 0;
+  }
+  $self->{parser} = HTML::Parser->new( api_version => 3);
++ $self->{parser}->{debug} = $self->{debug};
+  if (defined $args{url}) {
+    $self->_url($args{url});
+    return @{$self->{files}} if defined $self->{files};
+@@ -112,6 +114,10 @@
+       warn "Server is IIS" if $self->{debug};
+       $self->{parser}->handler( start => \&_parse_html_iis, "self, tagname, attr, attrseq, text");
+       $self->{parser}->handler( text => \&_parse_html_iis, "self, tagname, attr, attrseq, text");
++    } elsif ($self->{res}->headers->{server} =~ m!^lighttpd/!) {
++      warn "Server is lighttpd" if $self->{debug};
++      $self->{parser}->handler( start => \&_parse_html_lighttpd, "self, tagname, attr, attrseq, text");
++      $self->{parser}->handler( text => \&_parse_html_lighttpd, "self, tagname, attr, attrseq, text");
+     } else {
+       warn "Unknown web server" if $self->{debug};
+       return;
+@@ -127,7 +133,7 @@
+ 	   (defined $self->{port}?':' . $self->{port}:'') . 
+ 	   $entry->filename);
+       } else {
+-        $entry->url($self->{url} . $entry->filename);
++        $entry->url( URI->new_abs($entry->filename, $self->{url}) );
+       }
+     }
+     # Get this back from the parser object.
+@@ -281,8 +287,66 @@
+   }
+ }
+ 
++sub _parse_html_lighttpd {
++  my ($self, $tagname, $attr, $attrseq, $origtext) = @_;
+ 
++  if (not defined $tagname) {
++    return unless $self->{parser_state};
+ 
++    if ($self->{parser_state} eq 'title') {
++      warn "The title is: $origtext" if $self->{debug};
++      if ($origtext =~ m!^Index of (.+)/$!) {
++        $self->{directory} = $1;
++      }
++      $self->{parser_state} = 1;
++      return;
++    }
++
++    if ($self->{parser_state} eq 'time') {
++      if ($origtext =~ /^(\d{4})-(\w\w\w)-(\d\d) (\d\d):(\d\d):(\d\d)$/) {
++        my $time = timelocal(0, $5, $4, $3, $months->{$2}, $1-1900);
++        $self->{current_file}->{time} = $time;
++      }
++    } elsif ($self->{parser_state} eq 'size') {
++      if ($origtext =~ /^([\d\.]+)(\w)?/) {
++        $self->{current_file}->{size} = $1;
++        $self->{current_file}->{size_units} = $2 if defined $2;
++      }
++    } elsif ($self->{parser_state} eq 'type') {
++      if ($origtext =~ /^[\w\-\/]+$/) {
++        $self->{current_file}->{type} = $origtext;
++      }
++    }
++  } elsif ($tagname eq 'title') {
++    $self->{parser_state} = 'title';
++  } elsif ($tagname eq "td") {
++    my %class2state = (m => 'time', s => 'size', t => 'type');
++    my $class = $attr->{class};
++    my $state = $class2state{$class};
++    $self->{parser_state} = $state if $state;
++  } elsif ($tagname eq 'tr') {
++    if (defined $self->{current_file}) {
++      my $entry = WWW::IndexParser::Entry->new;
++      $entry->filename($self->{current_file}->{filename}) if defined $self->{current_file}->{filename};
++      $entry->time($self->{current_file}->{time}) if defined $self->{current_file}->{time};
++      $entry->type($self->{current_file}->{type}) if defined $self->{current_file}->{type};
++      $entry->size($self->{current_file}->{size}) if defined $self->{current_file}->{size};
++      $entry->size_units($self->{current_file}->{size_units}) if defined $self->{current_file}->{size_units};
++      push @{$self->{files}}, $entry;
++      warn "Added " . $self->{current_file}->{filename} if $self->{debug};
++      delete $self->{current_file};
++    }
++    warn "Possible new file row" if $self->{debug};
++    $self->{parser_state} = 1;
++  } elsif ($tagname eq "a" && defined $self->{parser_state}) {
++    warn "  file name = " .  $attr->{href} if $self->{debug};
++    $self->{current_file}->{filename} = $attr->{href} if defined $attr->{href};
++  } else {
++    warn $tagname if $self->{debug};
++  }
++}
++
++
+ =head1 NAME
+ 
+ WWW::IndexParser - Fetch and parse the directory index from a web server
+=== t/WWW-IndexParser.t
+==================================================================
+--- t/WWW-IndexParser.t	(revision 5436)
++++ t/WWW-IndexParser.t	(local)
+@@ -5,7 +5,7 @@
+ 
+ # change 'tests => 1' to 'tests => last_test_to_print';
+ use lib qw(../lib);
+-use Test::More tests => 3;
++use Test::More tests => 7;
+ 
+ BEGIN { use_ok('WWW::IndexParser') };
+ 
+@@ -18,3 +18,15 @@
+ my @files = WWW::IndexParser->new(url => $url);
+ ok( @files,                           "fetched index from $url");
+ ok( $files[0]->filename eq '/',     "first entry from $url is parent directory /");
++
++# test lighttpd
++{
++    my $url = "http://mirrors.cat.pdx.edu/lighttpd/";
++    my @files = WWW::IndexParser->new(url => $url);
++    ok( @files,                           "fetched index from $url");
++    is( $files[0]->filename, '../',          "first entry from $url is parent directory /");
++    warn $files[0]->url;
++    like( $files[1]->filename, qr/lighttpd/,     "second entry from $url looks like lighttpd tarball");
++    like( $files[1]->type, qr/rpm/, $files[1]->type );
++}
++

@@ -1,0 +1,71 @@
+diff -ruP /usr/local/src/CPAN/build/OpenIndex/Makefile.PL OpenIndex/Makefile.PL
+--- /usr/local/src/CPAN/build/OpenIndex/Makefile.PL	Fri Sep  7 06:57:07 2001
++++ OpenIndex/Makefile.PL	Sat Sep 29 00:53:46 2001
+@@ -74,5 +74,6 @@
+ 				'Apache::Status' => 0,
+ 				'Apache::Language' => 0,
+ 			   	'Storable'	=> 0,
++				'File::NCopy' => 0,
+ 				}, 
+ );
+diff -ruP /usr/local/src/CPAN/build/OpenIndex/OpenIndex.pm OpenIndex/OpenIndex.pm
+--- /usr/local/src/CPAN/build/OpenIndex/OpenIndex.pm	Sat Sep 15 07:44:54 2001
++++ OpenIndex/OpenIndex.pm	Sat Sep 29 00:55:17 2001
+@@ -86,12 +86,6 @@
+ 
+ # global arguments
+ use vars qw($debug $dodump $errmsg $chgid $users $iconfig %commands);
+-$debug;
+-$dodump;
+-$errmsg;
+-$chgid;		# used within chgid() required for File::NCopy
+-$users;		# global users revoke cache
+-$iconfig;
+ %commands = (
+     Menu => {
+ 	back=>\&procform,
+@@ -307,7 +301,7 @@
+     my $oldmask=umask $cfg->{umask} if $args->{gid} && @{$args->{gid}} && $cfg->{umask};
+ # process any before command
+     if($commands{$cmd}{before}) {
+-	unless($commands{$cmd}{before}($r,$args,$cfg,$docroot,$items,$formdst)) {
++	unless($commands{$cmd}{before}->($r,$args,$cfg,$docroot,$items,$formdst)) {
+ 	    $r->log->error(__PACKAGE__." $cmd before: $errmsg");
+ 	    return ERROR;
+ 	}
+@@ -330,7 +324,7 @@
+ 	    umask($oldmask) if $args->{gid} && @{$args->{gid}} && $cfg->{umask};
+ 	    $retval=ERROR;
+ 	} else {
+-	    $retval=$commands{$cmd}{cmd}($r,$args,$cfg,$docroot,$formsrc,$formdst);
++	    $retval=$commands{$cmd}{cmd}->($r,$args,$cfg,$docroot,$formsrc,$formdst);
+ 	    unless($retval) {
+ 		$r->log->warn(__PACKAGE__." $cmd ERROR: $args->{user}: $docroot: src=$formsrc dst=$formdst: $errmsg");
+ 		$retval=ERROR;
+@@ -341,7 +335,7 @@
+     } until $icnt<1 || $retval;
+ # process any after command
+     if($commands{$cmd}{after}) {
+-	$retval=$commands{$cmd}{after}($r,$args,$cfg,$docroot,$formdst);
++	$retval=$commands{$cmd}{after}->($r,$args,$cfg,$docroot,$formdst);
+ 	unless($retval) {
+ 	    $r->log->error(__PACKAGE__." $cmd after: $errmsg");
+ 	    $retval=ERROR;
+@@ -1836,7 +1830,7 @@
+ 		return FORBIDDEN;
+ 	    }
+ 	    if($cfg->{always}) {
+-		$retval=$cfg->{always}($r,\%args,$cfg,$uri);
++		$retval=$cfg->{always}->($r,\%args,$cfg,$uri);
+ 		if($retval>99) {
+ 		    $nRedir++;
+ 		    print STDERR "ALWAYS $retval\n===== ", __PACKAGE__, " DEBUG STOP  =====\n" if $debug;
+@@ -1848,7 +1842,7 @@
+ 		    $args{dir}="$args{root}$cfg->{fakedir}/";
+ 		    $args{dir}.="$cfg->{markdir}/" if $mode & URI_MARK;
+ 		}
+-		$retval=$commands{$args{proc}}{back}($r,\%args,$cfg,$docroot);
++		$retval=$commands{$args{proc}}{back}->($r,\%args,$cfg,$docroot);
+ 		if($retval>99) {
+ 		    $nRedir++;
+ 		    print STDERR "proc($args{proc}) $retval\n===== ", __PACKAGE__, " DEBUG STOP  =====\n" if $debug;

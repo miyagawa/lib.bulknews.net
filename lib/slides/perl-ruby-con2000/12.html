@@ -1,0 +1,32 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="11.html">[prev]</A> <A href="13.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>モジュールを作ってみよう</H2>
+<HR>
+<UL>
+<LI><CODE>perl Makefile.PL; make; make test</CODE>
+<OL>
+<LI><CODE>test.pl</CODE>でテストができる
+<LI>詳細は <CODE>perldoc Test; perldoc Test::Harness</CODE>
+</OL>
+<LI>ドキュメントを書く
+<OL>
+<LI>POD形式 = Perl に埋め込まれたドキュメント
+<LI>生成されたテンプレートを参考に
+</OL>
+<LI>バージョン管理
+<OL>
+<LI><CODE>$TV::Program::VERSION</CODE>の値
+<LI><CODE>MANIFEST</CODE>: ファイル一覧
+<LI><CODE>Changes</CODE>: 変更履歴
+</OL>
+</UL>
+</BODY>
+</HTML>

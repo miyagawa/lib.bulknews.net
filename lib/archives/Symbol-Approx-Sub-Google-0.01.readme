@@ -1,0 +1,29 @@
+NAME
+    Symbol::Approx::Sub::Google - uses Google Web API for approximate
+    matching
+
+SYNOPSIS
+      use Symbol::Approx::Sub xform => undef, match => 'Google';
+
+      $Symbol::Approx::Sub::Google::LicenseKey = "xxxxxxxxxxxxxx";
+
+      sub perl { ... }
+      perrl();                      # corrected to perl()
+
+DESCRIPTION
+    Symbol::Approx::Sub::Google is a plug-in for Symbol::Approx::Sub, which
+    allows you to use Google Web API's spell checking feature to find
+    approximate subroutine names.
+
+    This module would fail if you run your mis-spelled code more than 1000
+    times a day ;)
+
+AUTHOR
+    Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+SEE ALSO
+    the Symbol::Approx::Sub manpage, http://www.google.com/apis/
+

@@ -1,0 +1,26 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.33
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+1. おしらせ  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+2002/05/29 に JUS のイベントで Perl6 についてのセミナー講師をやらせて
+いただくことになりました。Perl6, Parrot, perl 5.8 などの話をいろいろと
+しようと思っています。セミナー後には、Tokyo.pm と合同の懇親会もありま
+すので、関東方面で都合のつく方はぜひ、お越しください。
+
+  http://www.jus.or.jp/benkyokai/02-05.html
+
+また、WEB+DB Press Vol.8 では、Class::DBI を使った RDBのオブジェクトモ
+デリングについての記事を書かせて頂いています。こちらも興味のある方はご
+らんください。
+  
+  http://www.gihyo.co.jp/wdpress/
+
+
+# また、近況報告になってしまいました（汗
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

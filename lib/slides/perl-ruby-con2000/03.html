@@ -1,0 +1,26 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="02.html">[prev]</A> <A href="04.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>関数を定義するモジュール</H2>
+<HR>
+<UL>
+<LI>関数指向モジュール<BR>例)<BR>
+<OL>
+<LI><CODE>Sys::Hostname</CODE> → <CODE>hostname()</CODE>
+<LI><CODE>LWP::Simple</CODE> → <CODE>get()</CODE>
+</OL>
+<LI><CODE>main</CODE>にインポートする
+<LI><CODE>use Foo::Bar;</CODE>で、<CODE>foobar()</CODE>をインポート<BR>
+　　　→ <CODE>require</CODE>ではダメ
+<LI><CODE>use Foo::Bar;</CODE><BR>
+= <CODE>BEGIN { require Foo::Bar; import Foo::Bar; }</CODE>
+</UL>
+</BODY>
+</HTML>

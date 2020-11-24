@@ -1,0 +1,4323 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl Configuration </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl Configuration 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./install.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./control.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Server_Configuration">Server Configuration</A>
+	<LI><A HREF="#Apache_Configuration">Apache Configuration</A>
+	<UL>
+
+		<LI><A HREF="#Configuration_Directives">Configuration Directives</A>
+		<LI><A HREF="#_htaccess_files">.htaccess files</A>
+		<LI><A HREF="#E_lt_DirectoryE_gt_E_lt_Locati">&lt;Directory&gt;, &lt;Location&gt; and &lt;Files&gt; Sections</A>
+		<LI><A HREF="#How_Directory_Location_and_File">How Directory, Location and Files Sections are Merged</A>
+		<LI><A HREF="#Sub_Grouping_of_Location_Dir">Sub-Grouping of &lt;Location&gt;, &lt;Directory&gt; and &lt;Files&gt; Sections</A>
+		<LI><A HREF="#Options_Directive">Options Directive</A>
+	</UL>
+
+	<LI><A HREF="#mod_perl_Configuration">mod_perl Configuration</A>
+	<UL>
+
+		<LI><A HREF="#Alias_Configurations">Alias Configurations</A>
+		<UL>
+
+			<LI><A HREF="#Running_CGI_PerlRun_and_Regist">Running CGI, PerlRun, and Registry Scripts Located in the Same Directory</A>
+		</UL>
+
+		<LI><A HREF="#_Location_Configuration">&lt;Location&gt; Configuration</A>
+		<LI><A HREF="#Overriding_Location_Setting_in">Overriding &lt;Location&gt; Setting in &quot;Sub-Location&quot;</A>
+		<LI><A HREF="#PerlModule_and_PerlRequire_Direc">PerlModule and PerlRequire Directives</A>
+		<LI><A HREF="#Perl_Handlers">Perl*Handlers</A>
+		<LI><A HREF="#The_handler_subroutine">The handler subroutine</A>
+		<LI><A HREF="#Stacked_Handlers">Stacked Handlers</A>
+		<LI><A HREF="#Perl_Method_Handlers">Perl Method Handlers</A>
+		<LI><A HREF="#PerlFreshRestart">PerlFreshRestart</A>
+		<LI><A HREF="#PerlSetVar_PerlSetEnv_and_PerlP">PerlSetVar, PerlSetEnv and PerlPassEnv</A>
+		<LI><A HREF="#PerlSetupEnv">PerlSetupEnv</A>
+		<LI><A HREF="#PerlWarn_and_PerlTaintCheck">PerlWarn and PerlTaintCheck</A>
+		<LI><A HREF="#MinSpareServers_MaxSpareServers_">MinSpareServers MaxSpareServers StartServers MaxClients MaxRequestsPerChild</A>
+	</UL>
+
+	<LI><A HREF="#The_Startup_File">The Startup File</A>
+	<UL>
+
+		<LI><A HREF="#The_Sample_Startup_File">The Sample Startup File</A>
+		<LI><A HREF="#What_Modules_You_Should_Add_to_t">What Modules You Should Add to the Startup File and Why</A>
+		<LI><A HREF="#The_Confusion_with_use_in_the_">The Confusion with use() in the Server Startup File</A>
+	</UL>
+
+	<LI><A HREF="#Apache_Configuration_in_Perl">Apache Configuration in Perl</A>
+	<UL>
+
+		<LI><A HREF="#Usage">Usage</A>
+		<LI><A HREF="#Enabling">Enabling</A>
+		<LI><A HREF="#Caveats">Caveats</A>
+		<LI><A HREF="#Verifying">Verifying</A>
+		<LI><A HREF="#Strict_Perl_Sections">Strict &lt;Perl&gt; Sections</A>
+		<LI><A HREF="#Debugging">Debugging</A>
+		<LI><A HREF="#References">References</A>
+	</UL>
+
+	<LI><A HREF="#Validating_the_Configuration_Syn">Validating the Configuration Syntax</A>
+	<LI><A HREF="#Enabling_Remote_Server_Configura">Enabling Remote Server Configuration Reports</A>
+	<LI><A HREF="#Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A>
+	<LI><A HREF="#Configuring_Apache_mod_perl_wi">Configuring Apache + mod_perl with mod_macro</A>
+	<LI><A HREF="#General_Pitfalls">General Pitfalls</A>
+	<UL>
+
+		<LI><A HREF="#My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A>
+		<LI><A HREF="#My_Script_Works_under_mod_cgi_b">My Script Works under mod_cgi, but when Called via mod_perl I Get a 'Save-As' Prompt</A>
+		<LI><A HREF="#Is_There_a_Way_to_Provide_a_Diff">Is There a Way to Provide a Different startup.pl File for Each Individual Virtual Host</A>
+		<LI><A HREF="#Is_There_a_Way_to_Modify_INC_on">Is There a Way to Modify @INC on a Per-Virtual-Host or Per-Location Basis.</A>
+		<LI><A HREF="#A_Script_From_One_Virtual_Host_C">A Script From One Virtual Host Calls a Script with the Same Path From the Other Virtual Host</A>
+		<LI><A HREF="#the_Server_no_Longer_Retrieves_t">the Server no Longer Retrieves the DirectoryIndex Files for a Directory</A>
+	</UL>
+
+	<LI><A HREF="#Configuration_Security_Concerns">Configuration Security Concerns</A>
+	<LI><A HREF="#Apache_Restarts_Twice_On_Start">Apache Restarts Twice On Start</A>
+	<LI><A HREF="#Knowing_the_proxy_pass_ed_Connec">Knowing the proxy_pass'ed Connection Type</A>
+	<LI><A HREF="#Adding_Custom_Configuration_Dire">Adding Custom Configuration Directives </A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Server_Configuration">Server Configuration</A></H1></CENTER>
+<P>
+The next step after building and installing your new mod_perl enabled
+Apache server is to configure the server. There are two separate parts to
+configure: Apache and mod_perl. Each has its own set of directives.
+
+<P>
+To configure your mod_perl enabled Apache server, the only file that you
+should need to edit is <EM>httpd.conf</EM>. By default, <EM>httpd.conf</EM> is put into the <EM>conf</EM> directory under the server root directory. The default server root is <EM>/usr/local/apache/</EM> on many UNIX platforms, but within reason it can be any directory you
+choose. If you are new to Apache and mod_perl, you will probably find it
+helpful to keep to the directory layouts we use in this Guide if you can.
+
+<P>
+Apache versions 1.3.4 and later are distributed with the configuration
+directives in a single file -- <EM>httpd.conf</EM>. This Guide uses the same approach in its examples. Prior to version
+1.3.4, the default Apache installation used three configuration files -- <EM>httpd.conf</EM>,
+<EM>srm.conf</EM>, and <EM>access.conf</EM>. If you wish you can still use all three files, by setting the
+AccessConfig and ResourceConfig directives in <EM>httpd.conf</EM>. You will also see later on that we use other files, for example <EM>perl.conf</EM> and <EM>startup.pl</EM>. This is just for our convenience, you could still do everything in <EM>httpd.conf</EM> if you wished.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Configuration">Apache Configuration</A></H1></CENTER>
+<P>
+Apache configuration can be confusing. To minimize the number of things
+that can go wrong, it can be a good idea first to configure Apache itself
+without mod_perl. This will give you the confidence that it works and maybe
+that you have some idea how to configure it.
+
+<P>
+There is a warning in the <EM>httpd.conf</EM> distributed with Apache about simply editing <EM>httpd.conf</EM> and running the server, without understanding all the implications. This is
+another warning. Modifying the config file and adding new directives can
+introduce security problems, and have performance implications.
+
+<P>
+The Apache distribution comes with an extensive configuration manual, and
+in addition each section of the distributed configuration file includes
+helpful comments explaining how every directive should be configured and
+what the defaults values are.
+
+<P>
+If you haven't moved Apache's directories around, the installation program
+will have configured everything for you. You can just start the server and
+test it. To start the server use the <CODE>apachectl</CODE>
+utility which comes bundled with the Apache distribution. It resides in the
+same directory as <CODE>httpd</CODE>, the Apache server itself. Execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/local/apache/bin/apachectl start</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you can test the server, for example by accessing <A
+HREF="http://localhost">http://localhost</A> from a browser running on the
+same host.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration_Directives">Configuration Directives</A></H2></CENTER>
+<P>
+For a basic setup there are just a few things to configure. If you have
+moved any directories you have to update them in <EM>httpd.conf</EM>. There are many of them, here are just a couple of examples:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ServerRoot   &quot;/usr/local/apache&quot;
+  DocumentRoot &quot;/home/httpd/docs&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to run it on a port other than port 80 edit the <CODE>Port</CODE>
+directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Port 8080</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You might want to change the user and group names the server will run
+under. Note that if started as the <EM>root</EM> user (which is generally the case), the parent process will continue to run
+as <EM>root</EM>, but its children will run as the user and group you have specified. For
+example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  User httpd
+  Group httpd</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+There are many other directives that you might need to configure as well.
+In addition to directives which take a single value there are whole
+sections of the configuration (such as the <CODE>&lt;Directory&gt;</CODE> and
+<CODE>&lt;Location&gt;</CODE> sections) which apply only to certain areas of your Web space. As mentioned
+earlier you will find them all in <EM>httpd.conf</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_htaccess_files">.htaccess files</A></H2></CENTER>
+<P>
+If there is a file with the name <EM>.htaccess</EM> in any directory, Apache scans it for further configuration directives
+which it then applies only to that directory (and its subdirectories). The
+name
+<EM>.htaccess</EM> is confusing because it can contain any configuration directives, not just
+those related to access to resources. You will not be surprised to find
+that a configuration directive can change the names of the files used in
+this way.
+
+<P>
+Note that if there is a
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Directory /&gt;
+    AllowOverride None
+  &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+directive in <EM>httpd.conf</EM>, Apache will not try to look for
+<EM>.htaccess</EM> at all.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="E_lt_DirectoryE_gt_E_lt_Locati">&lt;Directory&gt;, &lt;Location&gt; and &lt;Files&gt; Sections</A></H2></CENTER>
+<P>
+I'll explain just the basics of the <CODE>&lt;Directory&gt;</CODE>, <CODE>&lt;Location&gt;</CODE> and
+<CODE>&lt;Files&gt;</CODE> sections. Remember that there is more to know and the rest of the
+information is available in the Apache documentation. The information I'll
+present here is just what is important for understanding the mod_perl
+configuration sections.
+
+<P>
+Apache considers directories and files on your machine all to be resources.
+For each resource you can determine a particular behaviour which will apply
+to every request for information from that particular resource.
+
+<P>
+Obviously the directives in <CODE>&lt;Directory&gt;</CODE> sections apply to specific directories on your host machine, and those in <CODE>&lt;Files&gt;</CODE> sections apply only to specific files (actually groups of files with names
+which have something in common). In addition to these sections, Apache has
+the concept of a <CODE>&lt;Location&gt;</CODE>, which is also just a resource.  <CODE>&lt;Location&gt;</CODE> sections apply to specific URIs. Locations are based at the document root,
+directories are based at the filesystem root. For example, if you have the
+default server directory layout where the server root is <EM>/usr/local/apache</EM> and the document root is <EM>/usr/local/apache/htdocs</EM> then static files in the directory <EM>/usr/local/apache/htdocs/pub</EM> are in the location <EM>/pub</EM>.
+
+<P>
+It is up to you to decide which directories on your host machine are mapped
+to which locations. You should be careful how you do it, because the
+security of your server may be at stake.
+
+<P>
+Locations do not necessarily have to refer to existing physical
+directories, but may refer to virtual resources which the server creates
+for the duration of a single browser request. As you will see, this is
+often the case for a mod_perl server.
+
+<P>
+When a browser asks for a resource from your server, Apache determines from
+its configuration whether or not to serve the request, whether to pass the
+request to another server, what (if any) authorization is required for
+access to the resource, and how to reply. For any given resource, the
+various sections in your configuration may provide conflicting information.
+For example you may have a <CODE>&lt;Directory&gt;</CODE>
+section which tells Apache that authorization is required for access to the
+resource but you may have a <CODE>&lt;Files&gt;</CODE> section which says that it is not. It is not always obvious which directive
+takes precedence in these cases. This can be a trap for the unwary.
+
+<UL>
+<P><LI><STRONG><A NAME="item__lt_Directory_directoryPath_gt_">&lt;Directory directoryPath&gt; ... &lt;/Directory&gt;</A></STRONG>
+<P>
+Can appear in server and virtual host configurations.
+
+<P>
+<CODE>&lt;Directory&gt;</CODE> and <CODE>&lt;/Directory&gt;</CODE> are used to enclose a group of directives which will apply only to the
+named directory and sub-directories of that directory. Any directive which
+is allowed in a directory context (see the Apache documentation) may be
+used.
+
+<P>
+The path given in the <CODE>&lt;Directory&gt;</CODE> directive is either the full path to a directory, or a wild-card string. In
+a wild-card string, <CODE>?</CODE>
+matches any single character, <CODE>*</CODE> matches any sequence of characters, and <CODE>[]</CODE> matches character ranges. (This is similar to the shell's file globs.) None
+of the wildcards will match a <CODE>/</CODE> character. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   &lt;Directory /home/httpd/docs&gt;
+     Options Indexes
+   &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to use a regular expression to match then you should use the
+syntax <CODE>&lt;DirectoryMatch regex&gt;</CODE> ... <CODE>&lt;/DirectoryMatch&gt;</CODE>.
+
+<P>
+If multiple (non-regular expression) directory sections match the directory
+(or its parents) containing a document, then the directives are applied in
+the order of shortest match first, interspersed with the directives from
+any <EM>.htaccess</EM> files. For example, with
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>     &lt;Directory /&gt;
+       AllowOverride None
+     &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>     &lt;Directory /home/httpd/docs/*&gt;
+       AllowOverride FileInfo
+     &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+for access to the document <EM>/home/httpd/docs/index.html</EM> the steps are:
+
+<UL>
+<P><LI><STRONG><A NAME="item_Apply">Apply directive AllowOverride None (disabling .htaccess
+files).</A></STRONG>
+<P><LI><STRONG><A NAME="item_Apply">Apply directive AllowOverride FileInfo for directory
+/home/httpd/docs/ (which now enables .htaccess in
+/home/httpd/docs/ and its sub-directories).</A></STRONG>
+<P><LI><STRONG><A NAME="item_Apply">Apply any FileInfo directives in
+/home/httpd/docs/.htaccess.</A></STRONG>
+</UL>
+<P><LI><STRONG><A NAME="item__lt_Files_filename_gt_lt_">&lt;Files filename&gt; ... &lt;/Files&gt;</A></STRONG>
+<P>
+Can appear in server and virtual host configurations, and <EM>.htaccess</EM>
+files as well.
+
+<P>
+The <CODE>&lt;Files&gt;</CODE> directive provides for access control by filename. It is comparable to the <CODE>&lt;Directory&gt;</CODE> and
+<CODE>&lt;Location&gt;</CODE> directives. It should be closed with the
+<CODE>&lt;/Files&gt;</CODE> directive. The directives given within this section will be applied to any
+object with a basename (last component of filename) matching the specified
+filename.
+
+<P>
+<CODE>&lt;Files&gt;</CODE> sections are processed in the order they appear in the configuration file,
+after the <CODE>&lt;Directory&gt;</CODE> sections and
+<EM>.htaccess</EM> files are read, but before <CODE>&lt;Location&gt;</CODE>
+sections. Note that <CODE>&lt;Files&gt;</CODE> can be nested inside
+<CODE>&lt;Directory&gt;</CODE> sections to restrict the portion of the filesystem they apply to. <CODE>&lt;Files&gt;</CODE> cannot be nested inside
+<CODE>&lt;Location&gt;</CODE> sections however.
+
+<P>
+The filename argument should include a filename, or a wild-card string,
+where <CODE>?</CODE> matches any single character, and <CODE>*</CODE> matches any sequence of characters. Extended regular expressions can also
+be used, simply place a tilde character <CODE>~</CODE> between the directive and the regular expression. The regular expression
+should be in quotes. The dollar symbol refers to the end of the string. The
+pipe character indicates alternatives. Special characters in extended
+regular expressions must escaped with a backslash. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   &lt;Files ~ &quot;\.(gif|jpe?g|png)$&quot;&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+would match most common Internet graphics formats. Alternatively you can
+use the <CODE>&lt;FilesMatch regex&gt;</CODE> ... <CODE>&lt;/FilesMatch&gt;</CODE>
+syntax.
+
+<P><LI><STRONG><A NAME="item__lt_Location_URL_gt_lt_Lo">&lt;Location URL&gt; ... &lt;/Location&gt;</A></STRONG>
+<P>
+Can appear in server and virtual host configurations.
+
+<P>
+The <CODE>&lt;Location&gt;</CODE> directive provides for access control by URL. It is similar to the <CODE>&lt;Directory&gt;</CODE> directive, and starts a section which is terminated with the <CODE>&lt;/Location&gt;</CODE>
+directive.
+
+<P>
+<CODE>&lt;Location&gt;</CODE> sections are processed in the order they appear in the configuration file,
+after the <CODE>&lt;Directory&gt;</CODE> sections,
+<EM>.htaccess</EM> files and <CODE>&lt;Files&gt;</CODE> sections are read.
+
+<P>
+The <CODE>&lt;Location&gt;</CODE> section is the directive that is used most often with mod_perl.
+
+<P>
+URLs <EM>do not</EM> have to refer to real directories or files within the filesystem at all, <CODE>&lt;Location&gt;</CODE> operates completely outside the filesystem. Indeed it may sometimes be wise
+to ensure that
+<CODE>&lt;Location&gt;</CODE>s do not match real paths to avoid confusion.
+
+<P>
+The URL may use wildcards. In a wild-card string, <CODE>?</CODE> matches any single character, and <CODE>*</CODE> matches any sequences of characters, <CODE>[]</CODE>
+groups characters to match. For regular expression matches use the
+<CODE>&lt;LocationMatch regex&gt;</CODE> ... <CODE>&lt;/LocationMatch&gt;</CODE>
+syntax.
+
+<P>
+The <CODE>&lt;Location&gt;</CODE> functionality is especially useful when combined with the <CODE>SetHandler</CODE> directive. For example to enable status requests, but allow them only from
+browsers at <EM>example.com</EM>, you might use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /status&gt;
+    SetHandler server-status
+    order deny,allow
+    deny from all
+    allow from .example.com
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="How_Directory_Location_and_File">How Directory, Location and Files Sections are Merged</A></H2></CENTER>
+<P>
+When configuring the server, it's important to understand the order in
+which the rules of each section apply to requests. The order of merging is:
+
+<OL>
+<P><LI><STRONG><A NAME="item__lt_Directory_gt_except_regula">&lt;Directory&gt; (except regular expressions) and
+.htaccess are processed simultaneously, with .htaccess
+overriding &lt;Directory&gt;</A></STRONG>
+<P><LI><STRONG><A NAME="item__lt_DirectoryMatch_gt_and_lt_">&lt;DirectoryMatch&gt;, and &lt;Directory&gt; with
+regular expressions</A></STRONG>
+<P><LI><STRONG><A NAME="item__lt_Files_gt_and_lt_FilesMatch">&lt;Files&gt; and &lt;FilesMatch&gt; are processed
+simultaneously</A></STRONG>
+<P><LI><STRONG><A NAME="item__lt_Location_gt_and_lt_Locatio">&lt;Location&gt; and &lt;LocationMatch&gt; are
+processed simultaneously</A></STRONG>
+</OL>
+<P>
+Apart from <CODE>&lt;Directory&gt;</CODE>, each group is processed in the order that it appears in the configuration
+files.
+<CODE>&lt;Directory&gt;</CODE> (group 1 above) is processed in the order shortest directory component to
+longest. If multiple
+<CODE>&lt;Directory&gt;</CODE> sections apply to the same directory then they are processed in the
+configuration file order.
+
+<P>
+Sections inside <CODE>&lt;VirtualHost&gt;</CODE> sections are applied as if you were running several independent servers.
+The directives inside
+<CODE>&lt;VirtualHost&gt;</CODE> sections do not interact with each other. They are applied after first
+processing any sections outside the virtual host definition. This allows
+virtual host configurations to override the main server configuration.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Sub_Grouping_of_Location_Dir">Sub-Grouping of &lt;Location&gt;, &lt;Directory&gt; and &lt;Files&gt; Sections</A></H2></CENTER>
+<P>
+Let's say that you want all files, except for a few of the files in a
+specific directory and below, to be handled in the same way. For example if
+you want all the files in <EM>/home/http/docs</EM> to be served as plain files, but any files with ending <EM>.html</EM> and <EM>.txt</EM> to be processed by the content handler of your <CODE>Apache::MyFilter</CODE> module.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Directory /home/httpd/docs&gt;
+    &lt;FilesMatch &quot;\.(html|txt)$&quot;&gt;
+      SetHandler perl-script
+      PerlHandler Apache::MyFilter
+    &lt;/FilesMatch&gt;
+  &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Thus it is possible to embed sections inside sections to create subgroups
+which have their own distinct behavior. Alternatively you could use a <CODE>&lt;Files&gt;</CODE> section inside an <EM>.htaccess</EM> file.
+
+<P>
+Note that you can't put <CODE>&lt;Files&gt;</CODE> or <CODE>&lt;FilesMatch&gt;</CODE>
+sections inside a <CODE>&lt;Location&gt;</CODE> section, but you can put them inside a <CODE>&lt;Directory&gt;</CODE> section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Options_Directive">Options Directive</A></H2></CENTER>
+<P>
+Normally, if multiple <CODE>Options</CODE> directives apply to a directory, then the most specific one is taken
+complete; the options are not merged.
+
+<P>
+However if all the options on the <CODE>Options</CODE> directive are preceded by a <CODE>+</CODE> or <CODE>-</CODE> symbol, the options are merged. Any options preceded by <CODE>+</CODE> are added to the options currently in force, and any options preceded by <CODE>-</CODE> are removed.
+
+<P>
+For example, without any <CODE>+</CODE> and <CODE>-</CODE> symbols:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Directory /home/httpd/docs&gt;
+    Options Indexes FollowSymLinks
+  &lt;/Directory&gt;
+  &lt;Directory /home/httpd/docs/shtml&gt;
+    Options Includes
+  &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then only <CODE>Includes</CODE> will be set for the <EM>/home/httpd/docs/shtml</EM>
+directory. However if the second <CODE>Options</CODE> directive uses the <CODE>+</CODE>
+and <CODE>-</CODE> symbols:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Directory /home/httpd/docs&gt;
+    Options Indexes FollowSymLinks
+  &lt;/Directory&gt;
+  &lt;Directory /home/httpd/docs/shtml&gt;
+    Options +Includes -Indexes
+  &lt;/Directory&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then the options <CODE>FollowSymLinks</CODE> and <CODE>Includes</CODE> are set for the
+<EM>/home/httpd/docs/shtml</EM> directory.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_perl_Configuration">mod_perl Configuration</A></H1></CENTER>
+<P>
+When you have tested that the Apache server works on your machine, it's
+time to configure mod_perl. Some of the configuration directives are
+already familiar to you, but mod_perl introduces a few new ones.
+
+<P>
+It can be a good idea to keep all the mod_perl related configuration at the
+end of the configuration file, after the native Apache configuration
+directives.
+
+<P>
+To ease maintenance and to simplify multiple server installations, the
+Apache/mod_perl configuration system allows you several alternative ways to
+keep your configration directives in separate places. The
+<CODE>Include</CODE> directive in <EM>httpd.conf</EM> allow you to include the contents of other files, just as if the
+information were all contained in <EM>httpd.conf</EM>. This is a feature of Apache itself. For example if you want all your
+mod_perl configuration to be placed in a separate file <EM>mod_perl.conf</EM> you can do that by adding to <EM>httpd.conf</EM> this directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Include conf/mod_perl.conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+mod_perl adds two further directives: <CODE>&lt;Perl&gt;</CODE> sections allow you to execute Perl code from within any configuration file
+at server startup time, and as you will see later, a file containing any
+Perl program can be executed (also at server startup time) simply by
+mentioning its name in a <CODE>PerlRequire</CODE> or <CODE>PerlModule</CODE> directve.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Alias_Configurations">Alias Configurations</A></H2></CENTER>
+<P>
+The <CODE>ScriptAlias</CODE> and <CODE>Alias</CODE> directives provide a mapping of a URI to a file system directory. The
+directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /foo /home/httpd/foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will map all requests starting with <EM>/foo</EM> onto the files starting with <EM>/home/httpd/foo/</EM>. So when Apache gets a request <A
+HREF="http://www.example.com/foo/test.pl">http://www.example.com/foo/test.pl</A>
+the server will remap this into the file <EM>test.pl</EM> in the directory <EM>/home/httpd/foo/</EM>.
+
+<P>
+In addition <CODE>ScriptAlias</CODE> assigns all the requests that match the URI (i.e. <EM>/cgi-bin</EM>) to be executed under mod_cgi.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ScriptAlias /cgi-bin /home/httpd/cgi-bin</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+is actually the same as: 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /cgi-bin /home/httpd/cgi-bin
+  &lt;Location /cgi-bin&gt;
+    SetHandler cgi-script
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+where latter directive invokes mod_cgi. You shouldn't use the
+<CODE>ScriptAlias</CODE> directive unless you want the request to be processed under mod_cgi.
+Therefore when you configure mod_perl sections use
+<CODE>Alias</CODE> instead.
+
+<P>
+Under mod_perl the <CODE>Alias</CODE> directive will be followed by two further directives. The first is the SetHandler&nbsp;perl-script directive, which tells Apache to invoke mod_perl to run the script. The
+second directive (for example <CODE>PerlHandler</CODE>) tells mod_perl which handler (Perl module) the script should be run
+under, and hence for which phase of the request. Refer to the section
+<A HREF="././config.html#Perl_Handlers">Perl*Handlers</A> for more information about handlers for the various request phases.
+
+<P>
+When you have decided which methods to use to run your scripts and where
+you will keep them, you can add the configuration <CODE>directive(s)</CODE>
+to <EM>httpd.conf</EM>. They will look like those below, but they will of course reflect the
+locations of your scripts in your file-system and the decisions you have
+made about how to run the scripts:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ScriptAlias /cgi-bin/ /home/httpd/cgi-bin/
+  Alias       /perl/    /home/httpd/perl/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the examples above all the requests issued for URIs starting with
+<EM>/cgi-bin</EM> will be served from the directory <EM>/home/httpd/cgi-bin/</EM>, and starting with <EM>/perl</EM> from the directory <EM>/home/httpd/perl/</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Running_CGI_PerlRun_and_Regist">Running CGI, PerlRun, and Registry Scripts Located in the Same Directory</A></H3></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # Typical for plain cgi scripts:
+  ScriptAlias /cgi-bin/  /home/httpd/perl/
+    
+  # Typical for Apache::Registry scripts:
+  Alias       /perl/     /home/httpd/perl/
+    
+  # Typical for Apache::PerlRun scripts:
+  Alias       /cgi-perl/ /home/httpd/perl/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the examples above we have mapped the three different URIs (<EM>http://www.example.com/perl/test.pl</EM>
+
+<EM>http://www.example.com/cgi-bin/test.pl</EM> and
+<EM>http://www.example.com/cgi-perl/test.pl</EM>) all to the same file
+<EM>/home/httpd/perl/test.pl</EM>. This means that we can have all our CGI scripts located at the same place
+in the file-system, and call the script in any of three ways simply by
+changing one component of the URI (<EM>cgi-bin|perl|cgi-perl</EM>).
+
+<P>
+This technique makes it easy to migrate your scripts to mod_perl. If your
+script does not seem to be working while running under mod_perl, then in
+most cases you can easily call the script in straight mod_cgi mode or under <CODE>Apache::PerlRun</CODE> without making any script changes. Simply change the URL you use to invoke
+it.
+
+<P>
+Although in the configuration above we have configured all three
+<EM>Aliases</EM> to point to the same directory within our file system, you can of course
+have them point to different directories if you prefer.
+
+<P>
+You should remember that it is undesirable to run scripts in plain mod_cgi
+mode from a mod_perl-enabled server--the resource consumption is too high.
+It is better to run these on a plain Apache server. See
+<A HREF="././strategy.html#Standalone_mod_perl_Enabled_Apac">Standalone mod_perl Enabled Apache Server</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_Location_Configuration">&lt;Location&gt; Configuration</A></H2></CENTER>
+<P>
+The <CODE>&lt;Location&gt;</CODE> section assigns a number of rules which the server should follow when the
+request's URI matches the
+<EM>Location</EM>. Just as it is the widely accepted convention to use
+<EM>/cgi-bin</EM> for your mod_cgi scripts, it is conventional to use
+<EM>/perl</EM> as the base URI of the perl scripts which you are running under mod_perl.
+Let's review the following very widely used
+<CODE>&lt;Location&gt;</CODE> section:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /perl/ /home/httpd/perl/
+  PerlModule Apache::Registry
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This configuration causes all requests for URIs starting with <EM>/perl</EM>
+to be handled by the mod_perl Apache module with the handler from the
+<CODE>Apache::Registry</CODE> Perl module. Let's review the directives inside the <CODE>&lt;Location&gt;</CODE> section in the example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Remember the <CODE>Alias</CODE> from the above section? We use the same <CODE>Alias</CODE>
+here; if you were to use a <CODE>&lt;Location&gt;</CODE> that does not have the same <CODE>Alias</CODE>, the server would fail to locate the script in the file system. You need
+the <CODE>Alias</CODE> setting only if the code that should be executed is located in the file. So <CODE>Alias</CODE> just provides the URI to filepath translation rule.
+
+<P>
+Sometimes there is no script to be executed. Instead there is some module
+whose method is being executed, similar to <EM>/perl-status</EM>, where the code is stored in an Apache module. In such cases we don't need <CODE>Alias</CODE> settings for those <CODE>&lt;Location&gt;</CODE>s.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  SetHandler perl-script</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This assigns the mod_perl Apache module to handle the content generation
+phase.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlHandler Apache::Registry</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here we tell Apache to use the <CODE>Apache::Registry</CODE> Perl module for the actual content generation.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Options ExecCGI</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>Options</CODE> directive accepts various parameters (options), one of which is <CODE>ExecCGI</CODE>. This tells the server that the file is a program and should be executed,
+instead of just being displayed like a static file (like HTML file). If you
+omit this option then the script will either be rendered as plain text or
+else it will trigger a <EM>Save-As</EM>
+dialog, depending on the client's configuration.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  allow from all</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This directive is used to set access control based on domain. The above
+settings allow clients from any domain to run the script.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSendHeader On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PerlSendHeader On</CODE> tells the server to send an HTTP headers to the browser on every script
+invocation. You will want to turn this off for nph (non-parsed-headers)
+scripts.
+
+<P>
+The <CODE>PerlSendHeader On</CODE> setting invokes the Apache's
+<CODE>ap_send_http_header()</CODE> method after parsing the headers generated by the script. It is only meant
+for emulation of mod_cgi behavior with regard to headers.
+
+<P>
+To send the HTTP headers it's always better either to use the
+<CODE>$r-&gt;send_http_header</CODE> method using the Apache Perl API or to use the <CODE>$q-&gt;header</CODE> method from the <CODE>CGI.pm</CODE> module.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Closes the <CODE>&lt;Location&gt;</CODE> section definition.
+
+<P>
+Note that sometimes you will have to preload the module before using it in
+the <CODE>&lt;Location&gt;</CODE> section. In the case of
+<CODE>Apache::Registry</CODE> the configuration will look like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Registry
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PerlModule</CODE> is equivalent to Perl's native <CODE>use()</CODE> function call.
+
+<P>
+No changes are required to the <EM>/cgi-bin</EM> location (mod_cgi), since it has nothing to do with mod_perl.
+
+<P>
+Here is another very similar example, this time using
+<CODE>Apache::PerlRun</CODE> (For more information see
+<A HREF="././porting.html#Apache_PerlRun_a_closer_look">Apache::PerlRun</A>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /cgi-perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::PerlRun
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The only difference from the <CODE>Apache::Registry</CODE> configuration is the argument of the <CODE>PerlHandler</CODE> directive, where <CODE>Apache::Registry</CODE>
+has been replaced with <CODE>Apache::PerlRun</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Overriding_Location_Setting_in">Overriding &lt;Location&gt; Setting in &quot;Sub-Location&quot;</A></H2></CENTER>
+<P>
+So if you have:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /foo&gt;
+    SetHandler perl-script
+    PerlHandler My::Module
+   &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to remove a mod_perl handler setting from a location beneath a
+location where the handler was set (i.e. <EM>/foo/bar</EM>), all you have to do is to reset it, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /foo/bar&gt;
+    SetHandler default-handler
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now, all the requests starting with <EM>/foo/bar</EM> would be served by Apache's default handler.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="PerlModule_and_PerlRequire_Direc">PerlModule and PerlRequire Directives</A></H2></CENTER>
+<P>
+As we saw earlier, a module should be loaded before it is used.
+<CODE>PerlModule</CODE> and <CODE>PerlRequire</CODE> are the two mod_perl directives which are used to load modules and code.
+They are almost equivalent to Perl's <CODE>use()</CODE> and <CODE>require()</CODE> functions respectively and called from the Apache configuration file. You
+can pass one or more module names as arguments to <CODE>PerlModule</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PerlModule Apache::DBI CGI DBD::Mysql</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Generally the modules are preloaded from the startup script, which is
+usually called <EM>startup.pl</EM>. This is a file containing plain Perl code which is executed through the <CODE>PerlRequire</CODE> directive. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PerlRequire  /home/httpd/perl/lib/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A <CODE>PerlRequire</CODE> file name can be absolute or relative to
+<CODE>ServerRoot</CODE> or a path in <CODE>@INC</CODE>.
+
+<P>
+As with any file with Perl code that gets <CODE>use()</CODE>'d or
+<CODE>require()</CODE>'d, it must return a <EM>true</EM> value. To ensure that this happens don't forget to add <CODE>1;</CODE> at the end of <EM>startup.pl</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Perl_Handlers">Perl*Handlers</A></H2></CENTER>
+<P>
+As you probably know Apache traverses a loop for each HTTP request it
+receives.
+
+<P>
+After you have compiled and installed mod_perl, your Apache mod_perl
+configuration directives tell Apache to invoke the module mod_perl as the
+handler for some request which it receives. Although it could in fact
+handle all the phases of the request loop, usually it does not. You tell
+mod_perl which phases it is to handle (and so which to leave to other
+modules, or to the default Apache routines) by putting
+<CODE>Perl*Handler</CODE> directives in the configuration files.
+
+<P>
+Because you need the Perl interpreter to be present for your Perl script to
+do any processing at all, there is a slight difference between the way that
+you configure Perl and C handlers to handle parts of the request loop.
+Ordinarily a C module is written, compiled and configured to hook into a
+specific phase of the request loop. For a Perl handler you compile mod_perl
+itself to hook into the appropriate phases, as if it were to handle the
+phases itself. Then you put
+<CODE>Perl*Handler</CODE> directives in your configuration file to tell mod_perl that it is to pass
+the responsibility for handling that part of the request phase to your Perl
+module.
+
+<P>
+mod_perl is an Apache module written in C. As most programmers will only
+need to handle the response phase, in the default compilation most of the <CODE>Perl*Handler</CODE>s are disabled. When you configure the
+<EM>Makefile.PL</EM> file for its compilation, you must specify whether or not you will want to
+handle parts of the request loop other than the usual content generation
+phase. If so you need to specify which parts. See the ``<A HREF="././install.html#Callback_Hooks">Callback Hooks</A>'' section for how to do this.
+
+<P>
+Apache specifies about eleven phases of the request loop, namely (and in
+order of processing): Post-Read-Request, URI Translation, Header Parsing,
+Access Control, Authentication, Authorization, MIME type checking, FixUp,
+Response (also known as the Content handling phase), Logging and finally
+Cleanup. These are the stages of a request where the Apache API allows a
+module to step in and do something. There is a dedicated <CODE>Perl*Handler</CODE> for each of these stages plus a couple of others which don't correspond to
+parts of the request loop.
+
+<P>
+We call them <CODE>Perl*Handler</CODE> directives because the names of the many mod_perl handler directives for
+the various phases of the request loop all follow the same format. The <CODE>*</CODE> in <CODE>Perl*Handler</CODE> is a placeholder to be replaced by something which identifies the phase to
+be handled. For example <CODE>PerlLogHandler</CODE> is a Perl Handler which (fairly obviously) handles the logging phase.  
+
+<P>
+The slight exception is <CODE>PerlHandler</CODE>, which you can think of as
+<CODE>PerlResponseHandler</CODE>. It is the content generation handler and so it is probably the one that
+you will use most frequently.  
+
+<P>
+Note that it is mod_perl which recognizes these directives, and not Apache.
+They are mod_perl directives, and an ordinary Apache does not recognize
+them. If you get error messages about these directives being <EM>"perhaps mis-spelled"</EM> it is a sure sign that the appropriate part of mod_perl (or the entire
+mod_perl module!) is not present in your copy of Apache executable.
+
+<P>
+The full list of <CODE>Perl*Handler</CODE>s follows. They are in the order that they are processed by Apache and
+mod_perl:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PerlChildInitHandler
+    PerlPostReadRequestHandler
+    PerlInitHandler
+    PerlTransHandler
+    PerlHeaderParserHandler
+    PerlAccessHandler
+    PerlAuthenHandler
+    PerlAuthzHandler
+    PerlTypeHandler
+    PerlFixupHandler
+    PerlHandler
+    PerlLogHandler
+    PerlCleanupHandler
+    PerlChildExitHandler
+    PerlDispatchHandler
+    PerlRestartHandler</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PerlChildInitHandler</CODE> and <CODE>PerlChildExitHandler</CODE> do not refer to parts of the request loop, they are to allow your modules
+to initialize data structures and to clean up at the child process start-up
+and shutdown respectively, for example by allocating and deallocating
+memory.
+
+<P>
+All <CODE>&lt;Location&gt;</CODE>, <CODE>&lt;Directory&gt;</CODE> and
+<CODE>&lt;Files&gt;</CODE> sections contain a physical path specification. Like <CODE>PerlChildInitHandler</CODE> and <CODE>PerlChildExitHandler</CODE>, the directives <CODE>PerlPostReadRequestHandler</CODE> and <CODE>PerlTransHandler</CODE>
+cannot be used in these sections, nor in <EM>.htaccess</EM> files, because it is not until the end of the Translation Handler (<CODE>PerlTransHandler</CODE>) phase that the path translation is completed and a physical path is
+known.
+
+<P>
+<CODE>PerlInitHandler</CODE> changes its behaviour depending upon where it is used. In any case it is
+the first handler to be invoked in serving a request. If found outside any <CODE>&lt;Location&gt;</CODE>,
+<CODE>&lt;Directory&gt;</CODE> or <CODE>&lt;Files&gt;</CODE> section (at the top level), it is an alias for <CODE>PerlPostReadRequestHandler</CODE>. When inside any such section it is an alias for <CODE>PerlHeaderParserHandler</CODE>.
+
+<P>
+Starting from <CODE>PerlHeaderParserHandler</CODE> the requested URI has been mapped to a physical server pathname, and thus
+it can be used to match a <CODE>&lt;Location&gt;</CODE>, <CODE>&lt;Directory&gt;</CODE> or <CODE>&lt;Files&gt;</CODE>
+configuration section, or to look in a <EM>.htaccess</EM> file if such a file exists in the specified directory in the translated
+path.
+
+<P>
+<CODE>PerlDispatchHandler</CODE> and <CODE>PerlRestartHandler</CODE> do not correspond to parts of the Apache API, but allow you to fine-tune
+the mod_perl API.
+
+<P>
+The Apache documentation will tell you all about these stages and what your
+modules can do. By default, most of these hooks are disabled at compile
+time, see the``<A HREF="././install.html#Callback_Hooks">Callback Hooks</A>'' section for information on enabling them.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_handler_subroutine">The handler subroutine</A></H2></CENTER>
+<P>
+By default the mod_perl API expects a subroutine called <CODE>handler()</CODE>
+to handle the request in the registered <CODE>Perl*Handler</CODE> module. Thus if your module implements this subroutine, you can register
+the handler with mod_perl like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Perl*Handler Apache::Foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Replace <CODE>Perl*Handler</CODE> with the name of a specific handler from the list given above. mod_perl
+will preload the specified module for you. Please note that this approach
+will not preload the module at startup. To make sure it gets loaded you
+have three options: you can explicitly preload it with the <CODE>PerlModule</CODE> directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can preload it at the startup file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Foo ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Or you can use a nice shortcut that the <CODE>Perl*Handler</CODE> syntax provides:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Perl*Handler +Apache::Foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note the leading <CODE>+</CODE> character. This directive is equivalent to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Foo
+  Perl*Handler Apache::Foo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you decide to give the handler routine a name other than
+<CODE>handler</CODE>, for example <CODE>my_handler</CODE>, you must preload the module and explicitly give the name of the handler
+subroutine:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Foo
+  Perl*Handler Apache::Foo::my_handler</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As you have seen, this will preload the module at server startup.
+
+<P>
+If a module needs to know which handler is currently being run, it can find
+out with the <EM>current_callback</EM> method. This method is most useful to <EM>PerlDispatchHandlers</EM> which wish to take action for certain phases only.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if($r-&gt;current_callback eq &quot;PerlLogHandler&quot;) {
+      $r-&gt;warn(&quot;Logging request&quot;);
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Stacked_Handlers">Stacked Handlers</A></H2></CENTER>
+<P>
+With the mod_perl stacked handlers mechanism, during any stage of a request
+it is possible for more than one <CODE>Perl*Handler</CODE> to be defined and run.
+
+<P>
+<CODE>Perl*Handler</CODE> directives (in your configuration files) can define any number of
+subroutines. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlTransHandler OneTrans TwoTrans RedTrans BlueTrans</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+With the method <CODE>Apache-&gt;push_handlers()</CODE>, callbacks (handlers) can be added to a stack <EM>at runtime</EM> by mod_perl scripts.
+
+<P>
+<CODE>Apache-&gt;push_handlers()</CODE> takes the callback hook name as its first argument and a subroutine name or
+reference as its second.
+
+<P>
+Here's an example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(:common);
+  sub my_logger {
+    #some code here
+    return OK;
+  }
+  Apache-&gt;push_handlers(&quot;PerlLogHandler&quot;, \&amp;my_logger);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here's another one:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw(:common);
+  $r-&gt;push_handlers(&quot;PerlLogHandler&quot;, sub {
+      print STDERR &quot;__ANON__ called\n&quot;;
+      return OK;
+  });</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+After each request, this stack is erased.
+
+<P>
+All handlers will be called unless a handler returns a status other than <CODE>OK</CODE> or <CODE>DECLINED</CODE>.
+
+<P>
+Example uses:
+
+<P>
+<CODE>CGI.pm</CODE> maintains a global object for its plain function interface. Since the
+object is global, it does not go out of scope, <CODE>DESTROY</CODE> is never called.  <CODE>CGI-&gt;new</CODE> can call:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache-&gt;push_handlers(&quot;PerlCleanupHandler&quot;, \&amp;CGI::_reset_globals);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This function will be called during the final stage of a request,
+refreshing <CODE>CGI.pm</CODE>'s globals before the next request comes in.
+
+<P>
+<CODE>Apache::DCELogin</CODE> establishes a DCE login context which must exist for the lifetime of a
+request, so the <CODE>DCE::Login</CODE> object is stored in a global variable. Without stacked handlers, users must
+set
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlCleanupHandler Apache::DCELogin::purge</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+in the configuration files to destroy the context. This is not
+``user-friendly''. Now, <CODE>Apache::DCELogin::handler</CODE> can call:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache-&gt;push_handlers(&quot;PerlCleanupHandler&quot;, \&amp;purge);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Persistent database connection modules such as <CODE>Apache::DBI</CODE> could push a <CODE>PerlCleanupHandler</CODE> handler that iterates over <CODE>%Connected</CODE>, refreshing connections or just checking that connections have not gone
+stale. Remember, by the time we get to <CODE>PerlCleanupHandler</CODE>, the client has what it wants and has gone away, so we can spend as much
+time as we want here without slowing down response time to the client
+(although the process itself is unavailable for serving new requests before
+the operation is completed).
+
+<P>
+<CODE>PerlTransHandlers</CODE> (e.g. <CODE>Apache::MsqlProxy</CODE>) may decide, based on the URI or some arbitrary condition, whether or not
+to handle a request. Without stacked handlers, users must configure it
+themselves:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> PerlTransHandler Apache::MsqlProxy::translate
+ PerlHandler      Apache::MsqlProxy</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PerlHandler</CODE> is never actually invoked unless <CODE>translate()</CODE> sees that the request is a proxy request (<CODE>$r-&gt;proxyreq</CODE>). If it is a proxy request, <CODE>translate()</CODE> sets <CODE>$r-&gt;handler("perl-script")</CODE>, and only then will <CODE>PerlHandler</CODE> handle the request. Now users do not have to specify <CODE>PerlHandler Apache::MsqlProxy</CODE>, the
+<CODE>translate()</CODE> function can set it with <CODE>push_handlers()</CODE>.
+
+<P>
+Imagine that you want to include footers, headers, etc., piecing together a
+document, without using SSI. The following example shows how to implement
+it. First we prepare the code as follows:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Test/Compose.pm
+  ---------------
+  package Test::Compose;
+  use Apache::Constants qw(:common);
+  
+  sub header {
+     my $r = shift;
+     $r-&gt;content_type(&quot;text/plain&quot;);
+     $r-&gt;send_http_header;
+     $r-&gt;print(&quot;header text\n&quot;);
+     return OK;
+  }
+  sub body   { shift-&gt;print(&quot;body text\n&quot;)   ; return OK}
+  sub footer { shift-&gt;print(&quot;footer text\n&quot;) ; return OK}
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # in httpd.conf or perl.conf
+  PerlModule Test::Compose
+  &lt;Location /foo&gt;
+     SetHandler &quot;perl-script&quot;
+     PerlHandler Test::Compose::header Test::Compose::body Test::Compose::footer   
+   &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Parsing the output of another PerlHandler? This is a little more tricky,
+but consider:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /foo&gt;
+    SetHandler &quot;perl-script&quot;
+    PerlHandler OutputParser SomeApp
+  &lt;/Location&gt;
+  
+  &lt;Location /bar&gt;
+    SetHandler &quot;perl-script&quot;
+    PerlHandler OutputParser AnotherApp
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now, <CODE>OutputParser</CODE> goes first, but it <CODE>untie()</CODE>'s <CODE>*STDOUT</CODE> and re-<CODE>tie()</CODE>'s it to its own package like so:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package OutputParser;
+ 
+  sub handler {
+      my $r = shift;
+      untie *STDOUT;
+      tie *STDOUT =&gt; 'OutputParser', $r;
+   }
+   
+  sub TIEHANDLE {
+      my($class, $r) = @_;
+      bless { r =&gt; $r}, $class;
+  }
+  
+  sub PRINT {
+      my $self = shift;   
+      for (@_) {
+          #do whatever you want to $_ for example:
+          $self-&gt;{r}-&gt;print($_ . &quot;[insert stuff]&quot;);
+      }
+  }
+  
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To build in this feature, configure with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL PERL_STACKED_HANDLERS=1 [ ... ]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to test whether your running mod_perl Apache can stack
+handlers, the method <CODE>Apache-&gt;can_stack_handlers</CODE> will return
+<CODE>TRUE</CODE> if mod_perl was configured with <CODE>PERL_STACKED_HANDLERS=1</CODE>, and <CODE>FALSE</CODE> otherwise.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Perl_Method_Handlers">Perl Method Handlers</A></H2></CENTER>
+<P>
+If a <CODE>Perl*Handler</CODE> is prototyped with <CODE>$$</CODE>, this handler will be invoked as a method. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My;
+  @ISA = qw(BaseClass);
+   
+  sub handler ($$) {
+      my($class, $r) = @_;
+      ...;
+  }
+   
+  package BaseClass;
+   
+  sub method ($$) {
+      my($class, $r) = @_;
+      ...;
+  }
+  
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> PerlHandler My</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> PerlHandler My-&gt;handler</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since the handler is invoked as a method, it may inherit from other
+classes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> PerlHandler My-&gt;method</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+META: requires more explanation!
+
+<P>
+In this case, the <CODE>My</CODE> class inherits this method from <CODE>BaseClass</CODE>.
+
+<P>
+To build in this feature, configure with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % perl Makefile.PL PERL_METHOD_HANDLERS=1 [ ... ]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="PerlFreshRestart">PerlFreshRestart</A></H2></CENTER>
+<P>
+To reload <CODE>PerlRequire</CODE>, <CODE>PerlModule</CODE> and other <CODE>use()</CODE>'d modules, and to flush the <CODE>Apache::Registry</CODE> cache on server restart, add to 
+<EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlFreshRestart On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Make sure you read <A HREF="././troubleshooting.html#Evil_things_might_happen_when_us">Evil things might happen when using PerlFreshRestart</A>.
+
+<P>
+Starting from mod_perl version 1.22 <CODE>PerlFreshRestart</CODE> is ignored when mod_perl is compiled as a DSO. But it almost doesn't
+matter, since mod_perl as a DSO will do a full tear-down (perl_destruct()).
+So it's still a <EM>FreshRestart</EM>, just fresher than static (non-DSO) mod_perl :)
+
+<P>
+But note that even if you have
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlFreshRestart No</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and mod_perl as a DSO you will still get a <EM>FreshRestart</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="PerlSetVar_PerlSetEnv_and_PerlP">PerlSetVar, PerlSetEnv and PerlPassEnv</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv key val
+  PerlPassEnv key</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>PerlPassEnv</CODE> passes, <CODE>PerlSetEnv</CODE> sets and passes <EM>ENVironment</EM>
+variables to your scripts. You can access them in your scripts through <CODE>%ENV</CODE> (e.g. <CODE>$ENV{&quot;key&quot;}</CODE>).
+
+<P>
+Regarding the setting of <CODE>PerlPassEnv PERL5LIB</CODE> in <EM>httpd.conf</EM>: if you turn on taint checks (<CODE>PerlTaintCheck On</CODE>), <CODE>$ENV{PERL5LIB}</CODE>
+will be ignored (unset). See the '<A HREF="././porting.html#Command_Line_Switches_w_T_e">Switches -w, -T</A>' section.
+
+<P>
+<CODE>PerlSetVar</CODE> is very similar to <CODE>PerlSetEnv</CODE>, but you extract it with another method.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetVar foo bar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  push @{ $Location{&quot;/&quot;}-&gt;{PerlSetVar} }, [ foo =&gt; 'bar' ];</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and in the code you read it with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r = Apache-&gt;request;
+  print $r-&gt;dir_config('foo');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The above prints: 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  bar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that you cannot do this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  push @{ $Location{&quot;/&quot;}-&gt;{PerlSetVar} }, [ foo =&gt; \%bar ];</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+All values are treated as strings, so you will get a stringified reference
+to a hash as a value (something which will look like ``<CODE>HASH(0x87a5108)</CODE>''). This cannot be turned back into a reference and therefore into the
+original hash upon retrieval.
+
+<P>
+However you can use the <CODE>PerlAddVar</CODE> directive to push more values into the variable, emulating arrays. For
+example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetVar foo bar
+  PerlAddVar foo bar1
+  PerlAddVar foo bar2</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or the equal:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlAddVar foo bar
+  PerlAddVar foo bar1
+  PerlAddVar foo bar2</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To retrieve the values use the <CODE>dir_config-&gt;get()</CODE> method:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my @foo = $r-&gt;dir_config-&gt;get('foo');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my %foo = $r-&gt;dir_config-&gt;get('foo');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Make sure that you use an even number of elements if you store the
+retrieved values in a hash.
+
+<P>
+While the Apache's <CODE>SetEnv</CODE> and mod_perl's <CODE>PerlSetEnv</CODE> apparently perform the same thing, the former doesn't happen until the
+fixup phase, the latter happens as soon as possible, so those variables are
+available before then, e.g. in <CODE>PerlAuthenHandler</CODE> for
+<CODE>$ENV{ORACLE_HOME}</CODE> (or another environment variable that you need in these early request
+processing stages).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="PerlSetupEnv">PerlSetupEnv</A></H2></CENTER>
+<P>
+See <A HREF="././performance.html#PerlSetupEnv_Off">PerlSetupEnv Off</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="PerlWarn_and_PerlTaintCheck">PerlWarn and PerlTaintCheck</A></H2></CENTER>
+<P>
+For <STRONG>PerlWarn</STRONG> and <STRONG>PerlTaintCheck</STRONG> directives see the '<A HREF="././porting.html#Command_Line_Switches_w_T_e">Switches -w, -T</A>' section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="MinSpareServers_MaxSpareServers_">MinSpareServers MaxSpareServers StartServers MaxClients MaxRequestsPerChild</A></H2></CENTER>
+<P>
+<CODE>MinSpareServers</CODE>, <CODE>MaxSpareServers</CODE>, <CODE>StartServers</CODE> and
+<CODE>MaxClients</CODE> are standard Apache configuration directives that control the number of
+servers that will be launched at server startup and kept alive during the
+server's operation.
+
+<P>
+<CODE>MaxRequestsPerChild</CODE> lets you specify the maximum number of requests which each child will be
+allowed to serve. When a process has served
+<CODE>MaxRequestsPerChild</CODE> requests the parent kills it and replaces it with a new one. There may also
+be other reasons why a child is killed, so it does not mean that each child
+will in fact serve this many requests, only that it will not be allowed to
+serve more than that number.
+
+<P>
+These five directives are very important for achieving the best performance
+from your server. The section ' <A HREF="././performance.html#Performance_Tuning_by_Tweaking_A">Performance Tuning by Tweaking Apache Configuration</A>' provides all the details.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_Startup_File">The Startup File</A></H1></CENTER>
+<P>
+At server startup, before child processes are spawned to receive incoming
+requests, there is more that can be done than just preloading files. You
+might want to register code that will initialize a database connection for
+each child when it is forked, tie read-only dbm files, etc.
+
+<P>
+The <EM>startup.pl</EM> file is an ideal place to put the code that should be executed when the
+server starts. Once you have prepared the code, load it in <EM>httpd.conf</EM> before the rest of the mod_perl configuration directives like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    PerlRequire  /home/httpd/perl/lib/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+I must stress that all the code that is run at server initialization time
+is run with root priveleges if you are executing it as the root user (which
+you have to do unless you choose to run the server on an unprivileged port,
+above 1024). This means that anyone who has write access to a script or
+module that is loaded by <CODE>PerlModule</CODE> or
+<CODE>PerlRequire</CODE> effectively has root access to the system. You might want to take a look at
+the new and experimental <CODE>PerlOpmask</CODE>
+directive and <CODE>PERL_OPMASK_DEFAULT</CODE> compile time option to try to disable some of the more dangerous
+operations.
+
+<P>
+Since the startup file is a file written in plain Perl, one can validate
+its syntax with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -c /home/httpd/perl/lib/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Sample_Startup_File">The Sample Startup File</A></H2></CENTER>
+<P>
+Let's look at a real world startup file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  startup.pl
+  ----------
+  use strict;
+  
+  # Extend @INC if needed
+  use lib qw(/dir/foo /dir/bar);
+  
+  # Make sure we are in a sane environment.
+  $ENV{MOD_PERL} or die &quot;not running under mod_perl!&quot;;
+   
+  # For things in the &quot;/perl&quot; URL
+  use Apache::Registry;          
+   
+  # Load Perl modules of your choice here
+  # This code is interpreted *once* when the server starts
+  use LWP::UserAgent ();
+  use Apache::DBI ();
+  use DBI ();
+  
+  # Tell me more about warnings
+  use Carp ();
+  $SIG{__WARN__} = \&amp;Carp::cluck;
+  
+  # Load CGI.pm and call its compile() method to precompile 
+  # (but not to import) its autoloaded methods. 
+  use CGI ();
+  CGI-&gt;compile(':all');
+  
+  # Initialize the database connections for each child
+  Apache::DBI-&gt;connect_on_init
+  (&quot;DBI:mysql:database=test;host=localhost&quot;,
+   &quot;user&quot;,&quot;password&quot;,
+   {
+    PrintError =&gt; 1, # warn() on errors
+    RaiseError =&gt; 0, # don't die on error
+    AutoCommit =&gt; 1, # commit executes immediately
+   }
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we'll review the code explaining why each line is used.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This pragma is worth using in every script longer than half a dozen lines.
+It will save a lot of time and debugging later on.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib qw(/dir/foo /dir/bar);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The only chance to permanently modify <CODE>@INC</CODE> before the server is started is with this command. Later the running code
+can modify
+<CODE>@INC</CODE> just for the moment it <CODE>require()</CODE>'s some file, and then
+<CODE>@INC</CODE>'s value gets reset to what it was originally.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $ENV{MOD_PERL} or die &quot;not running under mod_perl!&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A sanity check, if Apache/mod_perl wasn't properly built, the above code
+will abort the server startup.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Registry;          
+  use LWP::UserAgent ();
+  use Apache::DBI ();
+  use DBI ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Preload the modules that get used by our Perl code serving the requests.
+Unless you need the symbols (variables and subroutines) exported by the
+modules you preload to accomplish something within the startup file, don't
+import them, since it's just a waste of startup time. Instead use the empty
+list <CODE>()</CODE> to tell the <CODE>import()</CODE>
+function not to import anything.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Carp ();
+  $SIG{__WARN__} = \&amp;Carp::cluck;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is a useful snippet to enable extended warnings logged in the
+error_log file. In addition to basic warnings, a trace of calls is added.
+This makes the tracking of the potential problem a much easier task, since
+you know who called whom. For example, with normal warnings you might see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Use of uninitialized value at
+      /usr/lib/perl5/site_perl/5.005/Apache/DBI.pm  line 110.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+but you have no idea where it was called from. When we use <CODE>Carp</CODE> as shown above we might see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Use of uninitialized value at
+            /usr/lib/perl5/site_perl/5.005/Apache/DBI.pm line 110.
+      Apache::DBI::connect(undef, 'mydb::localhost', 'user',
+         'passwd', 'HASH(0x87a5108)') called at
+            /usr/lib/perl5/site_perl/5.005/i386-linux/DBI.pm line 382
+      DBI::connect('DBI', 'DBI:mysql:mydb::localhost', 'user',
+         'passwd', 'HASH(0x8375e4c)') called at
+            /usr/lib/perl5/site_perl/5.005/Apache/DBI.pm line 36
+      Apache::DBI::__ANON__('Apache=SCALAR(0x87a50c0)') called at 
+            PerlChildInitHandler subroutine 
+            `Apache::DBI::__ANON__' line 0
+      eval {...} called at PerlChildInitHandler subroutine 
+            `Apache::DBI::__ANON__' line 0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+we clearly see that the warning was triggered by <CODE>eval()'uating</CODE>
+the
+<CODE>Apache::DBI::__ANON__</CODE> which called <CODE>DBI::connect</CODE> (with the arguments that we see as well), which in turn called the
+<CODE>Apache::DBI::connect</CODE> method. Now we know where to look for our problem.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI ();
+  CGI-&gt;compile(':all');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Some modules create their subroutines at run time to improve their load
+time. This helps when the module includes many subroutines, but only a few
+are actually used. <CODE>CGI.pm</CODE> falls into this category. Since with mod_perl the module is loaded only
+once, it might be a good idea to precompile all or a part of its methods.
+
+<P>
+<CODE>CGI.pm</CODE>'s <CODE>compile()</CODE> method performs this task. Notice that this is a proprietary function of
+this module, other modules can implement this feature or not and use this
+or some other name for this functionality. As with all modules we preload
+in the startup file, we don't import symbols from them as they will be lost
+when they go out of the file's scope.
+
+<P>
+Note that starting with <CODE>$CGI::VERSION</CODE> 2.46, the recommended method to precompile the code in <CODE>CGI.pm</CODE> is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI qw(-compile :all);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But the old method is still available for backward compatibility.
+
+<P>
+See also the '<A HREF="././debug.html#Apache_Status_Embedded_Inter">Apache::Status -- Embedded interpreter status information</A>' section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="What_Modules_You_Should_Add_to_t">What Modules You Should Add to the Startup File and Why</A></H2></CENTER>
+<P>
+Every module loaded at server startup will be shared among the server
+children, saving a lot of RAM on your machine. Usually I put most of the
+code I develop into modules and preload them.
+
+<P>
+You can even preload your CGI script with <CODE>Apache::RegistryLoader</CODE>
+(See <A HREF="././performance.html#Preloading_Perl_Modules_at_Serve">Preload Perl modules at server startup</A>) and you can get the children to preopen their database connections with
+<CODE>Apache::DBI</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Confusion_with_use_in_the_">The Confusion with use() in the Server Startup File</A></H2></CENTER>
+<P>
+Some people wonder why you need to duplicate the <CODE>use()</CODE> clause in the startup file and in the script itself. The confusion arises
+due to misunderstanding the <CODE>use()</CODE> function. <CODE>use()</CODE> normally performs two operations, namely <CODE>require()</CODE> and <CODE>import()</CODE>, called within a
+<CODE>BEGIN</CODE> block. See the section ``<A HREF="././perl.html#use_">use()</A>'' for a detailed explanation of the <CODE>use(),</CODE>
+<CODE>require()</CODE> and <CODE>import()</CODE> functions.
+
+<P>
+In the startup file we don't want to import any symbols since they will be
+lost when we leave the scope of the startup file anyway, i.e. they won't be
+visible to any of the child processes which run our mod_perl scripts.
+Instead we want to preload the module in the startup file and then import
+any symbols that we actually need in each script individually.
+
+<P>
+Normally when we write <CODE>use MyModule;</CODE>, <CODE>use()</CODE> will both load the module and import its symbols; so for the startup file
+we write <CODE>use
+MyModule ();</CODE> and the empty parentheses will ensure that the module is loaded but that no
+symbols are imported. Then in the actual mod_perl script we write <CODE>use()</CODE> in the standard way, e.g. <CODE>use MyModule;</CODE>. Since the module has already been preloaded, the only action taken is to
+import the symbols. For example in the startup file you write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+since you probably don't need any symbols to be imported there. But in your
+code you would probably write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use CGI qw(:html);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For example, if you have <CODE>use()</CODE>'d <CODE>Apache::Constants</CODE> in the startup file, it does not mean you can have the following handler:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package MyModule;
+  sub {
+    my $r = shift;
+    ## Cool stuff goes here
+    return OK;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You would either need to add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants qw( OK );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Or use the fully qualified name:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  return Apache::Constants::OK;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to use the function interface without exporting the symbols,
+use fully qualified function names, e.g. <CODE>CGI::param</CODE>. The same rule applies to variables, you can import variables and you can
+access them by their full name. e g. <CODE>$My::Module::bar</CODE>. When you use the object oriented (method) interface you don't need to
+export the method symbols.
+
+<P>
+Technically, you aren't required to supply the <CODE>use()</CODE> statement in your (handler?) code if it was already loaded during server
+startup (i.e. by '<CODE>PerlRequire startup.pl</CODE>'). When writing your code, however, you should not assume the module code
+has been preloaded. In the future, you or someone else will revist this
+code and will not understand how it is possible to use a module's methods
+without first loading the module itself.
+
+<P>
+Read the <CODE>Exporter</CODE> and <CODE>perlmod</CODE> manpages for more information about <CODE>import()</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Configuration_in_Perl">Apache Configuration in Perl</A></H1></CENTER>
+<P>
+With <CODE>&lt;Perl&gt;</CODE>...<CODE>&lt;/Perl&gt;</CODE> sections, it is possible to configure your server entirely in Perl.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Usage">Usage</A></H2></CENTER>
+<P>
+<CODE>&lt;Perl&gt;</CODE> sections can contain <EM>any</EM> and as much Perl code as you wish. These sections are compiled into a
+special package whose symbol table mod_perl can then walk and grind the
+names and values of Perl variables/structures through the Apache core
+configuration gears. Most of the configuration directives can be
+represented as scalars (<CODE>$scalar</CODE>) or lists (<CODE>@list</CODE>). A <CODE>@list</CODE> inside these sections is simply converted into a space delimited string for
+you. Here is an example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>   httpd.conf
+  ------------
+  &lt;Perl&gt;
+  @PerlModule = qw(Mail::Send Devel::Peek);
+  
+  #run the server as whoever starts it
+  $User  = getpwuid($&gt;) || $&gt;;
+  $Group = getgrgid($)) || $); 
+  
+  $ServerAdmin = $User;
+  
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Block sections such as <CODE>&lt;Location&gt;</CODE>..<CODE>&lt;/Location&gt;</CODE>
+are represented in a <CODE>%Location</CODE> hash, e.g.:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  
+  $Location{&quot;/~dougm/&quot;} = {
+    AuthUserFile =&gt; '/tmp/htpasswd',
+    AuthType =&gt; 'Basic',
+    AuthName =&gt; 'test',
+    DirectoryIndex =&gt; [qw(index.html index.htm)],
+    Limit =&gt; {
+      METHODS =&gt; 'GET POST',
+      require =&gt; 'user dougm',
+    },
+  };
+  
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If an Apache directive can take two or three arguments you may push strings
+(the lowest number of arguments will be shifted off the
+<CODE>@list</CODE>) or use an array reference to handle any number greater than the minimum
+for that directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  push @Redirect, &quot;/foo&quot;, &quot;<A HREF="http://www.foo.com/&quot">http://www.foo.com/&quot</A>;;
+  
+  push @Redirect, &quot;/imdb&quot;, &quot;<A HREF="http://www.imdb.com/&quot">http://www.imdb.com/&quot</A>;;
+  
+  push @Redirect, [qw(temp &quot;/here&quot; &quot;<A HREF="http://www.there.com&quot">http://www.there.com&quot</A>;)];</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Other section counterparts include <CODE>%VirtualHost</CODE>, <CODE>%Directory</CODE> and
+<CODE>%Files</CODE>.
+
+<P>
+To pass all environment variables to the children with a single
+configuration directive, rather than listing each one via <CODE>PassEnv</CODE>
+or <CODE>PerlPassEnv</CODE>, a <CODE>&lt;Perl&gt;</CODE> section could read in a file and:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  push @PerlPassEnv, [$key =&gt; $val];</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache-&gt;httpd_conf(&quot;PerlPassEnv $key $val&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+These are somewhat simple examples, but they should give you the basic
+idea. You can mix in any Perl code you desire. See <EM>eg/httpd.conf.pl</EM>
+and <EM>eg/perl_sections.txt</EM> in the mod_perl distribution for more examples.
+
+<P>
+Assume that you have a cluster of machines with similar configurations and
+only small distinctions between them: ideally you would want to maintain a
+single configuration file, but because the configurations aren't <EM>exactly</EM> the same (e.g. the <CODE>ServerName</CODE> directive) it's not quite that simple.
+
+<P>
+<CODE>&lt;Perl&gt;</CODE> sections come to rescue. Now you have a single configuration file and the
+full power of Perl to tweak the local configuration. For example to solve
+the problem of the <CODE>ServerName</CODE>
+directive you might have this <CODE>&lt;Perl&gt;</CODE> section:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  $ServerName = `hostname`;
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For example if you want to allow personal directories on all machines
+except the ones whose names start with <EM>secure</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  $ServerName = `hostname`;
+  if ( $ServerName !~ /^secure/) {
+    $UserDir = &quot;public.html&quot;;
+  } else {
+    $UserDir = &quot;DISABLED&quot;;
+  }
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Behind the scenes, mod_perl defines a package called
+<CODE>Apache::ReadConfig</CODE>. Here it keeps all the variables that you define inside the <CODE>&lt;Perl&gt;</CODE> sections. Therefore it's not necessarily to configure the server within the <CODE>&lt;Perl&gt;</CODE>
+sections. Actually what you can do is to write the Perl code to configure
+the server just like you'd do in the <CODE>&lt;Perl&gt;</CODE>
+sections, but instead place it into a separate file that should be called
+during the configuration parsing with either <CODE>PerlModule</CODE> or
+<CODE>PerlRequire</CODE> directives, or from within the startup file. All you have to do is to
+declare the package <CODE>Apache::ReadConfig</CODE> within this file. Using the last example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  apache_config.pl
+  ---------------- 
+  package Apache::ReadConfig;
+  
+  $ServerName = `hostname`;
+  if ( $ServerName !~ /^secure/) {
+    $UserDir = &quot;public.html&quot;;
+  } else {
+    $UserDir = &quot;DISABLED&quot;;
+  }
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd.conf
+  ----------
+  PerlRequire /home/httpd/perl/lib/apache_config.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Enabling">Enabling</A></H2></CENTER>
+<P>
+To enable <CODE>&lt;Perl&gt;</CODE> sections you should build mod_perl with
+perl&nbsp;Makefile.PL&nbsp;PERL_SECTIONS=1&nbsp;[&nbsp;...&nbsp;].
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Caveats">Caveats</A></H2></CENTER>
+<P>
+Be careful when you declare package names inside <CODE>&lt;Perl&gt;</CODE>
+sections, for example this code has a problem:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;  
+    package My::Trans;
+    use Apache::Constants qw(:common);
+    sub handler{ OK }
+    
+    $PerlTransHandler = &quot;My::Trans&quot;;
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When you put code inside a <CODE>&lt;Perl&gt;</CODE> section, by default it actually goes into the <CODE>Apache::ReadConfig</CODE> package, which is already declared for you. This means that the <CODE>PerlTransHandler</CODE> we have tried to define above is actually undefined. If you define a
+different package name within a <CODE>&lt;Perl&gt;</CODE> section you must make sure to close the scope of that package and return to
+the
+<CODE>Apache::ReadConfig</CODE> package when you want to define the configuration directives, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;  
+    package My::Trans;
+    use Apache::Constants qw(:common);
+    sub handler{ OK }
+    
+    package Apache::ReadConfig;  
+    $PerlTransHandler = &quot;My::Trans&quot;;
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Verifying">Verifying</A></H2></CENTER>
+<P>
+This section shows how to check and dump the configuration you have made
+with the help of <CODE>&lt;Perl&gt;</CODE> sections in <EM>httpd.conf</EM>.
+
+<P>
+To check the <CODE>&lt;Perl&gt;</CODE> section syntax outside of httpd, we make it look like a Perl script:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  # !perl
+  # ... code here ...
+  __END__
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you may run:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  perl -cx httpd.conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In a running httpd you can see how you have configured the
+<CODE>&lt;Perl&gt;</CODE> sections through the URI
+<A HREF="././debug.html#Apache_Status_Embedded_Inter">/perl-status</A>, by choosing <EM>Perl
+Section Configuration</EM> from the menu. In order to make this item show up in the menu you should
+set <CODE>$Apache::Server::SaveConfig</CODE> to a true value. When you do that the <EM>Apache::ReadConfig</EM> namespace (in which the configuration data is stored) will not be flushed,
+making configuration data available to Perl modules at request time.
+
+<P>
+Example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> &lt;Perl&gt;
+ $Apache::Server::SaveConfig = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> $DocumentRoot = ...
+ ...
+ &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+At request time, the value of <STRONG>$DocumentRoot</STRONG> can be accessed with the fully qualified name <STRONG>$Apache::ReadConfig::DocumentRoot</STRONG>.
+
+<P>
+You can dump the configuration of <CODE>&lt;Perl&gt;</CODE> sections like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  use Apache::PerlSections();
+  ...
+  # Configuration Perl code here
+  ...
+  print STDERR Apache::PerlSections-&gt;dump();
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Alternatively you can store it in a file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::PerlSections-&gt;store(&quot;httpd_config.pl&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can then <CODE>require()</CODE> that file in some other <CODE>&lt;Perl&gt;</CODE>
+section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Strict_Perl_Sections">Strict &lt;Perl&gt; Sections</A></H2></CENTER>
+<P>
+If the Perl code doesn't compile, the server won't start. If the generated
+Apache config is invalid, <CODE>&lt;Perl&gt;</CODE> sections have always just logged an error and carried on, since there might
+be globals in the section that are not intended for the config.
+
+<P>
+The variable <CODE>$Apache::Server::StrictPerlSections</CODE> has been added in mod_perl version 1.22. If you set this variable to a true
+value, for example
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $Apache::Server::StrictPerlSections = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then mod_perl will not tolerate invalid Apache configuration syntax and
+will <CODE>croak</CODE> (die) if this is the case. At the time of writing the default value is <CODE>0</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Debugging">Debugging</A></H2></CENTER>
+<P>
+If you compile mod_perl with <CODE>PERL_TRACE=1</CODE> and set the environment variable <A HREF="././debug.html#Debug_Tracing">MOD_PERL_TRACE</A> then you should see some useful diagnostics when mod_perl is processing <CODE>&lt;Perl&gt;</CODE>
+sections.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="References">References</A></H2></CENTER>
+<P>
+For more info see <A
+HREF="http://www.modperl.com">http://www.modperl.com</A> Chapter 8
+
+<P>
+META: a direct link?
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Validating_the_Configuration_Syn">Validating the Configuration Syntax</A></H1></CENTER>
+<P>
+<CODE>apachectl configtest</CODE> tests the configuration file without starting the server. You can safely
+validate the configuration file on your production server, if you run this
+test before you restart the server with <CODE>apachectl restart</CODE>. Of course it is not 100% perfect, but it will reveal any syntax errors
+you might have made while editing the file.
+
+<P>
+'<CODE>apachectl configtest</CODE>' is the same as '<CODE>httpd -t</CODE>' and it doesn't just parse the code in <EM>startup.pl</EM>, it actually executes it.
+<CODE>&lt;Perl&gt;</CODE> configuration has always started Perl during the configuration read, and <CODE>Perl{Require,Module}</CODE> do so as well.
+
+<P>
+Of course we assume that the code that gets called during this test cannot
+cause any harm to your running production environment. The following hint
+shows how to prevent the code in the startup script and
+<CODE>&lt;Perl&gt;</CODE> from being executed during the syntax check, if that's what you want.
+
+<P>
+If you want your startup code to get control over the <CODE>-t</CODE>
+(<CODE>configtest</CODE>) server launch, start the server configuration test with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd -t -Dsyntax_check</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and, if for example you want to prevent your startup code from being
+executed, at the top of the code add:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  return if Apache-&gt;define('syntax_check');</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Enabling_Remote_Server_Configura">Enabling Remote Server Configuration Reports</A></H1></CENTER>
+<P>
+The nifty mod_info module displays the complete server configuration in
+your browser. In order to use it you have compile it in or, if the server
+was compiled with DSO mode enabled, load it as an object. Then just
+uncomment the ready-prepared section in the <EM>httpd.conf</EM> file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /server-info&gt;
+    SetHandler server-info
+    Order deny,allow
+    Deny from all
+    Allow from www.example.com
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now restart the server and issue the request:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://www.example.com/server-info">http://www.example.com/server-info</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A></H1></CENTER>
+<P>
+If you are using a two-server setup, with a mod_perl server listening on a
+high port, it is advised that you do not publish the number of the high
+port number in URLs. Rather use a proxying rewrite rule in the non-mod_perl
+server:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine      On
+  RewriteLogLevel    0
+  RewriteRule       ^/perl/(.*) <A HREF="http://localhost:8080/perl/">http://localhost:8080/perl/</A>$1 [P]
+  ProxyPassReverse   /          <A HREF="http://localhost/">http://localhost/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+I was told one problem with publishing high port numbers is that IE 4.x has
+a bug when re-posting data to a non-port-80 URL. It drops the port
+designator, and uses port 80 anyway.
+
+<P>
+Another reason is that firewalls probably will have the high port closed,
+therefore users behind the firewalls will be unable to reach your service,
+running on the blocked port.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Configuring_Apache_mod_perl_wi">Configuring Apache + mod_perl with mod_macro</A></H1></CENTER>
+<P>
+mod_macro is an Apache module written by Fabien Coelho that lets you define
+and use macros in the Apache configuration file.
+
+<P>
+mod_macro can be really useful when you have many virtual hosts, and where
+each virtual host has a number of scripts/modules, most of them with a
+moderately complex configuration setup.
+
+<P>
+First download the latest version of mod_macro from <A
+HREF="http://www.cri.ensmp.fr/~coelho/mod_macro/">http://www.cri.ensmp.fr/~coelho/mod_macro/</A>
+, and configure your Apache server to use this module.
+
+<P>
+Here are some useful macros for mod_perl users:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # set up a registry script
+  &lt;Macro registry&gt;
+  SetHandler &quot;perl-script&quot;
+  PerlHandler Apache::Registry
+  Options +ExecCGI
+  &lt;/Macro&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # example
+  Alias /stuff /usr/www/scripts/stuff
+  &lt;Location /stuff&gt;
+  Use registry
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If your registry scripts are all located in the same directory, and your
+aliasing rules consistent, you can use this macro:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # set up a registry script for a specific location
+  &lt;Macro registry $location $script&gt;
+  Alias /$location /home/httpd/perl/scripts/$script
+  &lt;Location /$location&gt;
+  SetHandler &quot;perl-script&quot;
+  PerlHandler Apache::Registry
+  Options +ExecCGI
+  &lt;/Location&gt;
+  &lt;/Macro&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # example
+  Use registry stuff stuff.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you're using content handlers packaged as modules, you can use the
+following macro:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # set up a mod_perl content handler module
+  &lt;Macro modperl $module&gt;
+  SetHandler &quot;perl-script&quot;
+  Options +ExecCGI
+  PerlHandler $module
+  &lt;/Macro&gt;
+  
+  #examples
+  &lt;Location /perl-status&gt;
+  PerlSetVar StatusPeek On
+  PerlSetVar StatusGraph On
+  PerlSetVar StatusDumper On
+  Use modperl Apache::Status
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The following macro sets up a Location for use with <CODE>HTML::Embperl</CODE>. Here we define all ``.html'' files to be processed by <CODE>Embperl</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Macro embperl&gt;
+  SetHandler &quot;perl-script&quot;
+  Options +ExecCGI
+  PerlHandler HTML::Embperl
+  PerlSetEnv EMBPERL_FILESMATCH \.html$
+  &lt;/Macro&gt;
+  
+  # examples
+  &lt;Location /mrtg&gt;
+  Use embperl
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Macros are also very useful for things that tend to be verbose, such as
+setting up Basic Authentication:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # Sets up Basic Authentication
+  &lt;Macro BasicAuth $realm $group&gt;
+  Order deny,allow
+  Satisfy any
+  AuthType Basic
+  AuthName $realm
+  AuthGroupFile /usr/www/auth/groups
+  AuthUserFile /usr/www/auth/users
+  Require group $group
+  Deny from all
+  &lt;/Macro&gt;
+  
+  # example of use
+  &lt;Location /stats&gt;
+  Use BasicAuth WebStats Admin
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Finally, here is a complete example that uses macros to set up simple
+virtual hosts. It uses the <CODE>BasicAuth</CODE> macro defined previously (yes, macros can be nested!).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Macro vhost $ip $domain $docroot $admingroup&gt;
+  &lt;VirtualHost $ip&gt;
+  ServerAdmin webmaster@$domain
+  DocumentRoot /usr/www/htdocs/$docroot
+  ServerName www.$domain
+  &lt;Location /stats&gt;
+  Use BasicAuth Stats-$domain $admingroup
+  &lt;/Location&gt;
+  &lt;/VirtualHost&gt;
+  &lt;/Macro&gt;
+  
+  # define some virtual hosts
+  Use vhost 10.1.1.1 example.com example example-admin
+  Use vhost 10.1.1.2 example.net examplenet examplenet-admin</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+mod_macro is also useful in a non vhost setting. Some sites for example
+have lots of scripts which people use to view various statistics, email
+settings and etc. It is much easier to read things like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use /forwards email/showforwards
+  use /webstats web/showstats</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The actual macros for the last example are left as an exercise to reader.
+These can be easily constructed based on the examples presented in this
+section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="General_Pitfalls">General Pitfalls</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A></H2></CENTER>
+<P>
+Check your configuration files and make sure that the <CODE>ExecCGI</CODE> is turned on in your configurations.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="My_Script_Works_under_mod_cgi_b">My Script Works under mod_cgi, but when Called via mod_perl I Get a 'Save-As' Prompt</A></H2></CENTER>
+<P>
+Did you put <STRONG>PerlSendHeader On</STRONG> in the configuration part of the
+<CODE>&lt;Location foo&gt;&lt;/Location&gt;</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Is_There_a_Way_to_Provide_a_Diff">Is There a Way to Provide a Different startup.pl File for Each Individual Virtual Host</A></H2></CENTER>
+<P>
+No. Any virtual host will be able to see the routines from a <EM>startup.pl</EM>
+loaded for any other virtual host.  
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Is_There_a_Way_to_Modify_INC_on">Is There a Way to Modify @INC on a Per-Virtual-Host or Per-Location Basis.</A></H2></CENTER>
+<P>
+You can use <CODE>PerlSetEnv PERL5LIB ...</CODE> or a <CODE>PerlFixupHandler</CODE> with the <CODE>lib</CODE> pragma (<CODE>use lib qw(...)</CODE>).
+
+<P>
+A better way is to use
+<A HREF="././modules.html#Apache_PerlVINC_Allows_Module">Apache::PerlVINC</A>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="A_Script_From_One_Virtual_Host_C">A Script From One Virtual Host Calls a Script with the Same Path From the Other Virtual Host</A></H2></CENTER>
+<P>
+This has been a bug before, last fixed in 1.15_01, i.e. if you are running
+1.15, that could be the problem. You should set this variable in a startup
+file (which you load with <CODE>PerlRequire</CODE> in
+<EM>httpd.conf</EM>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $Apache::Registry::NameWithVirtualHost = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But, as we know sometimes a bug turns out to be a feature. If the same
+script is running for more than one Virtual host on the same machine, this
+can be a waste, right? Set it to <CODE>0</CODE> in a startup script if you want to turn it off and have this bug as a
+feature. (Only makes sense if you are sure that there will be no <EM>other</EM> scripts with the same path/name). It also saves you some memory as well.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $Apache::Registry::NameWithVirtualHost = 0;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="the_Server_no_Longer_Retrieves_t">the Server no Longer Retrieves the DirectoryIndex Files for a Directory</A></H2></CENTER>
+<P>
+The problem was reported by users who declared mod_perl configuration
+inside a <CODE>&lt;Directory&gt;</CODE> section for all files matching *.pl. The problem went away after placing
+the directives in a <CODE>&lt;Files&gt;</CODE>
+section.
+
+<P>
+The mod_alias and mod_rewrite are both Trans handlers in the normal case.
+So in the setup where both are used, if mod_alias runs first and matches it
+will return OK and mod_rewrite won't see the request.
+
+<P>
+The opposite can happen as well, where mod_rewrite rules apply but the
+<CODE>Alias</CODE> directives are completely ignored.
+
+<P>
+The behavior is not random, but depends on the Apache modules loading
+order. Apache modules are being executed in <EM>reverse</EM> order, i.e. module that was <EM>Added</EM> first will be executed last.
+
+<P>
+The solution is not to mix mod_rewrite and mod_alias. mod_rewrite does
+everything mod_alias does--except for <CODE>ScriptAlias</CODE> which is not really relevant to mod_perl anyway. Don't rely on the module
+ordering, but use explicitely disjoint URL namespaces for <CODE>Alias</CODE> and
+<CODE>Rewrite</CODE>. In other words any URL regexp that can potentially match a
+<CODE>Rewrite</CODE> rule should not be used in an <CODE>Alias</CODE>, and vice versa. Given that mod_rewrite can easily do what mod_alias does,
+it's no problem.
+
+<P>
+Here is one of the examples where <CODE>Alias</CODE> is replaced with
+<CODE>RedirectMatch</CODE>. This is a snippet of configuration at the light non-mod_perl Apache
+server:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine     on
+  RewriteLogLevel   0
+  RewriteRule       ^/(perl.*)$    <A HREF="http://127.0.0.1:8045/">http://127.0.0.1:8045/</A>$1  [P,L]
+  RewriteRule       ^/(mail.*)$    <A HREF="http://127.0.0.1:8045/">http://127.0.0.1:8045/</A>$1  [P,L]
+  NoCache           *
+  ProxyPassReverse  / <A HREF="http://www.example.com/">http://www.example.com/</A>
+  
+  RedirectMatch permanent ^/$      /pages/index
+  RedirectMatch permanent ^/foo$   /pages/bar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This configuration works fine because any URI that matches one of the
+redirects will never match one of the rewrite rules.
+
+<P>
+In the above setup we proxy requests starting with <EM>/perl</EM> or
+<EM>/mail</EM> to the mod_perl server, forbid proxy requests to the external sites, and
+make sure that the proxied requests will use the
+<EM>http://www.example.com/</EM> as their URL on the way back to the client.
+
+<P>
+The <CODE>RedirectMatch</CODE> settings work exactly like if you'd write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /      /pages/index
+  Alias /foo   /pages/bar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But as we told before we don't want to mix the two.
+
+<P>
+Here is another example where the redirect is done by a rewrite rule:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine     on
+  RewriteLogLevel   0
+  RewriteMap        lowercase int:tolower
+  RewriteRule       ^/(perl.*)$  <A HREF="http://127.0.0.1:8042/">http://127.0.0.1:8042/</A>$1   [P,L]
+  RewriteRule       ^/$           /pages/welcome.htm        [R=301,L]
+  RewriteRule       ^(.*)$        ${lowercase:$1}
+  NoCache           *
+  ProxyPassReverse  /  <A HREF="http://www.example.com/">http://www.example.com/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If we omit the rewrite rule that matches <CODE>^/$</CODE>, and instead use a redirect, it will never be called, because the URL is
+still matched by the last rule <CODE>^(.*)$</CODE>. This is a somewhat contrived example because that last regex could be
+rewritten as <CODE>^(/.+)$</CODE> and all would be well.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Configuration_Security_Concerns">Configuration Security Concerns</A></H1></CENTER>
+<P>
+It is better not to advertise the port that mod_perl server uses to the
+outside world, for it creates a potential security risk by revealing which
+<CODE>module(s)</CODE> and/or OS you are running your web server on.
+
+<P>
+For more information see <A HREF="././config.html#Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A>.
+
+<P>
+The more modules you have in your web server, the more complex the code.
+
+<P>
+The more complex the code in your web server, the more chances for bugs.
+
+<P>
+The more chances for bugs, the more chance that some of those bugs may
+involve security.
+
+<P>
+We never were completely sure why the default of the <CODE>ServerToken</CODE>
+directive in Apache is <CODE>Full</CODE> rather than <CODE>Minimal</CODE>. Seems like you would only make it <CODE>Full</CODE> if you are debugging. Probably the reason for using the <CODE>ServerToken Full</CODE> is for a show-off, so NetCraft (http://netcraft.com) and other similar
+survey services will count more Apache servers, which is good for all of
+us, but you really want to reveal as little information as possible to the
+potential crackers.
+
+<P>
+Another approach is to modify httpd sources to reveal no unwanted
+information, so all responses will return an empty or phony <CODE>Server:</CODE>
+field.
+
+<P>
+From the other point of view, security by obscurity is a lack of security.
+Any determined cracker will eventually figure out what version of Apache
+run and what third party modules you have built in.
+
+<P>
+You can see what information is revealed by your server, by telneting to it
+and issuing some request. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % telnet localhost 8080
+  Trying 127.0.0.1
+  Connected to localhost
+  Escape character is '^]'.
+  HEAD / HTTP1.0
+  
+  HTTP/1.1 200 OK
+  Date: Sun, 16 Apr 2000 11:06:25 GMT
+  Server: Apache/1.3.12 (Unix) mod_perl/1.22 mod_ssl/2.6.2 OpenSSL/0.9.5
+  [more lines snipped]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So as you see that a lot of information is revealed and a <CODE>Full</CODE>
+
+<CODE>ServerToken</CODE> has been used.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Restarts_Twice_On_Start">Apache Restarts Twice On Start</A></H1></CENTER>
+<P>
+When the server is restarted, the configuration and module initialization
+phases are called twice in total before the children are forked. The second
+restart is done in order to ensure that future restarts will work
+correctly, by making sure that all modules can survive a restart (<CODE>SIGHUP</CODE>). This is very important if you restart a production server.
+
+<P>
+You can control what code will be executed on the start or restart by
+checking the value of <CODE>$Apache::Server::Starting</CODE> and
+<CODE>$Apache::Server::ReStarting</CODE> respectively. The former variable is
+<EM>true</EM> when the server is starting and the latter is <EM>true</EM> when it's restarting.
+
+<P>
+For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Perl&gt;
+  print STDERR &quot;Server is Starting\n&quot;   if $Apache::Server::Starting;
+  print STDERR &quot;Server is ReStarting\n&quot; if $Apache::Server::ReStarting;
+  &lt;/Perl&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <EM>startup.pl</EM> file and similar loaded via <CODE>PerlModule</CODE> or
+<CODE>PerlRequire</CODE> are compiled only once. Because once the module is compiled it enters the
+special <CODE>%INC</CODE> hash. When Apache restarts--Perl checks whether the module or script in
+question is already registered in <CODE>%INC</CODE> and won't try to compile it again.
+
+<P>
+So the only code that you might need to protect from running on restart is
+the one in the <CODE>&lt;Perl&gt;</CODE> sections. But since one usually uses the <CODE>&lt;Perl&gt;</CODE> sections mainly for on the fly configuration creation, there shouldn't be a
+reason why it'd be undesirable to run the code more than once.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Knowing_the_proxy_pass_ed_Connec">Knowing the proxy_pass'ed Connection Type</A></H1></CENTER>
+<P>
+Let's say that you have a frontend server running mod_ssl, mod_rewrite and
+mod_proxy. You want to make sure that your user is using a secure
+connection for some specific actions like login information submission. You
+don't want to let the user login unless the request was submitted through a
+secure port.
+
+<P>
+Since you have to proxy_pass the request between front and backend servers,
+you cannot know where the connection has come from. Neither is using the
+HTTP headers reliable.
+
+<P>
+A possible solution for this problem is to have the the mod_perl server
+listen on two different ports (e.g. 8000 and 8001) and have the mod_rewrite
+proxy rule in the regular server redirect to port 8000 and the mod_rewrite
+proxy rule in the SSL virtual host redirect to port 8001. In the mod_perl
+server just check the <CODE>PORT</CODE> variable to tell if the connection is secure.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Adding_Custom_Configuration_Dire">Adding Custom Configuration Directives</A></H1></CENTER>
+<P>
+This is covered in the Eagle Book in a great detail. This is just a simple
+example, showing how to add your own Configuration directives.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Makefile.PL
+  -----------
+  package Apache::TestDirective;
+  
+  use ExtUtils::MakeMaker;
+  
+  use Apache::ExtUtils qw(command_table);
+  use Apache::src ();
+  
+  my @directives = (
+                  {   name        =&gt;  'Directive4',
+                      errmsg      =&gt;  'Anything',
+                      args_how    =&gt;  'RAW_ARGS',
+                      req_override=&gt;  'OR_ALL',
+                  },
+                 );
+    
+  command_table(\@directives);
+  
+  WriteMakefile(
+    'NAME'      =&gt; 'Apache::TestDirective',
+    'VERSION_FROM' =&gt; 'TestDirective.pm',
+    'INC'       =&gt; Apache::src-&gt;new-&gt;inc,
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  TestDirective.pm
+  ----------------
+  package Apache::TestDirective;
+  
+  use strict;
+  use Apache::ModuleConfig ();
+  use DynaLoader ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if($ENV{MOD_PERL}) {
+    no strict;
+    $VERSION = '0.01';
+    @ISA = qw(DynaLoader);
+     __PACKAGE__-&gt;bootstrap($VERSION); #command table, etc.
+  }
+  
+  sub Directive4 {
+    warn &quot;Directive4 @_\n&quot;;
+  }
+  
+  1;
+  __END__</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the mod_perl source tree, add this to <EM>t/docs/startup.pl</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use blib qw(/home/dougm/test/Apache/TestDirective);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and at the bottom of <EM>t/conf/httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::TestDirective
+  Directive4 hi</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Test it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make start_httpd
+  % make kill_httpd</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You should see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Directive4 Apache::TestDirective=HASH(0x83379d0)
+  Apache::CmdParms=SCALAR(0x862b80c) hi</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And in the error log file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % grep Directive4 t/logs/error_log 
+  Directive4 Apache::TestDirective=HASH(0x83119dc)
+  Apache::CmdParms=SCALAR(0x8326878) hi</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If it didn't work as expected try building mod_perl with <CODE>PERL_TRACE=1</CODE>, then do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  setenv MOD_PERL_TRACE all</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+before starting the server. Now you should get some useful diagnostics.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./install.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./control.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/20/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl Guide</title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>mod_perl Guide</h1>
+
+    <center>
+      <p>
+	<b>
+	  Deploying mod_perl technology to give rocket speed to
+	  your CGI/Perl scripts.
+	</b>
+      </p>
+    </center>
+
+    <center><p><b>Version 1.29 May 31, 2001</b></p></center>
+ 
+
+    <table align=center width="70%">
+ 
+      <tr>
+	<td>	  
+	  <div class="notice">
+	    <b>Full Version Master Copy URL</b>: <a
+	    href="http://perl.apache.org/guide/"><b>http://perl.apache.org/guide/</b></a><br>
+	  </div>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index_long.html">Full TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="toc"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Table of Contents:
+	    </font>
+	  </h3>
+
+	  <ul>
+	  <div class="toc">
+	    <LI><A HREF="intro.html">Introduction. Incentives. Credits. </A></LI>
+
+
+<LI><A HREF="start.html">Guide's Overview </A></LI>
+
+
+<LI><A HREF="perl.html">Perl Reference </A></LI>
+
+
+<LI><A HREF="install.html">mod_perl Installation </A></LI>
+
+
+<LI><A HREF="config.html">mod_perl Configuration </A></LI>
+
+
+<LI><A HREF="control.html">Controlling and Monitoring the Server </A></LI>
+
+
+<LI><A HREF="strategy.html">Choosing the Right Strategy </A></LI>
+
+
+<LI><A HREF="scenario.html">Real World Scenarios </A></LI>
+
+
+<LI><A HREF="porting.html">CGI to mod_perl Porting. mod_perl Coding guidelines. </A></LI>
+
+
+<LI><A HREF="performance.html">Performance Tuning </A></LI>
+
+
+<LI><A HREF="frequent.html">Frequent mod_perl problems </A></LI>
+
+
+<LI><A HREF="troubleshooting.html">Warnings and Errors Troubleshooting Index </A></LI>
+
+
+<LI><A HREF="correct_headers.html">Issuing Correct HTTP Headers </A></LI>
+
+
+<LI><A HREF="security.html">Protecting Your Site </A></LI>
+
+
+<LI><A HREF="databases.html">mod_perl and Relational Databases </A></LI>
+
+
+<LI><A HREF="dbm.html">mod_perl and dbm files </A></LI>
+
+
+<LI><A HREF="multiuser.html">mod_perl for ISPs. mod_perl and Virtual Hosts </A></LI>
+
+
+<LI><A HREF="debug.html">Debugging mod_perl </A></LI>
+
+
+<LI><A HREF="browserbugs.html">Workarounds for some known bugs in browsers. </A></LI>
+
+
+<LI><A HREF="modules.html">Apache::* modules </A></LI>
+
+
+<LI><A HREF="snippets.html">Code Snippets </A></LI>
+
+
+<LI><A HREF="hardware.html">Choosing an Operating System and Hardware </A></LI>
+
+
+<LI><A HREF="advocacy.html">mod_perl Advocacy </A></LI>
+
+
+<LI><A HREF="help.html">Getting Help and Further Learning </A></LI>
+
+
+<LI><A HREF="download.html">Appendix A: Downloading software and documentation </A></LI>
+
+
+	  </div>
+
+	</ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index_long.html">Full TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="changes"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Changes:
+	    </font>
+	  </h3>
+
+	  <ul>
+
+	    <li> 
+      The Guide's <a href="CHANGES">Changes</a> file.
+	    </li>
+	  </ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="download"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Download:
+	    </font>
+	  </h3>
+	
+
+	  <ul>
+
+	    <li> 
+	      The latest CVS snapshots of the POD sources
+	      and the build script you can build the HTMLs from,
+	      are available from  <a
+		href="http://www.stason.org/guide-snapshots/">
+		http://www.stason.org/guide-snapshots/</a>.
+	    </li>
+
+	    <li> 
+	      <b>This</b> release's HTML files, POD sources 
+	      and build script are available from <a
+		href="http://www.perl.com/CPAN-local/authors/id/S/ST/STAS/">
+		my directory at CPAN or its mirrors</a> or <a
+		href="http://search.cpan.org/search?mode=module&query=mod_perl_guide">search.cpan.org</a>.
+	    </li>
+
+	    <li> 
+	      <!-- this link must be FQDN, since the split version
+	      will link to the broken link if you don't do it, since
+	      we don't copy the pdf to the split version -->
+	      Here is the <a href="http://perl.apache.org/guide/mod_perl_guide.pdf.gz"> Book-like
+		version </a> (PDF format).<br>  
+                <B>IMPORTANT</B>: When you
+		download a file with .gz extension many browsers do
+		you a "favor" and uncompress it, but forget to remove
+		the .gz extension. Just remove this extension if your
+		tools complain that the file is broken if you try to
+		uncompress it again.<br>
+                To read PDF files you can
+		use: <code>ghostview</code> (<code>gv</code>),
+	      <code>xpdf</code> or <code>acroread</code> (with
+	      <code>acroread</code> you can search the text and us the
+	      hyperlinks).  You can use the
+	      <code>pdf2ps</code> utility to convert PDF to
+	      PostSscript format.
+	    </li>
+
+	  </ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <A NAME="search"></A>
+	  <h3>
+	    <font color="#008B8B">
+	      Search:
+	    </font>
+	  </h3>
+
+	  <div class="search">
+	    Using <a
+	    href="http://www.nexial.com/nextrieve/"><b>nextrieve</b></a>
+	    engine on <b>split</b> Guide version (by Vivek Khera):
+	    <form
+	      action="http://thingy.kcilink.com/cgi-bin/modperlguide.cgi"
+	      method="post">
+	      <center>
+		<input type=text name=q value="" size=25> 
+		<input type=submit value=" Search ">
+	      </center>
+	    </form>
+	  </div>
+
+	  <div class="search">	
+	    Using
+	    <a href="http://sunsite.berkeley.edu/SWISH-E/">
+	      <b>SWISH-E</b></a> engine + Perl filters on <b>split</b>
+	      Guide version (by Randy Kobes):
+	    <form method="GET"
+	      action="http://theoryx5.uwinnipeg.ca/cgi-bin/guide-search"
+	      enctype="application/x-www-form-urlencoded" name="search">
+	      <center>
+		<input type="text" name="query" size=25>
+		<input type="submit" name="Submit" value=" Search ">
+		<input type="hidden" name=".cgifields" value="where">
+		<input type="hidden" name=".cgifields" value="match">
+	      </center>
+	    </form>
+	  </div>
+
+	  <div class="search">	  
+	    Using
+	    <a href="http://sunsite.berkeley.edu/SWISH-E/">
+	      <b>SWISH-E</b></A> engine on <b>full</b> Guide version
+	      (perl.apache.org) (bad results):
+	    <form action="http://search.apache.org/" method="post">
+	      <center>
+		<input type="text" name="keyword" value="" size=25>
+		<input type="hidden" name="what" value="perl">
+		<input type="hidden" name="results" value=40>
+		<input type="submit" value="Search">
+	      </center>
+	    </form>    
+	  </div>
+	  
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index_long.html">Full TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>	  
+	  <div class="notice">
+	    Full Version Master Copy URL: <a
+	    href="http://perl.apache.org/guide/"><b>http://perl.apache.org/guide</b></a><br>
+	    Copyright &copy; 1998-2001 Stas Bekman. All rights
+	    reserved. (Distributed under GPL license)
+	  </div>
+	</td>
+      </tr>
+
+    </table>
+ 
+
+    <hr>
+
+    <center>
+      <table cellspacing=2 cellpadding=2>
+	
+	<tr align=center valign=top>
+	  <td align=center valign=center>
+	    
+	    <b><font size=-1>
+		Written by <a
+		  href="help.html#Contacting_me">Stas
+		  Bekman</a>.<br> Last Modified at 05/31/2001
+	      </font></b>
+	    <br>
+	    
+	  </td>
+
+	  <td>
+	    
+	    <a href="http://perl.apache.org"><img
+	    src="images/mod_perl2.jpg"
+		border=0 alt="Mod Perl Icon" border=0 height=59 width=150></a>
+	    <br>
+
+	  </td>
+
+	  <td>
+
+	    <font size=-2>
+	      Use of the Camel for Perl is <BR> a trademark of <A
+	      HREF="http://www.ora.com">O'Reilly &amp;
+	      Associates</A>,<BR> and is used by permission. 
+	    </font>
+	    <br>
+	    
+	  </td>
+	  
+	</tr>
+      </table>
+    </center>
+    
+  </body>
+</html>
+

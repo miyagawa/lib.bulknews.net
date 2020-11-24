@@ -1,0 +1,141 @@
+#!/usr/local/bin/perl -w
+
+#
+# jscache.cgi - Cache javascript feed content on your server
+#
+#   AUTHOR:  Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+#   LICENSE: free software, licensed under the same license as Perl.
+#
+
+use strict;
+use vars qw($VERSION $remote_url $cache_dir $cache_ttl $get_app $debug @allow_url $content_type);
+
+$VERSION = "0.02";
+
+#--------------------------------------------------
+# 設定項目ここから
+
+# 中継する javascript URL
+# パラメータなどはのぞく
+$remote_url = "http://bulkfeeds.net/app/similar.js";
+
+# キャッシュディレクトリ
+# Web サーバのユーザ権限で writable である必要がある
+$cache_dir = "/tmp/jscache";
+
+# キャッシュする時間 (単位: 分)
+$cache_ttl = 60;
+
+# HTTP 接続に使用するアプリケーション
+# LWP がインストールされている場合は設定不要
+# 'lynx -source'
+# 'wget --quiet -O -'
+# 'curl -m 30 -s'
+$get_app = '';
+
+# Referer として許可する URL: 部分マッチ
+# 空の場合はチェックしない
+# @allow_url = ("yourhost.example.com");
+@allow_url = ();
+
+# Content-Type
+$content_type = "x-application/javascript";
+
+# デバッグ変数
+$debug = 1;
+
+# 設定項目ここまで
+#--------------------------------------------------
+
+if (@allow_url) {
+    my $referer = $ENV{HTTP_REFERER} || '';
+    warn "Referer: $referer" if $debug;
+    my $match   = join '|', map quotemeta, @allow_url;
+    warn "allow url pattern: $match" if $debug;
+    if (!$referer or $referer !~ /$match/) {
+	send_http_header();
+	print "document.write('<p>jscache: invalid referer</p>');";
+	exit;
+    }
+}
+
+my $url = $remote_url;
+   $url .= "?$ENV{QUERY_STRING}" if $ENV{QUERY_STRING};
+
+warn "remote url is $url" if $debug;
+
+my $cache_file = cache_for($url);
+warn "cache file for $url is $cache_file" if $debug;
+
+if (-e $cache_file && -M _ < ($cache_ttl / (24 * 60))) {
+    warn "using cache file $cache_file" if $debug;
+    output_content($cache_file);
+} else {
+    warn "no cache available or expired." if $debug;
+    my $content = get_content($url);
+    store_cache($cache_file, $content);
+    output_content($cache_file);
+}
+
+sub cache_for {
+    my $url = shift;
+    $url =~ s/(\W)/'%' . unpack('H2', $1)/eg; # uri_escape
+
+    unless (-e $cache_dir) {
+	warn "cache dir $cache_dir doesn't exit. Try mkdir" if $debug;
+	mkdir $cache_dir, 0777 or die "$cache_dir: $!";
+    }
+
+    return $cache_dir . "/" . $url;
+}
+
+sub get_content {
+    my $url = shift;
+    my $have_lwp = eval "require LWP::Simple; 1";
+    if ($have_lwp) {
+	warn "you have LWP::Simple installed." if $debug;
+	return LWP::Simple::get($url);
+    } else {
+	# taint it
+	$url =~ s/([^A-Za-z0-9\-_.!~*'()])/'%' . unpack('H2', $1)/eg;
+	my $content;
+	open APP, qq/$get_app "$url" |/ or die "$get_app: $!";
+	while (<APP>) {
+	    $content .= $_;
+	}
+	close APP;
+	return $content;
+    }
+}
+
+sub send_http_header {
+    if ($ENV{MOD_PERL}) {
+	my $r = Apache->request;
+	$r->send_http_header("Content-Type: $content_type");
+    } else {
+	print "Content-Type: $content_type\n\n";
+    }
+}
+
+sub output_content {
+    my $cache_file = shift;
+    send_http_header();
+    open CACHE, $cache_file or die "$cache_file: $!";
+    while (<CACHE>) { print }
+    close CACHE;
+}
+
+sub store_cache {
+    my($cache_file, $content) = @_;
+    warn "writing content to $cache_file" if $debug;
+    open OUT, ">$cache_file" or die "$cache_file: $!";
+    print OUT $content;
+    close OUT;
+}
+
+#
+# Changes:
+# 0.02  Sun May  9 14:32:13 JST 2004
+#       Referer チェック用変数 @allow_url を追加
+#       Content-Type を設定可能に
+#

@@ -1,0 +1,101 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.32
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. News  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+ものすごく間があいてしまいました。またぼちぼち書いていきたいとおもいま
+す。休んでいる間にあったニュースなどをつらつらとまとめてみました。
+
+
+* perl 5.7.3 リリース
+
+http://use.perl.org/article.pl?sid=02/03/05/1235220
+http://archive.develooper.com/perl5-porters@perl.org/msg74215.html
+
+perl の開発ブランチである 5.7 の最新リビジョン 5.7.3 がリリースされま
+した。5.7 系列はこれで終りで、近日中に 5.8 RC1 がリリースされ、夏まで
+には 5.8 が世に出る予定です。5.7, 5.8 の変更点は近いうちにまとめてみよ
+うと思っています。
+
+* Apocalypse 4, Exegesis 4
+
+http://use.perl.org/article.pl?sid=02/04/03/0450238
+http://www.perl.com/pub/a/2002/04/01/exegesis4.html
+http://www.perl.com/pub/a/2002/01/15/apo4.html
+
+Perl6 のオブジェクト指向機能などもだいぶ全容が見えて来た感じです。といっ
+ても、僕には難しくてなにがなんやら ...
+
+* Perl を256倍使う本DBI 編発売
+
+http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm
+
+川合孝典さんによる Perl256本の第1弾がアスキーより発売されています。世
+界初のDBD本！買いましょう。
+
+* WEB+DB Press 連載開始
+
+http://www.gihyo.co.jp/wdpress/
+
+WEB+DB Press Vol.7 より、Perl Style というタイトルで連載をはじめました。
+Perl を用いたWebアプリケーション開発の手法について書いていこうと思って
+います。次回 Vol.8 では Class::DBI の特集を書いていますのでお楽しみに。
+
+* mysql プロトコルを Pure Perl で
+
+http://search.cpan.org/search?dist=Net-MySQL
+http://search.cpan.org/search?dist=DBD-mysqlPP
+
+小山浩之さんによる MySQL ネットワークプロトコルを Pure Perl で実装した
+モジュールが CPAN に登録されています。IO::Socket によってプロトコルを
+実装しているため、libmysql のような外部ライブラリを必要としないところ
+がセールスポイント。
+
+* YAPC NA
+
+http://www.yapc.org/America/
+
+YAPC::NA のレジストレーションがはじまっています。参加したいなー。
+
+* 拙作 CPAN モジュール
+
+くだらないモジュールをいくつかつくってみました。
+
+- PHP::Session, Apache::Session::PHP
+
+http://search.cpan.org/search?dist=PHP-Session
+http://search.cpan.org/search?dist=Apache-Session-PHP
+
+PHP4 のデフォルトセッション機能によって生成されるセッションファイルを
+読み書きすることができます。PHP とセッションを共有するときに使うと便利!?
+
+- WWW::Baseball::NPB
+
+http://search.cpan.org/search?dist=WWW-Baseball-NPB
+
+Yahoo! Sports の野球情報を HTTP経由で取得するモジュールです。
+
+- Email::Valid::Loose
+
+http://search.cpan.org/search?dist=Email-Valid-Loose
+
+i-mode のメールアドレスは @ の直前のドットを許可していますが、これは 
+RFC822 的には不正で、Email::Valid を使うと不正アドレスになってしまいま
+す（当然ですが）。仕事でちょっと困ったので、これも許してしまうサブクラ
+スがこれです。
+
+- Class::DBI::SQLite
+
+http://search.cpan.org/search?dist=Class-DBI-SQLite
+
+C で書かれたファイルベースの高速なSQLエンジン、sqlite を Class::DBI か
+ら利用するためのアドインです。実際のコードは数行です。
+
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

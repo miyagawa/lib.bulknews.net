@@ -1,0 +1,816 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Getting Help and Further Learning </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Getting Help and Further Learning 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./advocacy.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./download.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#READ_ME_FIRST">READ ME FIRST</A>
+	<LI><A HREF="#Contacting_me">Contacting me</A>
+	<LI><A HREF="#Get_help_with_mod_perl">Get help with mod_perl</A>
+	<LI><A HREF="#Get_help_with_Perl">Get help with Perl</A>
+	<LI><A HREF="#Get_help_with_Perl_CGI">Get help with Perl/CGI</A>
+	<LI><A HREF="#Get_help_with_Apache">Get help with Apache </A>
+	<LI><A HREF="#Get_help_with_DBI_and_SQL">Get help with DBI and SQL</A>
+	<LI><A HREF="#Get_help_with_Squid_Internet_O">Get help with Squid - Internet Object Cache</A>
+	<LI><A HREF="#Get_help_with_CVS_Concurrent_">Get help with CVS - Concurrent Version Control</A>
+	<LI><A HREF="#Get_help_with_Performance_and_Sc">Get help with Performance and Scalability</A>
+	<LI><A HREF="#Get_help_with_Unix_OS_flavors_">Get help with Unix OS flavors - Unix OS related resources</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="READ_ME_FIRST">READ ME FIRST</A></H1></CENTER>
+<P>
+If, after reading this guide and the other documents listed in this
+section, you still don't have the answers/information needed, please ask
+for help on the Apache/mod_perl mailing list. But please, first try to
+browse the mailing list archive. Most of the time you will find the answer
+to your questions by searching the archive, since it is very likely that
+someone else has already encountered the same problem and found a solution
+for it. If you ignore this advice, you should not be surprised if your
+question is left unanswered - it bores people to answer the same question
+more than once. This does not mean that you should avoid asking questions,
+but you should not abuse the available help and you should <EM>RTFM</EM> before you call for <EM>HELP</EM>. (Remember the fable of the shepherd boy and the wolves).
+
+<P>
+For more information See <A HREF="././help.html#Get_help_with_mod_perl">Get helped with mod_perl</A>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Contacting_me">Contacting me</A></H1></CENTER>
+<P>
+Hi, I wrote this document to help people with mod_perl. It does not mean
+that if you have any question regarding mod_perl, perl or whatever you
+think I might know, you should send it directly to me. Please see the <A HREF="././help.html#Get_help_with_mod_perl">Get help with mod_perl</A>
+section and follow the guidelines described there.
+
+<P>
+However, you are welcome to submit corrections and suggestions directly to
+me at <A
+HREF="mailto:stas@stason.org?subject=mod_perl%20guide%20corrections.">stas@stason.org?subject=mod_perl%20guide%20corrections.</A>
+If you are going to submit heavy corrections of the text (I love those!),
+please help me by downloading the source pages in POD from <A
+HREF="http://www.stason.org/guide-snapshots/">http://www.stason.org/guide-snapshots/</A>,
+directly editing them and sending them to me. I will use Emacs Ediff to
+perform an easy merge of such changes. Thank you!
+
+<P>
+<EM>PLEASE DO NOT SEND QUESTIONS DIRECTLY TO ME, I didn't invite those
+by writing the guide.  They will all be immediately deleted.  Please
+ask questions on the mod_perl list and if we can answer your question,
+one (or more) of us will answer it on the list.  Thank you!</EM>
+
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_mod_perl">Get help with mod_perl</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl home</A></STRONG>
+<P>
+<A HREF="http://perl.apache.org">http://perl.apache.org</A>
+
+<P><LI><STRONG><A NAME="item_News">News and Resources</A></STRONG>
+<P>
+Take23: News and Resources for the mod_perl world <A
+HREF="http://take23.org">http://take23.org</A>
+
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl Books</A></STRONG>
+<UL>
+<P><LI><STRONG><A NAME="item__Apache_Modules_Book">'Apache Modules' Book</A></STRONG>
+<P>
+<A HREF="http://www.modperl.com">http://www.modperl.com</A> is the home
+site of The Apache Modules Book, a book about creating Web server modules
+using the Apache API, written by Lincoln Stein and Doug MacEachern.
+
+<P>
+The book should be available from your local bookstore or from your
+favourite on-line bookseller. O'Reilly lists this book as:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Writing Apache Modules with Perl and C
+  By Lincoln Stein &amp; Doug MacEachern
+  1st Edition March 1999
+  2nd Edition Feb 2000
+  1-56592-567-X, Order Number: 567X
+  746 pages, $34.95</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item__Managing_and_Programming_mod_pe">'Managing and Programming mod_perl' Book</A></STRONG>
+<P>
+<A HREF="http://www.modperlbook.com">http://www.modperlbook.com</A> is the
+home site of the new mod_perl book, that Eric Cholet and Stas Bekman are
+co-authoring. We expect the book to be published in 2001.
+
+<P>
+Ideas, suggestions and comments are welcome. Please send them to <A
+HREF="mailto:info@modperlbook.com">info@modperlbook.com</A> .
+
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl Quick Reference Card</A></STRONG>
+<P>
+<EM>mod_perl Pocket Reference</EM> by Andrew Ford was published by O'Reilly and Associates <A
+HREF="http://www.oreilly.com/catalog/modperlpr/">http://www.oreilly.com/catalog/modperlpr/</A>
+
+
+<P>
+You should probably get also the <EM>Apache Pocket Reference</EM> by the same author and the same publisher: <A
+HREF="http://www.oreilly.com/catalog/apachepr/">http://www.oreilly.com/catalog/apachepr/</A>
+
+
+<P>
+See also Andrew's collection of reference card for Apache and other
+programs: <A HREF="http://www.refcards.com.">http://www.refcards.com.</A>
+
+</UL>
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl Guide</A></STRONG>
+<P>
+by Stas Bekman at <A
+HREF="http://perl.apache.org/guide">http://perl.apache.org/guide</A>
+
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl FAQ</A></STRONG>
+<P>
+by Frank Cringle at <A
+HREF="http://perl.apache.org/faq/">http://perl.apache.org/faq/</A> .
+
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl performance tuning guide</A></STRONG>
+<P>
+by Vivek Khera at <A
+HREF="http://perl.apache.org/tuning/">http://perl.apache.org/tuning/</A> .
+
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl plugin reference guide</A></STRONG>
+<P>
+by Doug MacEachern at <A
+HREF="http://perl.apache.org/src/mod_perl.html">http://perl.apache.org/src/mod_perl.html</A>
+.
+
+<P><LI><STRONG><A NAME="item_Quick">Quick guide for moving from CGI to mod_perl</A></STRONG>
+<P>
+at <A
+HREF="http://perl.apache.org/dist/cgi_to_mod_perl.html">http://perl.apache.org/dist/cgi_to_mod_perl.html</A>
+.
+
+<P><LI><STRONG><A NAME="item_mod_perl_traps">mod_perl_traps, common traps and solutions for mod_perl users</A></STRONG>
+<P>
+at <A
+HREF="http://perl.apache.org/dist/mod_perl_traps.html">http://perl.apache.org/dist/mod_perl_traps.html</A>
+.
+
+<P><LI><STRONG><A NAME="item_Articles">Articles</A></STRONG>
+<UL>
+<P><LI><STRONG><A NAME="item_PerlMonth">PerlMonth</A></STRONG>
+<P>
+<A HREF="http://perlmonth.com">http://perlmonth.com</A>
+
+<P><LI><STRONG><A NAME="item_ApacheToday">ApacheToday</A></STRONG>
+<P>
+<A HREF="http://apachetoday.com">http://apachetoday.com</A>
+
+<P><LI><STRONG><A NAME="item_Basic">Basic knowledge about Apache stages and mod_perl handlers
+article in German</A></STRONG>
+<P>
+<A
+HREF="http://www.heise.de/ix/artikel/2000/01/156/">http://www.heise.de/ix/artikel/2000/01/156/</A>
+
+
+</UL>
+<P><LI><STRONG><A NAME="item_mod_perl">mod_perl mailing lists</A></STRONG>
+<UL>
+<P><LI><STRONG><A NAME="item_The">The mod_perl mailing list</A></STRONG>
+<P>
+The Apache/Perl mailing list <EM>is available for mod_perl users and
+developers to share ideas, solve problems and discuss things related
+to mod_perl and the Apache::* modules.</EM>  To subscribe to this list, send email to <A
+HREF="mailto:modperl-subscribe@apache.org">modperl-subscribe@apache.org</A>
+. To unsubscribe send email to <A
+HREF="mailto:modperl-unsubscribe@apache.org">modperl-unsubscribe@apache.org</A>
+. 
+
+<P>
+To subscribe to the digest list send email to <A
+HREF="mailto:modperl-digest-subscribe@apache.org">modperl-digest-subscribe@apache.org</A>
+.
+
+<P>
+A <EM>searchable</EM> mod_perl mailing list archive is available at <A
+HREF="http://forum.swarthmore.edu/epigone/modperl">http://forum.swarthmore.edu/epigone/modperl</A>
+. Thanks to Ken Williams for this.
+
+<P>
+More archives available:
+
+<UL>
+<P><LI>
+<P>
+<A
+HREF="http://www.geocrawler.com/lists/3/web/182/0/">http://www.geocrawler.com/lists/3/web/182/0/</A>
+
+
+<P><LI>
+<P>
+<A
+HREF="http://www.mail-archive.com/modperl%40apache.org/">http://www.mail-archive.com/modperl%40apache.org/</A>
+
+
+<P><LI>
+<P>
+<A
+HREF="http://www.davin.ottawa.on.ca/archive/modperl/">http://www.davin.ottawa.on.ca/archive/modperl/</A>
+
+
+<P><LI>
+<P>
+<A
+HREF="http://marc.theaimsgroup.com/?l=apache-modperl">http://marc.theaimsgroup.com/?l=apache-modperl</A>
+
+
+<P><LI>
+<P>
+<A
+HREF="http://www.egroups.com/group/modperl/">http://www.egroups.com/group/modperl/</A>
+
+
+</UL>
+<P><LI><STRONG><A NAME="item_The">The advocacy mailing list</A></STRONG>
+<P>
+The list for mod_perl advocacy issues, discussions about sites, etc.
+
+<P>
+Subscribe by sending a mail to <A
+HREF="mailto:advocacy-subscribe@perl.apache.org.">advocacy-subscribe@perl.apache.org.</A>
+Unsubscribe by sending a mail to <A
+HREF="mailto:advocacy-unsubscribe@perl.apache.org.">advocacy-unsubscribe@perl.apache.org.</A>
+Use <A HREF="mailto:advocacy@perl.apache.org">advocacy@perl.apache.org</A>
+to post to the list.
+
+<P>
+The archive: <A
+HREF="http://www.mail-archive.com/advocacy@perl.apache.org/.">http://www.mail-archive.com/advocacy@perl.apache.org/.</A>
+
+
+<P><LI><STRONG><A NAME="item_The">The modperl-cvs mailing list</A></STRONG>
+<P>
+The modperl developers list is the list where you can watch mod_perl
+getting patched. No real discussions happen on this list, but if you want
+to know about the latest changes in the mod_perl core before everyone else,
+this is a list to be on.
+
+<P>
+To subscribe to this list, send email to <A
+HREF="mailto:modperl-cvs-subscribe@apache.org">modperl-cvs-subscribe@apache.org</A>
+. To unsubscribe send email to <A
+HREF="mailto:modperl-cvs-unsubscribe@apache.org">modperl-cvs-unsubscribe@apache.org</A>
+. Send email to <A
+HREF="mailto:modperl-cvs@apache.org">modperl-cvs@apache.org</A> to post to
+the list.
+
+<P>
+No archives available.
+
+</UL>
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Perl">Get help with Perl</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_The">The Perl FAQ</A></STRONG>
+<P>
+<A
+HREF="http://www.perl.com/CPAN/doc/FAQs/FAQ/PerlFAQ.html">http://www.perl.com/CPAN/doc/FAQs/FAQ/PerlFAQ.html</A>
+
+
+<P><LI><STRONG><A NAME="item_The">The Perl Home Page</A></STRONG>
+<P>
+<A HREF="http://www.perl.com/">http://www.perl.com/</A>
+
+<P><LI><STRONG><A NAME="item_The">The Perl Journal</A></STRONG>
+<P>
+<A HREF="http://www.tpj.com/">http://www.tpj.com/</A>
+
+<P><LI><STRONG><A NAME="item_Perl">Perl Module Mechanics</A></STRONG>
+<P>
+<A
+HREF="http://world.std.com/~swmcd/steven/perl/module_mechanics.html">http://world.std.com/~swmcd/steven/perl/module_mechanics.html</A>
+- This page describes the mechanics of creating, compiling, releasing and
+maintaining Perl modules.
+
+<P><LI><STRONG><A NAME="item_XS">XS tutorials</A></STRONG>
+<P>
+Perl manpages: <EM>perlguts</EM>, <EM>perlxs</EM>, and <EM>perlxstut</EM> manpages.
+
+<P>
+Dean Roehrich's XS CookBookA and CookBookB <A
+HREF="http://search.cpan.org/search?dist=CookBookA">http://search.cpan.org/search?dist=CookBookA</A>
+<A
+HREF="http://search.cpan.org/search?dist=CookBookB">http://search.cpan.org/search?dist=CookBookB</A>
+
+
+<P>
+a series of articles at PerlMonth.com by Steven McDougall: <A
+HREF="http://www.perlmonth.com/columns/modules/modules.html?issue=6">http://www.perlmonth.com/columns/modules/modules.html?issue=6</A>
+<A
+HREF="http://www.perlmonth.com/columns/modules/modules.html?issue=7">http://www.perlmonth.com/columns/modules/modules.html?issue=7</A>
+<A
+HREF="http://www.perlmonth.com/columns/modules/modules.html?issue=8">http://www.perlmonth.com/columns/modules/modules.html?issue=8</A>
+<A
+HREF="http://www.perlmonth.com/columns/modules/modules.html?issue=9">http://www.perlmonth.com/columns/modules/modules.html?issue=9</A>
+<A
+HREF="http://www.perlmonth.com/columns/modules/modules.html?issue=10">http://www.perlmonth.com/columns/modules/modules.html?issue=10</A>
+
+
+<P>
+<EM>Advanced Perl Programming</EM> By Sriram Srinivasan. Published by O'Reilly &amp; Associates. ISBN:
+1-56592-220-4. Chapters 18-20.
+
+<P>
+perl-xs mailing list on perl.org (mail <A
+HREF="mailto:perl-xs-subscribe@perl.org)">perl-xs-subscribe@perl.org)</A>
+
+<P>
+Take a look also at Inline.pm (CPAN) and SWIG (http://www.swig.org/)
+
+<P><LI><STRONG><A NAME="item_perl5">perl5-porters mailing list</A></STRONG>
+<P>
+Send an email:
+
+<UL>
+<P><LI>
+<P>
+to <A
+HREF="mailto:perl5-porters-subscribe@perl.org">perl5-porters-subscribe@perl.org</A>
+to subscribe to this list.
+
+<P><LI>
+<P>
+to <A
+HREF="mailto:perl5-porters-unsubscribe@perl.org">perl5-porters-unsubscribe@perl.org</A>
+to unsubscribe to this list.
+
+<P><LI>
+<P>
+to <A
+HREF="mailto:perl5-porters-digest-subscribe@perl.org">perl5-porters-digest-subscribe@perl.org</A>
+if you prefer a digest version.
+
+<P><LI>
+<P>
+to <A
+HREF="mailto:perl5-porters-digest-unsubscribe@perl.org">perl5-porters-digest-unsubscribe@perl.org</A>
+to unsubscribe from the digest.
+
+<P><LI>
+<P>
+to <A
+HREF="mailto:perl5-porters-help@perl.org">perl5-porters-help@perl.org</A>
+for more information about the subscription options.
+
+</UL>
+<P>
+See also <A
+HREF="http://tile.net/listserv/perl5portersdigest.html">http://tile.net/listserv/perl5portersdigest.html</A>
+and <A
+HREF="http://tile.net/lists/perl5porters.html">http://tile.net/lists/perl5porters.html</A>
+.
+
+<P>
+List's archive is available at <A
+HREF="http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/.">http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/.</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Perl_CGI">Get help with Perl/CGI</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_Perl">Perl/CGI FAQ</A></STRONG>
+<P>
+at <A
+HREF="http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html">http://www.perl.com/CPAN/doc/FAQs/cgi/perl-cgi-faq.html</A>
+
+
+<P><LI><STRONG><A NAME="item_Answers">Answers to some troublesome Perl and Perl/CGI questions</A></STRONG>
+<P>
+<A
+HREF="http://stason.org/TULARC/webmaster/myfaq.html">http://stason.org/TULARC/webmaster/myfaq.html</A>
+
+
+<P><LI><STRONG><A NAME="item_Idiot">Idiot's Guide to CGI programming</A></STRONG>
+<P>
+<A
+HREF="http://www.perl.com/CPAN/doc/FAQs/cgi/idiots-guide.html">http://www.perl.com/CPAN/doc/FAQs/cgi/idiots-guide.html</A>
+
+
+<P><LI><STRONG><A NAME="item_WWW">WWW Security FAQ</A></STRONG>
+<P>
+<A
+HREF="http://www.w3.org/Security/Faq/www-security-faq.html">http://www.w3.org/Security/Faq/www-security-faq.html</A>
+
+
+<P><LI><STRONG><A NAME="item_CGI">CGI/Perl Taint Mode FAQ</A></STRONG>
+<P>
+<A
+HREF="http://www.gunther.web66.com/FAQS/taintmode.html">http://www.gunther.web66.com/FAQS/taintmode.html</A>
+(by Gunther Birznieks)
+
+<P><LI><STRONG><A NAME="item_cgi">cgi-list mailing list</A></STRONG>
+<P>
+Send email to <A HREF="mailto:majordomo@jann.com">majordomo@jann.com</A>
+with body:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  subscribe cgi-list</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Apache">Get help with Apache</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_Apache">Apache Project's Home</A></STRONG>
+<P>
+<A HREF="http://www.apache.org">http://www.apache.org</A>
+
+<P><LI><STRONG><A NAME="item_Apache">Apache Quick Reference Card</A></STRONG>
+<P>
+<A HREF="http://www.refcards.com">http://www.refcards.com</A> (other
+reference cards are also available from this link)
+
+<P><LI><STRONG><A NAME="item_The">The Apache FAQ</A></STRONG>
+<P>
+<A
+HREF="http://www.apache.org/docs/misc/FAQ.html">http://www.apache.org/docs/misc/FAQ.html</A>
+
+
+<P><LI><STRONG><A NAME="item_Apache">Apache Server Documentation</A></STRONG>
+<P>
+<A HREF="http://www.apache.org/docs/">http://www.apache.org/docs/</A>
+
+<P><LI><STRONG><A NAME="item_Apache">Apache Handlers</A></STRONG>
+<P>
+<A
+HREF="http://www.apache.org/docs/handler.html">http://www.apache.org/docs/handler.html</A>
+
+
+<P><LI><STRONG><A NAME="item_mod_rewrite">mod_rewrite Guide</A></STRONG>
+<P>
+<A
+HREF="http://www.engelschall.com/pw/apache/rewriteguide/">http://www.engelschall.com/pw/apache/rewriteguide/</A>
+
+
+<P><LI><STRONG><A NAME="item_articles">articles</A></STRONG>
+<P>
+Security and Apache: An Essential Primer <A
+HREF="http://linuxplanet.com/linuxplanet/print/1527/">http://linuxplanet.com/linuxplanet/print/1527/</A>
+
+
+<P>
+Using Apache with Suexec on Linux <A
+HREF="http://linuxplanet.com/linuxplanet/print/1445/">http://linuxplanet.com/linuxplanet/print/1445/</A>
+
+
+<P>
+Installing and Securing the Apache Webserver with SSL <A
+HREF="http://www.securityfocus.com/focus/sun/articles/apache-inst.html?&_ref=1653102939">http://www.securityfocus.com/focus/sun/articles/apache-inst.html?&_ref=1653102939</A>
+
+
+<P><LI><STRONG><A NAME="item_mod_throttle_access">mod_throttle_access</A></STRONG>
+<P>
+mod_throttle_access is available at <A
+HREF="http://www.fremen.org/apache/">http://www.fremen.org/apache/</A>
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_DBI_and_SQL">Get help with DBI and SQL</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+Introduction to Structured Query Language: <A
+HREF="http://w3.one.net/~jhoffman/sqltut.htm">http://w3.one.net/~jhoffman/sqltut.htm</A>
+
+
+<P><LI>
+<P>
+SQL for Web Nerds by Philip Greenspun <A
+HREF="http://www.arsdigita.com/books/sql/">http://www.arsdigita.com/books/sql/</A>
+
+
+<P><LI><STRONG><A NAME="item_Jeffrey">Jeffrey Baker's DBI Examples and Performance Tuning</A></STRONG>
+<P>
+<A
+HREF="http://www.saturn5.com/~jwb/dbi-examples.html">http://www.saturn5.com/~jwb/dbi-examples.html</A>
+(by Jeffrey William Baker).
+
+<P><LI><STRONG><A NAME="item_DBI">DBI Homepage</A></STRONG>
+<P>
+<A
+HREF="http://www.symbolstone.org/technology/perl/DBI/">http://www.symbolstone.org/technology/perl/DBI/</A>
+
+
+<P><LI><STRONG><A NAME="item_DBI">DBI mailing list information</A></STRONG>
+<P>
+<A HREF="http://www.fugue.com/dbi/">http://www.fugue.com/dbi/</A> 
+
+<P><LI><STRONG><A NAME="item_DBI">DBI mailing list archives</A></STRONG>
+<P>
+<A
+HREF="http://outside.organic.com/mail-archives/dbi-users/">http://outside.organic.com/mail-archives/dbi-users/</A>
+<A
+HREF="http://www.xray.mpe.mpg.de/mailing-lists/dbi/">http://www.xray.mpe.mpg.de/mailing-lists/dbi/</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Squid_Internet_O">Get help with Squid - Internet Object Cache</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+Home page - <A HREF="http://squid.nlanr.net/">http://squid.nlanr.net/</A>
+
+<P><LI>
+<P>
+FAQ - <A
+HREF="http://squid.nlanr.net/Squid/FAQ/FAQ.html">http://squid.nlanr.net/Squid/FAQ/FAQ.html</A>
+
+
+<P><LI>
+<P>
+Users Guide - <A
+HREF="http://squid.nlanr.net/Squid/Users-Guide/">http://squid.nlanr.net/Squid/Users-Guide/</A>
+
+
+<P><LI>
+<P>
+Mailing lists - <A
+HREF="http://squid.nlanr.net/Squid/mailing-lists.html">http://squid.nlanr.net/Squid/mailing-lists.html</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_CVS_Concurrent_">Get help with CVS -- Concurrent Version Control</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+mod_perl repository specific doc: mod_perl_cvs.pod, located in the root of
+the mod_perl source distribution and online at <A
+HREF="http://perl.apache.org/mod_perl_cvs.html">http://perl.apache.org/mod_perl_cvs.html</A>
+
+
+<P><LI>
+<P>
+Open Source Development with CVS <A
+HREF="http://cvsbook.red-bean.com/">http://cvsbook.red-bean.com/</A>
+
+<P><LI>
+<P>
+Online Documents <A
+HREF="http://www.sourcegear.com/CVS/Docs/online">http://www.sourcegear.com/CVS/Docs/online</A>
+
+
+<P><LI>
+<P>
+CVS Quick Reference <A
+HREF="http://www.sourcegear.com/CVS/Docs/ref">http://www.sourcegear.com/CVS/Docs/ref</A>
+
+
+<P><LI>
+<P>
+CVS Books <A
+HREF="http://www.sourcegear.com/CVS/Docs/books">http://www.sourcegear.com/CVS/Docs/books</A>
+
+
+<P><LI>
+<P>
+User-Written FAQ <A
+HREF="http://www.sourcegear.com/CVS/Docs/docfaq">http://www.sourcegear.com/CVS/Docs/docfaq</A>
+
+
+<P><LI>
+<P>
+Introduction to CVS <A
+HREF="http://www.sourcegear.com/CVS/Docs/blandy">http://www.sourcegear.com/CVS/Docs/blandy</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Performance_and_Sc">Get help with Performance and Scalability</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_Techniques">Techniques and Technologies for Scaling Internet Services mailing list.</A></STRONG>
+<P>
+The list's address: <A
+HREF="mailto:scalable@arctic.org.">scalable@arctic.org.</A> Subscribe by
+sending a message to <A
+HREF="mailto:scalable-subscribe@arctic.org.">scalable-subscribe@arctic.org.</A>
+Archive: <A
+HREF="http://archive.develooper.com/scalable@arctic.org/">http://archive.develooper.com/scalable@arctic.org/</A>
+
+
+<P><LI>
+<P>
+<EM>Solaris 2.x - Tuning Your TCP/IP Stack and More</EM>
+<A
+HREF="http://www.rvs.uni-hannover.de/people/voeckler/tune/EN/tune.html">http://www.rvs.uni-hannover.de/people/voeckler/tune/EN/tune.html</A>
+
+
+<P>
+This page talks about TCP/IP stack and various tricks of tuning your system
+to get the most out of it as a web server. While the information is for
+Solaris 2.x OS, most of it will be relevant of other Unix flavors. At the
+end an extensive list of related literature is presented.
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Get_help_with_Unix_OS_flavors_">Get help with Unix OS flavors -- Unix OS related resources</A></H1></CENTER>
+<UL>
+<P><LI><STRONG><A NAME="item_Memory">Memory system management and arhitecture:</A></STRONG>
+<P>
+The Solaris memory system, sizing, tools and architecture: <A
+HREF="http://www.sun.com/solutions/third-party/global/SAS/pdf/vmsizing.pdf">http://www.sun.com/solutions/third-party/global/SAS/pdf/vmsizing.pdf</A>
+
+
+<P><LI>
+</UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./advocacy.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./download.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/20/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

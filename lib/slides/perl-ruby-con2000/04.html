@@ -1,0 +1,29 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="03.html">[prev]</A> <A href="05.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2><CODE>use</CODE> vs. <CODE>require</CODE></H2>
+<HR>
+<H3><CODE>use</CODE></H3>
+<UL>
+<LI>コンパイル時に実行
+<LI><CODE>import</CODE>呼び出し (名前空間のインポート)
+</UL>
+<BLOCKQUOTE><PRE><CODE>package Foo::Bar;
+
+require Exporter;
+@ISA = qw(Exporter);
+@EXPORT = qw(foobar);		# by Default
+@EXPORT_OK = qw(foobar_ok);	# on Request
+
+sub foobar { }
+sub foobar_ok { }
+1;</CODE></PRE></BLOCKQUOTE>
+</BODY>
+</HTML>

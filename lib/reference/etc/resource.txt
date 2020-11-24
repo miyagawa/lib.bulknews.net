@@ -1,0 +1,13 @@
+http://www.perl.com/
+http://www.cpan.org/
+http://search.cpan.org/
+http://www.perldoc.com/
+http://www.refcards.com/
+http://perl.infoware.ne.jp/
+http://www.perlfaq.com/
+http://perl.faq-by-day.org/
+http://genome-www.stanford.edu/perlOOP/
+http://www.take23.org/
+http://www.lifespree.com/modperl/
+http://rf.net/~james/perli18n.html
+http://cpan.anidea.com/

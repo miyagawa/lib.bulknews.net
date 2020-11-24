@@ -1,0 +1,1313 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Issuing Correct HTTP Headers </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Issuing Correct HTTP Headers 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./troubleshooting.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./security.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#The_Origin_of_this_Chapter">The Origin of this Chapter</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#1_Why_Headers">1) Why Headers</A>
+	<LI><A HREF="#2_Which_Headers">2) Which Headers</A>
+	<UL>
+
+		<LI><A HREF="#2_1_Date_Related_Headers">2.1) Date Related Headers</A>
+		<LI><A HREF="#2_1_1_Date">2.1.1) Date</A>
+		<LI><A HREF="#2_1_2_Last_Modified">2.1.2) Last-Modified</A>
+		<LI><A HREF="#2_1_3_Expires_and_Cache_Control">2.1.3) Expires and Cache-Control</A>
+		<LI><A HREF="#2_2_Content_Related_Headers">2.2) Content Related Headers</A>
+		<LI><A HREF="#2_2_1_Content_Type">2.2.1) Content-Type</A>
+		<LI><A HREF="#2_2_2_Content_Length">2.2.2) Content-Length</A>
+		<LI><A HREF="#2_2_3_Entity_Tags">2.2.3) Entity Tags</A>
+		<LI><A HREF="#2_3_Content_Negotiation">2.3) Content Negotiation</A>
+		<LI><A HREF="#2_3_1_Vary">2.3.1) Vary</A>
+	</UL>
+
+	<LI><A HREF="#3_Requests">3) Requests</A>
+	<UL>
+
+		<LI><A HREF="#3_1_HEAD">3.1) HEAD</A>
+		<LI><A HREF="#3_2_POST">3.2) POST</A>
+		<LI><A HREF="#3_3_GET">3.3) GET</A>
+		<LI><A HREF="#3_4_Conditional_GET">3.4) Conditional GET</A>
+	</UL>
+
+	<LI><A HREF="#4_Avoiding_Dealing_with_Header">4.) Avoiding Dealing with Headers</A>
+	<LI><A HREF="#References">References</A>
+	<UL>
+
+		<LI><A HREF="#_1_">[1]</A>
+		<LI><A HREF="#_2_">[2]</A>
+		<LI><A HREF="#_3_">[3]</A>
+		<LI><A HREF="#_4_">[4]</A>
+		<LI><A HREF="#_5_">[5]</A>
+	</UL>
+
+	<LI><A HREF="#Other_resources">Other resources</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1></CENTER>
+<P>
+As there is always more than one way to do it, I'm tempted to believe one
+must be the best. Hardly ever am I right.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_Origin_of_this_Chapter">The Origin of this Chapter</A></H1></CENTER>
+<P>
+This chapter has been contributed to the Guide by Andreas Koenig. You will
+find the references and other related info at the bottom of this page. I'll
+try to keep it up to date with the Master version which resides on CPAN. If
+in doubt -- always check the CPAN for
+<CODE>Apache::correct_headers</CODE>.
+
+<P>
+If you have any questions regarding this specific document only, please
+refer to Andreas, since he is the guru on this subject. On any other matter
+please contact the mod_perl mailing list.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="1_Why_Headers">1) Why Headers</A></H1></CENTER>
+<P>
+Dynamic Content is dynamic, after all, so why would anybody care about HTTP
+headers? Header composition is a task often neglected in the CGI world.
+Because pages are generated dynamically, you might expect that pages
+without a <CODE>Last-Modified</CODE> header are fine, and that an
+<CODE>If-Modified-Since</CODE> header in the browser's request can be ignored. This laissez-faire
+principle gets in the way when you try to establish a server that is
+entirely driven by dynamic components and the number of hits is
+significant.
+
+<P>
+If the number of hits is not significant, don't bother to read this
+document.
+
+<P>
+If the number of hits is significant, you might want to consider what
+cache-friendliness means (you may also want to read
+<A HREF="././correct_headers.html#_4_">[4]</A>) and how you can cooperate with caches to increase the performace of your
+site. Especially if you use Squid in accelerator mode (helpful hints for
+Squid, see
+<A HREF="././correct_headers.html#_1_">[1]</A>), you will have a strong motivation to cooperate with it. This document
+may help you to do it correctly.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="2_Which_Headers">2) Which Headers</A></H1></CENTER>
+<P>
+The HTTP standard (v 1.1 is specified in <A HREF="././correct_headers.html#_3_">[3]</A>, v 1.0 in <A HREF="././correct_headers.html#_2_">[2]</A>) describes lots of headers. In this document, we only discuss those
+headers which are most relevant to caching.
+
+<P>
+I have grouped the headers into three groups: date headers, content
+headers, and the special Vary header.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_1_Date_Related_Headers">2.1) Date Related Headers</A></H2></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_1_1_Date">2.1.1) Date</A></H2></CENTER>
+<P>
+Section 14.18 of the HTTP standard deals with the circumstances under which
+you must or must not send a <CODE>Date</CODE> header. For almost everything a normal mod_perl user is doing, a <CODE>Date</CODE> header needs to be generated. But the mod_perl programmer doesn't have to
+worry about this header since the Apache server guarantees that this header
+is sent.
+
+<P>
+In <CODE>http_protocol.c</CODE> the <CODE>Date</CODE> header is set according to
+<CODE>$r-&gt;request_time</CODE>. A mod_perl script can read, but not change,
+<CODE>$r-&gt;request_time</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_1_2_Last_Modified">2.1.2) Last-Modified</A></H2></CENTER>
+<P>
+Section 14.29 of the HTTP standard deals with this. The
+<CODE>Last-Modified</CODE> header is mostly used as a so-called weak validator. Here are two sentences
+from the HTTP specs:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  A validator that does not always change when the resource
+  changes is a &quot;weak validator.&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  One can think of a strong validator as one that changes
+  whenever the bits of an entity changes, while a weak value
+  changes whenever the meaning of an entity changes.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This tells us that we should consider the semantics of the page we are
+generating and not the date when we are running. The question is, when did
+the <STRONG>meaning</STRONG> of this page change last time? Let's imagine the document in question is a
+text-to-gif renderer that takes as input a font to use, background and
+foreground colours, and a string to render. Although the actual image is
+created on-the-fly, the semantics of the page are determined when the
+script was last changed, right?
+
+<P>
+Actually, a few more things are relevant: the semantics also change a
+little when you update one of the fonts that may be used or when you update
+your <CODE>ImageMagick</CODE> or equivalent program. It's something you should consider, if you want to
+get it right.
+
+<P>
+If you have a page which comprises several components, you should ask all
+the components when they changed their semantic behaviour last time. Then
+pick the oldest of those times.
+
+<P>
+mod_perl offers you two convenient methods to deal with this header:
+<CODE>update_mtime()</CODE> and <CODE>set_last_modified().</CODE> These
+methods and several others are unavailable in the normal mod_perl
+environment but are silently imported when you use <CODE>Apache::File</CODE>. Refer to the
+<CODE>Apache::File</CODE> manpage for more info.
+
+<P>
+<CODE>update_mtime()</CODE> takes a UNIX time as its argument and sets
+Apache's request structure finfo.st_mtime to this value. It does so only
+when the argument is greater than a previously stored <CODE>finfo.st_mtime</CODE>.
+
+<P>
+<CODE>set_last_modified()</CODE> sets the outgoing header <CODE>Last-Modified</CODE> to the string that corresponds to the stored finfo.st_mtime. By passing a
+UNIX time to <CODE>set_last_modified(),</CODE> mod_perl calls
+<CODE>update_mtime()</CODE> with this argument first.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::File;
+  use Date::Parse;
+  # Date::Parse parses RCS format, Apache::Util::parsedate doesn't
+  $Mtime ||=
+    Date::Parse::str2time(substr q$Date: 2000/11/19 16:26:37 $, 6);
+  $r-&gt;set_last_modified($Mtime);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_1_3_Expires_and_Cache_Control">2.1.3) Expires and Cache-Control</A></H2></CENTER>
+<P>
+Section 14.21 of the HTTP standard deals with the <CODE>Expires</CODE>
+header. The purpose of the <CODE>Expires</CODE> header is to determine a point in time after which the document should be
+considered out of date (stale). Don't confuse this with the very different
+meaning of the
+<CODE>Last-Modified</CODE> header. The <CODE>Expires</CODE> header is useful to avoid unnecessary validation from now on until the
+document expires and it helps the recipients to clean up their stored
+documents. A sentence from the HTTP standard:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  The presence of an Expires field does not imply that the
+  original resource will change or cease to exist at, before, or
+  after that time.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So think before you set up a time when you believe a resource should be
+regarded as stale. Most of the time I can determine an expected lifetime
+from ``now'', that is the time of the request. I would not recommend
+hardcoding the date of Expiry, because when you forget that you did it, and
+the date arrives, you will serve ``already expired'' documents that cannot
+be cached at all by anybody. If you believe a resource will never expire,
+read this quote from the HTTP specs:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  To mark a response as &quot;never expires,&quot; an origin server sends an
+  Expires date approximately one year from the time the response is
+  sent.  HTTP/1.1 servers SHOULD NOT send Expires dates more than one
+  year in the future.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the code for the mod_perl programmer who wants to expire a document
+half a year from now:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out('Expires',
+                 HTTP::Date::time2str(time + 180*24*60*60));</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A very handy alternative to this computation is available in HTTP 1.1, the
+cache control mechanism. Instead of setting the <CODE>Expires</CODE> header you can specify a delta value in a <CODE>Cache-Control</CODE> header. You can do that by executing just:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out('Cache-Control', &quot;max-age=&quot; . 180*24*60*60);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which is, of course much cheaper than the first example because perl
+computes the value only once at compile time and optimizes it into a
+constant.
+
+<P>
+As this alternative is only available in HTTP 1.1 and old cache servers may
+not understand this header, it is advisable to send both headers. In this
+case the <CODE>Cache-Control</CODE> header takes precedence, so the <CODE>Expires</CODE> header is ignored on HTTP 1.1 compliant servers. Or you could go with an
+if/else clause:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if ($r-&gt;protocol =~ /(\d\.\d)/ &amp;&amp; $1 &gt;= 1.1){
+    $r-&gt;header_out('Cache-Control', &quot;max-age=&quot; . 180*24*60*60);
+  } else {
+    $r-&gt;header_out('Expires',
+                   HTTP::Date::time2str(time + 180*24*60*60));
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you restart your Apache server regularly, I'd save the <CODE>Expires</CODE>
+header in a global variable. Oh, well, this is probably over-engineered
+now.
+
+<P>
+If people are determined that their document shouldn't be cached, here is
+the easy way to set a suitable <CODE>Expires</CODE> header...
+
+<P>
+The call <CODE>$r-&gt;no_cache(1)</CODE> will cause Apache to generate an
+<CODE>Expires</CODE> header with the same content as the Date-header in the response, so that
+the document ``expires immediately''. Don't set
+<CODE>Expires</CODE> with <CODE>$r-&gt;header_out</CODE> if you use <CODE>$r-&gt;no_cache</CODE>, because header_out takes precedence. The problem that remains is that
+there are broken browsers which ignore <CODE>Expires</CODE> headers.
+
+<P>
+Currently (mod_perl v1.22?) to avoid caching altogether:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $headers = $r-&gt;headers_out;
+  $headers-&gt;{'Pragma'} = $headers-&gt;{'Cache-control'} = 'no-cache';
+  $r-&gt;no_cache(1);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+works with the major browsers.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_2_Content_Related_Headers">2.2) Content Related Headers</A></H2></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_2_1_Content_Type">2.2.1) Content-Type</A></H2></CENTER>
+<P>
+You are most probably familiar with <CODE>Content-Type</CODE>. Sections 3.7, 7.2.1 and 14.17 of the HTTP specs cover the details.
+mod_perl has the
+<CODE>content_type()</CODE> method to deal with this header, for example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;content_type(&quot;image/png&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>Content-Type</CODE>  <EM>should</EM> be included in all messages according to the specs, and Apache will
+generate one if you don't. It will be whatever is specified in the relevant <CODE>DefaultType</CODE> configuration directive or
+<CODE>text/plain</CODE> if none is active.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_2_2_Content_Length">2.2.2) Content-Length</A></H2></CENTER>
+<P>
+According to section 14.13 of the HTTP specifications, the
+<CODE>Content-Length</CODE> header is the number of octets in the body of a message. If it can be
+determined prior to sending, it can be very useful for several reasons to
+include it. The most important reason why it is good to include it is that
+keepalive requests only work with responses that contain a <CODE>Content-Length</CODE> header. In mod_perl you can say
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out('Content-Length', $length);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you use <CODE>Apache::File</CODE>, you get the additional
+<CODE>set_content_length()</CODE> method for the Apache class which is a bit more efficient than the above.
+You can then say:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;set_content_length($length);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>Content-Length</CODE> header can have an important impact on caches by invalidating cache entries
+as the following extract from the specification explains:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  The response to a HEAD request MAY be cacheable in the sense that
+  the information contained in the response MAY be used to update a
+  previously cached entity from that resource.  If the new field values
+  indicate that the cached entity differs from the current entity (as
+  would be indicated by a change in Content-Length, Content-MD5, ETag
+  or Last-Modified), then the cache MUST treat the cache entry as
+  stale.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So be careful never to send a wrong <CODE>Content-Length</CODE>, either in a GET or in a HEAD request.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_2_3_Entity_Tags">2.2.3) Entity Tags</A></H2></CENTER>
+<P>
+An <CODE>Entity Tag</CODE> is a validator which can be used instead of, or in addition to, the <CODE>Last-Modified</CODE> header. An entity tag is a quoted string which can be used to identify
+different versions of a particular resource. An entity tag can be added to
+the response headers like so:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out(&quot;ETag&quot;,&quot;\&quot;$VERSION\&quot;&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note: mod_perl offers the <CODE>Apache::set_etag()</CODE> method if you have loaded <CODE>Apache::File</CODE>. It is strongly recommended that you <EM>do not</EM>
+use this method unless you know what you are doing.  <CODE>set_etag()</CODE> is expecting to be used in conjunction with a static request for a file on
+disk that has been <CODE>stat()ed</CODE> in the course of the current
+request. It is inappropriate and ``dangerous'' to use it for dynamic
+content.
+
+<P>
+By sending an entity tag you promise the recipient that you will not send
+the same <CODE>ETag</CODE> for the same resource again unless the content is <EM>'equal'</EM> to what you are sending now (see below for what equality means).
+
+<P>
+The pros and cons of using entity tags are discussed in section 13.3 of the
+HTTP specs. For us mod_perl programmers that discussion can be summed up as
+follows:
+
+<P>
+There are strong and weak validators. Strong validators change whenever a
+single bit changes in the response. Weak validators change when the meaning
+of the response changes. Strong validators are needed for caches to allow
+for sub-range requests. Weak validators allow a more efficient caching of
+equivalent objects. Algorithms like MD5 or SHA are good strong validators,
+but what we usually want, when we want to take advantage of caching, is a
+good weak validator.
+
+<P>
+A <CODE>Last-Modified</CODE> time, when used as a validator in a request, can be strong or weak,
+depending on a couple of rules. Please refer to section 13.3.3 of the HTTP
+standard to understand these rules. This is mostly relevant for range
+requests as this citation of section 14.27 explains:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  If the client has no entity tag for an entity, but does have a
+  Last-Modified date, it MAY use that date in a If-Range header.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But it is not limited to range requests. Section 13.3.1 succinctly states
+that:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  The Last-Modified entity-header field value is often used as a
+  cache validator.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The fact that a <CODE>Last-Modified</CODE> date may be used as a strong validator can be pretty disturbing if we are
+in fact changing our output slightly without changing the semantics of the
+output. To prevent these kinds of misunderstanding between us and the cache
+servers in the response chain, we can send a weak validator in an
+<CODE>ETag</CODE> header. This is possible because the specs say:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  If a client wishes to perform a sub-range retrieval on a value for
+  which it has only a Last-Modified time and no opaque validator, it
+  MAY do this only if the Last-Modified time is strong in the sense
+  described here.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In other words: by sending them an <CODE>ETag</CODE> that is marked as weak we prevent them from using the Last-Modified header
+as a strong validator.
+
+<P>
+An <CODE>ETag</CODE> value is marked as a weak validator by prepending the string <CODE>W/</CODE> to the quoted string, otherwise it is strong. In perl this would mean
+something like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out('ETag',&quot;W/\&quot;$VERSION\&quot;&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Consider carefully which string you choose to act as a validator. You are
+on your own with this decision because...
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ... only the service author knows the semantics of a resource
+  well enough to select an appropriate cache validation
+  mechanism, and the specification of any validator comparison
+  function more complex than byte-equality would open up a can
+  of worms.  Thus, comparisons of any other headers (except
+  Last-Modified, for compatibility with HTTP/1.0) are never used
+  for purposes of validating a cache entry.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you are composing a message from multiple components, it may be
+necessary to combine some kind of version information for all these
+components into a single string.
+
+<P>
+If you are producing relatively large documents, or content that does not
+change frequently, you most likely will prefer a strong entity tag, thus
+giving caches a chance to transfer the document in chunks. (Anybody in the
+mood to add a chapter about ranges to this document?)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_3_Content_Negotiation">2.3) Content Negotiation</A></H2></CENTER>
+<P>
+Content negotiation is a particularly wonderful feature that was introduced
+with HTTP 1.1. Unfortunately it is not yet widely supported. Probably the
+most popular usage scenario of content negotiation is language negotiation.
+A user specifies in the browser preferences the languages they understand
+and how well they understand them. The browser includes these settings in
+an <CODE>Accept-Language</CODE>
+header when it sends the request to the server and the server then chooses
+from several available representations of the document the one that best
+fits the user's preferences. Content negotiation is not limited to
+language. Citing the specs:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  HTTP/1.1 includes the following request-header fields for enabling
+  server-driven negotiation through description of user agent
+  capabilities and user preferences: Accept (section 14.1), Accept-
+  Charset (section 14.2), Accept-Encoding (section 14.3), Accept-
+  Language (section 14.4), and User-Agent (section 14.43). However, an
+  origin server is not limited to these dimensions and MAY vary the
+  response based on any aspect of the request, including information
+  outside the request-header fields or within extension header fields
+  not defined by this specification.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="2_3_1_Vary">2.3.1) Vary</A></H2></CENTER>
+<P>
+In order to signal to the recipient that content negotiation has been used
+to determine the best available representation for a given request, the
+server must include a <CODE>Vary</CODE> header. This tells the recipient which request headers have been used to
+determine it. So an answer may be generated like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;header_out('Vary', join &quot;, &quot;, 
+        qw(accept accept-language accept-encoding user-agent));</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The header of a very cool page may greet the user with something like
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Hallo Kraut, Dein NutScrape versteht zwar PNG aber leider
+  kein GZIP.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+but it has the side effect of being expensive for a caching proxy. As of
+this writing, Squid (version 2.1PATCH2) does not cache resources that come
+with a Vary header at all. So unless you find a clever workaround, you
+won't enjoy your Squid accelerator for these documents :-(
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="3_Requests">3) Requests</A></H1></CENTER>
+<P>
+Section 13.11 of the specifications states that the only two cachable
+methods are <CODE>GET</CODE> and <CODE>HEAD</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="3_1_HEAD">3.1) HEAD</A></H2></CENTER>
+<P>
+Among the above recommended headers, the date-related ones (<CODE>Date</CODE>,
+<CODE>Last-Modified</CODE>, and <CODE>Expires</CODE>/<CODE>Cache-Control</CODE>) are usually easy to produce and thus should be computed for <CODE>HEAD</CODE> requests just the same as for <CODE>GET</CODE> requests.
+
+<P>
+The <CODE>Content-Type</CODE> and <CODE>Content-Length</CODE> headers should be exactly the same as would be supplied to the
+corresponding <CODE>GET</CODE> request. But as it can be expensive to compute them, they can just as well
+be omitted, since there is nothing in the specs that forces you to compute
+them.
+
+<P>
+What is important for the mod_perl programmer is that the response to a <CODE>HEAD</CODE> request <EM>must not</EM> contain a message-body. The code in your mod_perl handler might look like
+this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # compute the headers that are easy to compute
+  if ( $r-&gt;header_only ){ # currently equivalent to $r-&gt;method eq &quot;HEAD&quot;
+    $r-&gt;send_http_header;
+    return OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you are running a Squid accelerator, it will be able to handle the whole <CODE>HEAD</CODE> request for you, but under some circumstances it may not be allowed to do
+so.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="3_2_POST">3.2) POST</A></H2></CENTER>
+<P>
+The response to a <CODE>POST</CODE> request is not cachable due to an underspecification in the HTTP standards.
+Section 13.4 does not forbid caching of responses to <CODE>POST</CODE> requests but no other part of the HTTP standard explains how caching of <CODE>POST</CODE> requests could be implemented, so we are in a vacuum here and all existing
+caching servers therefore refuse to implement caching of <CODE>POST</CODE>
+requests. This may change if somebody does the groundwork of defining the
+semantics for cache operations on <CODE>POST</CODE>. Note that some browsers with their more aggressive caching do implement
+caching of <CODE>POST</CODE>
+requests.
+
+<P>
+Note: If you are running a Squid accelerator, you should be aware that it
+accelerates outgoing traffic, but does not bundle incoming traffic. If you
+have long <CODE>POST</CODE> requests, Squid doesn't buy you anything. So always consider using a <CODE>GET</CODE> instead of a <CODE>POST</CODE> if possible.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="3_3_GET">3.3) GET</A></H2></CENTER>
+<P>
+A normal <CODE>GET</CODE> is what we usually write our mod_perl programs for. Nothing special about
+it. We send our headers followed by the body.
+
+<P>
+But there is a certain case that needs a workaround to achieve better
+cacheability. We need to deal with the ``?'' in the rel_path part of the
+requested URI. Section 13.9 specifies that
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ... caches MUST NOT treat responses to such URIs as fresh unless
+  the server provides an explicit expiration time.  This specifically
+  means that responses from HTTP/1.0 servers for such URIs SHOULD NOT
+  be taken from a cache.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You're tempted to believe that if we are using HTTP 1.1 and send an
+explicit expiration time we're on the safe side? Unfortunately reality is a
+little bit different. It has been a bad habit for quite a long time to
+misconfigure cache servers such that they treat all
+<CODE>GET</CODE> requests containing a question mark as uncacheable. People even used to
+mark everything as uncacheable that contained the string
+<CODE>cgi-bin</CODE>.
+
+<P>
+To work around this bug in the <CODE>HEAD</CODE> requests, I have stopped calling my CGI directories <CODE>cgi-bin</CODE> and I have written the following handler that lets me work with CGI-like
+query strings without rewriting the software (such as <CODE>Apache::Request</CODE> and <CODE>CGI.pm</CODE>) that deals with them.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub handler {
+    my($r) = @_;
+    my $uri = $r-&gt;uri;
+    if ( my($u1,$u2) = $uri =~ / ^ ([^?]+?) ; ([^?]*) $ /x ) {
+      $r-&gt;uri($u1);
+      $r-&gt;args($u2);
+    } elsif ( my($u1,$u2) = $uri =~ m/^(.*?)%3[Bb](.*)$/ ) {
+      # protect against old proxies that escape volens nolens
+      # (see HTTP standard section 5.1.2)
+      $r-&gt;uri($u1);
+      $u2 =~ s/%3B/;/gi;
+      $u2 =~ s/%26/;/gi; # &amp;
+      $u2 =~ s/%3D/=/gi;
+      $r-&gt;args($u2);
+    }
+    DECLINED;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This handler must be installed as a <CODE>PerlPostReadRequestHandler</CODE>.
+
+<P>
+The handler takes any request that contains one or more semicolons but
+<EM>no</EM> question mark such that the first semicolon is interpreted as a question
+mark and everything after that as the query string. You can now exchange
+the request:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://example.com/query?BGCOLOR=blue;FGCOLOR=red">http://example.com/query?BGCOLOR=blue;FGCOLOR=red</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://example.com/query;BGCOLOR=blue;FGCOLOR=red">http://example.com/query;BGCOLOR=blue;FGCOLOR=red</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Thus it allows the co-existence of queries from ordinary forms that are
+being processed by a browser and predefined requests for the same resource.
+It has one minor bug: Apache doesn't allow percent-escaped slashes in such
+a query string. So instead of:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://example.com/query;BGCOLOR=blue;FGCOLOR=red;FONT=%2Ffont%2Fbla">http://example.com/query;BGCOLOR=blue;FGCOLOR=red;FONT=%2Ffont%2Fbla</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+you have to use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://example.com/query;BGCOLOR=blue;FGCOLOR=red;FONT=/font/bla">http://example.com/query;BGCOLOR=blue;FGCOLOR=red;FONT=/font/bla</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="3_4_Conditional_GET">3.4) Conditional GET</A></H2></CENTER>
+<P>
+A rather challenging request mod_perl programmers can get is the
+conditional <CODE>GET</CODE>, which typically means a request with an If-Modified-Since header. The
+HTTP specifications have this to say:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  The semantics of the GET method change to a &quot;conditional GET&quot;
+  if the request message includes an If-Modified-Since,
+  If-Unmodified-Since, If-Match, If-None-Match, or If-Range
+  header field.  A conditional GET method requests that the
+  entity be transferred only under the circumstances described
+  by the conditional header field(s). The conditional GET method
+  is intended to reduce unnecessary network usage by allowing
+  cached entities to be refreshed without requiring multiple
+  requests or transferring data already held by the client.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So how can we reduce the unnecessary network usage in such a case? mod_perl
+makes it easy for you by offering Apache's
+<CODE>meets_conditions()</CODE>. You have to set up your <CODE>Last-Modified</CODE> (and possibly <CODE>ETag</CODE>) header before calling this method. If the return value of this method is
+anything other than <CODE>OK</CODE>, you should return that value from your handler and you're done. Apache
+handles the rest for you. The following example is taken from
+<A HREF="././correct_headers.html#_5_">[5]</A>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if((my $rc = $r-&gt;meets_conditions) != OK) {
+     return $rc;
+  }
+  #else ... go and send the response body ...</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you have a Squid accelerator running, it will often handle the
+conditionals for you and you can enjoy its extremely fast responses for
+such requests by reading the <EM>access.log</EM>. Just grep for
+<CODE>TCP_IMS_HIT/304</CODE>. But as with a <CODE>HEAD</CODE> request there are circumstances under which it may not be allowed to do so.
+That is why the origin server (which is the server you're programming)
+needs to handle conditional <CODE>GET</CODE>s as well even if a Squid accelerator is running.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="4_Avoiding_Dealing_with_Header">4.) Avoiding Dealing with Headers</A></H1></CENTER>
+<P>
+There is another approach to dynamic content that is possible with
+mod_perl. This approach is appropriate if the content changes relatively
+infrequently, if you expect lots of requests to retrieve the same content
+before it changes again and if it is much cheaper to test whether the
+content needs refreshing than it is to refresh it.
+
+<P>
+In this case a <CODE>PerlFixupHandler</CODE> can be installed for the relevant location. It tests whether the content is
+up to date. If so, it returns <CODE>DECLINED</CODE> and lets the Apache core serve the content from a file. Otherwise, it
+regenerates the content into the file, updates the <CODE>$r-&gt;finfo</CODE> status and again returns <CODE>DECLINED</CODE> so that Apache serves the updated file. Updating <CODE>$r-&gt;finfo</CODE> can be achieved by calling
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $r-&gt;filename($file); # force update of finfo</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+even if this seems redundant because the filename is already equal to
+<CODE>$file</CODE>. Setting the filename has the side effect of doing a
+<CODE>stat()</CODE> on the file. This is important because otherwise Apache would use the out
+of date <CODE>finfo</CODE> when generating the response header.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="References">References</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_1_">[1]</A></H2></CENTER>
+<P>
+Stas Bekman: mod_perl Guide. <A
+HREF="http://perl.apache.org/guide/">http://perl.apache.org/guide/</A>
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_2_">[2]</A></H2></CENTER>
+<P>
+T. Berners-Lee et al.: Hypertext Transfer Protocol -- HTTP/1.0, RFC 1945.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_3_">[3]</A></H2></CENTER>
+<P>
+R. Fielding et al.: Hypertext Transfer Protocol -- HTTP/1.1, RFC 2616.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_4_">[4]</A></H2></CENTER>
+<P>
+Martin Hamilton: Cachebusting - cause and prevention,
+draft-hamilton-cachebusting-01. Also available online at <A
+HREF="http://vancouver-webpages.com/CacheNow/">http://vancouver-webpages.com/CacheNow/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="_5_">[5]</A></H2></CENTER>
+<P>
+Lincoln Stein, Doug MacEachern: Writing Apache Modules with Perl and C,
+O'Reilly, 1-56592-567-X. Selected chapters available online at <A
+HREF="http://www.modperl.com">http://www.modperl.com</A> . Amazon page at
+<A
+HREF="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu/">http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Other_resources">Other resources</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+Prevent the browser from Caching a page <A
+HREF="http://www.pacificnet.net/~johnr/meta.html">http://www.pacificnet.net/~johnr/meta.html</A>
+
+
+<P>
+This page is an explanation of using the Meta tag to prevent caching, by
+browser or proxy, of an individual page wherein the page in question has
+data that may be of a sensitive nature as in a ``form page for submittal''
+and the creator of the page wants to make sure that the page does not get
+submitted twice.
+
+<P><LI>
+</UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./troubleshooting.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./security.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 11/21/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

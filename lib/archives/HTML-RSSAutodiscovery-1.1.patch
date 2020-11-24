@@ -1,0 +1,59 @@
+diff -ruP HTML-RSSAutodiscovery-1.1/lib/HTML/RSSAutodiscovery.pm HTML-RSSAutodiscovery-1.1.new/lib/HTML/RSSAutodiscovery.pm
+--- HTML-RSSAutodiscovery-1.1/lib/HTML/RSSAutodiscovery.pm	Thu Oct 31 00:33:00 2002
++++ HTML-RSSAutodiscovery-1.1.new/lib/HTML/RSSAutodiscovery.pm	Mon Oct 20 15:30:53 2003
+@@ -481,10 +481,11 @@
+       
+   # Check links
+     
+-  if ($attrs->{'name'} =~ /^(XML|RSS)$/) {
++  if (defined($attrs->{'name'}) && $attrs->{'name'} =~ /^(XML|RSS)$/) {
+     return;
+   }
+-  if (($attrs->{'type'} ne "application/rss+xml") &&
++  if (defined($attrs->{'name'}) &&
++      ($attrs->{'type'} ne "application/rss+xml") &&
+       ($attrs->{'type'} ne "text/xml")) {
+     return;
+   }
+diff -ruP HTML-RSSAutodiscovery-1.1/t/002-locate.t HTML-RSSAutodiscovery-1.1.new/t/002-locate.t
+--- HTML-RSSAutodiscovery-1.1/t/002-locate.t	Thu Oct 31 00:23:02 2002
++++ HTML-RSSAutodiscovery-1.1.new/t/002-locate.t	Mon Oct 20 15:32:21 2003
+@@ -4,16 +4,13 @@
+ plan tests => 5;
+ 
+ my $url   = "http://www.diveintomark.org";
+-my $links = undef;
+-my $count = undef;
++my($links, $count);
+ 
+ use_ok("HTML::RSSAutodiscovery");
+-
+ my $html = HTML::RSSAutodiscovery->new();
+-
+ isa_ok($html,"HTML::RSSAutodiscovery");
+ 
+-my $links = undef;
++undef $links;
+ 
+ eval { $links = $html->locate($url); };
+ is($@,'',"Parsed $url");
+@@ -22,6 +19,7 @@
+ 
+ $count = scalar(@$links);
+ cmp_ok($count,">",0,"$count feed(s)");
++
+ 
+ 
+ 
+diff -ruP HTML-RSSAutodiscovery-1.1/t/003-noparse.t HTML-RSSAutodiscovery-1.1.new/t/003-noparse.t
+--- HTML-RSSAutodiscovery-1.1/t/003-noparse.t	Thu Oct 31 00:22:45 2002
++++ HTML-RSSAutodiscovery-1.1.new/t/003-noparse.t	Mon Oct 20 15:38:20 2003
+@@ -10,7 +10,7 @@
+ 
+ plan tests => 5;
+ 
+-my $url   = "aaronland";
++my $url   = "scripting";
+ my $links = undef;
+ my $count = undef;
+ 

@@ -1,0 +1,1 @@
+<<$dirname::dirname /><?$meta::id> dc:identifier="$meta::id"</?> rdf:resource="$meta::resource" dc:title="$title" />

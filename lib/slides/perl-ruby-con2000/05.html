@@ -1,0 +1,30 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="04.html">[prev]</A> <A href="06.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>オブジェクト指向モジュール</H2>
+<HR>
+<UL>
+<LI>オブジェクト指向プログラミングをモジュールで
+<LI>例)<BR>
+<OL>
+<LI><CODE>CGI</CODE>
+<BLOCKQUOTE><PRE><CODE>use CGI;
+$q = new CGI;
+print $q->header, $q->start_html, "Your name is ", $q->param('name'),
+      $q->end_html;
+</CODE></PRE></BLOCKQUOTE>
+<LI><CODE>FileHandle</CODE>
+<BLOCKQUOTE><PRE><CODE>use FileHandle;
+$fh = new FileHandle "> file.txt";
+$fh->print("Hello World!\n");
+$fh->close;
+</CODE></PRE></BLOCKQUOTE>
+</BODY>
+</HTML>

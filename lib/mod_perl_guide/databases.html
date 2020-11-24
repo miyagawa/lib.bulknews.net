@@ -1,0 +1,1055 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl and Relational Databases </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl and Relational Databases 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./security.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./dbm.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Why_Relational_SQL_Databases">Why Relational (SQL) Databases</A>
+	<LI><A HREF="#Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A>
+	<UL>
+
+		<LI><A HREF="#Introduction">Introduction</A>
+		<LI><A HREF="#When_should_this_module_be_used_">When should this module be used and when shouldn't it be used?</A>
+		<LI><A HREF="#Configuration">Configuration</A>
+		<LI><A HREF="#Preopening_DBI_connections">Preopening DBI connections</A>
+		<LI><A HREF="#Debugging_Apache_DBI">Debugging Apache::DBI</A>
+		<LI><A HREF="#Database_Locking_Risks">Database Locking Risks</A>
+		<LI><A HREF="#Troubleshooting">Troubleshooting</A>
+		<UL>
+
+			<LI><A HREF="#The_Morning_Bug">The Morning Bug</A>
+			<LI><A HREF="#Opening_connections_with_differe">Opening connections with different parameters</A>
+			<LI><A HREF="#Cannot_find_the_DBI_handler">Cannot find the DBI handler</A>
+			<LI><A HREF="#Apache_DBI_does_not_work">Apache:DBI does not work</A>
+			<LI><A HREF="#Skipping_connection_cache_during">Skipping connection cache during server startup</A>
+			<LI><A HREF="#Debugging_code_which_deploys_DBI">Debugging code which deploys DBI</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="#mysql_use_result_vs_mysql_store">mysql_use_result vs. mysql_store_result.</A>
+	<LI><A HREF="#Optimize_Run_Two_SQL_Engine_Ser">Optimize: Run Two SQL Engine Servers</A>
+	<LI><A HREF="#Some_useful_code_snippets_to_be_">Some useful code snippets to be used with relational Databases</A>
+	<UL>
+
+		<LI><A HREF="#Turning_SQL_query_writing_into_a">Turning SQL query writing into a short and simple task</A>
+		<LI><A HREF="#The_My_DB_module">The My::DB module</A>
+		<LI><A HREF="#My_DB_Module_s_Usage_Examples">My::DB Module's Usage Examples</A>
+	</UL>
+
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Why_Relational_SQL_Databases">Why Relational (SQL) Databases</A></H1></CENTER>
+<P>
+Nowadays millions of people surf the Internet. There are millions of
+Terabytes of data lying around. To manipulate the data new smart techniques
+and technologies were invented. One of the major inventions was the
+relational database, which allows us to search and modify huge stores of
+data very quickly. We use <STRONG>SQL</STRONG> (Structured Query Language) to access and manipulate the contents of these
+databases.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A></H1></CENTER>
+<P>
+When people started to use the web, they found that they needed to write
+web interfaces to their databases. CGI is the most widely used technology
+for building such interfaces. The main limitation of a CGI script driving a
+database is that its database connection is not persistent - on every
+request the CGI script has to re-connect to the database, and when the
+request is completed the connection is closed.
+
+<P>
+<CODE>Apache::DBI</CODE> was written to remove this limitation. When you use it, you have a database
+connection which persists for the process' entire life. So when your
+mod_perl script needs to use a database,
+<CODE>Apache::DBI</CODE> provides a valid connection immediately and your script starts work right
+away without having to initiate a database connection first.
+
+<P>
+This is possible only with CGI running under a mod_perl enabled server,
+since in this model the child process does not quit when the request has
+been served.
+
+<P>
+It's almost as straightforward as is it sounds; there are just a few things
+to know about and we will cover them in this section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Introduction">Introduction</A></H2></CENTER>
+<P>
+The DBI module can make use of the <CODE>Apache::DBI</CODE> module. When it loads, the DBI module tests if the environment variable
+<CODE>$ENV{MOD_PERL}</CODE> is set, and if the <CODE>Apache::DBI</CODE> module has already been loaded. If so, the DBI module will forward every
+<CODE>connect()</CODE> request to the <CODE>Apache::DBI</CODE> module. <CODE>Apache::DBI</CODE> uses the <CODE>ping()</CODE> method to look for a database handle from a
+previous <CODE>connect()</CODE> request, and tests if this handle is still
+valid. If these two conditions are fulfilled it just returns the database
+handle.
+
+<P>
+If there is no appropriate database handle or if the <CODE>ping()</CODE>
+method fails, <CODE>Apache::DBI</CODE> establishes a new connection and stores the handle for later re-use. When
+the script is run again by a child that is still connected, <CODE>Apache::DBI</CODE> just checks the cache of open connections by matching the <EM>host</EM>, <EM>username</EM> and <EM>password</EM>
+parameters against it. A matching connection is returned if available or a
+new one is initiated and then returned.
+
+<P>
+There is no need to delete the <CODE>disconnect()</CODE> statements from
+your code. They won't do anything because the <CODE>Apache::DBI</CODE> module overloads the <CODE>disconnect()</CODE> method with an empty one.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="When_should_this_module_be_used_">When should this module be used and when shouldn't it be used?</A></H2></CENTER>
+<P>
+You will want to use this module if you are opening several database
+connections to the server. <CODE>Apache::DBI</CODE> will make them persistent per child, so if you have ten children and each
+opens two different connections (with different <CODE>connect()</CODE>
+arguments) you will have in total twenty opened and persistent connections.
+After the initial <CODE>connect()</CODE> you will save the connection time
+for every <CODE>connect()</CODE> request from your <CODE>DBI</CODE> module. This can be a huge benefit for a server with a high volume of
+database traffic.
+
+<P>
+You must <STRONG>not</STRONG> use this module if you are opening a special connection for each of your
+users. Each connection will stay persistent and in a short time the number
+of connections will be so big that your machine will scream in agony and
+die.
+
+<P>
+If you want to use <CODE>Apache::DBI</CODE> but you have both situations on one machine, at the time of writing the
+only solution is to run two Apache/mod_perl servers, one which uses <CODE>Apache::DBI</CODE> and one which does not.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration">Configuration</A></H2></CENTER>
+<P>
+After installing this module, the configuration is simple - add the
+following directive to <CODE>httpd.conf</CODE>
+
+
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::DBI</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that it is important to load this module before any other
+<CODE>Apache*DBI</CODE> module and before the <CODE>DBI</CODE> module itself!
+
+<P>
+You can skip preloading <CODE>DBI</CODE>, since <CODE>Apache::DBI</CODE> does that. But there is no harm in leaving it in, as long as it is loaded
+after
+<CODE>Apache::DBI</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Preopening_DBI_connections">Preopening DBI connections</A></H2></CENTER>
+<P>
+If you want to make sure that a connection will already be opened when your
+script is first executed after a server restart, then you should use the <CODE>connect_on_init()</CODE> method in the startup file to preload every connection you are going to
+use. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::DBI-&gt;connect_on_init
+  (&quot;DBI:mysql:myDB::myserver&quot;,
+   &quot;username&quot;,
+   &quot;passwd&quot;,
+   {
+    PrintError =&gt; 1, # warn() on errors
+    RaiseError =&gt; 0, # don't die on error
+    AutoCommit =&gt; 1, # commit executes immediately
+   }
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+As noted above, use this method only if you want all of apache to be able
+to connect to the database server as one user (or as a very few users),
+i.e. if your <CODE>user(s)</CODE> can effectively share the connection. Do
+<STRONG>not</STRONG> use this method if you want for example one unique connection per user.
+
+<P>
+Be warned though, that if you call <CODE>connect_on_init()</CODE> and your database is down, Apache children will be delayed at server
+startup, trying to connect. They won't begin serving requests until either
+they are connected, or the connection attempt fails. Depending on your DBD
+driver, this can take several minutes!
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Debugging_Apache_DBI">Debugging Apache::DBI</A></H2></CENTER>
+<P>
+If you are not sure if this module is working as advertised, you should
+enable Debug mode in the startup script by:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $Apache::DBI::DEBUG = 1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Starting with <CODE>ApacheDBI-0.84</CODE>, setting <CODE>$Apache::DBI::DEBUG = 1</CODE>
+will produce only minimal output. For a full trace you should set
+<CODE>$Apache::DBI::DEBUG = 2</CODE>.
+
+<P>
+After setting the DEBUG level you will see entries in the <CODE>error_log</CODE>
+both when <CODE>Apache::DBI</CODE> initializes a connection and when it returns one from its cache. Use the
+following command to view the log in real time (your <CODE>error_log</CODE> might be located at a different path, it is set in the Apache configuration
+files):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  tail -f /usr/local/apache/logs/error_log</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+I use <CODE>alias</CODE> (in <CODE>tcsh</CODE>) so I do not have to remember the path:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  alias err &quot;tail -f /usr/local/apache/logs/error_log&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Database_Locking_Risks">Database Locking Risks</A></H2></CENTER>
+<P>
+Be very very careful when locking the database (<CODE>LOCK TABLE ...</CODE>) or singular rows if you use <CODE>Apache::DBI</CODE> or similar persistent connections. MySQL threads keep tables locked until
+the thread ends (connection is closed) or the tables are unlocked. If your
+session <CODE>die()'s</CODE> while tables are locked, they will stay neatly
+locked as your connection won't be closed either.
+
+<P>
+See the section <A HREF="././debug.html#Handling_the_User_pressed_Stop_">Handling the 'User pressed Stop button' case</A> for more information on prevention.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Troubleshooting">Troubleshooting</A></H2></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="The_Morning_Bug">The Morning Bug</A></H3></CENTER>
+<P>
+The SQL server keeps a connection to the client open for a limited period
+of time. In the early days of <CODE>Apache::DBI</CODE> developers were bitten by so called <EM>Morning bug</EM>, when every morning the first users to use the site received a <CODE>No Data Returned</CODE> message, but after that everything worked fine.
+
+<P>
+The error was caused by <CODE>Apache::DBI</CODE> returning a handle of the invalid connection (the server closed it because
+of a timeout), and the script was dying on that error. The <CODE>ping()</CODE> method was introduced to solve this problem, but it didn't worked properly
+till
+<CODE>Apache::DBI</CODE> version 0.82 was released. In that version and afterwards
+<CODE>ping()</CODE> was called inside the <CODE>eval</CODE> block, which resolved the problem.
+
+<P>
+It's possible that some <CODE>DBD::</CODE> drivers don't have the <CODE>ping()</CODE> method implemented. The <CODE>Apache::DBI</CODE> manpage explains how to write one.
+
+<P>
+Another solution was found - to increase the timeout parameter when
+starting the database server. Currently we startup <CODE>MySQL</CODE> server with a script <CODE>safe_mysql</CODE>, so we have modified it to use this option:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  nohup $ledir/mysqld [snipped other options] -O wait_timeout=172800</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+172800 seconds is equal to 48 hours. This change solves the problem, but
+the <CODE>ping()</CODE> method works properly in <CODE>DBD::mysql</CODE> as well.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Opening_connections_with_differe">Opening connections with different parameters</A></H3></CENTER>
+<P>
+When it receives a connection request, before it decides to use an existing
+cached connection, <CODE>Apache::DBI</CODE> insists that the new connection be opened in exactly the same way as the
+cached connection. If I have one script that sets <CODE>LongReadLen</CODE> and one that does not, <CODE>Apache::DBI</CODE> will make two different connections. So instead of having a maximum of 40
+open connections, I can end up with 80.
+
+<P>
+However, you are free to modify the handle immediately after you get it
+from the cache. So always initiate connections using the same parameters
+and set <CODE>LongReadLen</CODE> (or whatever) afterwards.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Cannot_find_the_DBI_handler">Cannot find the DBI handler</A></H3></CENTER>
+<P>
+You must use <CODE>DBI::connect()</CODE> as in normal DBI usage to get your <CODE>$dbh</CODE> database handler.
+Using the <CODE>Apache::DBI</CODE> does not eliminate the need to write proper <CODE>DBI</CODE> code. As the <CODE>Apache::DBI</CODE> man page states, you should program as if you are not using <CODE>Apache::DBI</CODE> at all. <CODE>Apache::DBI</CODE> will override the DBI methods where necessary and return your cached
+connection. Any <CODE>disconnect()</CODE> call will be just ignored.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Apache_DBI_does_not_work">Apache:DBI does not work</A></H3></CENTER>
+<P>
+Make sure you have it installed.
+
+<P>
+Make sure you configured mod_perl with either:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PERL_CHILD_INIT=1 PERL_STACKED_HANDLERS=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Use the example script eg/startup.pl (in the mod_perl distribution). Remove
+the comment from the line.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # use Apache::DebugDBI;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and adapt the connect string. Do not change anything in your scripts for
+use with <CODE>Apache::DBI</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Skipping_connection_cache_during">Skipping connection cache during server startup</A></H3></CENTER>
+<P>
+Does your error_log look like this?
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  10169 Apache::DBI PerlChildInitHandler
+  10169 Apache::DBI skipping connection cache during server startup
+  Database handle destroyed without explicit disconnect at
+  /usr/lib/perl5/site_perl/5.005/Apache/DBI.pm line 29.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If so you are trying to open a database connection in the parent httpd
+process. If you do, children will each get a copy of this handle, causing
+clashes when the handle is used by two processes at the same time. Each
+child must have its own, unique, connection handle.
+
+<P>
+To avoid this problem, <CODE>Apache::DBI</CODE> checks whether it is called during server startup. If so the module skips
+the connection cache and returns immediately without a database handle.
+
+<P>
+You must use the <CODE>Apache::DBI-&gt;connect_on_init()</CODE> method in the startup file.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Debugging_code_which_deploys_DBI">Debugging code which deploys DBI</A></H3></CENTER>
+<P>
+To log a trace of <CODE>DBI</CODE> statement execution, you must set the
+<CODE>DBI_TRACE</CODE> environment variable. The <CODE>PerlSetEnv DBI_TRACE</CODE>
+directive must appear before you load <CODE>Apache::DBI</CODE> and <CODE>DBI</CODE>.
+
+<P>
+For example if you use <CODE>Apache::DBI</CODE>, modify your <CODE>httpd.conf</CODE> with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetEnv DBI_TRACE &quot;3=/tmp/dbitrace.log&quot;
+  PerlModule Apache::DBI</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Replace <CODE>3</CODE> with the TRACE level you want. The traces from each request will be
+appended to <CODE>/tmp/dbitrace.log</CODE>. Note that the logs might interleave if requests are processed
+concurrently.
+
+<P>
+Within your code you can control trace generation with the
+<CODE>trace()</CODE> method:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  DBI-&gt;trace($trace_level)
+  DBI-&gt;trace($trace_level, $trace_filename)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+DBI trace information can be enabled for all handles using this DBI class
+method. To enable trace information for a specific handle use the similar <CODE>$h-&gt;trace</CODE> method.
+
+<P>
+Using the handle trace option with a <CODE>$dbh</CODE> or <CODE>$sth</CODE> is handy for limiting the trace info to the specific bit of code that you
+are interested in.
+
+<P>
+Trace Levels:
+
+<UL>
+<P><LI><STRONG><A NAME="item_0">0 - trace disabled.</A></STRONG>
+<P><LI><STRONG><A NAME="item_1">1 - trace DBI method calls returning with results.</A></STRONG>
+<P><LI><STRONG><A NAME="item_2">2 - trace method entry with parameters and exit with results.</A></STRONG>
+<P><LI><STRONG><A NAME="item_3">3 - as above, adding some high-level information from the
+driver and also adding some internal information from the DBI.</A></STRONG>
+<P><LI><STRONG><A NAME="item_4">4 - as above, adding more detailed information from the driver
+and also including DBI mutex information when using threaded perl.</A></STRONG>
+<P><LI><STRONG><A NAME="item_5">5 and above - as above but with more and more obscure
+information.</A></STRONG>
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mysql_use_result_vs_mysql_store">mysql_use_result vs. mysql_store_result.</A></H1></CENTER>
+<P>
+Since many mod_perl developers use mysql as their preferred SQL engine,
+these notes explain the difference between <CODE>mysql_use_result()</CODE> and
+<CODE>mysql_store_result()</CODE>. The two influence the speed and size of the processes.
+
+<P>
+The <CODE>DBD::mysql</CODE> (version 2.0217) documentation includes the following snippet:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  mysql_use_result attribute: This forces the driver to use
+  mysql_use_result rather than mysql_store_result. The former is
+  faster and less memory consuming, but tends to block other
+  processes. (That's why mysql_store_result is the default.)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Think about it in client/server terms. When you ask the server to
+spoon-feed you the data as you use it, the server process must buffer the
+data, tie up that thread, and possibly keep any database locks open for a
+long time. So if you read a row of data and ponder it for a while, the
+tables you have locked are still locked, and the server is busy talking to
+you every so often. That is <CODE>mysql_use_result()</CODE>.
+
+<P>
+If you just suck down the whole dataset to the client, then the server is
+free to go about its business serving other requests. This results in
+parallelism since the server and client are doing work at the same time,
+rather than blocking on each other doing frequent I/O. That is
+<CODE>mysql_store_result()</CODE>.
+
+<P>
+As the mysql manual suggests: you should not use <CODE>mysql_use_result()</CODE>
+if you are doing a lot of processing for each row on the client side. This
+can tie up the server and prevent other threads from updating the tables.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Optimize_Run_Two_SQL_Engine_Ser">Optimize: Run Two SQL Engine Servers</A></H1></CENTER>
+<P>
+Sometimes you end up running many databases on the same machine. These
+might have very varying database needs (such as one db with sessions, very
+frequently updated but tiny amounts of data, and another with large sets of
+data that's hardly ever updated) you might be able to gain a lot by running
+two differently configured databases on one server. One would benefit from
+lots of caching, the other would probably reduce the efficiency of the
+cache but would gain from fast disk access. Different usage profiles
+require vastly different performance needs.
+
+<P>
+This is basically a similar idea to having <A HREF="././strategy.html#One_Plain_Apache_and_One_mod_per">two Apache servers</A>, each optimized for its specific requirements.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Some_useful_code_snippets_to_be_">Some useful code snippets to be used with relational Databases</A></H1></CENTER>
+<P>
+In this section you will find scripts, modules and code snippets to help
+you get started using relational Databases with mod_perl scripts. Note that
+I work with <CODE>mysql</CODE> ( <A HREF="http://www.mysql.com">http://www.mysql.com</A> ), so the code
+you find here will work out of box with mysql. If you use some other SQL
+engine, it might work for you or it might need some changes. YMMV.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Turning_SQL_query_writing_into_a">Turning SQL query writing into a short and simple task</A></H2></CENTER>
+<P>
+Having to write many queries in my CGI scripts, persuaded me to write a
+stand alone module that saves me a lot of time in coding and debugging my
+code. It also makes my scripts much smaller and easier to read. I will
+present the module here, with examples following:
+
+<P>
+Notice the <CODE>DESTROY</CODE> block at the end of the module, which makes various cleanups and allows
+this module to be used under mod_perl and
+<CODE>mod_cgi</CODE> as well. Note that you will not get the benefit of persistent database
+handles with mod_cgi.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_My_DB_module">The My::DB module</A></H2></CENTER>
+
+	       <p><a href="code/My-DB.pm"><code>My-DB.pm</code></a> -- The My::DB module
+
+</p>
+	      <P>
+(Note that you will not find this on CPAN. at least not yet :)
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="My_DB_Module_s_Usage_Examples">My::DB Module's Usage Examples</A></H2></CENTER>
+<P>
+To use <CODE>My::DB</CODE> in your script, you first have to create a <CODE>My::DB</CODE>
+object:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use vars qw($db_obj);
+  my $db_obj = new My::DB or croak &quot;Can't initialize My::DB object: $!\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you can use any of <CODE>My::DB</CODE>'s methods. Assume that we have a table called <EM>tracker</EM> where we store the names of the users and what they are doing at each and
+every moment (think about an online community program).
+
+<P>
+I will start with a very simple query--I want to know where the users are
+and produce statistics. <CODE>tracker</CODE> is the name of the table.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    # fetch the statistics of where users are
+  my $r_ary = $db_obj-&gt;sql_get_matched_rows_ary_ref
+    (&quot;tracker&quot;,
+     [qw(where_user_are)],
+    );
+  
+  my %stats = ();
+  my $total = 0;
+  foreach my $r_row (@$r_ary){
+    $stats{$r_row-&gt;[0]}++;
+    $total++;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now let's count how many users we have (in table <CODE>users</CODE>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $count = $db_obj-&gt;sql_count_matched(&quot;users&quot;);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Check whether a user exists:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $username = 'stas';
+  my $exists = $db_obj-&gt;sql_count_matched
+  (&quot;users&quot;,
+   [username =&gt; [&quot;=&quot;,$username]]
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Check whether a user is online, and get the time since she went online (<CODE>since</CODE> is a column in the <CODE>tracker</CODE> table, it tells us when a user went online):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my @row = ();
+  $db_obj-&gt;sql_get_matched_row
+  (\@row,
+   &quot;tracker&quot;,
+   ['UNIX_TIMESTAMP(since)'],
+   [username =&gt; [&quot;=&quot;,$username]]
+  );
+  
+  if (@row) {
+    my $idle = int( (time() - $row[0]) / 60);
+    return &quot;Current status: Is Online and idle for $idle minutes.&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A complex query. I join two tables, and I want a reference to an array
+which will store a slice of the matched query (<CODE>LIMIT $offset,$hits</CODE>) sorted by <CODE>username</CODE>. Each row in the array is to include the fields from the <CODE>users</CODE> table, but only those listed in <CODE>@verbose_cols</CODE>. Then we print it out.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r_ary = $db_obj-&gt;sql_get_matched_rows_ary_ref
+    (
+     &quot;tracker STRAIGHT_JOIN users&quot;,
+     [map {&quot;users.$_&quot;} @verbose_cols],
+     [],
+     [&quot;WHERE tracker.username=users.username&quot;,
+      &quot;ORDER BY users.username&quot;,
+      &quot;LIMIT $offset,$hits&quot;],
+    );
+  
+  foreach my $r_row (@$r_ary){
+    print ...
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Another complex query. The user checks checkboxes to be queried by, selects
+from lists and types in match strings, we process input and build the <CODE>@where</CODE> array. Then we want to get the number of matches and the matched rows as
+well.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my @search_keys = qw(choice1 choice2);
+  my @where = ();
+    # Process the checkboxes - we turn them into a regular expression
+  foreach (@search_keys) {
+    next unless defined $q-&gt;param($_) and $q-&gt;param($_);
+    my $regexp = &quot;[&quot;.join(&quot;&quot;,$q-&gt;param($_)).&quot;]&quot;;
+    push @where, ($_ =&gt; ['REGEXP',$regexp]);
+  }
+  
+    # Add the items selected by the user from our lists
+    # selected =&gt; exact match
+  push @where,(country =&gt; ['=',$q-&gt;param('country')]) if $q-&gt;param('country');
+  
+    # Add the parameters typed by the user
+  foreach (qw(city state)) {
+    push @where,($_ =&gt; ['LIKE',$q-&gt;param($_)]) if $q-&gt;param($_);
+  }
+  
+     # Count all that matched the query
+  my $total_matched_users =  $db_obj-&gt;sql_count_matched
+    (
+     &quot;users&quot;,
+     \@where,
+    );
+  
+    # Now process the orderby
+  my $orderby = $q-&gt;param('orderby') || 'username';
+  
+     # Do the query and fetch the data
+  my $r_ary = $db_obj-&gt;sql_get_matched_rows_ary_ref
+  (
+   &quot;users&quot;,
+   \@display_columns,
+   \@where,
+   [&quot;ORDER BY $orderby&quot;,
+    &quot;LIMIT $offset,$hits&quot;],
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>sql_get_matched_rows_ary_ref</CODE> knows to handle both <CODE>OR</CODE>ed and
+<CODE>AND</CODE>ed params. This example shows how to use <CODE>OR</CODE> on parameters:
+
+<P>
+This snippet is an implementation of a watchdog. Our users want to know
+when their colleagues go online. They register the usernames of the people
+they want to know about. We have to make two queries: one to get a list of
+usernames, the second to find out whether any of these users is online. In
+the second query we use the <CODE>OR</CODE> keyword.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # check who we are looking for
+  $r_ary = $db_obj-&gt;sql_get_matched_rows_ary_ref
+    (&quot;watchdog&quot;,
+     [qw(watched)],
+     [username =&gt; ['=',$username)],
+     ],
+    );
+  
+    # put them into an array
+  my @watched = map {$_-&gt;[0]} @{$r_ary};
+  
+  my %matched = ();
+    # Does the user have some registered usernames?
+  if (@watched) {
+  
+  # Try to fetch all the users who match the usernames exactly.
+  # Put it into an array and compare it with a hash!
+    $r_ary = $db_obj-&gt;sql_get_matched_rows_ary_ref
+      (&quot;tracker&quot;,
+       [qw(username)],
+       [username =&gt; ['=',\@watched],
+       ]
+      );
+  
+    map {$matched{$_-&gt;[0]} = 1} @{$r_ary};
+  }
+  
+  # Now %matched includes the usernames of the users who are being
+  # watched by $username and currently are online.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./security.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./dbm.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 12/18/2000
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

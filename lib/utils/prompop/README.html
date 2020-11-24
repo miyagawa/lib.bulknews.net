@@ -1,0 +1,20 @@
+<H2>WHAT'S THIS</H2>
+prom-wl の生成するログファイルから、POP3 の応答を返します。Win32 端末からASTEC-X や TeraTerm 経由で <A href="http://www.gohome.org/wl/">Wanderlust</A> でメールを読んでいる人におすすめします。Win32 から<A href="http://www.mirai.ne.jp/~mamo/bsbiff.html">B's biff</A>などの biff ツールで、UNIX 側の新着メールをチェックするのに便利です。というか、それ以外には使えません。
+
+<H2>INSTALL</H2>
+<blockquote>
+<pre>% wget prompop-0.xx.tar.gz
+% tar xzvf prompop-0.xx.tar.gz
+% cd prompop-0.xx
+% perl Makefile.PL
+% make
+# make install
+</pre>
+</blockquote>
+
+<H2>USAGE</H2>
+<A href="http://cr.yp.to/ucspi-tcp/tcpserver.html">tcpserver</A> や inetd から起動してください。引数には procmail ログ、MH ディレクトリ、POP3 認証に使うパスワード（crypt したもの）を渡します。
+<blockquote>
+<pre>% tcpserver 0 8110 /use/local/bin/prompop ~/.procmail/log ~/Mail 2aea9ADdi &</pre>
+</blockquote>
+

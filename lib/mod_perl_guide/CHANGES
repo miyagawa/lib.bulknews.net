@@ -1,0 +1,2106 @@
+		###################################
+		### mod_perl Guide CHANGES file ###
+		###################################
+
+04.26.2001 ver 1.29
+
+* dbm.pod:
+
+  o updated "Flawed Locking Methods Which Must Not Be Used" with notes
+    about lock upgrading (David Harris)
+
+* strategy.pod:
+
+  o added a ref to a light and fast Boa webserver
+
+* scenario.pod:
+
+  o cleared out the section on open proxying with mod_proxy (Eric Cholet)
+
+* multiuser.pod:
+
+  o extended the "Virtual Servers Technologies" section with freevsd,
+    freevmware, vmware and S/390 references.
+
+* snippets.pod:
+
+  o removed the cache control section -- it's covered in the HTTP
+    headers chapter.
+
+  o subrequests and notes working together (Darren Chamberlain)
+
+* performance.pod:
+ 
+  o "Interpolation vs List" update: wrongly used the 'concatenation'
+    term instead of interpolation (Mark Summerfield)
+
+  o "Interpolation, Concatenation or List" was rewritten
+
+  o new: "Architecture Specific Compile Options" (Tim Bunce, Perrin
+    Harkins, Greg Cope, Owen Williams, Vivek Khera, Steve Fink, James
+    W Walden)
+
+* modules.pod:
+
+  o Extended the docs of Apache::SubProcess module
+
+* porting.pod: 
+
+  o "using register_cleanup in startup.pl to register cleanup action
+    at the server shutdown or restart" (Doug)
+
+* config.pod: 
+
+  o Cleared the item which was falsely stating that the globals
+    defined in startup.pl cannot be seen by child process. (Richard
+    Chen)
+
+* install.pod:
+
+  o updated "Discovering Whether Some Option Was Configured": added
+    Apache::MyConfig
+
+  o debian/apt install notes updates (Neil Conway)
+
+  o some callback hooks aren't enabled by ALL_HOOKS=1 (Neil Conway)
+
+* download.pod
+
+  o update the location of mod_proxy_add_forward.c (Ask Bjorn Hansen)
+
+* help.pod
+
+  o added a link to Andrew Ford's Apache and mod_perl pocket books.
+
+  o added a link to take23.org
+
+  o added a XS resources section 
+
+  o added a link to the scalable list archive
+
+  o remove the mailing list post address, to make it easier of Ask to
+    filter SPAM.
+
+* troubleshooting.pod
+
+  o new: "exit signal Segmentation fault (11)" with mysql: (Matt
+    Sergeant)
+
+  o improved the docs of fixing a broken /dev/null
+
+* debug.pod
+
+  o updated "gdb says there are no debugging symbols" -- a simpler
+    technique to have the binary unstripped during make install.
+ 
+* Minor corrections:
+
+  o debug.pod (Alexander Farber)
+  o performance.pod (Marc Lehmann, Kees Vonk)
+  o snippets.pod (Ime Smits)
+  o porting.pod (Michele Beltrame)
+  o config.pod (Surat Singh Bhati, Paul Cotter )
+  o control.pod (Aaron Johnson, Cliff Rayman, Yann Kerhervé)
+  o modules.pod (Daniel Bohling)
+  o install.pod (Kevin Swope, Jamie)
+  
+
+
+01.11.2001 ver 1.28
+
+* Makefile.PL: fixed to generate a correct Makefile on Solaris:
+  removed space/extra new line after some manually created targets
+  (Lupe Christoph)
+
+* databases.pod:
+
+ o "the morning bug" section was updated
+
+* scenario.pod:
+
+  o updated the sample squid configuration directives to work with
+    version 2.3.STABLE2.
+
+* strategy.pod:
+
+ o corrected the math example with 56k modem, where the result was
+   times and not seconds (Thanks to the students from my class at
+   YAPC::Europe 2000)
+
+ o corrected the math example using the MaxClient formula (for split
+   code sets)
+
+  o verified that squid's default read-ahead (send) buffer is of 16KB
+
+* dbm.pod:
+
+  o reviewed/rewritten/corrected
+
+* performance.pod:
+
+  o corrected another math example with calculating real MaxClients
+    when shared memory is taken into an account (Thanks to an
+    anonymous bearded student from from my class at YAPC::Europe 2000)
+
+  o new section: "Measuring the Memory of the Process"
+
+  o The "Forking and Executing Subprocesses from mod_perl" sections
+    has been almost completely rewritten
+
+  o The "Global vs. Fully Qualified Variables" section was rewritten
+
+* modules.pod:
+
+  o Apache::PerlVINC has changed its interface, updating to ver .03
+    (Todd Finney)
+
+* help.pod:
+
+  o "Get help with DBI and SQL" updated with new resources
+
+  o Added a link to a tuning manual of Solaris 2.x TPC/IP stack and
+    other webserver related info. Useful for all Unix flavors.
+
+* install.pod:
+
+  o removed the section with deb package links from David
+    Huggins-Daines, since the link to the package is dead.
+
+* porting.pod:
+
+  o new tip: "Redirecting STDOUT into a Scalar" (Chris Nokleberg)
+
+* Minor corrections:
+
+  o perl.pod: Jean-Louis Guenego
+  o performance.pod: (Richard Chen, Ulrich Neumerkel)
+  o install.pod: (Artur Zambrzycki)
+
+
+11.26.2000 ver 1.27
+
+* intro.pod: 
+
+  o. updated the long due credits section
+
+* correct_headers.pod:
+
+  o added a link to an info page:
+  "Prevent the browser from Caching a page"
+
+* multiuser.pod:
+
+  o added a ref to "The User-mode Linux Kernel" project (related to
+    running of many servers on the same machine safely to the system).
+
+* performance.pod:
+
+  o added the http_load utility section
+
+  o added notes about latency problems with db transactions
+    "Persistent DB Connections" (Rodger Donaldson)
+
+* download.pod:
+
+  o added links to http_load and Daquiri (only link to the backhand
+    site) utilities.
+
+* troubleshooting.pod:
+
+  o foo ... at /dev/null line 0 (Honza Pazdziora)
+
+  o httpd keeps on growing after each restart (Perrin Harkins)
+
+* debug.pod:
+
+  o suggestion to use warn while debugging (Kenny Gatdula)
+
+  o extended the section on using strace(1).
+
+  o documented the fact that Apache::Status shouldn't be used on
+    production machines because of the overhead that it creates
+    (Doug).
+
+  o extended the section: "Safe Resource Locking and Cleanup Code"
+    with localized file globs example (Doug)
+
+* help.pod:
+
+  o added cgi-list subscription info (Peter J. Schoenster)
+
+  o started new sections: 'Get help with Unix OS flavors -- Unix OS
+    related resources' and 'Get help with Performance and Scalability'
+
+* perl.pod: 
+
+  o new: Understanding Closures -- the Easy Way (Randal Shwartz,
+  Perrin Harkins, Stas)
+
+  o Exceptions section update: Exception::Class and Devel::StackTrace
+  (Matt Sergeant and Dave Rolsky)
+
+* porting.pod: 
+
+  o new item: "Return Codes under Apache::Registry" (Eric Cholet)
+
+  o "-M and other time() file tests under mod_perl" -- added a nice
+    TransHandler to handle the time resetting (Doug)
+
+  o Adding local() at "-M and other time() file tests under mod_perl"
+    (Andreas Koenig)
+
+  o Documented Apache::Reload 
+
+  o correction: PERL5LIB is not ignored when PerlTaintCheck is on
+
+* install.pod: 
+
+  o mod_proxy_add_forward setup extended with notes about
+  --permute-module to make it easy to place mod_proxy_add_forward
+  before mod_proxy (Larry Leszczynski)
+
+  o mod_perl and php install scenario (Roy Nasser)
+
+  o reviewed and extensively edited.
+
+  o added an info about Aphid Apache Installer
+
+  o removed the section about experimental compile option
+    PERL_MARK_WHERE since it should go away with 2.0 (it's still
+    mentioned in debug.pod : "Finding the Line Which Triggered the
+    Error or Warning" (Doug)
+
+* scenario.pod: reviewed and extensively edited.
+
+* strategy.pod: reviewed and extensively edited.
+
+* Minor corrections:
+
+  o install.pod: (Neil Conway, Lance Cleveland)
+
+  o perl.pod: (Pavel Shmidt)
+
+  o config.pod: (Michael Rendell)
+
+
+
+
+
+08.22.2000 ver 1.26-fix-01
+
+* build: fixed the Makefile.PL to detect the prerequisites. MANIFEST
+  file is OK now (didn't accept files starting with './') (Marcel
+  Grunauer)
+
+* troubleshooting.pod: install_driver(Oracle) failed: Can't load
+   '.../DBD/Oracle/Oracle.so' for module DBD::Oracle (Ed Park)
+
+
+
+
+08.21.2000 ver 1.26
+
+* mod_perl guide's build process is now completely migrated into an
+  external module, distributed in package Pod::HtmlPSPdf.
+
+* install.pod: Raven SSL installation notes updated (Doug, Geoffrey
+  Young)
+
+*  troubleshooting.pod: install_driver(Oracle) failed: Can't load
+   '.../DBD/Oracle/Oracle.so' for module DBD::Oracle (Yann Ramin,
+   Richard Chen)
+
+* security.pod: a code sample in "Non authenticated access for
+  internal IPs, Authenticated for external IPs" is corrected (Will
+  Trillich)
+
+* porting.pod: "CHECK Blocks" (Doug)
+
+* scenario.pod: "The dual server installation scenario was complete
+  rewritten, to accomodate a better in my opinion directories layout
+  and simpler installation process"
+
+* perl.pod: "Exception Handling for mod_perl" was improved by Matt
+  Sergeant.
+
+* Minor corrections: 
+  o config (Ron Pero)
+
+08.05.2000 ver 1.25
+
+* License: People asked me to redistribute mod_perl Guide in other
+  ways than just mirroring the mod_perl site. Therefore I've licensed
+  the guide under GPL and included the required info in the CPAN
+  package.
+
+* perl:
+
+  o added "Using Non-Hardcoded Configuration Module Names" (Chris Winters)
+
+
+* debug:
+
+  o updated: "How can I find out if a mod_perl code has a memory leak"
+
+  o rewritten:
+    Handling the 'User pressed Stop button' case 
+      Detecting Aborted Connections 
+      The Importance of Cleanup Code 
+        Critical Section 
+        Safe Resource Locking and Cleanup Code 
+
+* config:
+  
+  o added a sub header "Running CGI, PerlRun, and Registry Scripts
+    located in the same Directory" to make the info more prominent to
+    find. (Ron Pero)
+  
+  o PerlAddVar info was added
+ 
+* control
+
+  o "Swapping Prevention" rewritten from scratch and moved from
+    performance chapter to control chapter (Ed Phillips, Barrie
+    Slaymaker, Joshua Chamas)
+
+  o "Preparing for Machine Reboot" -- added a section describing the
+    chkconfig(8) use (Andreas Koenig)
+
+* porting: 
+
+  o the wrong suggested solution to the nested sub problem was
+    spotted!!! (Hunter Monroe, Hailei Dai) it's fixed now. 
+
+  o update: "Terminating requests and processes, the exit() and
+    child_terminate() functions" -- under perl5.6 you don't need to
+    override exit anymore! (Doug, Eric Cholet)
+
+  o s/PerlTaintMode/PerlTaintCheck/ (Gunther Birznieks)
+
+* review: 
+
+  o Mark Summerfield has reviewed these chapters: modules,
+  browserbugs, security and start.
+
+* performance:
+
+  o "CGI.pm vs Apache::Request" and "Apache::args vs
+    Apache::Request::param" were merged into a single section called:
+    "Apache::args vs Apache::Request::param vs CGI::param"
+
+  o The first example showing the use of ab was corrected (Joe
+    Schaefer)
+
+  o rewritten: 
+
+    + Apache::Registry PerlHandler versus Custom PerlHandler
+    + Keeping the Shared Memory Limit 
+    + Limiting the Size of the Processes
+    + Limiting Other Resources Used by Apache Child Processes
+
+* modules:  
+
+  o "Apache::GTopLimit - Limit Apache httpd processes" merged into
+    performance chapter.
+
+  o Apache::PerlVINC configuration corrected (Patrick)
+
+* Minor corrections: 
+  o config (Carl Hansen, Ron Pero, Jeff Chan, Cliff Rayman, Marcel Grunauer)
+  o control (Marcel Grunauer)
+  o debug (Marcel Grunauer)
+  o install (Ron Pero)
+  o snippets (Ask Bjoern Hansen, Chris Nokleberg)
+  o perl (Will Trillich, Cliff Rayman, Jason Rhinelander)
+  o porting (Ged Haywood)
+
+
+
+06.07.2000 ver 1.24
+
+* perl: "catching exceptions" -- a few corrections (Matt Sergeant)
+
+* modules: added Apache::Gzip (Ken Williams)
+
+* guide's design
+
+  o put back the links underlining
+
+  o background-color: #ffffee;
+
+  o added (jump) menus to reach search/download/index from everywhere
+  
+  o added the two new search engines (both working on the split
+    version of the guide)
+
+* guide's build: 
+
+  o The build code was completely rewritten, html2ps is now bundled
+    with the guide so one can create PS version, and if there is
+    ps2pdf the PDF version.
+
+  o It can produce the split version of the Guide.
+
+  o One can easily reuse the package to build his own docs, since the
+    look-n-feel has been moved into the templates from the code.
+
+  o Once I feel confident I'll probably separate the build code from
+    the Guide to give it its own life and make it easier to reuse by
+    other developers. I need testers who want to use this package
+    before I release it a separate module.
+
+* performance: 
+
+  o old sections rewritten/improved:
+    - Are My Variables Shared?
+    - Preloading Registry Scripts
+    - Calculating Real Memory Usage
+    - Preloading Perl Modules at Server Startup 
+    -  Preloading Registry Scripts at Server Startup 
+    - Forking and Executing Subprocesses from mod_perl 
+      = Spawning a Detachable Sub-Process
+      = Gory Details About fork()
+      = Executing system() in the Right Way
+      = Avoiding Zombie Processes
+
+  o new sections:
+    - Apache/mod_perl Build Options
+      = mod_perl Process Size as a Function of Compiled in C Modules and
+               mod_perl Features
+    - Modules Initializing at Server Startup
+      = Initializing DBI.pm (corrections by Tim Bunce)
+      = Initializing CGI.pm
+
+* control: 
+
+  o These sections were rewritten and extended:
+    - Server Maintenance Chores 
+        = Handling Log Files 
+          + Log Rotation 
+          + Non-Scheduled Emergency Log Rotation 
+
+  o 'cyclog' is now called multilog (from daemontools package)
+
+  o Moved from debug and rewritten "Speeding up the Apache Termination
+    and Restart"
+
+  o Rewritten and extended "SUID Start-up Scripts" with: 
+    "Introduction to SUID Executables"
+    "Apache Startup SUID Script's Security"
+    "Sample Apache Startup SUID Script"
+
+* hardware: partly rewritten and improved.
+
+* reconstruction process: obvious.pod has been disassembled and merged
+  into debug.pod.
+
+* debug: update: Apache::DumpHeaders (Ask Bjoern Hansen)
+
+* troubleshooting: PerlFreshRestart is irrelevant for DSO (Vivek
+  Khera, Doug)
+
+* review: 
+
+  o Drew Taylor has reviewed these chapters: scenario and strategy
+    chapters.
+
+  o Mark Summerfield has reviewed these chapters: scenario, perl and
+    strategy chapters.
+
+  o Eric Cholet has reviewed the porting chapter.
+
+* Minor corrections: 
+  o download (Salve J Nilsen)
+  o performance (w trillich) 
+  o perl (Scott Holdren) 
+  o snippets+download (Ask Bjoern Hansen) 
+  o debug (Robert Mathews) 
+  o scenario (Tuomas Salo)
+
+
+
+
+
+
+05.12.2000 ver 1.23
+
+* guide's layout changed: Now there are two index files -- the default
+  index.html shows only the names of the chapters in TOC, the new
+  index_long.html shows the full TOC as before.
+
+* guide's layout changed: Changed to simple black_on_white no fancy
+  frames and colors anymore
+
+* guide: Changed the order of the the chapters towards logical
+  sequentiality. 
+
+* snippets: new: "Sending Cookies in REDIRECT Response" (Doug)
+
+* help: new: added the digest list info (Ask Bjoern Hansen)
+
+* performance: new: "Limiting the Number of Processes Serving the Same
+  Resource"
+
+* troubleshooting: updated: "RegistryLoader: Translation of uri [...]
+  to filename failed"
+
+* porting: update: "using format() and write()" -- using sprintf (Matt
+  Sergeant)
+
+* perl: new: "Variables Globally, Lexically Scoped And Fully
+  Qualified" (Ged W. Haywood)
+
+* build suite: documenting the build script so others could reuse this
+  code in their documentation generation chores.
+
+* performance: a complete reorganizing of the content toward a better
+  navigatibility.
+
+* strategy: removed "Multithreading or not Multithreading" -- has
+  flaws and needs a rewrite
+
+* performance: update: "KeepAlive" -- works only if there is a
+  Content-Length header (Andreas Koenig)
+
+* help: new: "get help with CVS"
+
+* troubleshooting: new: "Segfaults when using XML::Parser" (DeWitt
+  Clinton)
+
+* performance: new: "Do Not Run Everything on One mod_perl Server"
+  (Joshua Chamas, Shane shane@isupportlive.com, Gunther Birznieks)
+     
+* minor corrections: scenario (Eric Jain), debug (Geoffrey Young).
+
+* install: new: "mod_perl and Raven SSL" (Doug)
+
+* scenario: new: "mod_proxy: Security Issues" (Eric Cholet)
+
+* performance: new: "Improving Perl Code Performance Hints" =>
+  "Concatination or List" (Doug)
+
+* debug: new: "hanging processes detection: Using the Perl Trace"
+
+* debug: new:  "Hanging because of the OS Problem" (Greg Stark)
+
+* install: new: "About gdbm, db and ndbm libraries" (Les Mikesell)
+
+* performance: new: "Benchmarking Apache::Registry and Perl Content
+  Handler"
+
+* performance: new: "Benchmarking CGI.pm and Apache::Request"
+
+* porting: new: "Transitioning from Apache::Registry to Apache
+  handlers"
+
+* config: new: "Alias and Rewrite Conflicts" (Eric Cholet, Ask Bjoern
+  Hansen, Vivek Vhera)
+
+* scenario: new: "Front-end Back-end Proxying with Virtual Hosts"
+  (Vivek Vhera, Eric Cholet)
+
+* install: new: "APACHE_USER and APACHE_GROUP env" (Doug)
+
+* config: new: "Overriding <Location> Setting in "Sub-Location""
+  (Darren Chamberlain, Vivek Vhera)
+
+* review: Mark Summerfield has reviewed these chapters: porting,
+  correct_headers, intro, multiuser, snippets and performance.
+
+* troubleshooting: new: "Processes Get Stuck on Graceful Restart" (Doug)
+
+* debug: updated: "Safe Resource Locking" added utils to trace the
+  open files owner processes. (Doug, Eric Cholet)
+
+* databases: new: "Database Locking Risks"
+
+* performance: update: "Limiting the Resources Used by httpd
+  Children", explanation of the soft and hard limits (Eric Cholet)
+
+* help: added subscription info for perl5-porters mailing list
+
+* perl: new: "Exception Handling for mod_perl" (Matt Sergeant)
+
+* review: Ged W. Haywood was very kind to review and correct the
+  config, perl, dbm, snippets, advocacy, browserbugs, download, help,
+  modules, troubleshooting, multiuser, obvious, correct_headers,
+  status and hardware chapters.
+
+* modules: new: "Apache::RequestNotes" (Geoffrey Young)
+
+
+
+
+
+
+04.09.2000 ver 1.22
+
+* intro: updated the long due credits section
+
+* snippets: new: "Authentication Snippets" (Michael Finke, Eric
+  Cholet)
+
+* debug: new: "Apache::DumpHeaders" (Ask Bjoern Hansen)
+
+* debug: new: "Apache::DebugInfo" (Geoffrey Young)
+
+* config: updated: "PerlFreshRestart" with DSO notes (Doug, Vivek
+  Khera)
+
+* troubleshooting: new: "Can't upgrade that kind of scalar ..." (Doug)
+
+* performance: new: "Bloatware" (Tom Christiansen)
+
+* performance: new: "CGI.pm versus Apache::Request" (Doug)
+
+* performance: new: "Apache::Registry versus pure PerlHandler" (Doug)
+
+* performance: new: "TMTOWTDI: Convenience and Performance"
+
+* install: "Is it possible to run mod_perl enabled Apache as suExec?"
+  (Randal L. Schwartz, Matt Sergeant)
+
+* performance: updated: "Benchmarking PerlHandlers"
+
+* performance: new: "Keeping the Shared Memory Limit"
+
+* porting: new: "File tests operators"
+
+* performance: updated "PerlSetupEnv Off" with a test script
+
+* snippets: new: "Getting the Front-end Server's Name in the Back-end
+  Server" (Sean Dague)
+
+* porting: extended "Taint mode" -- a suggestion for services that
+  move to mod_perl and have part of the scripts that won't run under
+  enabled Taint mode (Gunther Birznieks, Ken Williams)
+
+* modules: new: "Apache::OutputChain -- Chain Stacked Perl Handlers"
+  (Honza Pazdziora, Eric Cholet)
+
+* snippets: new: "SSI and Embperl -- Doing Both" (Michael Schout)
+
+* performance: new: "-Dusemymalloc Perl Build Option" (Doug, Jeffrey
+  W. Baker)
+
+* strategy: added unedited answer for the question "Multithreading or
+  not Multithreading" (Shane shane@isupportlive.com)
+
+* install: updated "Automating installation" (James G Smith)
+
+* performance: added a workaround for limiting memory usage under
+  Linux to "Limiting the Resources Used by httpd Children" (Kevin
+  Murphy)
+
+* debug: added clarification fd leakage in "Safe Resource Locking"
+  (Bill Moseley)
+
+* multiuser: extended the scenario for multi-user/multi-webserver on
+  one machine option, how to enforce port and similar settings without
+  forbidding user to modify his httpd.conf. (inspired by Greg Cope)
+
+* scenario: new: "Caching in mod_proxy" (Ilya Obshadko)
+
+* porting: new: "Accessing Request Object in non-Perl*Handler Modules"
+  (Doug)
+
+* config: new: "Adding Custom Configuration Directives" (Doug)
+
+* snippets: new: "Convert a POST Request into a GET Request" (Doug)
+
+* scenario: extended the "Getting the Remote Server IP in the Back-end
+  server in the Proxy Setup" section with notes about the modules
+  configuration precedence problem and its solution. (Ilya Obshadko,
+  Ewan Edwards)
+
+* strategy: new "Pros and Cons of Building mod_perl as DSO" (based on
+  http://www.apache.org/docs/dso.html by Ralf S. Engelschall)
+
+* strategy: new: "mod_perl and mod_ssl" (Tom Mornini, Vivek Khera, Mads
+  Toftum)
+
+* snippets: added a "PerlTransHandler example" (Randal L. Schwartz,
+  Ajay Shah)
+
+* config: extended examples for "<Perl> sections", added the package
+  declaration caveat, Apache::ReadConfig namespace and more.
+
+* performance: extended the "Reducing the Number of stat() Calls"
+  section, with examples of PerlTransHandler and reducing stat()s for
+  .htaccess look-ups
+
+* help: added the perlmonth.com and Gerald Richter's article reference
+
+* porting: updated the "Right headers generation": OS with EBCDIC as
+  character set and sending proper headers. (Doug)
+
+* porting: added: "Apache::print() and CORE::print()" (Doug)
+
+* debug: updated: Sys::Signal, SIGALRM and perl5.6 issue (Doug and Bill
+  Moseley)
+
+* config: $Apache::Server::StrictPerlSections (Doug)
+
+* scenario: more practical mod_rewrite examples by Geoffrey Young.
+
+* minor corrections: download.pod by Ron Pool, scenario.pod by Terry
+  West and Eric Cholet, config.pod by Richard More, performance.pod by
+  Stephen Judd and Steve Reppucci, frequent.pod by Andreas Piesk.
+
+* review: Mark Summerfield has joined the group of the kind people who
+  review and correct the Guide. He has reviewed these chapters:
+  advocacy, config, control, databases, dbm, debug, download,
+  frequent, hardware, help, install.
+
+* review: Ged W. Haywood was very kind to review and correct the
+  debug chapter.
+
+
+
+
+03.04.2000 ver 1.21
+
+* help: updated the mod_perl list subscription info, added the
+  advocacy list info.
+
+* download: HA section - added more links (Robin Berjon, Gerd Knops)
+
+* strategy: added a new section "When One Machine is not Enough for
+  SQL DB and mod_perl" (Vivek Khera, Jeffrey W. Baker, John Armstrong,
+  Mike Miller, Leslie Mikesell, Tom Brown, Ed Phillips, Marko van der
+  Puil) Special thanks to Jeffrey for working on the this section
+  before it went into the Guide.
+
+* perfomance: added the section "Memory Swapping is Considered Bad"
+
+* modules: added the Apache::GTopLimit and Apache::Watchdog::RunAway
+  modules description
+
+* performance: new section "Is my Code Shared"
+
+* download: added links to DB sites and "Low-Cost Unix Database
+  Differences" comparison page.
+
+* config: new section "Enabling Remote Server Configuration Reports"
+
+* performance: new section "Calculating Real Memory Usage"
+
+* scenario: mod_proxy section has been rewritten and extended with
+  lots of OS specific information (Joshua Chamas, Oleg Bartunov,
+  Gerald Richter, Radu Greab, Peter Haworth, Vivek Khera)
+
+* performance: rewritten "Object Methods Calls Versus Function Calls"
+  and splitted into the original section and "Imported Symbols and
+  Memory Usage" (James G Smith, David Mitchell, Doug, Matt Sergeant,
+  Bill Moseley, Autarch)
+
+* performance: added "Reducing the Number of stat() Calls" (Steve
+  Reppucci)
+
+* install: added a note of how to force CPAN shell to install mod_perl
+  when the same version is already installed. 
+
+* scenario: added "mod_rewrite Examples" (Vivek Khera, Tom Mornini)
+
+* databases: added "Optimize: Run Two SQL Engine Servers" (Pascal
+  Eeftinck)
+
+* snippets: added "Using DESTROY to Finalize Output" with solutions to
+  redirection loghandler fixes (Michael Blakeley)
+
+* scenario: added to the section "One Plain and One mod_perl enabled
+  Apache Servers" --target option to make the ./configure stage
+  somewhat simpler. (James Furness)
+
+* snippets: added 2 modified versions of the mysql backup/restore
+  scripts to work with 3.22.30+ (Ward Vandewege)
+
+* Moved complete files, previously enlisted in the text, to the
+  external files. This makes the browsing faster when the files are
+  very big.  Added new POD tag =code to create the link to the
+  external file at the pod2html conversion stage
+
+* review: Ged W. Haywood was very kind to review and correct the
+  following chapters: control, install
+
+* performance: in "Forking and Executing Subprocesses from mod_perl"
+  fixed a few typos in code. (Anthony D. Ettinger, Matt Sergeant and
+  Edwin Pratomo)
+
+
+
+
+
+02.09.2000 ver 1.20
+
+* I've created a mod_perl_guide package and now it's available from
+  CPAN! So when a new version gets released you just open your CPAN
+  shell and do:
+
+  % perl -MCPAN -eshell
+  cpan> install mod_perl_guide
+
+  All the POD sources and build scripts has moved to this
+  distribution, get them from CPAN. 
+
+* There is no more PostScript file book style distribution. A better
+  PDF version has replaced it (suggested by Andrew Ford). Note that
+  you can use gv (ghostview) to view pdf files, if you don't have a
+  free acroread installed. Or you can always use 'pdf2ps' utility to
+  convert it back to PS.
+
+  BTW this release's PDF file consists of 481 Letter format pages.
+
+* install: rewritten "What Compiler Should Be Used to Build mod_perl?"
+
+* performance: added "Measuring the Subroutines Memory Usage"
+
+* install: added "using http://localhost/perl-status?hooks" to check
+  what hooks where enabled during the build process.
+
+* debug: extended the "Looking inside the server" section with new
+  info about Apache::Status, mod_status and Apache::VMonitor
+
+* snippets: added "Emulating the Authentication Mechanism" (Eric
+  Cholet)
+
+* troubleshooting: runtime: added "Can't call method
+  "register_cleanup" (CGI.pm)" (Doug, Nick Tonkin)
+
+* snippets: added "Setting PerlHandler Based on MIME Type" (Doug)
+
+* install: .makepl_args.mod_perl in $HOME, otherwise
+  makepl_args.mod_perl (no leading dot) (Ask Bjoern Hansen)
+
+* databases: completed the DBI trace info (Doug Kyle)
+
+* modules: added and extended the Apache::Registry{BB|NG} sections
+  (Doug)
+
+* config: added "debugging <Perl> sections" (Doug)
+
+* modules: added a ref to "Apache::RedirectLogFix" (Doug)
+
+* snippets: added "Passing Notes Between mod_perl and other (non-perl)
+  Apache Modules" (David Harris)
+
+* snippets: added "mod_rewrite Based On Query String and URI
+  Implemented in Perl" (Darren Chamberlain)
+
+* config: added "Knowing the proxy_pass'ed Connection Type" (Geoff
+  Crawshaw)
+
+* perl: the long time ago added regexp section "lifted" from
+  mod_perl_traps.pod was written by David Landgren and I apologize for
+  not stating it here (I didn't know it was David who wrote it). Now
+  everything is in its place.
+
+* perl: added a workaround to make FindBin work under mod_perl (Joao
+  Fonseca)
+
+* install: "make test troubleshooting": added the 'localhost' entry
+  existance in '/etc/hosts' verification.
+
+* debug: explained the confusion about Sys::Signal and SIGALRM (was
+  already solved internally) (Doug)
+
+* perl: John Hyland and Kavitha have pointed out a few typos of mine
+  :)
+
+* dbm: mentioned DB_File::Lock and Tie::DB_FileLock modules and added
+  a summary of all available dbm lock wrappers ripped of from the
+  DB_File::Lock manpage. (David Harris)
+
+* installation: APACHE_PREFIX works only if APACI_ARGS is used (Joe
+  Slag)
+
+* databases: fixed sql_escape from My::DB module's example (Yann
+  Kerhervé)
+
+* databases: starting from Apache::DBI 0.84 Apache::DebugDBI is
+  discarded. (Mike Depot)
+
+* debug: added the "PERL_DEBUG=1 Build Option" 
+
+* debug: added the "PERL_DESTRUCT_LEVEL Environment Variable" (Doug)
+
+* databases: updated the DBI wrapper module 
+
+* install: added to the troubleshooting section the solution to
+  'PL_perl_destruct_level errors' problem, which happened during the
+  mod_perl build process.
+
+* review: Ged W. Haywood was very kind to review and correct the
+  following chapters: frequent, perl, performance (!), scenario (!)
+
+* perl: rewritten "Tracing Warnings Reports" section
+
+* porting: fixed a bad mistake in the code that prints header only
+  once in the "Generating correct HTTP Headers" section. Added more
+  material about headers as well.
+
+* config: added "Options Values Merging" section
+
+* config: the chapter was partially rewritten and reorganized
+
+* config: completed the "Apache Restarts Twice On Start" section
+
+
+
+
+
+12.19.99 ver 1.19
+
+* all.html has gone (all htmls in one) -- it became more than 1Mb, too
+  big - use the PS version instead
+
+* reorg: moved the "perl reference" chapter to be one of the first
+  ones, because it should be read first. Moved the strategies and
+  implementations toward the middle.
+
+* snippets: started "Code Unloading" as hinted by Doug.
+
+* porting: updated "Output from system calls" (Doug)
+
+* porting: fixed the "\n\n" vs. "\r\n\r\n"(Philip Newton)
+
+* debug: added "Debugging when Server Crashes on Startup before
+  Writing to Log File" (Cliff Rayman)
+
+* snippets: added "Redirecting While Maintaining Environment
+  Variables" (Vivek Khera)
+
+* troubleshooting: added "libexec/libperl.so: open failed: No such
+  file or directory" (Christophe Dupre)
+
+* performance: added "Upload/Download of Big Files" (Ken Williams)
+
+* install: added a reference to "Static debian package" (David
+  Huggins-Daines)
+
+* troubleshooting: added Windows: "Apache::DBI and
+  PERL_STARTUP_DONE_CHECK" (Gerald Richter, Randy Kobes)
+
+* performance: added KeepAlive notes (Craig, Pascal Eeftinck)
+
+* performance: added HTML::Mason notes (Pascal Eeftinck)
+
+* porting: added new "die() and mod_perl"
+
+* porting/perl: moved most of the perl specific reference material
+  into perl.pod removing duplications of this material on the way and
+  replacing it with pointers to perl.pod
+
+* performance: rewritten "Object Methods Calls Versus Function Calls"
+
+* porting: FindBin is not mod_perl compatible (Andrei A. Voropaev,
+  Joao Fonseca)
+
+* scenario: denoted the ProxyReceiveBufferSize limit by SO_RCVBUF in
+  kernel (Vivek Khera) and kern.ipc.maxsockbuf=2621440 on BSD (Oleg
+  Bartunov)
+
+* snippets: added "mysql backup and restore scripts"
+
+* snippets: added "Subclassing Apache::Request example"
+
+* snippets: added "CGI::params in the mod_perl-ish way"
+
+* debug: added "Using print() and Data::Dumper for Debugging"
+
+* snippets: started a "Sending email from mod_perl" topic
+
+* control: Preparing for Machine Reboot
+
+* download: added more load ballancing URLs
+
+* performance: added "Tuning with httperf"
+
+* intro: added "High-Profile Sites Running mod_perl" (Rex Staples)
+
+* review: Ged W. Haywood was very kind to review and correct the
+  following chapters: start, intro, strategy, porting (!), databases,
+  dbm, security.
+
+* install.pod: perl Makefile.PL troubleshooting - added "A test
+  compilation with your Makefile configuration failed..." and
+  "missing/misconfigured libgdbm.so" (Tom Brown and Steve Willer)
+
+* install.pod: make troubleshooting "unrecognized format specifier for..."
+  during the build process (Scott Fagg)
+
+* porting: a bug in a script from "Exposing Apache::Registry secrets"
+  spotted and fixed (John Deighan)
+
+* install.pod: integrated the "manual mod_perl build process" remarks
+  and patch (Robin Berjon)
+
+* install.pod: don't put mod_perl sources in a sub-dir of Apache
+  sources. It wouldn't build! (Ask Bjoern Hansen)
+
+* review: Dale Couch was very kind to review and correct the
+  following chapters: porting
+
+
+
+
+11.13.99 ver 1.18
+
+* An almost complete rewrite of debug.pod:
+
+(Integrated Doug's debugging article at perlmonth.com)
+
+  Curing The "Internal Server Error" 
+  Helping error_log to Help Us 
+  The Importance of Warnings 
+      diagnostics pragma 
+  Monitoring the error_log file 
+  Hanging processes: Detection and Diagnostics 
+      An Example of the Code that Might Hang the Process 
+      Detecting hanging processes 
+      Determination of the reason 
+  Handling the 'User pressed Stop button' case 
+      Detecting Aborted Connections 
+      The Importance of Cleanup Code 
+           Critical Section 
+           Safe Resource Locking 
+           Cleanup Code 
+  Handling the server timeout cases and working with $SIG{ALRM} 
+  Watching the server 
+      Configuration 
+      Usage 
+      Compiled Registry Scripts section seems to be empty. 
+  Sometimes script works, sometimes does not 
+  Code Debug 
+      Locating and correcting Syntax Errors 
+      Using Apache::FakeRequest to Debug Apache Perl Modules 
+      Finding the Line Number the Error/Warning has been Triggered at 
+      Using print() Function for Debugging 
+      The Importance of Good Coding Style and Conciseness 
+      Introduction into Perl Debugger 
+      Interactive Perl Debugging under mod_cgi 
+      Non-Interactive Perl Debugging under mod_perl 
+      Interactive Perl Debugging under mod_perl 
+      Interactive Perl Debugging under mod_perl and ptkdb 
+      Debugging core Dumping Code 
+  Apache::Debug 
+  Debugging Core Dumps 
+  Debug Tracing 
+  gdb says there are no debugging symbols 
+  Debugging Signal Handlers ($SIG{FOO}) 
+  Code Profiling 
+  Devel::Peek 
+  How can I find if my mod_perl scripts have memory leaks 
+  Debugging your code in Single Server Mode 
+
+* A complete rewrite of install.pod:
+
+(Integrated the INSTALL.* docs from the mod_perl distribution)
+
+  Installing mod_perl in 10 Minutes and 10 Command Lines 
+  The Gory Details 
+      Sources Configuration (perl Makefile.PL ...) 
+           Configuration parameters 
+               APACHE_SRC 
+               DO_HTTPD, NO_HTTPD, PREP_HTTPD 
+               Callback Hooks 
+               EVERYTHING 
+               PERL_TRACE 
+               APACHE_HEADER_INSTALL 
+               PERL_STATIC_EXTS 
+               PERL_MARK_WHERE 
+               APACHE_PREFIX 
+               APACI_ARGS 
+           Reusing Configuration Parameters 
+           Discovering whether some option was configured 
+           Using an alternative Configuration file 
+      mod_perl Building (make) 
+           make Troubleshooting 
+               undefined reference to 'Perl_newAV' 
+      Built Server Testing (make test) 
+           Manual Testing 
+           make test Troubleshooting 
+               make test fails 
+               mod_perl.c is incompatible with this version of apache 
+               make test......skipping test on this platform 
+      Installation (make install) 
+      Building Apache and mod_perl by Hand 
+  Installation Scenarios for Standalone mod_perl 
+      The All-In-One Way 
+      The Flexible Way 
+      Build mod_perl as DSO inside Apache source tree via APACI 
+      Build mod_perl as DSO outside Apache source tree via APXS 
+  Installation Scenarios for mod_perl and Other Components 
+      mod_perl and mod_ssl (+openssl) 
+      mod_perl and mod_ssl Rolled from RPMs 
+      mod_perl and apache-ssl (+openssl) 
+      mod_perl and Stronghold 
+           Note For Solaris 2.5 users 
+  mod_perl Installation with CPAN.pm's Interactive Shell 
+  Installing on multiple machines 
+  using RPM, DEB and other packages to install mod_perl 
+      A word on mod_perl RPM packages 
+      Getting Started 
+      Compiling RPM source files 
+      Mix and Match RPM and source 
+      Installing a single apache+mod_perl RPM 
+      Compiling libapreq (Apache::Request) with the RH 6.0 mod_perl RPM 
+      Installing separate Apache and mod_perl RPMs 
+      Testing the mod_perl API 
+  Installation Without Superuser Privileges 
+      Installing Perl Modules into a Directory of Choice 
+      Making Your Scripts Find the Locally Installed Modules 
+      CPAN.pm Shell and Locally Installed Modules 
+      Making a Local Apache Installation 
+      Actual Local mod_perl Enabled Apache Installation 
+      Local mod_perl Enabled Apache Installation with CPAN.pm 
+  Automating installation 
+  How can I tell whether mod_perl is running 
+      Testing by checking the error_log file 
+      Testing by viewing /perl-status 
+      Testing via telnet 
+      Testing via a CGI script 
+      Testing via lwp-request 
+  General Notes 
+      Should I rebuild mod_perl if I have upgraded my perl? 
+      Perl installation requirements 
+      mod_auth_dbm nuances 
+      Stripping apache to make it almost perl-server 
+      Saving the config.status Files with mod_perl, php, ssl and Other Components 
+      Should I Build mod_perl with gcc or cc? 
+  OS Related Notes 
+
+* databases: added "Debugging code which deploys DBI"
+
+* porting: added "STDIN, STDOUT and STDERR streams"
+
+* advocacy: added "A summary of perl/cgi discussion at slashdot.org"
+
+* snippets: added "Terminating a child process on Request Completion"
+  (Doug)
+
+* troubleshooting: added "Apache.pm failed to load!" (Doug)
+
+* snippets: added "Reading POST Data, then Redirecting" (Doug)
+
+* snippets: added "Cache control for regular and error modes" (Cliff
+  Rayman)
+
+* performance: added "Be carefull with symbolic links" (the same
+  script compiled twice)
+
+* install: new "apache/mod_perl/mod_ssl Rolled from RPMs Scenario"
+  (Stephane Benoit)
+
+* porting: 'use subs (exit)' typo fixed (Chris Nokleberg)
+
+* warnings.pod was renamed to troubleshooting.pod and now it's
+  categorized by the following sections:
+	Building and Installation
+        Configuration and Startup 
+        Code Parsing and Compilation 
+        Runtime
+	Shutdown and Restart 
+
+* porting: the following sections were moved to debug.pod:
+  "Finding the Line Number the Error/Warning has been Triggered at",
+  "Turning warnings ON",
+  "diagnostics pragma"
+
+* porting: rewritten "Comman line Switches (-w, -T, etc)"
+
+* performance: "Forking or Executing subprocesses from mod_perl"
+  updated with another CHLD sighandler using WNOHANG to reap zombie
+  processes (Lincoln Stein)
+
+* install: updated "Testing via a CGI script" (Geoffrey S Young)
+
+* porting: updated "Terminating requests and processes, exit()
+  function" with info about post_request termination,
+  Apache::SizeLimit and Apache::GTopLimit
+
+* perlformance: links from
+ http://www.realtime.net/~parkerm/perl/conf98/index.htm
+ and http://www.realtime.net/~parkerm/perl/conf98/sld006.htm
+ were dead (I removed them :( (Peter Skov)
+
+* snippets: added "Caching the POSTed Data" (Doug)
+
+* install: "Compiling libapreq with mod_perl RPM" reviewed and
+  corrected (Geoffrey S Young)
+
+* status.pod has been eliminated and absorbed by debug.pod where it
+  belong
+
+* Fixed pod translator. Now it handles correctly C<$r-E<gt>method>
+  encodings. (Andreas Koenig)
+
+
+
+
+
+10.16.99 ver 1.17
+
+* intro: CREDITS section was updated with the long list of
+  contributors!!! Thank you all!!! If I've missed your name, please let
+  me know!!!
+
+* control: added "Safe Code Updates on a Live Production Server"
+
+* control: added "An Intentional Disabling of Live Scripts"
+
+* scenario: added a big new section "One Light and One Heavy Servers
+  where ALL htmls are Perl-Generated" (Wesley Darlington)
+
+* dbm: David Harris has detected a corruption with the suggested
+  locking methods in the Camel book and DB_File man page (at least
+  before the version 1.72). They are flawed and if you use them in the
+  environment where more than one process modify the dbm file, it can
+  get corrupted!!! I've modified the DB_File::Lock module to fix the
+  problem by integrating the previously written DB_File::Wrap and the
+  module David wrote (David Harris)
+
+* snippets: added "Sending multiply cookies with Perl API" (Rick
+  Myers)
+
+* install: added a big section "using RPM, DEB and other packages to
+  install mod_perl" (Geoffrey S Young, David Harris)
+
+* install: added "Automating installation" - James G Smith's Apache
+  Builder script
+
+* install: added a new section "using CPAN to install mod_perl"
+
+* performance: extended the "Forking or Executing subprocesses from
+  mod_perl" with information and code to avoid zombies.
+
+* performance: added a converted to pod "Jeff's guide to mod_perl
+  database performance" (Jeffrey W. Baker)
+
+* new chapter: "Correct Headers" contributed by Andreas Koenig!!!
+
+* help: updated the link to DBI homepage (hermetica has gone)
+
+* performance: added sizing benchmarks of CGI.pm's imported
+  symbols. (CGI.pm's object methods calls vs. function calls)
+
+* porting: fixed a typo with local() and Special variables (Andrei
+  A. Voropaev)
+
+* snippets: fixed a taint problem in the sample error_log display
+  script.(John Walker)
+
+* install: added "Should I Build mod_perl with gcc or cc" (Tom Hughes)
+
+* warnings: added to the troubleshotting section "Missing right
+  bracket at line " with a link to the item explaining that in
+  porting.pod ("__END__ and __DATA__ tokens") (Eric Strovink)
+
+* install: added a tip of saving config.status files for each module
+  build (php. mod_perl, ssl) for a later easier reuse. (Dave
+  Hodgkinson)
+
+* performance: added clarification to "PerlSetupEnv Off" item (Doug)
+
+* snippets: added "Passing environment variables between handlers"
+  (Doug)
+
+* warnings: added "Can't locate loadable object for module XXX" (Doug)
+
+* config: corrected the <Perl> section dump typo (Gerald Richter)
+
+* scenario: corrected the snippet to extract the client IP from the
+  X-Forwarded-For header to use headers_in instead of the obsolete
+  header_in (Oleg Bartunov)
+
+* scenario: added a note about "Ben Laurie's Apache-SSL setting
+  REMOTE_ADDER instead of X-Forwarded-For header (Jie Gao)
+
+* performance: started "Analysis of SW and HW Requirements" (Jeffrey
+  W. Baker)
+
+* warnings: clarification of "rwrite returned -1" (Eric Cholet)
+
+* warnings: added "Invalid command 'PerlHandler" (Doug) 
+
+* debug: started "Apache::Debug" and Carp::confess("init") (Doug) 
+
+* install: "undefined reference to 'Perl_newAV'" documented (Doug)
+
+* modules: added a clarification about Apache::PerlVINC (Doug)
+
+* warnings: updated the "Callback Called Exit & -D
+  PERL_EMERGENCY_SBRK" (Doug)
+
+* databases: added $Apache::DBI::DEBUG = 2 (instead of '1') for ver
+  0.84+ (Edmund Mergl)
+
+* performance: added "Caching prepare() statements" + rolling your own
+  Apache::DBO code (Jeffrey Baker)
+
+* porting: replaced "Apache::Registry::handler" with
+  "Apache::Registry". It caused problems to some of the users (Daniel
+  W. Burke)
+
+* performance: added "Increasing the shared memory with mergemem" (no
+  real info but a link to the util's site. Please take a look and
+  submit your opinions) (Doug Bagley)
+
+* snippets: added "Redirect a POST request, forwarding the content"
+ (Eric Cholet, Doug)
+
+* performance extended the "Using $|=1 under mod_perl and better
+  print() techniques" with notes about rflush()
+
+* shuffled many items around to help more intuitive search of the them
+
+* performance: added "Cached stat() calls"
+
+09.26.99 ver 1.16
+
+* Many little things fixed, rewritten - didn't worth listing them all
+  here.
+
+* index.html: added another search box for only mod_perl FAQs and the
+  guide provided by perlreference.com
+
+* config: added a note about Apache restarting twice on start
+
+* warnings: added "syntax error at /dev/null" - broken /dev/null
+  (Doug)
+
+* porting: added "Special Perl Variables" using local()
+
+* multiuser: Added the considerations not to let users to execute their
+  CGI scripts inside mod_perl server because of file permissions
+  (non-mod_perl problem) and a possibility to hijack a DBI connection
+  from Apache::DBI pool of cached connections (Peter Galbavy)
+
+* install: added "Is it possible to tell whether some option was
+  included" nm() hints (Doug)
+
+* performance: new "PerlSetupEnv Off" (Doug)
+
+* porting: new section "Passing and preserving custom data structures
+  between handlers" (Ken Williams)
+
+* security: "OK, AUTH_REQUIRED.and FORBIDDEN" in authentication
+  phase. (Eric Cholet, Jason Bodnar)
+
+* porting: rewrote the "Generating correct HTTP Headers" section, to
+  talk about HEAD requests, PerlSendHeader, Perl API to handle the
+  headers generation, Cookie headers, closure methods to send headers
+  only once.
+ 
+* Purifications: I'm very grateful to the people who take their time
+  to help me to improve the guide's readablility. This time Richard
+  A. Wells and Frank Schoeters submitted a few corrections to the
+  text. Keep these corrections coming. Thanks!
+
+* porting: extended the "Forking and Starting Sub-processes with
+  mod_perl" section (Les Mikesell, Randal L. Schwartz )
+
+* porting: Wrote a whole new section "Configuration Files: Writing,
+  Modifying and Reloading.", which consist of 3 big parts:
+	      Writing Configuration Files 
+              Reloading Configuration Files 
+              Dynamically updating configuration files 
+
+* scenario: updated the X-Forwarded-For> section with notes of
+  non-reliability. (Ask Bjoern Hansen, Vivek Khera)
+
+* porting: started the "Sharing variables between processes" section
+  (Eric Cholet)
+
+* config: dumping the configuration by <Perl> sections (Eric Cholet)
+
+* performance: prepare_cached() in persistent connections.
+
+* help.pod: updated a link to Jefferey W. Baker's DBI examples
+  (Jefferey W. Baker)
+
+* a list of mailing list archives was updated (Andreas J. Koenig, Jan
+  Peter Hecking, Matthew Darwin, Christof Damian, Geoffrey S Young)
+
+* debug.pod: "Spinning httpds" section from mod_perl.pod
+
+* config.pod: have stolen the sections "PERL METHOD HANDLERS",
+ "STACKED HANDLERS" and "Perl*Handlers" from mod_perl.pod
+
+* performance.pod: noted the DTWO_POT_OPTIMIZE and -DPACK_MALLOC Perl
+  Options from perl5004delta.pod relevant to mod_perl
+
+* config.pod: wrote sections "PerlModule and PerlRequire directives",
+  and Perl*Handlers.
+
+* install.pod: "skipping test on this platform" while 'make test'
+  explained. (Doug)
+
+* warnings.pod: syntax error at /dev/null, explained (Doug)
+
+* started to work on intro.pod to make clear out the differences
+  between Perl API, Apache::Registry, Apache::PerlRun.
+
+* install.pod: added "mod_auth_dbm nuances" an old notice from
+  mod_perl_traps page
+
+* porting.pod: Added the explanation of why you cannot use C<__END__>
+  or C<__DATA__> within C<Apache::Registry> scripts.
+
+* Removed the Cyan background from the postscript version of the
+  guide. I liked the light grey background when the guide was printed
+  on the B&W printer, but yes it uses too much toner - so it's gone :)
+
+08.17.99 ver 1.15
+
+* Richard A. Wells has kindly reviewed and corrected the following 
+  pods: advocacy.pod download.pod snippets.pod status.pod
+  browserbugs.pod intro.pod start.pod
+
+* security.pod : added "Forcing reauthenticating" section
+
+* index.pod : Added a link to http://www.perlreference.com/mod_perl/
+
+* help.pod : Added links to modperl.sourcegarden.org and
+  http://www.perlreference.com/mod_perl/
+
+* performance.pod: a little fix to the crashme script (Jay J)
+
+* Updated the porting.pod sections: "Sometimes it wors, sometimes
+  doesn't", "Script's name space" and other as well
+
+* config.pod: updated <Perl> sections (how to dump the sections (Eric
+  Cholet) and how to use the /perl-status for doing that.
+
+* hardware.pod: David Landgren did a great job of reviewing,
+  suggesting and correcting the OS/Hardare chapter!
+
+* Andreas J. Koenig pointed out that it's unfair to mention eddieware
+  without the others.. I agree Andreas! hardware.pod and download.pod
+  were updated to point to "High-Availability Linux Project"
+  site... Eddieware was removed :) 
+
+* download.pod: now guide hints on where to find Apache::Request
+  (libapreq-x.xx.tar.gz) - on Philip Jacob request
+
+* config.pod: a few small typos (John Milton)
+
+* databases.pod: Matt Arnold pointed out a problem with
+  connect_on_init if the database server is down. I've added a
+  warning.
+
+* porting.pod: Cleared out the confusion with StatINC and @INC issue
+
+* perl.pod: Added a section that reveals the useful perldoc options
+
+* performance.pod: Added the explanation of the Apache::Leak example
+  (Cliff Rayman)
+
+* databases.pod: Added the explanation of the "skipping connection
+  cache during server startup", when the connection is attempted to be
+  opened in the parent process. (Edmund Mergl)
+
+* debug.pod: started the "Debugging Core Dumps" item (Doug)
+
+* performance.pod: added the reference to Apache::RegistryBB, for
+  those who want to save the little overhead of the stat() call that
+  is being executed under Apache::Registry. (Doug)
+
+* modules.pod: added Apache::RegistryBB (Doug)
+
+* porting.pod: covered the issue of Apache/Work/Foo/Bar.pm collision
+  with Apache/Work/Foo.pm if the former is being loaded first (Doug)
+
+* Apache::Leak considered to be non-friendly, added a reference to
+  B::LexInfo (Doug)
+
+* porting.pod: "Passing ENV variables to CGI" added clarifications for
+  %ENV setting/passing mechanism in mod_perl (Doug)
+
+* performance.pod: started a new subsection - shared memory (what, how
+  much, where)
+ 
+* modules.pod and porting.pod: added an Apache::LogSTDERR module to
+  solve the syslog problem(Doug)
+
+* porting.pod: Reloading handlers trick (Doug)
+
+07.3.99 ver 1.14
+
+* porting.pod: added "Exposing Apache::Registry secrets, closures,
+  multiserver mode".
+
+* A complete review, which included corrections, verifications,
+  extensions and clarifications was done to the following pods during
+  the preparation of the tutorial for the 3rd apache conference:
+	start.pod     
+	intro.pod     
+	porting.pod   
+	performance.pod
+	strategy.pod  
+	scenario.pod  
+	config.pod    
+	install.pod   
+	control.pod   
+	databases.pod 
+	multiuser.pod  
+	help.pod      
+
+06.19.99 ver 1.13
+
+* While working on presentation discovered a wonderfull 'html2ps'
+  utility (http://www.tdb.uu.se/~jan/html2psug.html) - so now we have
+  a real mod_perl book in PostScript !!! (cross references aren't
+  working yet)
+
+* hardware: added a reference to eddieware
+
+* performance.pod: extended the Apache::Resource section (Doug)
+
+* performance.pod: Added a reference to httperf benchmark tool.
+
+* I made many little changes all over the guide, while preparing a
+  subset of material for the upcoming apache/perl conference tutorial
+
+* performance.pod: added some clarifications to "Preload Perl modules
+  at server startup" section - regarding CGI::compile
+
+* advocacy.pod: A complete rewrite to communicate the ideas
+  differently.  Now it displays a positive, motivational and
+  concise perspective on the same ideas. (by Randy Harmon)
+
+* strategy.pod: modifications related to memory sharing with Apache,
+  mod_proxy section (Ask Bjoern Hansen)
+
+* scenario.pod: Added the missing implementation of "Standalone
+  mod_perl Enabled Apache Server"+configuration, which is temporarely
+  located at the same chapter.
+
+* More pods have been purified by Steve Reppucci (performance.pod).
+
+06.05.99 ver 1.12
+
+* install.pod: added "Should I rebuild mod_perl if I have upgraded my
+  perl?"
+
+* scenario.pod: explained the long termed bug with APACI_ARGS, csh vs. 
+  sh issue.
+
+* databases.pod: added "mysql_use_result vs. mysql_store_result"
+  (Michael Hall, Ken Williams, Vivek Khera)
+
+* config.pod: added "Logical grouping of Location, Directory and
+  FilesMatch directives" (Daniel Koch)
+
+* config.pod: added "The confusion with use() clause in startup" file
+  (Mike Fletcher)
+
+* config.pod: added "The confusion with defining globals in startup"
+  file
+
+* performance.pod: extended the Devel::DProf notes with Apache::DProf
+
+* started a new advocacy.pod: mod_perl advocacy
+
+* install.pod: "Stripping apache to make it almost perl-server"
+  (Jeffrey W. Baker, Randal L. Schwartz,Robin Berjon)
+
+* modules.pod, config.pod : added Doug's Apache::PerlVINC to set a
+  different @INC perl location
+
+* install.pod: covered an installation problem of: "mod_perl.c is
+  incompatible with this version of apache" (Doug)
+
+* databases.pod: added "Opening a connection with different
+  parameters" (Jauder Ho, Edmund Mergl)
+
+* performance.pod. modules.pod - added Apache::GzipChain to cut down
+  download times
+
+* debug.pod: added some snippets from Doug's replies showing strace
+  and Devel::Peek in action
+
+* updated obvious.html#Reloading_only_specific_files - some code
+  improvements (Ken Williams)
+
+* debug.pod: added "Debugging Signal Handlers ($SIG{FOO})" which
+  covers the latest $SIG{ALRM} changes and Doug's Sys::Signal module
+  to overcome the handler restore problem with other signals. (Doug)
+
+* strategy.pod: mod_proxy and http accell sections were extended by
+  notes from Joshua Chamas.
+
+* warning.pod: noted a 'rwrite returned -1' fix in CVS version
+
+* obvious.pod: added "Additional reading references" to "my() scoped 
+  variable in nested subroutines" including a pointer to an article by
+  Mark-Jason Dominus about how Perl handles variables and namespaces,
+  and the difference between `use vars' and `my'.
+
+* hardware.pod: applied some addition and changes.
+
+* debug.pod: added "Monitoring error_log file"
+
+* scenario.pod: added a complete definition of ProxyReceiveBufferSize,
+  its buffering functionality.
+
+* More pods have been purified by Steve Reppucci (hardware.pod,
+  strategy.pod). Thanks to Steve English speakers can read my
+  scribbles as well :o) 
+
+05.17.99 ver 1.11
+
+* new hardware.pod: added a "Operating System and Hardware Demands"
+  (Dean Fitz reviewed it and made lots of fixes!!! Thanks)
+
+* started a new security.pod "Protecting Your Site" to explain
+  security hazards and to show some configuration setups and code
+  snippets.
+
+* security.pod: explained the Authentication and Authorization terms
+
+* security.pod: "Non authenticated access for internal IPs, but
+  authenticated by external IPs" (Eric Cholet)
+
+* scenario.pod: added "HTTP Authentication with 2 servers + proxy"
+  (Mark Mills, Russell D. Weiss)
+
+* scenario.pod: added some DSO building notes (Guy K. McArthur)
+
+* porting.pod: added "Generating correct HTTP MIME Headers" as
+  suggested by Alex Krohn
+
+* config.pod: added "Running 'apachectl configtest' or 'httpd -t'"
+  (Doug)
+
+* porting.pod: added "Passing ENV variables to CGI" (Doug)
+
+* Updated: "Finding the line number the error/warning has been
+  triggered at" at porting.pod
+
+* Added the info about ProxyReceiveBufferSize in scenario.pod,
+  mod_proxy section. (Rauznitz Balazs)
+
+* added to config.pod: Configuration Security Concerns (Gunther
+  Birznieks)
+
+* completely rewrote the start.pod (the English was horrible :(
+
+* updated help.pod with squid help URLs
+
+05.08.99 ver 1.10
+
+* control.pod: SUID start-up scripts (Lincoln Stein)
+
+* porting.pod: Forking subprocesses from mod_per (Philp Gwyn)
+
+* added to performance.pod: CGI.pm\'s object methods calls
+  vs. function calls
+
+* new pod: browserbugs.pod - Workarounds for some known bugs in browsers.
+  added: Preventing QUERY_STRING to get corrupted with &entity key
+  names.
+  added: IE 4.x does not re-post data to a non-port-80 URL
+
+* strategy.pod: updated notes about squid (Andreas J. Koenig)
+
+* strategy.pod and scenario.pod started the ProxyPass sections (Mark
+  Mills, Ken Williams, Ask Bjoern Hansen)
+
+* wrote a code to validate a pod L<> directive, by first building a
+  hash of all available achors and hash of all L<> directives, then
+  reporting the broken links! This is cool! TomC will never accept the
+  patch to his Pod2Html.pm :( So there is no broken links anymore,
+  unless I forgot to run the checker :)
+
+* start.pod now contains an overview of the guide. The previous
+  content migrated to install.pod and download.pod. Part of the
+  scenario.pod moved to install.pod.
+
+* people still report problems with CSS I use, I made more tweaking by
+  deleting almost all styles. Seems people are missing some basic
+  fonts families and complaining about being unable to read the text.
+
+* strategy.pod: using thttpd instead of plain apache (Rauznitz Balazs)
+
+* scenario.pod: was splitted into strategy.pod and
+  scenario.pod. strategy.pod now only talks about different
+  approaches, while scenario.pod provides the building and
+  configuration details. strategy.pod tries clearly to state the pros
+  and cons of each approach (please review)
+
+* Introduced a new dbm.pod: mod_perl and dbm files (please review)
+
+* Introduced a new databases.pod: mod_perl and Relational Databases
+  (please review)
+
+* The whole expanded table of contents now can be found in index.html
+   - (index.html now being generated by script). Should make
+  navigation much easier.
+
+* The last html sources file has gone, now all src files are pods. 
+
+* Improved search engines requirements: Extended <META
+  NAME="Description"> and <META NAME="keywords">
+
+* Improved navigation : added Next, Main. Previous links.
+
+* Added another list archive (help.html):
+  http://www.geocrawler.com/lists/3/web/182/0/ (Eric Cholet)
+
+* obvious.pod: "Setting environment variables for scripts called from
+  CGI." (Lincoln Stein, Doug MacEachern)
+
+* extended the "Using $|=1 under mod_perl and better print()
+  techniques" at performace.pod.
+
+04.19.99 ver 1.09 (1/2)
+
+* guide.tar.gz and guide-src.tar.gz were outdated, now they are synced
+
+* Fixed a huge number of typos (with help of speller :), I'm sure
+  there are still many that speller didn't catch - guess people are
+  regular to read badly written textbooks, since just a few told me
+  about them :( If you spot such, please, do not hesitate and tell me!
+
+* Lupe Christoph suggested to apply changes to the main page. It's
+  done. Also as suggested by Lupe linked the text "Writing Apache
+  Modules with Perl and C" a link to http://www.modperl.com/ .
+
+* Numerous typos were spotted by Andreas J. Koenig and gave me an
+  idea to run speller :)
+
+04.17.99 ver 1.09
+
+* added to warnings.pod: explained "incorrect line number reporting in
+  error/warn log messages"
+
+* added to scenario.pod: clarification about 2 different config files
+  in the 2 servers scenario (David Livingstone)
+
+* added to scenario.pod: started "mod_perl as DSO" section - almost
+  empty yet :( anyone with DSO experience?
+
+* added to config.pod: started the mod_perl as DSO section
+
+* updated config.pod: added how $Apache::Registry::NameWithVirtualHost
+  bug in older versions can be turned into a feature (Doug)
+
+* added to performance.pod : Memory sharing (Leslie Mikesell)
+
+* updated warning.pod: server reached MaxClients setting
+
+* updated performance.pod : MaxClients reached ( Nick Tonkin )
+
+* updated start.pod: "How can I tell whether mod_perl is really
+  installed" - added httpd -l
+
+* modified scenario.pod: Made little changes to make the installation
+  process less confusing (Pete Harlan)
+
+* obvious.pod: updated "Handling the server timeout cases" -
+  $SIG{ALRM} to not restore the original underlying C handler. Pointed
+  to try a Sys::Signal as a remedy (Doug)
+
+* new in multiuser.pod: ISPs providing mod_perl services - a fantasy
+  or reality. (Notes from Mark Mills, Russell D. Weiss)
+
+* new in multiuser.pod: Virtual Hosts in the guide
+
+* new pod : multiuser.pod - mod_perl for ISPs. mod_perl and Virtual
+  Hosts.
+
+* Added a link to the new book to the O'Reilly and Amazon.com sites.
+
+* debug.pod: added Apache::DB coverage
+
+* performance.pod: "Why you should not use $|=1 under mod_perl" (Doug,
+  Randal)
+
+* debug.pod: "gdb says there are no debugging symbols" (Michael Hall)
+
+* config.pod: "the server no longer retrieves the DirectoryIndex files
+  for a directory" (Andreas Grupp)
+
+* scenario.pod: added 'make test fails' when people use PREP_HTTPD=1
+  or don't use DO_HTTPD=1 (Doug)
+
+* removed the 'Mini' part from the guide's name, since it's growned
+  enough to be not called mini any more.
+
+* modules.pod: added Apache::Request
+
+* modules.pod: added Apache::DBI 
+
+* modules.pod: added Apache::Session (Jeffrey Baker)
+
+* new pod: modules.pod - to introduce Apache::* modules with small
+ examples to rise curiosity to read the whole man page
+
+* new in scenario.pod: "mod_perl and proxy server" 
+
+	Incentives 
+        Squid proxy server in httpd accelerator mode 
+		Running a squid and 2 webservers scenario 
+                Running a squid and 1 mod_perl apache server scenario
+
+  (Reviewed and modified according to notes by
+  Richard Dice, Andreas J. Koenig, Eric Cholet, Jeremy Bailin, David
+  Landgren)
+
+* Added to scenario.pod: 'Publishing port numbers different from 80'
+ (originally by Ken Williams, forwarded by Eric Strovink)
+
+* config.pod: new section "Configuring Apache + mod_perl with mod_macro"
+  contributed entirely by Eric Cholet (I have edited it a bit :).
+
+
+04.03.99
+
+* Rewritten the CREDITS section of the intro.html. I hope I didn't miss
+ anyone, if I did please tell. Lets feed the ego :)
+
+* The guide now looks much better with StyleSheets (Nathan Vonnahme)
+
+* added to porting.pod : Filehandlers and locks leakages (Ken Williams, Doug)
+
+* added to obvious.pod: Handling the server timeout cases (Doug)
+
+* created new pod: perl.pod to cover some too frequently asked pure
+ perl questions: opened up with "Using global variables and sharing
+them between modules/packages"
+
+* Now the pod sources available online along with the resulting htmls
+ and the scripts that generates them.
+
+* Added a summary of various mod_perl deploying schemas (1/1, 2/2, DSO
+ and proxy). /scenario.html#More_mod_perl_deploying_schemas (Mark
+ Mills)
+
+* created new frequent.pod for "Frequent mod_perl problems" as
+ suggested by Eric Cholet, who said that problems like 'my() scoped
+variable in nested subroutines' come up so often on the list that
+should be stressed in the guide as one of the most important things to
+read/beware of. Since now it has only a few problems please suggest
+what other ones should go here.
+
+* obvious.pod rewritten : my() scoped variable in nested subroutines
+ (Eric Cholet)
+
+* some typos fixes in intro.html, start.pod and scenario.pod (Garr
+ Updegraff)
+
+* snippets.pod: Cookie handling code (Ed Park)
+
+* obvious.pod updated: Handling the 'User pressed Stop button'
+ case. More hints (Eric Strovink) and apache 1.3.6 news (Henrique
+ Pantarotto)
+
+* scenario.pod added : Is it possible to determine which options were
+ given to modperl's Makefile.PL
+
+* More pods have been purified by Steve Reppucci (warning.pod,
+ obvious.pod and porting.pod). He did so much work to make them
+ readable, that I'm afraid to apply new changes to break all the
+ beauty he made :) Thanks, Steve!
+
+03.15.99
+
+* Added a downloadable guide.tar.gz as someone requested
+
+* snippets.pod: Accessing variables from the caller's package (Ken
+ Williams)
+
+* porting.pod: Redirecting mod_perl error_log messages to the browser
+ - added an extensive example
+
+* control.pod: added hints - Preventing from modperl process to eat up
+ all the disk's space, when it goes wild. (Andreas J. Koenig, Ulrich
+ Pfeifer)
+
+* performance.pod: cleared out where one can get the 'ab' Apache
+ Benchmark utility
+
+* warning.pod: covered - Evil things might happen when using
+ PerlFreshRestart (Doug)
+
+* status.pod: covered - Compiled Registry Scripts section seems to be
+ empty (Radu Greab)
+
+* warning.pod: covered - RegistryLoader: Cannot translate the URI...
+
+* scenario.pod: added a note: when using USE_APACI and APACHE_PREFIX,
+ make install will run also the make install at Apache's source
+ tree... (Doug)
+
+* debug.pod Getting some decent debug info when running under mod_perl
+ (Doug)
+
+* ScriptAlias vs. Alias updated and explaned in config.pod. (Doug, Ask
+ and Eric)
+
+* scenario.pod, intro.html, config.pod, control.pod and start.pod were
+ purified by Steve Reppucci. Steve has fixed my incorrect English
+ expressions and tenses, corrected some technical details! Enormous
+ help, Steve! Thanks!
+
+If you see some incorrect English in the guide, don't hesitate to send
+an email to me. Thanks!
+
+01.22.99
+
+* new obvious.pod: Where do the warnings/errors go?
+
+* new index.html: added a search box
+
+* new snippets.pod: added error_log.pl script to fetch the latest logs
+from the server without telneting there
+
+* new snippets.pod: How to avoid printing the header more than once.
+
+* new snippets.pod: More on relative paths
+
+* upd start.pod: removed all 'latest version is', so the guide will
+not misguide people (Ken Williams)
+
+* upd config.html: removed redundant ;; (Ken Williams)
+
+* upd config.html: fixed the question/answer 'Is there a way to
+provide a different startup.pl file for each individual virtual'
+(Ken Williams)
+
+* upd help.html: a few links fixed (Peter Skov (UNIT))
+
+* upd porting.pod: CORE::exit vs Apache::exit section update (Doug)
+
+* upd scenario.pod: note about importance make clean execution,
+because of possible binary incompability (1.3.3 vs 1.3.4) (Doug)
+
+* upd porting.pod: switches -w, -T in the shebang line (Doug)
+
+* upd debug.pod: tracing the PerlRequire's and PerlModule's as they
+are loaded (Doug)
+
+* add config.pod: Sometimes script from one virtual host calls the
+script with the same path from the second virtual host (Doug)
+
+* add performance.pod: how can I find if my modperl scripts have memory leaks (and where). (Doug)
+
+* help.html: added a section for DBI help (Jeffrey W. Baker)
+
+12.28.98
+
+* Updated the "Client hit STOP or Netscrape bit it" section, with new
+warning "[modperl] caught SIGPIPE in process" for ver 1.17 (new
+Apache::SIG)
+
+* Richard A. Soderberg spotted a few problems with name anchors in
+start.html (pod converter doesn't resolve the problem correctly) and
+ScriptAlias typos at config.html. 
+
+* broken link to www-security-faq was spotted by Gunther Birznieks
+
+12.20.98
+
+* fixed: @INC vs %INC obvious.html#Using_Apache_StatINC (thank to Ken Williams)
+
+* new: Apache::SpeedLimit added to
+  performance.html#Limiting_the_request_rate_speed_
+
+* modified: register_cleanup in Registry scripts (END{} blocks)
+	based on the last week tread
+
+* new: obvious.html#Handling_the_User_pressed_Stop_
+
+* Found a bug in Pod::Html - it tries to convert HTTP::Foo alike
+  tokens into hypertext link which breaks the code in the resulting
+  html. Applied the patch to Pod::Html::VERSION 1.01
+
+1119a1120
+>        (?! :)                     # don't convert HTTP::Foo and alike
+
+
+* Discovered that the guide is being searchable thru the
+  http://www.apache.org/search.html added a link to index.html
+
+* Extended the control|Log_Rotation section (+Script from Randal)
+
+* control: HUP vs TERM vs USR1. I have asked for validation of this
+  section, but received none... Added a note about slowness of
+  termination (Robin Berjon) and possible way to speed it up (Frank
+  D. Cringle). Added a mneumonics => numbers for SIGs (Marshall Dudley)
+
+* added the missing USE_APACI=1 in start.html#Mod_Perl (Thanks to Tzvetan Stoyanov)
+
+
+12.13.98
+
+* covered warning: rwrite returned -1
+* covered warning: Client hit STOP or Netscrape bit it!
+* covered warning: Can't load '.../auto/DBI/DBI.so' for module DBI
+* covered porting: using format()
+* covered warning: child process 30388 did not exit, sending another SIGHUP
+* extended warning: Callback called exit
+
+All the above are based on the Doug's answers this weekend :)
+
+* new: config: Tuning MinSpareServers MaxSpareServers StartServers
+  MaxClients MaxRequestsPerChild (actually a pointer to the next item)
+
+* new: performance: 
+	Tuning the Apache's configuration variables for the best performance 
+        Tuning with ab - ApacheBench 
+        Tuning with crashme script 
+        Choosing MaxClients 
+        Choosing MaxRequestsPerChild 
+        Choosing MinSpareServers, MaxSpareServers and StartServers 
+        Summary of Benchmarking to tune all 5 parameters 
+
+##########################################################################
+12.08.98
+
+* Lots of "little typos" fixed. Thanks to Evan A. Zacks, 
+  Eric Cholet and Nancy Lin !
+
+* added a quote from DBI page, why $sth-rows; can't be used for rows counting. 
+
+* fixed obvious.html#Compiled_Regular_Expressions href at porting.html
+  Thanks to Richard Dice!
+
+* lots of little changes and add ons...
+
+12.07.98
+
+* Run a spell check. ispell and WWWebster were quite helpful :)
+
+* Added Richard Dice's notes about ways to see whether or not mod_perl
+  is actually compiled into the server and working. "check the
+  error_log file" (installation)
+
+* Added 'Is it possible to install mod_perl without root access?'
+  section into Server Installation (scenario) page.
+
+* Added Perrin Harkins and Jonathan Peterson's notes about
+  apache/mod_perl/embperl/DBI vs IIS/ASP/ADO
+
+* Added a CHANGES file (this one)
+
+* Added an 'all in one page', suitable for printing. Currently it's
+  just an ordered cat(). In the future it might change :)
+
+12.03.98
+
+* First Release
+
+
+
+
+
+
+
+
+
+
+
+
+

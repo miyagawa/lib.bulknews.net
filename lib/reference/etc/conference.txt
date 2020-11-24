@@ -1,0 +1,6 @@
+http://www.yapc.org/Europe/
+http://conferences.oreilly.com/perl5/
+http://perlruby-con.opensource.gr.jp/
+http://www.yapc.org/America/
+http://ApacheCon.Com/2000/US/
+http://www.perlworkshop.de/2001/

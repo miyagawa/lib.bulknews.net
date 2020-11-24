@@ -1,0 +1,20 @@
+diff -ruP /usr/local/src/CPAN/build/Net-Amazon-0.26/lib/Net/Amazon.pm Net-Amazon-0.26/lib/Net/Amazon.pm
+--- /usr/local/src/CPAN/build/Net-Amazon-0.26/lib/Net/Amazon.pm	2004-07-09 15:01:33.000000000 +0900
++++ Net-Amazon-0.26/lib/Net/Amazon.pm	2004-07-30 00:10:46.000000000 +0900
+@@ -20,6 +20,7 @@
+ 
+ use Net::Amazon::Request::ASIN;
+ use Net::Amazon::Request::Artist;
++use Net::Amazon::Request::Blended;
+ use Net::Amazon::Request::BrowseNode;
+ use Net::Amazon::Request::Keyword;
+ use Net::Amazon::Request::Wishlist;
+@@ -159,7 +160,7 @@
+         DEBUG(sub { "Received [ " . $xml . "]" });
+ 
+         my $xs = XML::Simple->new();
+-        $ref = $xs->XMLin($xml);
++        $ref = $xs->XMLin($xml, ForceArray => [ qw(ProductLine) ]);
+ 
+         # DEBUG(sub { Data::Dumper::Dumper($ref) });
+ 

@@ -1,0 +1,567 @@
+<HTML>
+<HEAD>
+<TITLE>mod_perl_design - notes on the design and goals of mod_perl-2.0</TITLE>
+<LINK REV="made" HREF="mailto:dougm@mako.uucp">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#synopsis">SYNOPSIS</A></LI>
+	<LI><A HREF="#description">DESCRIPTION</A></LI>
+	<LI><A HREF="#introduction">Introduction</A></LI>
+	<LI><A HREF="#interpreter management">Interpreter Management</A></LI>
+	<UL>
+
+		<LI><A HREF="#tipool">TIPool</A></LI>
+		<LI><A HREF="#virtual hosts">Virtual Hosts</A></LI>
+		<LI><A HREF="#further enhancements">Further Enhancements</A></LI>
+	</UL>
+
+	<LI><A HREF="#hook code and callbacks">Hook Code and Callbacks</A></LI>
+	<LI><A HREF="#perl interface to the apache api and data structures">Perl interface to the Apache API and Data Structures</A></LI>
+	<UL>
+
+		<LI><A HREF="#advantages to generating xs code">Advantages to generating XS code</A></LI>
+		<LI><A HREF="#lvalue methods">Lvalue methods</A></LI>
+	</UL>
+
+	<LI><A HREF="#filter hooks">Filter Hooks</A></LI>
+	<LI><A HREF="#directive handlers">Directive Handlers</A></LI>
+	<LI><A HREF="#<perl> configuration sections">&lt;Perl&gt; Configuration Sections</A></LI>
+	<LI><A HREF="#protocol module support">Protocol Module Support</A></LI>
+	<LI><A HREF="#mod_perl mpm">mod_perl MPM</A></LI>
+	<LI><A HREF="#build system">Build System</A></LI>
+	<LI><A HREF="#test framework">Test Framework</A></LI>
+	<LI><A HREF="#cgi emulation">CGI Emulation</A></LI>
+	<LI><A HREF="#apache::* library">Apache::* Library</A></LI>
+	<LI><A HREF="#perl enhancements">Perl Enhancements</A></LI>
+	<UL>
+
+		<LI><A HREF="#gvshared">GvSHARED</A></LI>
+		<LI><A HREF="#shared svpvx">Shared SvPVX</A></LI>
+		<LI><A HREF="#compile time method lookups">Compile time method lookups</A></LI>
+		<LI><A HREF="#memory management hooks">Memory management hooks</A></LI>
+		<LI><A HREF="#opcode hooks">Opcode hooks</A></LI>
+		<LI><A HREF="#solar variables">Solar variables</A></LI>
+	</UL>
+
+	<LI><A HREF="#author">AUTHOR</A></LI>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P>mod_perl_design - notes on the design and goals of mod_perl-2.0</P>
+<P>
+<HR>
+<H1><A NAME="synopsis">SYNOPSIS</A></H1>
+<PRE>
+ perldoc mod_perl_design</PRE>
+<P>
+<HR>
+<H1><A NAME="description">DESCRIPTION</A></H1>
+<P>notes on the design and goals of mod_perl-2.0</P>
+<P>
+<HR>
+<H1><A NAME="introduction">Introduction</A></H1>
+<P>In version 2.0 of mod_perl, the basic concept of 1.x still applies:</P>
+<PRE>
+ Provide complete access to the Apache C API via the Perl programming language.</PRE>
+<P>Rather than ``porting'' mod_perl-1.x to Apache 2.0, mod_perl-2.0 is
+being implemented as a complete re-write from scratch.</P>
+<P>For a more detailed introduction and functionality overview, see
+<EM>modperl_2.0</EM>.</P>
+<P>
+<HR>
+<H1><A NAME="interpreter management">Interpreter Management</A></H1>
+<P>In order to support mod_perl in a multi-threaded environment,
+mod_perl-2.0 will take advantage of Perl's <EM>ithreads</EM> feature, new to
+Perl version 5.6.0.  This feature encapsulates the Perl runtime inside
+a thread-safe <EM>PerlInterpreter</EM> structure.  Each thread which needs
+to serve a mod_perl request will need its own <EM>PerlInterpreter</EM>
+instance.</P>
+<P>Rather than create a one-to-one mapping of <EM>PerlInterpreter</EM>
+per-thread, a configurable pool of interpreters is managed by mod_perl.
+This approach will cut down on memory usage simply by maintaining a
+minimal number of intepreters.  It will also allow re-use of
+allocations made within each interpreter by recycling those which have
+already been used.  This was not possible in the 1.3.x model, where
+each child has its own interpreter and no control over which child
+Apache dispatches the request to.</P>
+<P>The interpreter pool is only enabled if Perl is built with -Dusethreads
+otherwise, mod_perl will behave just as 1.xx, using a single
+interpreter, which is only useful when Apache is configured with the
+prefork mpm.</P>
+<P>When the server is started, a Perl interpreter is constructed, compiling 
+any code specified in the configuration, just as 1.xx does.  This
+interpreter is referred to as the ``parent'' interpreter.  Then, for 
+the number of <EM>PerlInterpStart</EM> configured, a (thread-safe) clone of the
+parent interpreter is made (via <CODE>perl_clone())</CODE> and added to the pool of
+interpreters.  This clone copies any writeable data (e.g. the symbol
+table) and shares the compiled syntax tree.  From my measurements of a 
+startup.pl including a few random modules:</P>
+<PRE>
+ use CGI ();
+ use POSIX ();
+ use IO ();
+ use SelfLoader ();
+ use AutoLoader ();
+ use B::Deparse ();
+ use B::Terse ();
+ use B ();
+ use B::C ();</PRE>
+<P>The parent adds 6M size to the process, each clone adds less than half 
+that size, ~2.3M, thanks to the shared syntax tree.</P>
+<P>NOTE: These measurements were made prior to finding memory leaks
+related to <CODE>perl_clone()</CODE> in 5.6.0 and the GvSHARED optimization.</P>
+<P>At request time, If any Perl*Handlers are configured, an available
+interpreter is selected from the pool.  As there is a <EM>conn_rec</EM> and
+<EM>request_rec</EM> per thread, a pointer is saved in either the
+conn_rec-&gt;pool or request_rec-&gt;pool, which will be used for the
+lifetime of that request.  For handlers that are called when threads
+are not running (PerlChild{Init,Exit}Handler), the parent interpreter
+is used.  Several configuration directives control the interpreter
+pool management:</P>
+<DL>
+<DT><STRONG><A NAME="item_PerlInterpStart">PerlInterpStart</A></STRONG><BR>
+<DD>
+The number of intepreters to clone at startup time.
+<P></P>
+<DT><STRONG><A NAME="item_PerlInterpMax">PerlInterpMax</A></STRONG><BR>
+<DD>
+If all running interpreters are in use, mod_perl will clone new
+interpreters to handle the request, up until this number of
+interpreters is reached. when Max is reached, mod_perl will block (via
+<CODE>COND_WAIT())</CODE> until one becomes available (signaled via <CODE>COND_SIGNAL())</CODE>
+<P></P>
+<DT><STRONG><A NAME="item_PerlInterpMinSpare">PerlInterpMinSpare</A></STRONG><BR>
+<DD>
+The minimum number of available interpreters this parameter will clone
+interpreters up to Max, before a request comes in.
+<P></P>
+<DT><STRONG><A NAME="item_PerlInterpMaxSpare">PerlInterpMaxSpare</A></STRONG><BR>
+<DD>
+mod_perl will throttle down the number of interpreters to this number
+as those in use become available
+<P></P>
+<DT><STRONG><A NAME="item_PerlInterpMaxRequests">PerlInterpMaxRequests</A></STRONG><BR>
+<DD>
+The maximum number of requests an interpreter should serve, the
+interpreter is destroyed when the number is reached and replaced with
+a fresh one.
+<P></P></DL>
+<P>
+<H2><A NAME="tipool">TIPool</A></H2>
+<P>The interpreter pool is implemented in terms of a ``TIPool'' (Thread
+Item Pool), a generic api which can be reused for other data such as
+database connections.  A Perl interface will be provided for the
+<EM>TIPool</EM> mechanism, which, for example, will make it possible to
+share a pool of DBI connections.</P>
+<P>
+<H2><A NAME="virtual hosts">Virtual Hosts</A></H2>
+<P>The interpreter management has been implemented in a way such that
+each VirtualHost can have its own parent Perl interpreter and/or MIP
+(Mod_perl Interpreter Pool).
+It is also possible to disable mod_perl for a given virtual host.</P>
+<P>
+<H2><A NAME="further enhancements">Further Enhancements</A></H2>
+<UL>
+<LI>
+The interpreter pool management could be moved into it's own thread.
+<P></P>
+<LI>
+A ``garbage collector'', which could also run in it's own thread,
+examining the padlists of idle interpreters and deciding to release
+and/or report large strings, array/hash sizes, etc., that Perl is
+keeping around as an optimization.
+<P></P></UL>
+<P>
+<HR>
+<H1><A NAME="hook code and callbacks">Hook Code and Callbacks</A></H1>
+<P>The code for hooking mod_perl in the various phases, including
+Perl*Handler directives is generated by the ModPerl::Code module.
+Access to all hooks will be provided by mod_perl in both the
+traditional Perl*Handler configuration fashion and via dynamic
+registration methods (the ap_hook_* functions).</P>
+<P>When a mod_perl hook is called for a given phase, the glue code has an 
+index into the array of handlers, so it knows to return DECLINED right 
+away if no handlers are configured, without entering the Perl runtime
+as 1.xx did.  The handlers are also now stored in an
+apr_array_header_t, which is much lighter and faster than using a
+Perl  AV, as 1.xx did.  And more importantly, keeps us out of the Perl
+runtime until we're sure we need to be there.</P>
+<P>Perl*Handlers are now ``compiled'', that is, the various forms of:</P>
+<PRE>
+ PerlHandler MyModule (defaults to MyModule::handler or MyModule-&gt;handler)
+ PerlHandler MyModule-&gt;handler
+ PerlHandler $MyObject-&gt;handler
+ PerlHandler 'sub { print &quot;foo\n&quot; }'</PRE>
+<P>are only parsed once, unlike 1.xx which parsed every time the handler
+was used.  there will also be an option to parse the handlers at
+startup time.  note: this feature is currently not enabled with
+threads, as each clone needs its own copy of Perl structures.</P>
+<P>A ``method handler'' is now specified using the `method' sub attribute,
+e.g.</P>
+<PRE>
+ sub handler : method {};</PRE>
+<P>instead of 1.xx's</P>
+<PRE>
+ sub handler ($$) {}</PRE>
+<P>
+<HR>
+<H1><A NAME="perl interface to the apache api and data structures">Perl interface to the Apache API and Data Structures</A></H1>
+<P>In 1.x, the Perl interface back into the Apache API and data
+structures was done piecemeal.  As functions and structure members
+were found to be useful or new features were added to the Apache API,
+the xs code was written for them here and there.</P>
+<P>The goal for 2.0 is to generate the majority of xs code and provide
+thin wrappers were needed to make the API more Perlish.  As part of
+this goal, nearly the entire APR and Apache API, along with their
+public data structures will covered from the get-go.  Certain
+functions and structures which are considered ``private'' to Apache or
+otherwise un-useful to Perl will not be glued.</P>
+<P>The Apache header tree is parsed into Perl data structures which live
+in the generated <EM>Apache::FunctionTable</EM> and
+<EM>Apache::StructureTable</EM> modules.  For example, the following
+function prototype:</P>
+<PRE>
+ AP_DECLARE(int) ap_meets_conditions(request_rec *r);</PRE>
+<P>is parsed into the following Perl structure:</P>
+<PRE>
+  {
+    'name' =&gt; 'ap_meets_conditions'
+    'return_type' =&gt; 'int',
+    'args' =&gt; [
+      {
+        'name' =&gt; 'r',
+        'type' =&gt; 'request_rec *'
+      }
+    ],
+  },</PRE>
+<P>and the following structure:</P>
+<PRE>
+ typedef struct {
+     uid_t uid;
+     gid_t gid;
+ } ap_unix_identity_t;</PRE>
+<P>is parsed into:</P>
+<PRE>
+  {
+    'type' =&gt; 'ap_unix_identity_t'
+    'elts' =&gt; [
+      {
+        'name' =&gt; 'uid',
+        'type' =&gt; 'uid_t'
+      },
+      {
+        'name' =&gt; 'gid',
+        'type' =&gt; 'gid_t'
+      }
+    ],
+  }</PRE>
+<P>Similar is done for the mod_perl source tree, building
+<EM>ModPerl::FunctionTable</EM> and <EM>ModPerl::StructureTable</EM>.</P>
+<P>Three files are used to drive these Perl structures into the generated
+xs code:</P>
+<DL>
+<DT><STRONG><A NAME="item_lib%2FModPerl%2Ffunction%2Emap">lib/ModPerl/function.map</A></STRONG><BR>
+<DD>
+Specifies which functions are made available to Perl, along with which
+modules and classes they reside in.  Many functions will map directly
+to Perl, for example the following C code:
+<PRE>
+ static int handler (request_rec *r) {
+     int rc = ap_meets_conditions(r);
+     ...</PRE>
+<P>maps to Perl like so:</P>
+<PRE>
+ sub handler {
+     my $r = shift;
+     my $rc = $r-&gt;meets_conditions;
+ ...</PRE>
+<P>The function map is also used to dispatch Apache/APR functions to thin
+wrappers, rewrite arguments and rename functions which make the API
+more Perlish where applicable.  For example, C code such as:</P>
+<PRE>
+ char uuid_buf[APR_UUID_FORMATTED_LENGTH+1];
+ apr_uuid_t uuid;
+ apr_uuid_get(&amp;uuid)
+ apr_uuid_format(uuid_buf, &amp;uuid);
+ printf(&quot;uuid=%s\n&quot;, uuid_buf);
+</PRE>
+<PRE>
+
+is remapped to a more Perlish convention:</PRE>
+<PRE>
+ printf &quot;uuid=%s\n&quot;, APR::UUID-&gt;new-&gt;format;</PRE>
+<P></P>
+<DT><STRONG><A NAME="item_lib%2FModPerl%2Fstructure%2Emap">lib/ModPerl/structure.map</A></STRONG><BR>
+<DD>
+Specifies which structures and members of each are made available to
+Perl, along with which modules and classes they reside in.
+<P></P>
+<DT><STRONG><A NAME="item_lib%2FModPerl%2Ftype%2Emap">lib/ModPerl/type.map</A></STRONG><BR>
+<DD>
+This file defines how Apache/APR types are mapped to Perl types and
+vice-versa.  For example:
+<PRE>
+ apr_int32_t =&gt; SvIV
+ apr_int64_t =&gt; SvNV
+ server_rec  =&gt; SvRV (Perl object blessed into the Apache::Server class)</PRE>
+<P></P></DL>
+<P>
+<H2><A NAME="advantages to generating xs code">Advantages to generating XS code</A></H2>
+<UL>
+<LI>
+Not tied tightly to xsubpp
+<P></P>
+<LI>
+Easy adjustment to Apache 2.0 API/structure changes
+<P></P>
+<LI>
+Easy adjustment to Perl changes (e.g., Perl 6)
+<P></P>
+<LI>
+Ability to ``discover'' hookable third-party C modules.
+<P></P>
+<LI>
+Cleanly take advantage of features in newer Perls
+<P></P>
+<LI>
+Optimizations can happen across-the-board with one-shot
+<P></P>
+<LI>
+Possible to AUTOLOAD XSUBs
+<P></P>
+<LI>
+Documentation can be generated from code
+<P></P>
+<LI>
+Code can be generated from documentation
+<P></P></UL>
+<P>
+<H2><A NAME="lvalue methods">Lvalue methods</A></H2>
+<P>A new feature to Perl 5.6.0 is <EM>lvalue subroutines</EM>, where the
+return value of a subroutine can be directly modified.  For example,
+rather than the following code to modify the uri:</P>
+<PRE>
+ $r-&gt;uri($new_uri);</PRE>
+<P>the same result can be accomplished with the following syntax:</P>
+<PRE>
+ $r-&gt;uri = $new_uri;</PRE>
+<P>mod_perl-2.0 will support <EM>lvalue subroutines</EM> for all methods which
+access Apache and APR data structures.</P>
+<P>
+<HR>
+<H1><A NAME="filter hooks">Filter Hooks</A></H1>
+<P>mod_perl will provide two interfaces to filtering, a direct mapping to
+buckets and bucket brigades and a simpler, stream-oriented interface.</P>
+<P>Example of the stream oriented interface:</P>
+<PRE>
+ #httpd.conf
+ PerlOutputFilterHandler Apache::ReverseFilter</PRE>
+<PRE>
+ #Apache/ReverseFilter.pm
+ package Apache::ReverseFilter;</PRE>
+<PRE>
+ use strict;</PRE>
+<PRE>
+ sub handler {
+     my $filter = shift;</PRE>
+<PRE>
+     while ($filter-&gt;read(my $buffer, 1024)) {
+         $filter-&gt;write(scalar reverse $buffer);
+     }</PRE>
+<PRE>
+     return Apache::OK;
+ }</PRE>
+<P>
+<HR>
+<H1><A NAME="directive handlers">Directive Handlers</A></H1>
+<P>mod_perl 1.x provides a mechanism for Perl modules to implement
+first-class directive handlers, but requires an xs file to be
+generated and compiled.  The 2.0 version will provide the same
+functionality, but will not require the generated xs module.</P>
+<P>
+<HR>
+<H1><A NAME="<perl> configuration sections">&lt;Perl&gt; Configuration Sections</A></H1>
+<P>The ability to write configuration in Perl will carry over from 1.x,
+but will likely be implemented much different internally.  The mapping
+of a Perl symbol table should fit cleanly into the new
+<EM>ap_directive_t</EM> API, unlike the hoop jumping required in 1.x.</P>
+<P>
+<HR>
+<H1><A NAME="protocol module support">Protocol Module Support</A></H1>
+<P>Protocol module support is provided out-of-the-box, as the hooks
+and API are covered by the generated code blankets.  Any functionality
+for assisting protocol modules should be folded back into Apache if
+possible.</P>
+<P>
+<HR>
+<H1><A NAME="mod_perl mpm">mod_perl MPM</A></H1>
+<P>It will be possible to write an MPM (Multi-Processing Module) in Perl.
+mod_perl will provide a mod_perl_mpm.c framework which fits into the
+server/mpm standard convention.  The rest of the functionality needed
+to write an MPM in Perl will be covered by the generated xs code
+blanket.</P>
+<P>
+<HR>
+<H1><A NAME="build system">Build System</A></H1>
+<P>The biggest mess in 1.xx is mod_perl's Makefile.PL, the majority of
+logic has been broken down and moved to the Apache::Build module.
+The Makefile.PL will construct an Apache::Build object which will have 
+all the info it needs to generate scripts and Makefiles that
+apache-2.0 needs.  Regardless of what that scheme may be or change to, 
+it will be easy to adapt to with build logic/variables/etc., divorced
+from the actual Makefiles and configure scripts.  In fact, the new
+build will stay as far away from the Apache build system as possible.
+The module library (libmodperl.so or libmodperl.a) is built with as
+little help from Apache as possible, using only the <STRONG>INCLUDEDIR</STRONG>
+provided by <EM>apxs</EM>.</P>
+<P>The new build system will also ``discover'' XS modules, rather than
+hard-coding the XS module names.  This allows for switchabilty between
+static and dynamic builds, no matter where the xs modules live in the
+source tree.  This also allows for third-party xs modules to be
+unpacked inside the mod_perl tree and built static without
+modification the mod_perl Makefiles.</P>
+<P>For platforms such as Win32, the build files will be generated
+similar to how unix-flavor Makefiles are.</P>
+<P>
+<HR>
+<H1><A NAME="test framework">Test Framework</A></H1>
+<P>Similar to 1.x, mod_perl-2.0 will provide a 'make test' target to
+exercise as many areas of the API and module features as possible.</P>
+<P>The test framework in 1.x, like several other areas of mod_perl, was
+cobbled together over the years.  The goal of 2.0 is to provide a
+test framework that will be usable not only for mod_perl, but for
+third-party Apache::* modules and Apache itself.</P>
+<P>
+<HR>
+<H1><A NAME="cgi emulation">CGI Emulation</A></H1>
+<P>As a side-effect of embedding Perl inside Apache and caching
+compiled code, mod_perl has been popular as a CGI accelerator.  In
+order to provide a CGI-like environment, mod_perl must manage areas of
+the runtime which have a longer lifetime than when running under
+mod_cgi.  For example, the <STRONG>%ENV</STRONG> environment variable table, <STRONG>END</STRONG>
+blocks, <STRONG>@INC</STRONG> include paths, etc.</P>
+<P>CGI emulation will be supported in 2.0, but done so in a way that it
+is encapsulated in its own handler.  Rather that 1.x which uses the
+same response handler, regardless if the module requires CGI emulation
+or not.  With an <EM>ithreads</EM> enabled Perl, it will also be possible to
+provide more robust namespace protection.</P>
+<P>
+<HR>
+<H1><A NAME="apache::* library">Apache::* Library</A></H1>
+<P>The majority of the standard Apache::* modules in 1.x will be
+supported in 2.0.  Apache::Registry will likely be replaced with
+something akin to the Apache::PerlRun/Apache::RegistryNG replacement
+prototype that exists in 1.x.  The main goal being that the non-core
+CGI emulation components of these modules are broken into small,
+re-usable pieces to subclass Apache::Registry like behavior.</P>
+<P>
+<HR>
+<H1><A NAME="perl enhancements">Perl Enhancements</A></H1>
+<P>As Perl 5.8.0 is current in development and Perl 6.0 is a long ways
+off, it is possible and reasonable to add enhancements to Perl which
+will benefit mod_perl.  While these enhancements do not preclude the
+design of mod_perl-2.0, they will make an impact should they be
+implemented/accepted into the Perl development track.</P>
+<P>
+<H2><A NAME="gvshared">GvSHARED</A></H2>
+<P>As mentioned, the <CODE>perl_clone()</CODE> API will create a thread-safe
+interpreter clone, which is a copy of all mutable data and a shared
+syntax tree.  The copying includes subroutines, each of which take up
+around 255 bytes, including the symbol table entry.  Multiply that
+number times, say 1200, is around 300K, times 10 interpreter clones,
+we have 3Mb, times 20 clones, 6Mb, and so on.  Pure perl subroutines
+must be copied, as the structure includes the <STRONG>PADLIST</STRONG> of lexical
+variables used within that subroutine.  However, for XSUBs, there is
+no PADLIST, which means that in the general case, <CODE>perl_clone()</CODE> will
+copy the subroutine, but the structure will never be written to at
+runtime.  Other common global variables, such as <STRONG>@EXPORT</STRONG> and
+<STRONG>%EXPORT_OK</STRONG> are built at compile time and never modified during
+runtime.</P>
+<P>Clearly it would be a big win if XSUBs and such global variables were
+not copied.  However, we do not want to introduce locking of these
+structures for performance reasons.  Perl already supports the concept
+of a read-only variable, a flag which is checked whenever a Perl variable
+will be written to.  A patch has been submitted to the Perl
+development track to support a feature known as <STRONG>GvSHARED</STRONG>.  This
+mechanism allows XSUBs and global variables to be marked as shared, so
+<CODE>perl_clone()</CODE> will not copy these structures, but rather point to them.</P>
+<P>
+<H2><A NAME="shared svpvx">Shared SvPVX</A></H2>
+<P>The string slot of a Perl scalar is known as the <STRONG>SvPVX</STRONG>.  As Perl
+typically manages the string a variable points to, it must make a copy
+of it.  However, it is often the case that these strings are never
+written to.  It would be possible to implement copy-on-write strings
+in the Perl core with little performance overhead.</P>
+<P>
+<H2><A NAME="compile time method lookups">Compile time method lookups</A></H2>
+<P>A known disadvantage to Perl method calls is that they are slower than
+direct function calls.  It is possible to resolve method calls at
+compile time, rather than runtime, making method calls just as fast as
+subroutine calls.  However, there is certain information required for
+method look ups that are only known at runtime.  To work around this,
+compile time hints can be used, for example:</P>
+<PRE>
+ my Apache::Request $r = shift;</PRE>
+<P>Tells the Perl compiler to expect an object in the <EM>Apache::Request</EM>
+class to be assigned to <STRONG>$r</STRONG>.  A patch has already been submitted to
+use this information so method calls can be resolved at compile time.
+However, the implementation does not take into account sub-classing of
+the typed object.  Since the mod_perl API consists mainly of methods,
+it would be advantageous to re-visit the patch to find an acceptable
+solution.</P>
+<P>
+<H2><A NAME="memory management hooks">Memory management hooks</A></H2>
+<P>Perl has its own memory management system, implemented in terms of
+<EM>malloc</EM> and <EM>free</EM>.  As an optimization, Perl will hang onto
+allocations made for variables, for example, the string slot of a
+scalar variable.  If a variable is assigned, for example, a 5k chunk
+of HTML, Perl will not release that memory unless the variable is
+explicitly <EM>undef</EM>ed.  It would be possible to modify Perl in such a
+way that the management of these strings are pluggable, and Perl could
+be made to allocate from an APR memory pool.  Such a feature would
+maintain the optimization Perl attempts (to avoid malloc/free), but
+would greatly reduce the process size as pool resources are able to be
+re-used elsewhere.</P>
+<P>
+<H2><A NAME="opcode hooks">Opcode hooks</A></H2>
+<P>Perl already has internal hooks for optimizing opcode trees (syntax
+tree).  It would be quite possible for extensions to add their own
+optimizations if these hooks were plugable, for example, optimizing
+calls to <EM>print</EM>, so they directly call the Apache <EM>ap_rwrite</EM>
+function, rather than proxy via a <EM>tied filehandle</EM>.</P>
+<P>Another possible optimization would be ``inlined'' XSUB calls.  Perl has
+a generic opcode for calling subroutines, one which does not know the
+number of arguments coming into and being passed out of a subroutine.
+As the majority of mod_perl API methods have known in/out argument
+lists, it would be possible to implement a much faster version of the
+Perl <EM>pp_entersub</EM> routine.</P>
+<P>
+<H2><A NAME="solar variables">Solar variables</A></H2>
+<P>Perl global variables inside threaded MPMs are only global to the
+current interpreter clone in which they are running.  A useful feature
+for mod_perl applications would be the concept of a <EM>solar</EM> variable,
+which is global across all interpreters.  Such a feature would of
+course require mutex locking, something we do not want to introduce
+for normal Perl variables.  It might be possible to again piggy-back
+the <STRONG>SvREADONLY</STRONG> flag, which if true, checking for another flag
+<STRONG>SvSOLAR</STRONG> which implements the proper locking for concurrent access
+to cross-interpreter globals.</P>
+<P>
+<HR>
+<H1><A NAME="author">AUTHOR</A></H1>
+<P>Doug MacEachern</P>
+
+</BODY>
+
+</HTML>

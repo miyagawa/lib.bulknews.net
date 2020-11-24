@@ -1,0 +1,96 @@
+msgid "&About..."
+msgstr "&このソフトウェアについて..."
+
+msgid "E&xit..."
+msgstr "&終了\tCtrl-X"
+
+msgid "&Preferences..."
+msgstr "&設定\tCtrl-P"
+
+msgid "Can't open "
+msgstr "開けません "
+
+msgid "&File"
+msgstr "&ファイル"
+
+msgid "&Edit"
+msgstr "&編集"
+
+msgid "&Help"
+msgstr "&ヘルプ"
+
+msgid "Bye"
+msgstr "さようなら"
+
+msgid "Uses wxPerl"
+msgstr "wxPerl を使っています"
+
+msgid "About "
+msgstr "ソフトウェアについて "
+
+msgid "Preferences"
+msgstr "設定"
+
+msgid "Control"
+msgstr "コントロール"
+
+msgid "Mousebuttons"
+msgstr "マウスボタン"
+
+msgid "Adremo"
+msgstr "Adremo"
+
+msgid "Interval"
+msgstr "Adremo リフレッシュ間隔 (ms)"
+
+msgid "Language"
+msgstr "言語"
+
+msgid "English"
+msgstr "英語"
+
+msgid "Dutch"
+msgstr "オランダ語"
+
+msgid "Agent character"
+msgstr "エージェントキャラクター"
+
+msgid "Agent language"
+msgstr "エージェント言語 (スピーチ合成)"
+
+msgid "Change notice"
+msgstr "ほとんどの変更はアプリケーションの再起動後に反映されます"
+application"
+
+msgid "English (US)"
+msgstr "英語 (US)"
+
+msgid "English (British)"
+msgstr "英語 (British)"
+
+msgid "French"
+msgstr "フランス語"
+
+msgid "German"
+msgstr "ドイツ語"
+
+msgid "Italian"
+msgstr "イタリア語"
+
+msgid "Japanese"
+msgstr "日本語"
+
+msgid "Korean"
+msgstr "韓国語"
+
+msgid "Portuguese (Brazil)"
+msgstr "ポルトガル語 (ブラジル)"
+
+msgid "Russian"
+msgstr "ロシア語"
+
+msgid "Spanish"
+msgstr "スペイン語"
+
+msgid "Agent Voice"
+msgstr "MS Agent ボイス"

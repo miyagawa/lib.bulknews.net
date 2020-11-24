@@ -1,0 +1,95 @@
+diff -ruP Pod-ProjectDocs-0.05/lib/Pod/ProjectDocs.pm Pod-ProjectDocs-0.05.new/lib/Pod/ProjectDocs.pm
+--- Pod-ProjectDocs-0.05/lib/Pod/ProjectDocs.pm	2005-08-16 05:06:04.670000000 +0000
++++ Pod-ProjectDocs-0.05.new/lib/Pod/ProjectDocs.pm	2005-08-16 05:50:55.710000000 +0000
+@@ -38,7 +38,8 @@
+ 	$self->outroot($args{outroot});
+ 
+ 	$args{libroot} ||= File::Spec->curdir;
+-	$args{libroot} = File::Spec->rel2abs($args{libroot}, File::Spec->curdir)
++        $args{libroot} = [ $args{libroot} ] unless ref $args{libroot};
++	$args{libroot} = [ map File::Spec->rel2abs($_, File::Spec->curdir), @{$args{libroot}} ]
+ 		unless File::Spec->file_name_is_absolute($args{outroot});
+ 	$self->libroot($args{libroot});
+ 
+@@ -51,7 +52,7 @@
+ 	$self->_message("...");
+ 	$self->_message("...");
+ 	$self->_message("output root:  [".$self->outroot."]");
+-	$self->_message("library root: [".$self->libroot."]");
++	$self->_message("library root: [". join(", ", @{$self->libroot}) ."]");
+ 	$self->_message("...");
+ }
+ 
+@@ -83,36 +84,36 @@
+ 
+ 	$self->_message("...");
+ 	$self->_message("...");
+-	$self->_message("searching your perl-modules in your library directory [".$self->libroot."]...");
++	$self->_message("searching your perl-modules in your library directory [". join(", ", @{$self->libroot}) ."]...");
+ 	$self->_message("...");
+ 
+ 	my @modules = ();
+-	foreach my $file ( sort $self->_find_packages('pm') ) {
++	foreach my $file ( sort { $a->{path} cmp $b->{path} } $self->_find_packages('pm') ) {
+ 
+-		$self->_message("found $file.");
++		$self->_message("found $file->{path}.");
+ 
+ 		my $doc = Pod::ProjectDocs::Doc->new(
+-			origin 	=> $file,
++			origin 	=> $file->{path},
+ 			outroot	=> $self->outroot,
+-			libroot => $self->libroot,
++			libroot => $file->{dir},
+ 		);
+ 		push(@modules, $doc);
+ 	}
+ 
+ 	$self->_message("...");
+ 	$self->_message("...");
+-	$self->_message("searching your pod-manuals in your library directory [".$self->libroot."]...");
++	$self->_message("searching your pod-manuals in your library directory [". join(", ", @{$self->libroot}) ."]...");
+ 	$self->_message("...");
+ 
+ 	my @mans = ();
+-	foreach my $file ( sort $self->_find_packages('pod') ){
++	foreach my $file ( sort { $a->{path} cmp $b->{path} } $self->_find_packages('pod') ){
+ 
+-		$self->_message("found $file.");
++		$self->_message("found $file->{path}.");
+ 
+ 		my $doc = Pod::ProjectDocs::Doc->new(
+-			origin	=> $file,
++			origin	=> $file->{path},
+ 			outroot => $self->outroot,
+-			libroot => $self->libroot,
++			libroot => $file->{dir},
+ 		);
+ 		push(@mans, $doc);
+ 	}
+@@ -199,15 +200,19 @@
+ 	my $self = shift;
+ 	my $suffix = shift;
+ 	my $search = $self->libroot;
+-	$self->_croak("$search isn't detected or it's not a directory.")
+-		unless( -e $search && -d $search );
++        for my $dir (@$search) {
++            $self->_croak("$dir isn't detected or it's not a directory.")
++		unless( -e $dir && -d _ );
++        }
+ 	my @files  = ();
+-	my $wanted = sub {
++        for my $dir (@$search) {
++            my $wanted = sub {
+ 		return unless $File::Find::name =~ /\.$suffix$/;
+ 		(my $path = $File::Find::name ) =~ s#^\\.##;
+-		push @files, $path;
+-	};
+-	File::Find::find( { no_chdir => 1, wanted => $wanted }, $search );
++		push @files, { path => $path, dir => $dir };
++            };
++            File::Find::find( { no_chdir => 1, wanted => $wanted }, $dir );
++        }
+ 	return @files;
+ }
+ 

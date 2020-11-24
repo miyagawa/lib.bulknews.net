@@ -1,0 +1,144 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.27
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+1. Patterns in Perl ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Perl QA チームの Michael Schwern さんのデザインパターンに関するスライ
+ドが公開されています。
+
+  "Design Patterns in Perl OR Sufficiently Encapsulated Hacks"
+  http://magnonel.guild.net/~schwern/talks/Design_Patterns/
+
+この内容はデンマークで開催された JAOO カンファレンスでの内容のようです。
+サブタイトルが示すように、きれいに隠蔽された Hack でもって、Perl でデ
+ザインパターンを実装したり、あるいはパターンそのものが不要になったり、
+というケースが紹介されています。非常に面白いので、ぜひご覧ください。
+
+で、slide051.html に間違いがあります。
+
+        my $handling_method = \&{$handler.'::'.$orig_meth};
+
+        if( $handler_count == 1 ) {
+-            *{'Computer::'.$orig_meth} = $orig_meth;
++            *{'Computer::'.$orig_meth} = $handling_meth;
+        }  
+
+ですね。
+
+
+2. Iterator Pattern ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Iterator パターンを Perl で実装する例を紹介します。
+# この内容はデザインパターン ML(*1) へのポストを再利用しています。
+
+Perl で Iterator が出てくる箇所といえば、ハッシュの要素を操作する際の 
+each() 関数がそれにあたります。
+
+  while (my($key, $value) = each %hash) {
+      print "$key: $value\n";
+  }
+
+一方、ハッシュの操作をオブジェクトに結びつける tie では、each を提供す
+るために NEXTKEY() というメソッドを実装する必要があります。この実装が
+まさに iterator なわけです。
+
+*1) デザインパターンメーリングリスト
+    http://www.hyuki.com/dp/dpml.html
+
+List 1 では、name を属性にもつ Book クラスのいれものとして Bookshelf 
+をつくります。Book を追加していき、Bookshelf 内部の Book リストを 
+iterate するためのメソッド next() を実装しています。
+
+出力結果は List 2 のようになります。
+
+List 1  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+  package Book;
+  use fields qw(name);
+  
+  sub new {
+      my($class, $name) = @_;
+      my Book $self = fields::new($class);
+      $self->{name} = $name;
+      $self;
+  }
+  
+  package Bookshelf;
+  use base qw(Tie::IxHash);
+  
+  sub append_book {
+      my($self, $book) = @_;
+      $self->STORE($book => 1);
+  }
+  
+  *next = \&Tie::IxHash::NEXTKEY;
+
+  # Urrrrgh depends on Tie::IxHash internal!
+  sub reset_iterator { $_[0]->[3] = 0 }
+  
+  package main;
+  my $shelf = Bookshelf->new;
+  $shelf->append_book(Book->new('Around the World in 80 Days'));
+  $shelf->append_book(Book->new('Bible'));
+  $shelf->append_book(Book->new('Cinderella'));
+  
+  while (my Book $book = $shelf->next) {
+      print $book->{name}, "\n";
+  }
+
+  $self->reset_iterator();
+
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+List 2. ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Around the World in 80 Days
+Bible
+Cinderella
+＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+
+内部的に CPAN モジュールの Tie::IxHash(*2) の実装を利用しています。ハッ
+シュの each が iterator だ！ と書きましたが、Perl ハッシュは通常キーの
+順番を保存しません。ここでは順番を保持してくれる tiehash として 
+Tie::IxHash を利用しているというわけです。
+
+この next() メソッドは Bookshelf の中身を順番に返し、なくなったら 
+undef を返します。こうすると1回しか iterate できないので、カウンタを 0 
+にもどすメソッド reset_iterator() も実装しています。この実装はモロに 
+Tie::IxHash の内部構造に依存していますが、Bookshelf 内部で完結している
+ので問題はないでしょう。
+
+*2) Tie::IxHash
+    http://search.cpan.org/search?dist=Tie-IxHash
+
+
+3. Errata ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+OOP mailmag Vol.16 で。HTTP::Monkeywrench のサンプルコードに一部間違い
+があったようです。以下のように修正してください。KOMATSU Hiroshi さん、
+ご報告ありがとうございました。
+
+
+--- mag.txt~    Thu Mar 15 06:09:17 2001
++++ mag.txt     Fri Sep 21 03:43:01 2001
+@@ -60,10 +60,10 @@
+                   acceptcookie => 1, },
+                 { url => 'http://your.com/b.cgi',
+                   sendcookie => 1,
+-                  success_res => 'OK', },
++                  success_res => [ 'OK' ], },
+                 { url => 'http://your.com/c.cgi',
+                   sendcookie => 1,
+-                  error_res => 'NG', } ];
++                  error_res => [ 'NG' ], } ];
+
+ my $test = HTTP::Monkeywrench->new($settings);
+ $test->test($session);
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

@@ -1,0 +1,783 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl and dbm files </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl and dbm files 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./databases.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./multiuser.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Where_and_Why_to_use_dbm_files">Where and Why to use dbm files</A>
+	<LI><A HREF="#mod_perl_and_dbm">mod_perl and dbm</A>
+	<LI><A HREF="#Locking_dbm_Handlers_and_Write_L">Locking dbm Handlers and Write Lock Starvation Hazards</A>
+	<LI><A HREF="#Flawed_Locking_Methods_Which_Mus">Flawed Locking Methods Which Must Not Be Used</A>
+	<LI><A HREF="#Locking_Wrappers_Overview">Locking Wrappers Overview</A>
+	<LI><A HREF="#Tie_DB_Lock">Tie::DB_Lock</A>
+	<LI><A HREF="#DB_File_Lock2">DB_File::Lock2</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Where_and_Why_to_use_dbm_files">Where and Why to use dbm files</A></H1></CENTER>
+<P>
+Some of the earliest databases implemented on Unix were dbm files, and many
+are still in use today. As of this writing the Berkeley DB is the most
+powerful dbm implementation (http://www.sleepycat.com).
+
+<P>
+If you need a light database, with an easy API, using simple key-value
+pairs to store and manipulate a relatively small number of records, this is
+a solution that should be amongst the first you consider.
+
+<P>
+With dbm, it is rare to read the whole database into memory. Combine this
+feature with the use of smart storage techniques, and dbm files can be
+manipulated much faster than flat files. Flat file databases can be very
+slow on insert, update and delete operations, when the number of records
+starts to grow into the thousands. Sort algorithms on flat files can be
+very time-consuming.
+
+<P>
+The maximum practical size of a dbm database depends on many factors--your
+data, your hardware and the desired response times of course included--but
+as a rough guide consider 5,000 to 10,000 records to be reasonable.
+
+<P>
+We will talk mostly about the Berkley DB version 1.x, as it provides the
+best functionality while having a good speed and almost no limitations.
+Other implementations might be faster in some cases, but they are either
+limited in the length of the maximum value or the total number of records.
+
+<P>
+There is a number of Perl interfaces to the major dbm implementations, to
+list a few: <CODE>DB_File</CODE>, <CODE>NDBM_File</CODE>, <CODE>ODBM_File</CODE>, <CODE>GDBM_File</CODE>, and <CODE>SDBM_File</CODE>. The original Perl module for Berkeley DB was DB_File, which was written
+to interface to Berkeley DB version 1.85. The newer Perl module for
+Berkeley DB is <CODE>BerkeleyDB</CODE>, which was written to interface to version 2.0 and subsequent releases.
+Because Berkeley DB version 2.X has a compatibility API for version 1.85,
+you can (and should!) build <CODE>DB_File</CODE> using version 2.X of Berkeley DB, although <CODE>DB_File</CODE> will still only support the 1.85 functionality.
+
+<P>
+Several different indexing algorithms (known also as access methods) can be
+used with dbm implementations:
+
+<UL>
+<P><LI>
+<P>
+The <CODE>HASH</CODE> access method gives an <CODE>0(1)</CODE> complexity of search and update, fast insert and delete, but a slow sort
+(which you have to implement yourself). (Used by almost all dbm
+implementations)
+
+<P><LI>
+<P>
+The <CODE>BTREE</CODE> access method allows arbitrary key/value pairs to be stored in a sorted,
+balanced binary tree. This allows us to get a sorted sequence of data pairs
+in <CODE>0(1)</CODE>, but at the expense of much slower insert, update, delete operations than
+is the case with
+<CODE>HASH</CODE>. (Available mostly in Berkeley DB)
+
+<P><LI>
+<P>
+The <CODE>RECNO</CODE> access method is more complicated, and enables both fixed-length and
+variable-length flat text files to be manipulated using the same key/value
+pair interface as in <CODE>HASH</CODE> and <CODE>BTREE</CODE>. In this case the key will consist of a record (line) number. (Available
+mostly in Berkeley DB)
+
+<P><LI>
+<P>
+The <CODE>QUEUE</CODE> access method stores fixed-length records with logical record numbers as
+keys. It is designed for fast inserts at the tail and has a special cursor
+consume operation that deletes and returns a record from the head of the
+queue. The <CODE>QUEUE</CODE> access method uses record level locking. (Available only in Berkeley DB
+version 3.x)
+
+</UL>
+<P>
+Most often you will want to use the <CODE>HASH</CODE> method, but there are many considerations and your choice may be dictated
+by your application.
+
+<P>
+In recent years dbm databases have been extended to allow you to store more
+complex values, including data structures. The <CODE>MLDBM</CODE> module can store and restore the whole symbol table of your script,
+including arrays and hashes.
+
+<P>
+It is important to note that you cannot simply switch a dbm file from one
+storage algorithm to another. The only way to change the algorithm is to
+copy all the records one by one into a new dbm file, which was initialized
+according to a desired access method. You can use a script like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/bin/perl -w
+  
+  #
+  # This script takes as its parameters a list of Berkeley DB
+  # file(s) which are stored with the DB_BTREE algorithm.  It
+  # will back them up using the .bak extension and create
+  # instead dbms with the same records but stored using the
+  # DB_HASH algorithm
+  #
+  # Usage: btree2hash.pl filename(s)
+  
+  use strict;
+  use DB_File;
+  use Fcntl;
+  
+    # Do checks 
+  die &quot;Usage: btree2hash.pl filename(s))\n&quot; unless @ARGV;
+  
+  foreach my $filename (@ARGV) {
+  
+    die &quot;Can't find $filename: $!\n&quot; 
+      unless -e $filename and -r $filename;
+  
+      # First backup the file
+    rename &quot;$filename&quot;, &quot;$filename.btree&quot; 
+      or die &quot;can't rename $filename $filename.btree:$!\n&quot;;
+  
+      # tie both dbs (db_hash is a fresh one!)
+    tie my %btree , 'DB_File',&quot;$filename.btree&quot;, O_RDWR|O_CREAT, 
+        0660, $DB_BTREE or die &quot;Can't tie $filename.btree: $!&quot;;
+    tie my %hash ,  'DB_File',&quot;$filename&quot; , O_RDWR|O_CREAT, 
+        0660, $DB_HASH  or die &quot;Can't tie $filename: $!&quot;;
+  
+      # copy DB
+    %hash = %btree;
+  
+      # untie
+    untie %btree ;
+    untie %hash ;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that some dbm implementations come with other conversion utilities as
+well.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_perl_and_dbm">mod_perl and dbm</A></H1></CENTER>
+<P>
+Where does mod_perl fit into the picture?
+
+<P>
+If you need to access a dbm file in your mod_perl code in the read only
+mode the operation would be much faster if you keep the dbm file open
+(tied) all the time and therefore ready to be used. This will work with
+dynamic (read/write) databases accesses as well, but you need to use
+locking and data flushing to avoid data corruption.
+
+<P>
+Although mod_perl and dbm can give huge performance gains compared to the
+use of flat file databases you should be very careful. In addition to the
+need for locking, you need to consider the consequences of <CODE>die()</CODE> and unexpected process death.
+
+<P>
+If your locking mechanism cannot handle dropped locks, a stale lock can
+deactivate your whole site. You can enter a deadlock situation if two
+processes simultaneously try to acquire locks on two separate databases.
+Each has locked only one of the databases, and cannot continue without
+locking the second. Yet this will never be freed because it is locked by
+the other process. If your processes all ask for their DB files in the same
+order, this situation cannot occur.
+
+<P>
+If you modify the DB you should be make very sure that you flush the data
+and synchronize it, especially when the process serving your handler
+unexpectedly dies. In general your application should be tested very
+thoroughly before you put it into production to handle important data.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Locking_dbm_Handlers_and_Write_L">Locking dbm Handlers and Write Lock Starvation Hazards</A></H1></CENTER>
+<P>
+One has to deploy dbm file locking if there is chance that some process
+will want to write to it. Note that once you need to do locking you do it
+even when all you want is to read from the file. Since if you don't, it's
+possible that someone writes to the file at this very moment and you may
+read partly updated data.
+
+<P>
+Therefore we should distinguish between <EM>READ</EM> and <EM>WRITE</EM>
+locks. Before doing an operation on the dbm file, we first issue either a <EM>READ</EM> or a <EM>WRITE</EM> lock request, according to our needs.
+
+<P>
+If we are making a <EM>READ</EM> lock request, it is granted as soon as the
+<EM>WRITE</EM> lock on the file is removed if any or if it is already
+<EM>READ</EM> locked. The lock status becomes <EM>READ</EM> on success.
+
+<P>
+If we make a <EM>WRITE</EM> lock request, it is granted as soon as the file becomes unlocked. The lock
+status becomes <EM>WRITE</EM> on success.
+
+<P>
+The treatment of the <EM>WRITE</EM> lock request is most important.
+
+<P>
+If the DB is <EM>READ</EM> locked, a process that makes a <EM>WRITE</EM> request will poll until there are no reading or writing processes left.
+Lots of processes can successfully read the file, since they do not block
+each other. This means that a process that wants to write to the file may
+never get a chance to squeeze in, since it needs to obtain an exclusive
+lock.
+
+<P>
+The following diagram represents a possible scenario where everybody can
+read but no one can write (pX's represent different processes running for
+different times and all acquiring the read lock on the dbm file):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  [-p1-]                 [--p1--]
+     [--p2--]                [--p2--]
+   [---------p3---------] [--------p3----....
+                 [------p4-----]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The result is a starving process, which will timeout the request, and it
+will fail to update the DB. Ken Williams solved the above problem with his <A HREF="././dbm.html#Tie_DB_Lock"><CODE>Tie::DB_Lock</CODE></A> module, which is discussed in one of the following sections.
+
+<P>
+There are several locking wrappers for <CODE>DB_File</CODE> in CPAN right now. Each one implements locking differently and has
+different goals in mind. It is therefore worth knowing the difference, so
+that you can pick the right one for your application.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Flawed_Locking_Methods_Which_Mus">Flawed Locking Methods Which Must Not Be Used</A></H1></CENTER>
+<P>
+<EM>Caution</EM>: The suggested locking methods in the Camel book and
+<CODE>DB_File</CODE> man page (before version 1.72, fixed in 1.73) are flawed. If you use them
+in an environment where more than one process can modify the dbm file, it
+can get corrupted!!! The following is an explanation of why this happens.
+
+<P>
+You may not use a tied file's filehandle for locking, since you get the
+filehandle after the file has been already tied. It's too late to lock. The
+problem is that the database file is locked <EM>after</EM> it is opened. When the database is opened, the first 4k (in Berkley dbm
+library) is read and then cached in memory. Therefore, a process can open
+the database file, cache the first 4k, and then block while another process
+writes to the file. If the second process modifies the first 4k of the
+file, when the original process gets the lock is now has an inconsistent
+view of the database. If it writes using this view it may easily corrupt
+the database on disk.
+
+<P>
+This problem can be difficult to trace because it does not cause corruption
+every time a process has to wait for a lock. One can do quite a bit of
+writing to a database file without actually changing the first 4k. But once
+you suspect this problem you can easily reproduce it by making your program
+modify the records in the first 4k of the DB.
+
+<P>
+You better resort to using the standard modules for locking instead of
+inventing your own.
+
+<P>
+If your dbm file is used only in the read-only mode generally there is no
+need for locking at all. If you access the dbm file in read/write mode, the
+safest method is to <CODE>tie()</CODE> the dbm file after acquiring an
+external lock and <CODE>untie()</CODE> before the lock is released. So to
+access the file in shared mode (FLOCK_SH) one should following this
+pseudo-code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  flock FLOCK_SH &lt;===== start critical section
+  tie()
+  read...
+  untie()
+  flock FLOCK_UN &lt;===== end critical section</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Similar for the exclusive (EX), write access:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  flock FLOCK_EX &lt;===== start critical section
+  tie()
+  write...
+  sync()
+  untie()
+  flock FLOCK_UN &lt;===== end critical section</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+However you might want to save a few <CODE>tie()/untie()</CODE> calls if
+the same request accesses the dbm file more than once. You should be
+careful though. Based on the caching effect explained above, a process can
+perform an atomic downgrade of an exclusive lock to a shared one without
+re-tie()ing the file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  flock FLOCK_EX &lt;===== start critical section
+  tie()
+  write...
+  sync()
+                 &lt;===== end critical section
+  flock FLOCK_SH &lt;===== start critical section
+  read...
+  untie()
+  flock FLOCK_UN &lt;===== end critical section</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+because it has the updated data in its cache. By atomic, we mean it's
+ensured that the lock status gets changed, without any other process
+getting an exclusive access in between.
+
+<P>
+If you can ensure that one process safely upgrades a shared lock with an
+exclusive lock, one can save on <CODE>tie()/untie().</CODE> But this
+operation might lead to a dead-lock if two processes try to upgrade a
+shared lock with exclusive at the same time. Remember that in order to
+acquire an exclusive lock, all other processes need to release *all* locks.
+If your OS locking implementation resolves this deadlock by denying one of
+the upgrade requests, make sure your program handles that appropriately.
+The process that were denied has to <CODE>untie()</CODE> the dbm file and
+then ask for an exclusive lock.
+
+<P>
+A dbm file has always to be <CODE>untie()'ed</CODE> before the locking is
+released (unless you do an atomic downgrade from exclusive to shared as we
+have just explained). Remember that if at any given moment a process wants
+to lock and access the dbm file it has to re-tie() this file, if it was
+tied already. If this is not done, the integrity of the dbm file is not
+ensured.
+
+<P>
+To conclude, the safest method of reading from dbm file is to lock the file
+before <CODE>tie()-ing</CODE> it, <CODE>untie()</CODE> it before releasing
+the lock, and in the case of write to call <CODE>sync()</CODE> before
+<CODE>untie()-ing</CODE> it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Locking_Wrappers_Overview">Locking Wrappers Overview</A></H1></CENTER>
+<P>
+Here are some of the correctly working dbm locking wrappers on (three of
+them are available from CPAN):
+
+<UL>
+<P><LI>
+<P>
+<CODE>Tie::DB_Lock</CODE> -- <CODE>DB_File</CODE> wrapper which creates copies of the dbm file for read access, so that you
+have kind of a multiversioning concurrent read system. However, updates are
+still serial. After each update the read-only copies of the dbm file are
+recreated. Use this wrapper in situations where reads may be very lengthy
+and therefore write starvation problem may occur. On the other hand if you
+have big dbm files, it may create a big load on the system if the updates
+are quite frequent.  <A HREF="././dbm.html#Tie_DB_Lock">More information</A>.
+
+<P><LI>
+<P>
+<CODE>Tie::DB_FileLock</CODE> -- <CODE>DB_File</CODE> wrapper that has the ability to lock and unlock the database while it is
+being used. Avoids the tie-before-flock problem by simply re-tie-ing the
+database when you get or drop a lock. Because of the flexibility in
+dropping and re-acquiring the lock in the middle of a session, this can be
+used in a system that will work with long updates and/or reads. Refer to
+the
+<CODE>Tie::DB_FileLock</CODE> manpage for more information.
+
+<P><LI>
+<P>
+<CODE>DB_File::Lock</CODE> -- extremely lightweighted <CODE>DB_File</CODE> wrapper that simply flocks an external lockfile before tie-ing the database
+and drops the lock after untie. Allows one to use the same lockfile for
+multiple databases to avoid deadlock problems, if desired. Use this for
+databases where updates and reads are quick and simple flock locking
+semantics are enough. Refer to <CODE>DB_File::Lock</CODE> manpage for more information.
+
+<P><LI>
+<P>
+<A HREF="././dbm.html#DB_File_Lock2"><CODE>DB_File::Lock2</CODE></A> -- does the same thing as
+<CODE>DB_File::Lock</CODE>, but has a slightly different implementation. I wrote it before David
+Harris released his <CODE>DB_File::Lock</CODE> and I didn't want to kill mine, so I'll keep it here for a while :).
+
+<P><LI>
+<P>
+On some Operating Systems (FreeBSD is one example) it is possible to lock
+on tie:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  tie my %t, 'DB_File', $TOK_FILE, O_RDWR | O_EXLOCK, 0664;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and only release the lock by un-tie()-ing the file. Check if the
+<CODE>O_EXLOCK</CODE> flag is available on your operating system before you try to use this
+method!
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Tie_DB_Lock">Tie::DB_Lock</A></H1></CENTER>
+<P>
+<CODE>Tie::DB_Lock</CODE> ties hashes to databases using shared and exclusive locks. This module, by
+Ken Williams, solves the problems raised in the previous section.
+
+<P>
+The main difference from what I have described above is that
+<CODE>Tie::DB_Lock</CODE> copies a dbm file on read. Reading processes do not have to keep the file
+locked while they read it, and writing processes can still access the file
+while others are reading. This works best when you have lots of
+long-duration reading, and a few short bursts of writing.
+
+<P>
+The drawback of this module is the heavy IO performed when every reader
+makes a fresh copy of the DB. With big dbm files this can be quite a
+disadvantage and can slow the server down considerably.
+
+<P>
+An alternative would be to have one copy of the dbm image shared by all the
+reading processes. This can cut the number of files that are copied, and
+puts the responsibility of copying the read-only file on the writer, not
+the reader. It would need some care to make sure it does not disturb
+readers when putting a new read-only copy into place.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="DB_File_Lock2">DB_File::Lock2</A></H1></CENTER>
+
+	       <p><a href="code/DB_File-Lock2.pm"><code>DB_File-Lock2.pm</code></a> -- Here is C<DB_File::Lock2> which does the
+locking by using an external lockfile.
+
+</p>
+	      <P>
+This allows you to gain the lock before the file is tied. Note that it's
+not yet on CPAN and so is linked from here in its entirety. Note also that
+this code still needs some testing, so <EM>be careful</EM> if you use it on a production machine.
+
+<P>
+You use it like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use DB_File::Lock2 ();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A simple tie, READ lock and untie
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use DB_File::Lock2 ();
+  my $dbfile = &quot;/tmp/test&quot;;
+  tie my %mydb, 'DB_File::Lock2', $dbfile, 'read';
+  print $mydb{foo} if exists $mydb{foo};
+  untie %mydb;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can even skip the <CODE>untie()</CODE> call. When <CODE>$mydb</CODE> goes out of scope everything will be done automatically. However it is
+better to use the explicit call, to make sure the critical sections between
+lock and unlock are as short as possible. This is especially important when
+requesting an exclusive (write) lock.
+
+<P>
+The following example shows how it might be convenient to skip the explicit <CODE>untie()</CODE>. In this example, we don't need to save the intermediate result, we just
+return and the cleanup is done automatically.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use DB_File::Lock2 ();
+  my $dbfile = &quot;/tmp/test&quot;;
+  print user_exists(&quot;stas&quot;) ? &quot;Yes&quot; : &quot;No&quot;;
+  sub user_exists{
+    my $username = shift || '';
+  
+    warn(&quot;No username passed\n&quot;), return 0 unless $username;
+  
+    tie my %mydb, 'DB_File::Lock2', $dbfile, 'read';
+  
+    # if we match the username return 1, else 0
+    return $mydb{$username} ? 1 : 0;
+  
+  } # end of sub user_exists</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now let's write all the upper case characters and their respective ASCII
+values to a dbm file. Then read the file and print the contents of the DB,
+unsorted.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use DB_File::Lock2 ();
+  my $dbfile = &quot;/tmp/test&quot;;
+  
+    # write 
+  tie my %mydb, 'DB_File::Lock2', $dbfile,'write';
+  for (0..26) {
+    $mydb{chr 65+$_} = $_;
+  }
+  untie %mydb;
+  
+    # now, read them and printout (unsorted) 
+    # notice that 'read' is a default lock mode
+  tie %mydb, 'DB_File::Lock2', $dbfile;
+  while (my($k,$v) = each %mydb) {
+    print &quot;$k =&gt; $v\n&quot;;
+  }
+  untie %mydb;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If your CGI script is interrupted, the <CODE>DESTROY</CODE> block will take care of unlocking the dbm file and flush any changes. So
+your DB will be safe against possible corruption because of unclean program
+termination.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./databases.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./multiuser.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/26/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

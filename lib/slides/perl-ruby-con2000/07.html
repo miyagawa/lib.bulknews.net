@@ -1,0 +1,33 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="06.html">[prev]</A> <A href="08.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>クラスの例</H2>
+<HR>
+<UL>
+<LI>人を表す<CODE>Person</CODE>クラス
+<BLOCKQUOTE><PRE><CODE>$p = new Person name => 'Tom', age => 20;
+$p->speak;	# prints "I am Tom, 20 years old."
+</CODE></PRE></BLOCKQUOTE>
+<LI>実装は...
+<BLOCKQUOTE><PRE><CODE>package Person;
+sub new {
+    my $class = shift;		# クラス名が第1引数
+    my $self = { @_ };		# 引数をハッシュで受ける
+    bless $self, $class;	# クラスに bless する
+}
+sub speak {
+    my $self = shift;		# オブジェクト自身
+    printf 'I am %s, %d years old.', $self->{name}, $self->{age};
+}
+1;
+</CODE></PRE></BLOCKQUOTE>
+</UL>
+</BODY>
+</HTML>

@@ -1,0 +1,50 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.30
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Exporter::Lite ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Vol.29 [1] で Exporter による Mixin 実装を紹介しましたが、それに関連し
+て CPAN に Exporter::Lite というモジュールがアップロードされています。
+
+Michael Schwern 氏による Exporter::Lite では、基本的に Exporter と同じ
+動作をするものの、Exporter のように継承をする必要がありません。
+
+  package Mixin;
+  require Exporter;
+  @ISA = qw(Exporter);
+
+  @EXPORT = qw(foo);
+
+とするかわりに、
+
+  package Mixin;
+  use Exporter::Lite;
+
+  @EXPORT = qw(foo);
+
+とすることができます。
+
+Exporter では、継承することによって Exporter::import を再利用していま
+したが、Exporter::Lite では、import メソッドを import する(!) という方
+法で継承する必要性を排除しています。
+
+Ruby のような Mixin 実装をする上で手軽につかえて便利かも知れません。
+
+  Exporter::Lite
+  http://search.cpan.org/search?dist=Exporter-Lite
+
+[1] http://bulknews.net/lib/mailmag/29/
+
+2. WEB+DB PRESS Vol.6 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+技術評論社 "WEB+DB PRESS Vol.6" に Perl によるセッション管理の記事を書
+きました。Tokyo Perl Mongers 小山さんの Perl によるデザインパターンな
+どの記事もあって面白いです。ぜひご覧になってください。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+<TITLE>Apache::Session::Generate::ModUsertrack - mod_usertrack for session ID generation</TITLE>
+<LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
+</HEAD>
+
+<BODY>
+
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#NAME">NAME</A>
+	<LI><A HREF="#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="#CONFIGURATION">CONFIGURATION</A>
+	<LI><A HREF="#LIMITATION_WITHOUT_MOD_PERL">LIMITATION WITHOUT MOD_PERL</A>
+	<LI><A HREF="#AUTHOR">AUTHOR</A>
+	<LI><A HREF="#SEE_ALSO">SEE ALSO</A>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="NAME">NAME</A></H1>
+<P>
+Apache::Session::Generate::ModUsertrack - mod_usertrack for session ID
+generation
+
+<P>
+<HR>
+<H1><A NAME="SYNOPSIS">SYNOPSIS</A></H1>
+<P>
+<PRE>  use Apache::Session::Flex;
+</PRE>
+<P>
+<PRE>  tie %session, 'Apache::Session::Flex', $id, {
+      Store     =&gt; 'MySQL',
+      Lock      =&gt; 'Null',
+      Generate  =&gt; 'ModUsertrack',
+      Serialize =&gt; 'Storable',
+      ModUsertrackCookieName =&gt; 'usertrack', # optional
+  };
+</PRE>
+<P>
+<HR>
+<H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
+<P>
+Apache::Session::Generate::ModUsertrack enables you to use cookie tracked
+by mod_usertrack as session id for Apache::Session framework. This module
+fits well with long-term sessions, so better using RDBMS like MySQL for its
+storage.
+
+<P>
+<HR>
+<H1><A NAME="CONFIGURATION">CONFIGURATION</A></H1>
+<P>
+This module accepts one extra configuration option.
+
+<DL>
+<DT><STRONG><A NAME="item_ModUsertrackCookieName">ModUsertrackCookieName</A></STRONG><DD>
+<P>
+Specifies cookie name used in mod_usertrack. <CODE>Apache</CODE> for default, so change this if you change it via <CODE>CookieName</CODE> directive in mod_usertrack.
+
+</DL>
+<P>
+<HR>
+<H1><A NAME="LIMITATION_WITHOUT_MOD_PERL">LIMITATION WITHOUT MOD_PERL</A></H1>
+<P>
+This module first tries to fetch named cookie, but will in vain <STRONG>ONLY
+WHEN</STRONG> the HTTP request is the first one from specific client to the mod_usertrack
+enabled Apache web server. It is because if the request is for the first
+time, cookies are not yet baked on clients.
+
+<P>
+If you run scripts under mod_perl, this module tries to steal (not yet
+baked) cookie from Apache request notes.
+
+<P>
+See <EM>Apache</EM> for details.
+
+<P>
+<HR>
+<H1><A NAME="AUTHOR">AUTHOR</A></H1>
+<P>
+Tatsuhiko Miyagawa &lt;<A
+HREF="mailto:miyagawa@bulknews.net">miyagawa@bulknews.net</A>&gt;
+
+<P>
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+<P>
+<HR>
+<H1><A NAME="SEE_ALSO">SEE ALSO</A></H1>
+<P>
+<A HREF="/Apache/Session.html">Apache::Session</A>, <A HREF="/Apache/Session/Flex.html">Apache::Session::Flex</A>, mod_usertrack
+
+</BODY>
+
+</HTML>

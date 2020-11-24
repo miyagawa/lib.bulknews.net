@@ -1,0 +1,162 @@
+=======================================================
+Object-Oriented Programming with Perl Vol.31
+          by Tatsuhiko Miyagawa <miyagawa@cpan.org>
+=======================================================
+
+
+1. Errata ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+Vol.29, 30 のマガジンの複数箇所で、"Exporter" を "Expoter" と表記して
+いましたので、訂正します。過去のアーカイブ [1] では修正してありますの
+で参照してください。
+
+* Kato Atsushi さんご指摘ありがとうございました。
+
+[1] http://bulknews.net/lib/mailmag/
+
+2. Date/Time module ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+2001年も残すところ数日というわけで、日付関係のクラスをいくつか紹介して
+みたいと思います。
+
+Perl ではデファクトスタンダードたりえる Date/Time モジュールがないのが
+ちょっと弱いところです。datetime@perl.org [2] というメーリングリストで
+APIの標準化について議論されています。
+
+[2] http://lists.perl.org/showlist.cgi?name=datetime
+
+
+-- Date::Calc
+http://search.cpan.org/search?dist=Date-Calc
+
+日付操作の関数のほぼすべてこのモジュールで解決するといっても間違いない
+モジュールです。基本的に関数を export する形で定義されています。ほぼ 
+XS で書かれているので高速です。
+
+関数のインターフェースがヤダ、OO で使いたいという人のために最新版から
+は Date::Calc::Object というクラスが追加されています。overload を使っ
+て加減算をおこなうことができます。ちなみにこの overload 機能は、
+Date/Time 系の OO インターフェースをもったクラスではほとんどのクラスで
+サポートされています。
+
+Date::Calc とは別に、Date::Manip というソックリなモジュールもあります。
+どこが違うのかは良くわかりません。C が使えない環境の場合は、まったく同
+じ関数を Pure Perl で実装した Date::Pcalc を使うとよいでしょう。
+
+-- Class::Date
+http://search.cpan.org/search?dist=Class-Date
+
+OO ベースのインターフェースを持った日付操作クラスです。基本的に必要と
+されそうな機能はほぼ備えており、API もきれいにまとまっています。ちょっ
+と初期版にバグが多かったのと、Swiss Army Knife のように肥大化しつつあ
+るのがネックなところかもしれません。
+
+-- Time::Piece
+http://search.cpan.org/search?dist=Date-Simple
+
+Larry Wall の考案したAPI をMatt Sergeant 氏が実装したモジュールです。
+Perl の組み込み localtime() がオブジェクトを返すとしたら、という観点か
+ら作成されています。
+
+  my $time = Time::Piece->new;
+  print $time->year;
+
+のように使え、直感的です。このクラスもまた overload をサポートしていま
+す。一度は perl5.7.x で Core モジュールになりましたが、API を縛りたく
+ない、という理由から外されています。
+
+
+-- Date::Ical
+http://search.cpan.org/search?dist=Date-Ical
+
+日付操作API 標準フォーマットを目指す ICal 用のクラスです。
+
+
+-- Date::Simple
+http://search.cpan.org/search?dist=Date-Simple
+
+Simple という名前の通り、Date をオブジェクトとして扱うにあたって最低限
+のAPIを定義したクラスです。文字列化すると yyyy-mm-dd に overload する
+ので、SQL に放りこむときには便利です。
+
+Date クラスにもかかわらず、UNIX time によってオブジェクトが実装されて
+おり、32bit int の制約(2038年問題)をうけます。(Date::Calc はこの制約が
+ありません) int を使わずに実装したバージョンも制作中のようです。
+
+http://archive.develooper.com/datetime@perl.org/msg00214.html
+
+-- Date::Range
+http://search.cpan.org/search?dist=Date-Range
+
+Tony Bowden 氏が作成した「日付の範囲」を表現するクラスです。スケジュー
+ラなどの実装に便利です。日付クラスとしては、Date::Simple を利用してい
+ます。
+
+  my $range = Date::Range->new($date1, $date2);
+
+  my $earliest = $range->start;
+  my $latest   = $range->end;
+  my $days     = $range->length;
+
+  if ($range->includes($date3)) { ... }
+  if ($range->includes($range2)) { ... }
+
+  if ($range->overlaps($range2)) {
+      my $range3 = $range->overlap($range2);
+  }
+
+
+-- Date::Range::Birth
+http://search.cpan.org/search?dist=Date-Range-Birth
+
+筆者が作成した、Date::Range のサブクラスです。ある年代の人の誕生日範囲
+を取得することができます。
+
+  # 24歳の人の誕生日の範囲
+  my $range = Date::Range::Birth->new(24);
+
+  # 2001/01/01 に 24歳だった人
+  my $date   = Date::Simple->new(2001, 1, 1);
+  my $range2 = Date::Range::Birth->new(24, $date);
+
+  # 20歳〜30歳の人の誕生日の範囲
+  my $range3 = Date::Range::Birth->new([ 20, 30 ]);
+
+
+RDBMSのテーブルにユーザの誕生日を保存しておき、ユーザの中から 20歳の人
+を SELECT する、といった場合に利用すると便利です。
+
+  use DBI;
+  use Date::Range::Birth;
+
+  my $dbh = DBI->connect($dsn, $user, $passwd);
+  my $range = Date::Range::Birth->new(20);
+
+  my $sth = $dbh->prepare(<<'SQL')
+  SELECT name, birthday FROM customer
+  WHERE birthday >= ? AND birthday <= ?
+  SQL
+
+  # Date::Simple overloads to 'yyyy-mm-dd'!
+  $sth->execute($range->start, $range->end);
+
+  while (my $data = $sth->fetchrow_arrayref) {
+      print "name: $data->[0] birthday: $data->[1]\n";
+  }
+  $dbh->disconnect;
+
+
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+日付の操作は Date::Simple, 時刻まで入る場合には Time::Piece を利用する
+ことをお勧めしておきます。
+
+複雑な加減算をおこなう場合には Date::Calc を利用するとよいですが、イン
+ターフェースが関数ベースなので、Date::Simple や Time::Piece を継承した
+クラスを定義し、Date::Calc の関数への wrapper メソッドを用意しておくと
+使いやすいかも、と思います。
+
+
+--
+OOP w/ Perl 
+http://bulknews.net/lib/

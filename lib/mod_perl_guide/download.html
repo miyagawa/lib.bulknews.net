@@ -1,0 +1,480 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Appendix A: Downloading software and documentation </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Appendix A: Downloading software and documentation 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./help.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Coverage">Coverage</A>
+	<LI><A HREF="#Perl">Perl</A>
+	<LI><A HREF="#CPAN_Downloads">CPAN Downloads</A>
+	<LI><A HREF="#Apache">Apache</A>
+	<LI><A HREF="#mod_perl">mod_perl</A>
+	<LI><A HREF="#Squid_Internet_Object_Cache">Squid - Internet Object Cache</A>
+	<LI><A HREF="#thttpd_tiny_turbo_throttling_H">thttpd - tiny/turbo/throttling HTTP server</A>
+	<LI><A HREF="#mod_throttle_access">mod_throttle_access </A>
+	<LI><A HREF="#mod_proxy_add_forward">mod_proxy_add_forward</A>
+	<LI><A HREF="#httperf_webserver_Benchmarkin">httperf - webserver Benchmarking tool</A>
+	<LI><A HREF="#http_load_another_webserver_B">http_load - another webserver Benchmarking tool</A>
+	<LI><A HREF="#ab_ApacheBench">ab - ApacheBench</A>
+	<LI><A HREF="#Daquiri_yet_another_webserver">Daquiri - yet another webserver Benchmarking tool</A>
+	<LI><A HREF="#High_Availability_and_Load_Balan">High-Availability and Load Balancing Projects</A>
+	<UL>
+
+		<LI><A HREF="#mod_backhand_Load_Balancing_f">mod_backhand - Load Balancing for Apache</A>
+		<LI><A HREF="#mod_redundancy">mod_redundancy</A>
+		<LI><A HREF="#High_Availability_Linux_Project">High-Availability Linux Project</A>
+		<LI><A HREF="#lbnamed_a_Load_Balancing_Name_">lbnamed - a Load Balancing Name Server Written in Perl</A>
+		<LI><A HREF="#Network_Address_Translation_and_">Network Address Translation and Networks: Virtual Servers (Load Balancing)</A>
+		<LI><A HREF="#Linux_Virtual_Server_Project">Linux Virtual Server Project</A>
+		<LI><A HREF="#Efficient_Support_for_P_HTTP_in_">Efficient Support for P-HTTP in Cluster-Based Web Servers</A>
+		<LI><A HREF="#IP_Filter">IP Filter</A>
+	</UL>
+
+	<LI><A HREF="#Apache_Request">Apache::Request</A>
+	<LI><A HREF="#DataBases">DataBases</A>
+	<LI><A HREF="#libgtop">libgtop</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Coverage">Coverage</A></H1></CENTER>
+<P>
+Here you will find instructions for downloading the software and its
+related documentation.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Perl">Perl</A></H1></CENTER>
+<P>
+Perl is probably already installed on your machine, but you should at least
+check the version you are using. It is highly recommended that you have at
+least Perl version 5.004. You can get the latest perl version from <A
+HREF="http://www.perl.com/">http://www.perl.com/</A> . Try the direct
+download link <A
+HREF="http://www.perl.com/pace/pub/perldocs/latest.html">http://www.perl.com/pace/pub/perldocs/latest.html</A>
+. You can get Perl documentation from the same location (although copious
+documentation is included in the downloaded Perl distribution).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="CPAN_Downloads">CPAN Downloads</A></H1></CENTER>
+<P>
+You can download most of the Perl modules from CPAN. There are many mirrors
+of this site. The main site's URL is <A
+HREF="http://cpan.org/.">http://cpan.org/.</A>
+
+<P>
+You may want to search the Perl modules database by using <A
+HREF="http://search.cpan.org/.">http://search.cpan.org/.</A>
+
+<P>
+Either use the search form, or type in the name of the package the module
+is distributed in. For example if you are looking for
+<CODE>Apache::DumpHeaders</CODE>, you can type: <A
+HREF="http://search.cpan.org/search?dist=Apache-DumpHeaders">http://search.cpan.org/search?dist=Apache-DumpHeaders</A>
+.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache">Apache</A></H1></CENTER>
+<P>
+Get the latest Apache webserver and documentation from <A
+HREF="http://www.apache.org">http://www.apache.org</A> . Try the direct
+download link <A
+HREF="http://www.apache.org/dist/">http://www.apache.org/dist/</A> .
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_perl">mod_perl</A></H1></CENTER>
+<P>
+Get the latest mod_perl sources and documentation from <A
+HREF="http://perl.apache.org">http://perl.apache.org</A> . Try the direct
+download link <A
+HREF="http://perl.apache.org/dist/">http://perl.apache.org/dist/</A> .
+
+<P>
+Source/Binary Distributions: <A
+HREF="http://perl.apache.org/distributions.html">http://perl.apache.org/distributions.html</A>
+
+
+<P>
+Every Apache project rolls a new tar.gz snapshot of the latest CVS version
+every 6 hours. You can grab the latest mod_perl CVS snapshot from <A
+HREF="http://perl.apache.org/from-cvs/modperl/">http://perl.apache.org/from-cvs/modperl/</A>,
+all the mod_perl related projects are available from <A
+HREF="http://perl.apache.org/from-cvs.">http://perl.apache.org/from-cvs.</A>
+
+
+<P>
+RPM: <A HREF="http://perl.apache.org/rpm/">http://perl.apache.org/rpm/</A>
+
+<P>
+Debian users will find Perl, Apache and mod_perl are available as .deb
+files on official image CDs or from the Debian web site <A
+HREF="http://www.debian.org">http://www.debian.org</A> . The Debian
+distribution also contains many additional Perl and Apache libraries and
+modules. 
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Squid_Internet_Object_Cache">Squid - Internet Object Cache</A></H1></CENTER>
+<P>
+<A HREF="http://squid.nlanr.net/">http://squid.nlanr.net/</A>
+
+<P>
+Squid Linux 2.x Redhat RPMs : <A
+HREF="http://home.earthlink.net/~intrep/linux/">http://home.earthlink.net/~intrep/linux/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="thttpd_tiny_turbo_throttling_H">thttpd - tiny/turbo/throttling HTTP server</A></H1></CENTER>
+<P>
+<A
+HREF="http://www.acme.com/software/thttpd/">http://www.acme.com/software/thttpd/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_throttle_access">mod_throttle_access</A></H1></CENTER>
+<P>
+<A
+HREF="http://www.fremen.org/apache/mod_throttle_access.html">http://www.fremen.org/apache/mod_throttle_access.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_proxy_add_forward">mod_proxy_add_forward</A></H1></CENTER>
+<P>
+Ask Bjoern Hansen has written the <CODE>mod_proxy_add_forward.c</CODE> module for Apache that sets the <CODE>X-Forwarded-For</CODE> field when doing a ProxyPass, similar to what Squid does. His module is
+available from one of these URLs: <A
+HREF="http://modules.apache.org/search?id=124">http://modules.apache.org/search?id=124</A>,
+<A
+HREF="http://develooper.com/code/mpaf/mod_proxy_add_forward.c">http://develooper.com/code/mpaf/mod_proxy_add_forward.c</A>
+or <A
+HREF="http://www.cpan.org/authors/id/ABH/mod_proxy_add_forward.c">http://www.cpan.org/authors/id/ABH/mod_proxy_add_forward.c</A>,
+complete with instructions on how to compile it and whatnot.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="httperf_webserver_Benchmarkin">httperf -- webserver Benchmarking tool</A></H1></CENTER>
+<P>
+<A
+HREF="http://www.hpl.hp.com/personal/David_Mosberger/httperf.html">http://www.hpl.hp.com/personal/David_Mosberger/httperf.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="http_load_another_webserver_B">http_load -- another webserver Benchmarking tool</A></H1></CENTER>
+<P>
+<A
+HREF="http://www.acme.com/software/http_load/">http://www.acme.com/software/http_load/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="ab_ApacheBench">ab -- ApacheBench</A></H1></CENTER>
+<P>
+ApacheBench comes with the Apache distribution.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Daquiri_yet_another_webserver">Daquiri -- yet another webserver Benchmarking tool</A></H1></CENTER>
+<P>
+should be available from the mod_backhand CVS tree: <A
+HREF="http://www.backhand.org/mod_backhand/">http://www.backhand.org/mod_backhand/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="High_Availability_and_Load_Balan">High-Availability and Load Balancing Projects</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_backhand_Load_Balancing_f">mod_backhand -- Load Balancing for Apache</A></H2></CENTER>
+<P>
+<A
+HREF="http://www.backhand.org/mod_backhand/">http://www.backhand.org/mod_backhand/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_redundancy">mod_redundancy</A></H2></CENTER>
+<P>
+mod_redundancy is a module that works with Apache webserver. It creates a
+Master/Slave Relationship between two physical webservers. The Slave takes
+over the IP-Address(es) and the <CODE>Webservice(s)</CODE> in case of a
+failure of the Master. One of the clues of this solution is, that the
+Redundancy/Failover-Configuration is made inside the Apache-Configfile.
+
+<P>
+The product is neither OSS, nor free :(
+
+<P>
+The homepage of mod_redundancy is <A
+HREF="http://www.ask-the-guru.com">http://www.ask-the-guru.com</A> .
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="High_Availability_Linux_Project">High-Availability Linux Project</A></H2></CENTER>
+<P>
+You will find the definitive guide to load balancing techniques at the
+High-Availability Linux Project site -- <A
+HREF="http://www.henge.com/~alanr/ha/">http://www.henge.com/~alanr/ha/</A>
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="lbnamed_a_Load_Balancing_Name_">lbnamed - a Load Balancing Name Server Written in Perl</A></H2></CENTER>
+<P>
+<A
+HREF="http://www.stanford.edu/~riepel/lbnamed/">http://www.stanford.edu/~riepel/lbnamed/</A>
+<A
+HREF="http://www.stanford.edu/~riepel/lbnamed/bof.talk/">http://www.stanford.edu/~riepel/lbnamed/bof.talk/</A>
+<A
+HREF="http://www.stanford.edu/~schemers/docs/lbnamed/lbnamed.html">http://www.stanford.edu/~schemers/docs/lbnamed/lbnamed.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Network_Address_Translation_and_">Network Address Translation and Networks: Virtual Servers (Load Balancing)</A></H2></CENTER>
+<P>
+<A
+HREF="http://www.csn.tu-chemnitz.de/~mha/linux-ip-nat/diplom/node4.html#SECTION00043100000000000000">http://www.csn.tu-chemnitz.de/~mha/linux-ip-nat/diplom/node4.html#SECTION00043100000000000000</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Linux_Virtual_Server_Project">Linux Virtual Server Project</A></H2></CENTER>
+<P>
+<A
+HREF="http://www.linuxvirtualserver.org/">http://www.linuxvirtualserver.org/</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Efficient_Support_for_P_HTTP_in_">Efficient Support for P-HTTP in Cluster-Based Web Servers</A></H2></CENTER>
+<P>
+(with Mohit Aron and Willy Zwaenepoel.) In Proceedings of the USENIX 1999
+Annual Technical Conference, Monterey, CA, June 1999. <A
+HREF="http://www.cs.rice.edu/~druschel/usenix99lard.ps.gz">http://www.cs.rice.edu/~druschel/usenix99lard.ps.gz</A>
+<A
+HREF="http://www.usenix.org/publications/library/proceedings/usenix99/full_papers/aron/aron_html/index.html">http://www.usenix.org/publications/library/proceedings/usenix99/full_papers/aron/aron_html/index.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="IP_Filter">IP Filter</A></H2></CENTER>
+<P>
+The latest ip filter includes some simple load balancing code, that allows
+a round-robin distribution onto several machines via ipnat. That may be a
+simple solution for a few specific load problem. <A
+HREF="http://coombs.anu.edu.au/~avalon/ipf3.4beta3.tgz">http://coombs.anu.edu.au/~avalon/ipf3.4beta3.tgz</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Apache_Request">Apache::Request</A></H1></CENTER>
+<P>
+The package name is <EM>libapreq</EM>.
+
+<P>
+Get it from your favorite CPAN mirror at $CPAN/authors/id/DOUGM/ or from <A
+HREF="http://perl.apache.org/dist/.">http://perl.apache.org/dist/.</A>
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="DataBases">DataBases</A></H1></CENTER>
+<P>
+Low-Cost Unix Database Differences <A
+HREF="http://www.toodarkpark.org/computers/dbs.html">http://www.toodarkpark.org/computers/dbs.html</A>
+
+
+<P>
+My collection of various links to databases implementations <A
+HREF="http://stason.org/TULARC/webmaster/db.html">http://stason.org/TULARC/webmaster/db.html</A>
+
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="libgtop">libgtop</A></H1></CENTER>
+<P>
+LibGTop is a library that fetches system related information such as CPU
+Load, Memory Usage and information about running processes. The module <CODE>GTop</CODE> provides a Perl interface to this library.
+
+<P>
+<A
+HREF="http://home-of-linux.org/gnome/libgtop/">http://home-of-linux.org/gnome/libgtop/</A>
+
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./help.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 02/09/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

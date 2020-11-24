@@ -1,0 +1,25 @@
+<HTML>
+<HEAD><TITLE>Perl Conference - モジュールの作り方</TITLE>
+<LINK rel="stylesheet" href="default.css">
+</HEAD>
+<BODY>
+<!-- navi -->
+<DIV align="right">
+<A href="07.html">[prev]</A> <A href="09.html">[next]</A>
+</DIV>
+<!-- /navi -->
+<H2>クラスの実装</H2>
+<HR>
+<UL>
+<LI>コンストラクタは<CODE>new()</CODE>という名前でなくてもよい
+<LI>オブジェクトは無名ハッシュが多い<BR>
+　　　→配列, pseudo-hash ：速度
+<LI>クラスメソッド: 2つの書き方
+<OL>
+<LI><CODE>new Class name => 'value';</CODE>
+<LI><CODE>Class-&gt;new(name => 'value');</CODE>
+</OL>
+Damian Conway は2.を推奨
+</UL>
+</BODY>
+</HTML>

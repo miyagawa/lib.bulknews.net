@@ -1,0 +1,14 @@
+A:link    { color: #06C; background: transparent; }
+A:hover   { color: #6CF; background: transparent; }
+A:active  { color: #C60; background: transparent; }
+A:visited { color: #666; background: transparent; }
+HR { border-style: solid; border-width: 1pt; border-color:#039; }
+H1 { border-style: solid; border-width: 0 0 2px 0; border-color: #039;
+     color: #003399; /* background: transparent; */ background: white; }
+H2 { border-style: solid; border-width: 0 0 0 thick; border-color: #36f;
+     padding-left: 1.2ex; padding-top: 0.3ex; padding-bottom: 0.3ex;
+     color: #036; backgroud: transparent; }
+H3 { border-style: solid; border-width: 0 0 0 thick; border-color: #36f;
+     padding-left: 1.2ex; padding-top: 0.3ex; padding-bottom: 0.3ex;
+     color: #036; backgroud: transparent; }
+

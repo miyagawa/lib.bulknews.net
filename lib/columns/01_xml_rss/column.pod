@@ -1,0 +1,209 @@
+=head1 NAME
+
+RSS - Bulknews の RDF Site Summary 対応
+
+=head1 XML & Perl
+
+XMLをPerl で扱ってみようということで、bulknews http://bulknews.net/ で
+取得しているヘッドライン一覧を RSS 形式の XML で出力するのが、目的です。
+
+XML を Perl で利用するためのクラスは、CPAN に様々なインターフェースが
+登録されています。よく利用されているものには以下があるようです。
+
+=over 4
+
+=item *
+
+XML::Parser
+
+=item *
+
+XML::Twig
+
+=item *
+
+XML::DOM
+
+=item *
+
+XML::Grove
+
+=item *
+
+XML::XPATH
+
+=back
+
+C<XML::Parser>, C<XML::Twig> はストリームインタフェース、C<XML::DOM>,
+C<XML::Grove>, C<XML::XPATH> はツリー指向インターフェースとなっていま
+す。一般には、ストリーム指向の方が、速度的にもメモリ的にも有利ですが、
+ツリー形式の方が操作には優れているようです。
+
+C<XML::Parser> は C<expat> というツールを使っているため、この中ではもっ
+とも高速で、よく利用されています。C<expat> は non-validating parser で
+あるので、XML が形式として正しいかどうかの判別は行いません。よって、
+parse に失敗すると例外を投げるようです。実際に利用する際には eval() 
+で括って例外キャッチをする必要があります。
+
+C<XML::DOM> は W3C のDOMを実装したクラスで、libxml-enno というライブラ
+リに付属しています。FreeBSD4.0 では make test に失敗してしまいました。
+
+=head1 RDF Site Summary
+
+RSS は、XML によるサイトサマリのフォーマットで、Slashdot や Freshmeat 
+で利用されています。もともとは Netscape社が My Netscape で利用するため
+に提唱した規格のようです。
+
+Slashdot などのサイトは、自サイトの更新情報を RSS 形式でHTTPアクセスで
+きる場所においておき、ユーザはそれにアクセスして、自分のサイトへ 
+Slashdot の更新情報をHTMLに変換して埋め込む、といった使われ方を想定さ
+れています。
+
+また、crontab などで定期的にフェッチを行い、更新された情報のみをメール
+送信する、といった利用のされ方も考えられます。(まさに bulknews がやっ
+ていることですけど)
+
+RSS を扱うための Perl クラスが C<XML::RSS> で、内部ではC<XML::Parser> 
+を利用しています。C<LWP::Simple> と C<XML::RSS> を利用して、Freshmeat 
+のサマリを出力するスクリプトは以下のようになります。
+
+     1  #!/usr/local/bin/perl
+     2
+     3  use strict;
+     4  use LWP::Simple 'get';
+     5  use XML::RSS;
+     6
+     7  my $URL = 'http://freshmeat.net/backend/fm.rdf';
+     8
+     9  my $rss = new XML::RSS;
+    10  eval {
+    11      $rss->parse(get($URL));
+    12  };
+    13
+    14  for my $item (@{$rss->{items}}) {
+    15      printf "Title: %s\nLink: %s\nDescription: %s\n\n", $item->{title}, $item->{link}, $item->{description};
+    16  }
+
+さらに詳しい例は、Randal Schwertz のサイトに、各サイトの更新情報をメー
+ルで送信する例が載っています。(参考文献 "What's new with RSS")
+
+=head1 IMPLEMENTATION
+
+上記では、C<.rdf> ファイルの parse を行いましたが、C<XML::RSS> ではRDF
+ファイルを生成して出力することもできます。Bulknews の headlines テーブ
+ルから、各サイトに関して、最新15件のヘッドラインを RDF で出力するスク
+リプトは以下のようになりました。
+
+     1  #!/usr/local/bin/perl
+     2
+     3  use strict;
+     4  use CGI;
+     5  #use HTML::Template;
+     6  use DBI;
+     7  use Jcode;
+     8  use XML::RSS;
+     9  use vars qw(%Config);
+    10
+    11  use Bulknews::Config;
+    12  *Config = \%Bulknews::Config::Config;
+    13
+    14  # CGI
+    15  my $q = new CGI;
+    16
+    17  # Connect to DB
+    18  my $dbh = DBI->connect($Config{dsn}, $Config{db_user}, $Config{db_passwd}, {
+    19      RaiseError => 1
+    20  }) or die $DBI::errstr;
+    21
+    22  # param じゃなくて rdf.cgi?classname
+    23  my $classname = $ENV{QUERY_STRING} or die "no classname.";
+    24
+    25  my ($id, $name, $url) = $dbh->selectrow_array('SELECT id, name, url FROM site WHERE classname=?', undef, $classname);
+    26  my $rss = new XML::RSS version => '0.91';
+    27  $rss->channel(title => $name,
+    28                link => $url,
+    29                language => 'ja',
+    30                description => sprintf('Summary for %s, provided by Bulknews.',
+    31                                       $name),
+    32                );
+    33
+    34  my $headlines = $dbh->selectall_arrayref('SELECT id, headline FROM headlines WHERE site_id=? ORDER BY timestamp DESC LIMIT 15', undef, $id);
+    35  for my $h (@{$headlines}) {
+    36      $rss->add_item(title => $h->[1],
+    37                     link => 'http://bulknews.net/go.cgi?id=' . $h->[0],
+    38                     );
+    39  }
+    40
+    41  print $q->header(-type => 'text/plain'), Jcode->new($rss->as_string)->utf8;
+    42  $dbh->disconnect;
+
+11,12 行目は前回と同じく、設定変数をグロブを用いて初期化しています。
+
+23行目では、rdf.cgi?sitename のようにアクセスしてくるため、
+QUERY_STRING をとって、クラス名としています。Bulknews の site テーブル
+はC<WWW::Headline::Site> のサブクラス1個がテーブルのレコード1個に対応
+するため、クラス名からレコードを特定できるようにテーブル定義を変更しま
+した。
+
+25行目では、site テーブルからサイト名やURLをSELECT しています。簡便の
+ため、selectrow_array() メソッドをもちいて prepare(),
+execute() を省略しています。何度も execute() するのでなければ、
+こういったメソッドの方がコードも短くなっていい感じです。
+
+26行目で、C<XML::RSS> クラスのインスタンスを生成します。RDFのVersion 
+はいくつかあるようですが、デファクトスタンダードの 0.91 としました。
+
+27-32行目で、どのサイトに関するRDF かの情報を channel() メソッドで
+定義しています。言語は C<ja> としておきました。XML ですので、日本語は
+そのまま使えません。Unicode を使う必要があります。
+
+34行目で、該当するサイトの最新記事一覧を取得します。ここでも、簡便のた
+め selectall_arrayref() を使っています。bind_param 形式も利用でき
+るので、結構使えます。
+
+35-39行目で、各記事を add_item() で追加しています。ここでは、
+Description は取得していないので、title, link のみとしました。
+
+最後に、text/plain でヘッダを出力し(text/xml でもよかったのですが)、
+C<Jcode> で UTF8 化して出力しています。
+
+テーブル定義に関しても変更なく、ひとつスクリプトを書いただけで、
+Bulknews のデータベースを利用した、各ニュースサイトのRDF生成を行うこと
+ができています。 http://bulknews.net/rss/
+
+=head1 SEE ALSO
+
+=over 4
+
+=item XML::RSS
+
+http://search.cpan.org/search?dist=XML-RSS
+
+=item Using The C<XML::Parser> Module
+
+http://www.xml.com/pub/a/98/09/xml-perl.html/
+
+=item Perl and XML
+
+http://standards.ieee.org/resources/spasystem/twig/perl_xml/perl_xml.html
+
+=item Developer's Works
+
+http://www.jp.ibm.com/developerworks/xml/xml-perl.html
+http://www.jp.ibm.com/developerworks/xml/001020/j_xml-perl2.html
+
+=item What's new with C<XML::RSS>
+
+http://www.stonehenge.com/merlyn/WebTechniques/col45.html
+
+=item Bulknews
+
+http://bulknews.net/
+
+=back
+
+=head1 AUTHOR
+
+Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+
+=cut

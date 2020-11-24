@@ -1,0 +1,14 @@
+H1 { font-size: 60px; line-height: 65px; }
+H2 { font-size: 40px; line-height: 45px; }
+H3 { font-size: 30px; line-height: 35px; }
+H4 { font-size: 15px; line-height: 20px; }
+
+HR { line-height: 5px; }
+
+UL { font-size: 30px; line-height: 45px; }
+OL { font-size: 20px; line-height: 30px; }
+
+
+BLOCKQUOTE { margin-left: 10%; margin-right: 10%; font-size: 15px; line-height: 20px; background-color: #DDDDDD; }
+CODE { font-family: Arial; }
+

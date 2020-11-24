@@ -1,0 +1,3373 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Real World Scenarios </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Real World Scenarios 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./strategy.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./porting.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#Assumptions">Assumptions </A>
+	<LI><A HREF="#Standalone_mod_perl_Enabled_Apac">Standalone mod_perl Enabled Apache Server</A>
+	<UL>
+
+		<LI><A HREF="#Installation_in_10_lines">Installation in 10 lines</A>
+		<LI><A HREF="#Installation_in_10_paragraphs">Installation in 10 paragraphs</A>
+		<LI><A HREF="#Configuration">Configuration</A>
+	</UL>
+
+	<LI><A HREF="#One_Plain_and_One_mod_perl_enabl">One Plain and One mod_perl enabled Apache Servers</A>
+	<UL>
+
+		<LI><A HREF="#Configuration_and_Compilation_of">Configuration and Compilation of the Sources.</A>
+		<UL>
+
+			<LI><A HREF="#Building_the_httpd_docs_Server">Building the httpd_docs Server</A>
+			<LI><A HREF="#Building_the_httpd_perl_Server">Building the httpd_perl Server</A>
+		</UL>
+
+		<LI><A HREF="#Configuration_of_the_servers">Configuration of the servers</A>
+		<UL>
+
+			<LI><A HREF="#Basic_httpd_docs_Server_Configur">Basic httpd_docs Server Configuration</A>
+			<LI><A HREF="#Basic_httpd_perl_Server_Configur">Basic httpd_perl Server Configuration</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="#Running_Two_webservers_and_Squid">Running Two webservers and Squid in httpd Accelerator Mode</A>
+	<LI><A HREF="#Running_One_Webserver_and_Squid_">Running One Webserver and Squid in httpd Accelerator Mode</A>
+	<LI><A HREF="#mod_proxy">mod_proxy</A>
+	<UL>
+
+		<LI><A HREF="#Concepts_and_Configuration_Direc">Concepts and Configuration Directives</A>
+		<UL>
+
+			<LI><A HREF="#ProxyPass">ProxyPass</A>
+			<LI><A HREF="#ProxyPassReverse">ProxyPassReverse</A>
+			<LI><A HREF="#Security_Issues">Security Issues</A>
+		</UL>
+
+		<LI><A HREF="#Buffering_Feature">Buffering Feature</A>
+		<LI><A HREF="#Setting_the_Buffering_Limits_on_">Setting the Buffering Limits on Various OSs</A>
+		<UL>
+
+			<LI><A HREF="#IOBUFSIZE_Source_Code_Definition">IOBUFSIZE Source Code Definition</A>
+			<LI><A HREF="#ProxyReceiveBufferSize_Configura">ProxyReceiveBufferSize Configuration Directive</A>
+			<LI><A HREF="#Hacking_the_Code">Hacking the Code</A>
+		</UL>
+
+		<LI><A HREF="#Caching_Feature">Caching Feature</A>
+		<LI><A HREF="#Build_Process">Build Process</A>
+	</UL>
+
+	<LI><A HREF="#Front_end_Back_end_Proxying_with">Front-end Back-end Proxying with Virtual Hosts</A>
+	<LI><A HREF="#Getting_the_Remote_Server_IP_in_">Getting the Remote Server IP in the Back-end server in the Proxy Setup</A>
+	<UL>
+
+		<LI><A HREF="#Build">Build</A>
+		<LI><A HREF="#Usage">Usage</A>
+		<LI><A HREF="#Security">Security</A>
+		<LI><A HREF="#Caveats">Caveats</A>
+		<LI><A HREF="#mod_proxy_add_forward_Module_s_O">mod_proxy_add_forward Module's Order Precedence</A>
+	</UL>
+
+	<LI><A HREF="#HTTP_Authentication_With_Two_Ser">HTTP Authentication With Two Servers Plus a Proxy</A>
+	<LI><A HREF="#mod_rewrite_Examples">mod_rewrite Examples</A>
+	<LI><A HREF="#Caching_in_mod_proxy">Caching in mod_proxy</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="Assumptions">Assumptions</A></H1></CENTER>
+<P>
+I will assume for this section that you are familiar with plain (not
+mod_perl enabled) Apache, its compilation and configuration. In all
+configuration and code examples I will use <EM>localhost</EM> or
+<EM>www.example.com</EM> as a hostname. For the testing on a local machine,
+<EM>localhost</EM> would be just fine. If you are using the real name of your machine make
+sure to replace <EM>www.example.com</EM> with the name of your machine.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Standalone_mod_perl_Enabled_Apac">Standalone mod_perl Enabled Apache Server</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installation_in_10_lines">Installation in 10 lines</A></H2></CENTER>
+<P>
+The Installation is very very simple. This example shows installation on
+the Linux operating system.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src
+  % lwp-download <A HREF="http://www.apache.org/dist/apache_x.x.x.tar.gz">http://www.apache.org/dist/apache_x.x.x.tar.gz</A>
+  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A>
+  % tar xzvf apache_x.x.x.tar.gz
+  % tar xzvf mod_perl-x.xx.tar.gz
+  % cd mod_perl-x.xx
+  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1
+  % make &amp;&amp; make test &amp;&amp; make install
+  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That's all!
+
+<P>
+Notes: Replace x.xx and x.x.x with the real version numbers of mod_perl and
+Apache respectively. The <CODE>z</CODE> flag tells Gnu <CODE>tar</CODE> to uncompress the archive as well as extract the files. You might need
+superuser permissions to do the make install steps.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Installation_in_10_paragraphs">Installation in 10 paragraphs</A></H2></CENTER>
+<P>
+If you have the <CODE>lwp-download</CODE> utility installed, you can use it to download the sources of both packages:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % lwp-download <A HREF="http://www.apache.org/dist/apache_x.x.x.tar.gz">http://www.apache.org/dist/apache_x.x.x.tar.gz</A>
+  % lwp-download <A HREF="http://perl.apache.org/dist/mod_perl-x.xx.tar.gz">http://perl.apache.org/dist/mod_perl-x.xx.tar.gz</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>lwp-download</CODE> is a part of the LWP module (from the <CODE>libwww</CODE> package), and you will need to have it installed in order for mod_perl's <CODE>make
+test</CODE> step to pass.
+
+<P>
+Extract both sources. Usually I open all the sources in <EM>/usr/src/</EM>, but your mileage may vary. So move the sources and <CODE>chdir</CODE> to the directory that you want to put the sources in. If you have a non-GNU
+<CODE>tar</CODE> utility it will be unable to decompress so you will have to unpack in two
+steps: first uncompress the packages with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  gzip -d apache_x.x.x.tar.gz
+  gzip -d mod_perl-x.xx.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+then un-tar them with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  tar xvf apache_x.x.x.tar 
+  tar xvf mod_perl-x.xx.tar</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can probably use gunzip instead of gzip -d if you prefer.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src
+  % tar xzvf apache_x.x.x.tar.gz
+  % tar xzvf mod_perl-x.xx.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>chdir</CODE> to the mod_perl source directory:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd mod_perl-x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now build the Makefile. For your first installation and most basic work the
+parameters in the example below are the only ones you will need.  <CODE>APACHE_SRC</CODE> tells the Makefile.PL where to find the Apache
+<EM>src</EM> directory. If you have followed my suggestion and have extracted both
+sources under the directory <EM>/usr/src</EM>, then issue the command:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl Makefile.PL APACHE_SRC=../apache_x.x.x/src \
+    DO_HTTPD=1 USE_APACI=1 EVERYTHING=1</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+There are many additional optional parameters. You can find some of them
+later in this section and in the <A HREF="././config.html#">Server Configuration</A>
+section.
+
+<P>
+While running <CODE>perl Makefile.PL ...</CODE> the process will check for prerequisites and tell you if something is
+missing. If you are missing some of the perl packages or other software,
+you will have to install them before you proceed.
+
+<P>
+Next <CODE>make</CODE> the project. The command <CODE>make</CODE> builds the mod_perl extension and also calls <CODE>make</CODE> in the Apache source directory to build <CODE>httpd</CODE>. Then we run the <EM>test</EM> suite, and finally <EM>install</EM>
+the mod_perl modules in their proper places.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that if <CODE>make</CODE> fails, neither <CODE>make test</CODE> nor <CODE>make install</CODE>
+will be executed. If <CODE>make test</CODE> fails, <CODE>make install</CODE> will be not executed.
+
+<P>
+Now change to the Apache source directory and run <CODE>make install</CODE>. This will install Apache's headers, default configuration files, build
+the Apache directory tree and put <CODE>httpd</CODE> in it.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd ../apache_x.x.x
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When you execute the above command, the Apache installation process will
+tell you how to start a freshly built webserver (you need to know the path
+of <CODE>apachectl</CODE>, more about that later) and where to find the configuration files. Write
+down both, since you will need this information very soon. On my machine
+the two important paths are:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/local/apache/bin/apachectl
+  /usr/local/apache/conf/httpd.conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the build and installation processes are complete.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration">Configuration</A></H2></CENTER>
+<P>
+First, a simple configuration. Configure Apache as you usually would (set <CODE>Port</CODE>, <CODE>User</CODE>, <CODE>Group</CODE>, <CODE>ErrorLog</CODE>, other file paths etc).
+
+<P>
+Start the server and make sure it works, then shut it down. The
+<CODE>apachectl</CODE> utility can be used to start and stop the server:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /usr/local/apache/bin/apachectl start
+  % /usr/local/apache/bin/apachectl stop</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we will configure Apache to run perl CGI scripts under the
+<CODE>Apache::Registry</CODE> handler.
+
+<P>
+You can put configuration directives in a separate file and tell
+<EM>httpd.conf</EM> to include it, but for now we will simply add them to the main
+configuration file. We will add the mod_perl configuration directives to
+the end of <EM>httpd.conf</EM>. In fact you can place them anywhere in the file, but they are easier to
+find at the end.
+
+<P>
+For the moment we will assume that you will put all the scripts which you
+want to be executed by the mod_perl enabled server under the directory <EM>/home/httpd/perl</EM>. We will alias this directory to the URI <EM>/perl</EM>
+
+
+
+<P>
+Add the following configuration directives to <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Alias /perl/ /home/httpd/perl/
+  
+  PerlModule Apache::Registry
+  &lt;Location /perl&gt;
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    PerlSendHeader On
+    allow from all
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now create a four-line test script in <EM>/home/httpd/perl/</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  test.pl
+  -------
+  #!/usr/bin/perl -w
+  use strict;
+  print &quot;Content-type: text/html\r\n\r\n&quot;;
+  print &quot;It worked!!!\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that the server is probably running as a user with a restricted set of
+privileges, perhaps as user <CODE>nobody</CODE> or <CODE>www</CODE>. Look for the
+<CODE>User</CODE> directive in <EM>httpd.conf</EM> to find the userid of the server.
+
+<P>
+Make sure that you have read and execute permissions for <EM>test.pl</EM>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % chmod u+rx /home/httpd/perl/test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Test that the script works from the command line, by executing it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /home/httpd/perl/test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You should see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Content-type: text/html
+  
+  It worked!!!</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Assuming that the server's userid is <CODE>nobody</CODE>, make the script owned by this user. We already made it executable and
+readable by user.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % chown nobody /home/httpd/perl/test.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now it is time to test that mod_perl enabled Apache can execute the script.
+
+<P>
+Start the server ('<CODE>apachectl start</CODE>'). Check in <EM>logs/error_log</EM>
+to see that the server has indeed started--verify the correct date and time
+of the log entry.
+
+<P>
+To get Apache to execute the script we simply fetch its URI. Assuming that
+your <EM>httpd.conf</EM> has been configured with the directive <CODE>Port
+80</CODE>, start your favorite browser and fetch the following URI:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://www.example.com/perl/test.pl">http://www.example.com/perl/test.pl</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you have the loop-back device (127.0.0.1) configured, you can use the
+URI:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://localhost/perl/test.pl">http://localhost/perl/test.pl</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In either case, you should see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  It worked!!!</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If your server is listening on a port other than 80, for example 8000, then
+fetch the URI:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  <A HREF="http://www.example.com:8000/perl/test.pl">http://www.example.com:8000/perl/test.pl</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or whatever is appropriate.
+
+<P>
+If something went wrong, go through the installation process again, and
+make sure you didn't make a mistake. If that doesn't help, read the <CODE>INSTALL</CODE> pod document (<CODE>perlpod INSTALL</CODE>) in the mod_perl distribution directory.
+
+<P>
+Now that your mod_perl server is working, copy some of your Perl CGI
+scripts into the directory <EM>/home/httpd/perl/</EM> or below it.
+
+<P>
+If your programming techniques are good, chances are that your scripts will
+work with no modifications at all. With the mod_perl enabled server you
+will see them working very much faster.
+
+<P>
+If your programming techniques are sloppy, some of your scripts will not
+work and they may exhibit strange behaviour. Depending on the degree of
+sloppiness they may need anything from minor tweaking to a major rewrite to
+make them work properly. (See <A HREF="././debug.html#Sometimes_My_Script_Works_Somet">Sometimes My Script Works, Sometimes It Does Not</A> )
+
+<P>
+The above setup is very basic, but as with Perl, you can start to benefit
+from mod_perl from the very first moment you try it. As you become more
+familiar with mod_perl you will want to start writing Apache handlers and
+make more use of its power.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="One_Plain_and_One_mod_perl_enabl">One Plain and One mod_perl enabled Apache Servers</A></H1></CENTER>
+<P>
+Since we are going to run two Apache servers we will need two complete (and
+different) sets of configuration, log and other files. In this scenario
+we'll use a dedicated root directory for each server, which is a personal
+choice. You can choose to have both servers living under the same roof, but
+it might lead to a mess, since it requires a slightly more complicated
+configuration. This decision might be nice since you will be able to share
+some directories like <EM>include</EM>
+(which contains Apache headers), but in fact this can become a problem
+later, when you decide to upgrade one server but not the other. You will
+have to solve this problem then, so why not to avoid it in first place.
+
+<P>
+From now on we will refer to these two servers as <STRONG>httpd_docs</STRONG> (plain Apache) and <STRONG>httpd_perl</STRONG> (Apache/mod_perl). We will use
+<EM>/usr/local</EM> as our <EM>root</EM> directory.
+
+<P>
+First let's prepare the sources. We will assume that all the sources go
+into the <EM>/usr/src</EM> directory. Since you will probably want to tune each copy of Apache
+separately, it is better to use two separate copies of the Apache source
+for this configuration. For example you might want only the httpd_docs
+server to be built with the mod_rewrite module.
+
+<P>
+Having two independent source trees will prove helpful unless you use
+dynamically shared objects (<CODE>DSO</CODE>) which is covered later in this chapter.
+
+<P>
+Make two subdirectories:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % mkdir /usr/src/httpd_docs
+  % mkdir /usr/src/httpd_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Next put a set of the Apache sources into the <EM>/usr/src/httpd_docs</EM>
+directory (replace the directory <EM>/tmp</EM> with the path to the downloaded file and <CODE>x.x.x</CODE> with the version of Apache that you have downloaded):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/httpd_docs
+  % gzip -dc /tmp/apache_x.x.x.tar.gz | tar xvf -</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+or if you have GNU tar:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % tar xvzf /tmp/apache_x.x.x.tar.gz</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Just to check we have extracted in the right way:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ls -l
+  drwxr-xr-x  8 stas  stas 2048 Apr 29 17:38 apache_x.x.x/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now prepare the httpd_perl server sources:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/httpd_perl
+  % gzip -dc /tmp/apache_x.x.x.tar.gz | tar xvf -
+  % gzip -dc /tmp/modperl-x.xx.tar.gz | tar xvf -
+  
+  % ls -l
+  drwxr-xr-x  8 stas  stas 2048 Apr 29 17:38 apache_x.x.x/
+  drwxr-xr-x  8 stas  stas 2048 Apr 29 17:38 modperl-x.xx/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We are going to use a default Apache directory layout, and place each
+server directories under its dedicated directory. The two directories are
+as you have already guessed:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/local/httpd_perl/
+  /usr/local/httpd_docs/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The next step is to configure and compile the sources: Below are the
+procedures to compile both servers, using the directory layout I have just
+suggested.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration_and_Compilation_of">Configuration and Compilation of the Sources.</A></H2></CENTER>
+<P>
+As usual we use <EM>x.x.x</EM> instead of real version numbers so this document will never become
+obsolete. But the most important thing -- it's not misleading. It's quite
+possible that since the moment this document was written a new version has
+come out and you will be not aware of this fact if you will not check for
+it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Building_the_httpd_docs_Server">Building the httpd_docs Server</A></H3></CENTER>
+<DL>
+<P><DT><STRONG><A NAME="item_Sources">Sources Configuration:</A></STRONG><DD>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/httpd_docs/apache_x.x.x
+  % make clean
+  %  ./configure --prefix=/usr/local/httpd_docs \
+     --enable-module=rewrite --enable-module=proxy</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We need the <EM>mod_rewrite</EM> and <EM>mod_proxy</EM> modules as we will see later, so we tell <EM>./configure</EM> to build them in.
+
+<P>
+You might want to add <CODE>--layout</CODE> to see the resulting directories' layout without actually running the
+configuration process.
+
+<P><DT><STRONG><A NAME="item_Source">Source Compilation and Installation</A></STRONG><DD>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make
+  % make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Rename <CODE>httpd</CODE> to <CODE>http_docs</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % mv /usr/local/httpd_docs/bin/httpd \
+       /usr/local/httpd_docs/bin/httpd_docs</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now modify the <STRONG>apachectl</STRONG> utility to point to the renamed httpd via your favorite text editor or by
+using perl:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -pi -e 's|bin/httpd|bin/httpd_docs|' \
+    /usr/local/httpd_docs/bin/apachectl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    </DL>
+<P>
+Another approach would be to use the <EM>--target</EM> option while configuring the source, which makes the last two commands
+unnecessary.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./configure --prefix=/usr/local/httpd_docs \
+     --target=httpd_docs \
+     --enable-module=rewrite --enable-module=proxy
+  % make &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since we told <EM>./configure</EM> that we want the executable to be called
+<CODE>httpd_docs</CODE> (via <CODE>--target=httpd_docs</CODE>) -- it performs all the naming adjustment for us.
+
+<P>
+The only thing that you might find unusual, is that <EM>apachectl</EM> will be now called <EM>httpd_docsctl</EM> and the configuration file
+<EM>httpd.conf</EM> now will be called <EM>httpd_docs.conf</EM>.
+
+<P>
+We will leave the decision making about the preffered configuration and
+installation way to the reader. In the rest of the guide we will continue
+using the regular names resulted from using the standard configuration and
+the manual executable name adjustment as described at the beginning of this
+section .
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Building_the_httpd_perl_Server">Building the httpd_perl Server</A></H3></CENTER>
+<P>
+Now we proceed with the sources configuration and installation of the
+<EM>httpd_perl</EM> server. First make sure the sources are clean:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/httpd_perl/apache_x.x.x
+  % make clean
+  % cd /usr/src/httpd_perl/mod_perl-x.xx
+  % make clean</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It is important to <STRONG>make clean</STRONG> since some of the versions are not binary compatible (e.g apache 1.3.3 vs
+1.3.4) so any ``third-party'' C modules need to be re-compiled against the
+latest header files.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /usr/src/httpd_perl/mod_perl-x.xx</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /usr/bin/perl Makefile.PL \
+        APACHE_SRC=../apache_x.x.x/src \
+        DO_HTTPD=1 USE_APACI=1 EVERYTHING=1 \
+        APACHE_PREFIX=/usr/local/httpd_perl \
+        APACI_ARGS='--prefix=/usr/local/httpd_perl'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you need to pass any other configuration options to Apache's
+<CODE>configure</CODE>, add them after the <EM>--prefix</EM> option. e.g:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>        APACI_ARGS='--prefix=/usr/local/httpd_perl \
+                    --enable-module=status'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Notice that <STRONG>all</STRONG>  <CODE>APACI_ARGS</CODE> (above) must be passed as one long line if you work with <CODE>t?csh</CODE>!!! However with <CODE>(ba)?sh</CODE> it works correctly the way it is shown above, breaking the long lines with
+'<CODE>\</CODE>'. As of tcsh version 6.08.0, when it passes the <CODE>APACI_ARGS</CODE>
+arguments to <CODE>configure</CODE> it does not alter the newlines, but it strips the backslashes, thus
+breaking the configuration process.
+
+<P>
+Notice that just like in httpd_docs configuration you can use
+<CODE>--target=httpd_perl</CODE> instead of specifying each directory separately. Note that this option has
+to be the very last argument in
+<CODE>APACI_ARGS</CODE>, otherwise 'make test' tries to run <CODE>'httpd_perl'</CODE>, which fails.
+
+<P>
+[META: It's very important to use the same compiler you build the perl
+with. See the section '<A HREF="././install.html#What_Compiler_Should_Be_Used_to_">What Compiler Should Be Used to Build mod_perl</A>' for more information.
+
+<P>
+[META: --- Hmm, what's the option that overrides the compiler when building
+Apache from mod_perl. Check also whether mod_perl supplies the right
+compiler (the one used for building itself) -- if it does there is no need
+for the above note. ]
+
+<P>
+Now, build, test and install the <CODE>httpd_perl</CODE>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % make &amp;&amp; make test &amp;&amp; make install</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Upon installation Apache puts a stripped version of <CODE>httpd</CODE> at
+<EM>/usr/local/httpd_perl/bin/httpd</EM>. The original version which includes debugging symbols (if you need to run
+a debugger on this executable) is located at
+<EM>/usr/src/httpd_perl/apache_x.x.x/src/httpd</EM>.
+
+<P>
+You may have noticed that we did not run <CODE>make install</CODE> in the Apache source directory. When <CODE>USE_APACI</CODE> is enabled, <CODE>APACHE_PREFIX</CODE> will specify the <CODE>--prefix</CODE> option for Apache's <CODE>configure</CODE> utility, which gives the installation path for Apache. When this option is
+used, mod_perl's <CODE>make install</CODE> will also <CODE>make install</CODE> for Apache, installing the httpd binary, the support tools, and the
+configuration, log and document trees. If this option is not used you will
+have to explicitly run make install in the Apache source directory.
+
+<P>
+If <CODE>make test</CODE> fails, look into
+<EM>/usr/src/httpd_perl/mod_perl-x.xx/t/logs</EM> and read the error.log file. Also see <A HREF="././install.html#make_test_fails">make test fails</A>.
+
+<P>
+While doing <CODE>perl Makefile.PL ...</CODE> mod_perl might complain by warning you about a missing library <CODE>libgdbm</CODE>. This is a crucial warning. See
+<A HREF="././install.html#Missing_or_Misconfigured_libgdbm">Missing or Misconfigured libgdbm.so</A> for more info.
+
+<P>
+Now rename <CODE>httpd</CODE> to <CODE>httpd_perl</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % mv /usr/local/httpd_perl/bin/httpd \
+    /usr/local/httpd_perl/bin/httpd_perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Update the <EM>apachectl</EM> utility to drive the renamed httpd:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -p -i -e 's|bin/httpd|bin/httpd_perl|' \
+    /usr/local/httpd_perl/bin/apachectl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Configuration_of_the_servers">Configuration of the servers</A></H2></CENTER>
+<P>
+Now when we have completed the building process, the last stage before
+running the servers is to configure them.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Basic_httpd_docs_Server_Configur">Basic httpd_docs Server Configuration</A></H3></CENTER>
+<P>
+Configuring of the <CODE>httpd_docs</CODE> server is a very easy task. Starting from version 1.3.4 of Apache, there is
+only one file to edit. Open
+<EM>/usr/local/httpd_docs/conf/httpd.conf</EM> in your favorite text editor and configure it as you usually would, except
+make sure that you configure the log file directory (<EM>/usr/local/httpd_docs/logs</EM>
+and so on) and the other paths according to the layout you have decided to
+use.
+
+<P>
+Start the server with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/local/httpd_docs/bin/apachectl start</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Basic_httpd_perl_Server_Configur">Basic httpd_perl Server Configuration</A></H3></CENTER>
+<P>
+Edit the <EM>/usr/local/httpd_perl/conf/httpd.conf</EM>. As with the
+<CODE>httpd_docs</CODE> server configuration, make sure that <CODE>ErrorLog</CODE> and other file location directives are set to point to the right places,
+according to the chosen directory layout.
+
+<P>
+The first thing to do is to set a <CODE>Port</CODE> directive - it should be different from that used by the plain Apache
+server (<CODE>Port 80</CODE>) since we cannot bind two servers to the same port number on the same
+machine. Here we will use <CODE>8080</CODE>. Some developers use port <CODE>81</CODE>, but you can bind to ports below 1024 only if the server has root
+permissions. If you are running on a multiuser machine, there is a chance
+that someone already uses that port, or will start using it in the future,
+which could cause problems. If you are the only user on your machine,
+basically you can pick any unused port number. Many organizations use
+firewalls which may block some of the ports, so port number choice can be a
+controversial topic. From my experience the most popular port numbers are: <CODE>80</CODE>, <CODE>81</CODE>, <CODE>8000</CODE> and <CODE>8080</CODE>. Personally, I prefer the port <CODE>8080</CODE>. Of course with the two server scenario you can hide the nonstandard port
+number from firewalls and users, by using either mod_proxy's <CODE>ProxyPass</CODE> directive or a proxy server like Squid.
+
+<P>
+For more details see <A HREF="././config.html#Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A>, <A HREF="././scenario.html#Running_One_Webserver_and_Squid_">Running One Webserver and Squid in httpd Accelerator Mode</A>, <A HREF="././scenario.html#Running_Two_webservers_and_Squid">Running Two Webservers and Squid in httpd Accelerator Mode</A> and <A HREF="././scenario.html#mod_proxy">Using mod_proxy</A>.
+
+<P>
+Now we proceed to the mod_perl specific directives. It will be a good idea
+to add them all at the end of <CODE>httpd.conf</CODE>, since you are going to fiddle with them a lot in the early stages.
+
+<P>
+First, you need to specify the location where all mod_perl scripts will be
+located.
+
+<P>
+Add the following configuration directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    # mod_perl scripts will be called from
+  Alias /perl/ /usr/local/httpd_perl/perl/</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+From now on, all requests for URIs starting with <EM>/perl</EM> will be executed under mod_perl and will be mapped to the files in
+<EM>/usr/local/httpd_perl/perl/</EM>.
+
+<P>
+Now we configure the <EM>/perl</EM> location.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlModule Apache::Registry</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;Location /perl&gt;
+    #AllowOverride None
+    SetHandler perl-script
+    PerlHandler Apache::Registry
+    Options ExecCGI
+    allow from all
+    PerlSendHeader On
+  &lt;/Location&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This configuration causes any script that is called with a path prefixed
+with <EM>/perl</EM> to be executed under the <CODE>Apache::Registry</CODE>
+module and as a CGI (hence the <CODE>ExecCGI</CODE>--if you omit this option the script will be printed to the user's browser
+as plain text or will possibly trigger a '<STRONG>Save-As</STRONG>' window). The <CODE>Apache::Registry</CODE>
+module lets you run your (carefully written) Perl CGI scripts virtually
+unchanged under mod_perl. The <CODE>PerlModule</CODE> directive is the equivalent of Perl's <CODE>require().</CODE> We load the <CODE>Apache::Registry</CODE>
+module before we use it by giving the <CODE>PerlHandler</CODE>
+
+<CODE>Apache::Registry</CODE> directive.
+
+<P>
+<CODE>PerlSendHeader On</CODE> tells the server to send an HTTP header to the browser on every script
+invocation. You will want to turn this off for nph (non-parsed-headers)
+scripts.
+
+<P>
+This is only a very basic configuration. The <A HREF="././config.html#">Server Configuration</A> section covers the rest of the details.
+
+<P>
+Now start the server with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /usr/local/httpd_perl/bin/apachectl start</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Running_Two_webservers_and_Squid">Running Two webservers and Squid in httpd Accelerator Mode</A></H1></CENTER>
+<P>
+While I have detailed the mod_perl server installation, you are on your own
+with installing the Squid server (See <A HREF="././help.html#">Getting Helped</A> for more details). I run Linux, so I downloaded the RPM package, installed
+it, configured the <EM>/etc/squid/squid.conf</EM>, fired off the server and all was set.
+
+<P>
+Basically once you have Squid installed, you just need to modify the
+default <CODE>squid.conf</CODE> as I will explain below, then you are ready to run it.
+
+<P>
+The configuration that I'm going to present works with Squid server version
+2.3.STABLE2. It's possible that some directives will change in future
+versions.
+
+<P>
+First, let's take a look at what we have already running and what we want
+from squid.
+
+<P>
+Previously we have had the <CODE>httpd_docs</CODE> and <CODE>httpd_perl</CODE> servers listening on ports 80 and 8080. Now we want squid to listen on port
+80, to forward requests for static objects (plain HTML pages, images and so
+on) to the port which the httpd_docs server listens to, and dynamic
+requests to httpd_perl's port. And of course collecting the generated
+responses, which will be delivered to the client by Squid. As mentioned
+before this mode is known as <EM>httpd-accelerator</EM>
+mode in proxy dialect.
+
+<P>
+Therefore we have to reconfigure the httpd_docs server to listen to port 81
+instead, since port 80 will be taken by Squid. Remember that in our
+scenario both copies of Apache will reside on the same machine as Squid.
+
+<P>
+A proxy server makes all the magic behind it transparent to users. Both
+Apache servers return the data to Squid (unless it was already cached by
+Squid). The client never sees the other ports and never knows that there
+might be more than one server running. Do not confuse this scenario with <CODE>mod_rewrite</CODE>, where a server redirects the request somewhere according to the rewrite
+rules and forgets all about it. (i.e. works as a one way dispatcher, which
+dispatches the jobs but is not responsible fo
+
+<P>
+Squid can be used as a straightforward proxy server. ISPs and other
+companies generally use it to cut down the incoming traffic by caching the
+most popular requests. However we want to run it in <CODE>httpd
+accelerator mode</CODE>. Two directives (<CODE>httpd_accel_host</CODE> and
+<CODE>httpd_accel_port</CODE>) enable this mode. We will see more details shortly.  
+
+<P>
+If you are currently using Squid in the regular proxy mode, you can extend
+its functionality by running both modes concurrently. To accomplish this,
+you can extend the existing Squid configuration with
+<STRONG>httpd accelerator mode</STRONG>'s related directives or you can just create one from scratch.
+
+<P>
+Let's go through the changes we should make to the default configuration
+file. Since the file with default settings (<EM>/etc/squid/squid.conf</EM>) is huge (about 60KB) and we will not alter 95% of its default settings,
+my suggestion is to write a new one including only the modified directives.
+
+<P>
+We want to enable the redirect feature, to be able to serve requests by
+more than one server (in our case we have two: the httpd_docs and
+httpd_perl servers). So we specify <CODE>httpd_accel_host</CODE> as virtual. This assumes that your server has multiple interfaces - Squid
+will bind to all of them.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd_accel_host virtual</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then we define the default port the requests will be sent to, unless
+redirected. We assume that most requests will be for static documents (also
+it's easier to define redirect rules for the mod_perl server because of the
+URI that starts with <EM>perl</EM> or similar). We have our httpd_docs listening on port 81:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd_accel_port 81</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And as described before, squid listens to port 80.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  http_port 80</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We do not use <CODE>icp</CODE> (<CODE>icp</CODE> is used for cache sharing between neighboring machines, which is more
+relevant in the proxy mode).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  icp_port 0</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>hierarchy_stoplist</CODE> defines a list of words which, if found in a URL, causes the object to be
+handled directly by the cache. Since we told Squid in the previous
+directive that we aren't going to share the cache between neighboring
+machines this directive is irrelevant. In case that you do use this
+feature, make sure to set this directive to something like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  hierarchy_stoplist /cgi-bin /perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+where the <EM>/cgi-bin</EM> and <EM>/perl</EM> are aliases for the locations which handle the dynamic requests.
+
+<P>
+Now we tell Squid not to cache dynamically generated pages.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  acl QUERY urlpath_regex /cgi-bin /perl
+  no_cache deny QUERY</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Please note that the last two directives are controversial ones. If you
+want your scripts to be more compliant with the HTTP standards, according
+to the HTTP specification the headers of your scripts should carry the <EM>Caching Directives</EM>: <CODE>Last-Modified</CODE> and <CODE>Expires</CODE>.
+
+<P>
+What are they for? If you set the headers correctly, there is no need to
+tell the Squid accelerator <STRONG>NOT</STRONG> to try to cache anything. Squid will not bother your mod_perl servers a
+second time if a request is (a) cachable and (b) still in the cache. Many
+mod_perl applications will produce identical results on identical requests
+if not much time has elapsed between the requests. So your Squid might have
+a hit ratio of 50%, which means that the mod_perl servers will have only
+half as much work to do as they did before you installed Squid (or
+mod_proxy).
+
+<P>
+Even if you insert a user-ID and date in your page, caching can save
+resources when you set the expiration time to 1 second. A user might double
+click where a single click would do, thus sending two requests in parallel.
+Squid could serve the second request.
+
+<P>
+But this is only possible if you set the headers correctly. Refer to the
+chapter <A HREF="././correct_headers.html#">Correct Headers - A quick guide for mod_perl users</A> to learn more about generating the proper caching headers under mod_perl.
+In case where only the scripts under
+<EM>/perl/caching-unfriendly</EM> are not <EM>caching friendly</EM> fix the above setting to be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  acl QUERY urlpath_regex /cgi-bin /perl/caching-unfriendly
+  no_cache deny QUERY</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But if you are lazy, or just have too many things to deal with, you can
+leave the above directives the way we described. Just keep in mind that one
+day you will want to reread this section and <A HREF="././correct_headers.html#">the headers generation tutorial</A> to squeeze even more power from your servers without investing money in
+more memory and better hardware.
+
+<P>
+While testing you might want to enable the debugging options and watch the
+log files in the directory <EM>/var/log/squid/</EM>. But make sure to turn debugging off in your production server. Below we
+show it commented out, which makes it disabled, since it's disabled by
+default. Debug option 28 enables the debugging of the access control
+routes, for other debug codes see the documentation embedded in the default
+configuration file that comes with squid.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # debug_options 28</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We need to provide a way for Squid to dispatch requests to the correct
+servers. Static object requests should be redirected to httpd_docs unless
+they are already cached, while requests for dynamic documents should go to
+the httpd_perl server. The configuration below tells Squid to fire off 10
+redirect daemons at the specified path of the redirect daemon and (as
+suggested by Squid's documentation) disables rewriting of any <CODE>Host:</CODE> headers in redirected requests. The redirection daemon script is listed
+below.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  redirect_program /usr/lib/squid/redirect.pl
+  redirect_children 10
+  redirect_rewrites_host_header off</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The maximum allowed request size is in kilobytes, which is mainly useful
+during <CODE>PUT</CODE> and <CODE>POST</CODE> requests. A user who attempts to send a request with a body larger than
+this limit receives an ``Invalid Request'' error message. If you set this
+parameter to a zero, there will be no limit imposed. If you are using <CODE>POST</CODE> to upload files, then set this to the largest file's size plus a few extra
+kbytes.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  request_body_max_size 1000 KB</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then we have access permissions, which we will not explain. You might want
+to read the documentation, so as to avoid any security problems.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  acl all src 0.0.0.0/0.0.0.0
+  acl manager proto cache_object
+  acl localhost src 127.0.0.1/255.255.255.255
+  acl myserver src 127.0.0.1/255.255.255.255
+  acl SSL_ports port 443 563
+  acl Safe_ports port 80 81 8080 81 443 563
+  acl CONNECT method CONNECT
+  
+  http_access allow manager localhost
+  http_access allow manager myserver
+  http_access deny manager
+  http_access deny !Safe_ports
+  http_access deny CONNECT !SSL_ports
+  # http_access allow all</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since Squid should be run as a non-root user, you need these if you are
+invoking the Squid as root. The user <EM>squid</EM> is created when the Squid server is installed.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cache_effective_user squid
+  cache_effective_group squid</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now configure a memory size to be used for caching. The Squid documentation
+warns that the actual size of Squid can grow to be three times larger than
+the value you set.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cache_mem 20 MB</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We want to keep pools of allocated (but unused) memory available for future
+use if we have the memory available of course. Otherwise turn it off.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  memory_pools on</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now tighten the runtime permissions of the cache manager CGI script (<CODE>cachemgr.cgi</CODE>, which comes bundled with squid) on your production server.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cachemgr_passwd disable shutdown</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you are not using this script to manage the Squid server from remote,
+you should disable it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  cachemgr_passwd disable all</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the redirection daemon script (you should put it at the location you
+have specified in the <CODE>redirect_program</CODE> parameter in the config file above, and make it executable by the webserver
+of course):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/local/bin/perl -p
+  BEGIN{ $|=1 }
+  s|www.example.com(?::81)?/perl/|www.example.com:8080/perl/|o ;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here is what the regular expression from above does; it matches all the
+URIs that include either the string <EM>www.example.com/perl/</EM> or the string <EM>www.example.com:81/perl/</EM> and replaces either of these strings with <EM>www.example.com:8080/perl</EM>. No matter whether the regular expression worked or not, the <CODE>$_</CODE> variable is automagically printed.
+
+<P>
+We can write the above code as the following code as well:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/local/bin/perl
+  
+  $|=1;
+  
+  while (&lt;&gt;) {
+      # redirect to mod_perl server (httpd_perl)
+    print($_), next 
+      if s|www.example.com(:81)?/perl/|www.example.com:8080/perl/|o;
+  
+      # send it unchanged to plain apache server (http_docs)
+    print;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The above redirector can be more complex of course, but you know Perl,
+right?
+
+<P>
+A few notes regarding the redirector script:
+
+<P>
+You must disable buffering.  <CODE>$|=1;</CODE> does the job. If you do not disable buffering, <CODE>STDOUT</CODE> will be flushed only when its buffer becomes full--and its default size is
+about 4096 characters. So if you have an average URL of 70 chars, only
+after about 59 (4096/70) requests will the buffer be flushed, and the
+requests will finally reach the server. Your users will not wait that long,
+unless you have hundreds requests per second and then the buffer will be
+flushed very frequently because it'll get full very fast.
+
+<P>
+If you think that this is a very ineffective way to redirect, you should
+consider the following explanation. The redirector runs as a daemon, it
+fires up N redirect daemons, so there is no problem with Perl interpreter
+loading. Exactly as with mod_perl, the perl interpreter is loaded all the
+time in memory and the code has already been compiled, so the redirect is
+very fast (not much slower than if the redirector was written in C). Squid
+keeps an open pipe to each redirect daemon, thus there is no overhead of
+the system calls.
+
+<P>
+Now it is time to restart the server, at linux I do it with:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  /etc/rc.d/init.d/squid restart</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the Squid server setup is complete.
+
+<P>
+Almost... When you try the new setup, you will be surprised and upset to
+discover port 81 showing up in the URLs of the static objects (like htmls).
+Hey, we did not want the user to see the port 81 and use it instead of 80,
+since then it will bypass the squid server and the hard work we went
+through was just a waste of time!
+
+<P>
+The solution is to make both squid and httpd_docs listen to the same port.
+This can be accomplished by binding each one to a specific interface (so
+they are listening to different <STRONG>sockets</STRONG>). Modify
+<EM>httpd_docs/conf/httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Port 80
+  BindAddress 127.0.0.1
+  Listen 127.0.0.1:80</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now the httpd_docs server is listening only to requests coming from the
+local server. You cannot access it directly from the outside. Squid becomes
+a gateway that all the packets go through on the way to the httpd_docs
+server.
+
+<P>
+Modify <EM>squid.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  http_port 80
+  tcp_outgoing_address 127.0.0.1
+  httpd_accel_host 127.0.0.1
+  httpd_accel_port 80</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now restart the Squid and httpd_docs servers (it doesn't matter which one
+you start first), and voila--the port number has gone.
+
+<P>
+You must also have in the file <EM>/etc/hosts</EM> the following entry (chances are that it's already there):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  127.0.0.1 localhost.localdomain localhost</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now if your scripts are generating HTML including fully qualified self
+references, using 8080 or the other port, you should fix them to generate
+links to point to port 80 (which means not using the port at all in the
+URI). If you do not do this, users will bypass Squid and will make direct
+requests to the mod_perl server's port. As we will see later just like with
+httpd_docs, the httpd_perl server can be configured to listen only to
+requests coming from the localhost (with Squid forwarding these requests
+from the outside) and therefore users will not be able to bypass Squid.
+
+<P>
+To save you some keystrokes, here is the whole modified <CODE>squid.conf</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  http_port 80
+  tcp_outgoing_address 127.0.0.1
+  httpd_accel_host 127.0.0.1
+  httpd_accel_port 80
+  
+  icp_port 0
+  
+  acl QUERY urlpath_regex /cgi-bin /perl
+  no_cache deny QUERY
+  
+  # debug_options 28
+  
+  redirect_program /usr/lib/squid/redirect.pl
+  redirect_children 10
+  redirect_rewrites_host_header off
+  
+  request_body_max_size 1000 KB
+  
+  acl all src 0.0.0.0/0.0.0.0
+  acl manager proto cache_object
+  acl localhost src 127.0.0.1/255.255.255.255
+  acl myserver src 127.0.0.1/255.255.255.255
+  acl SSL_ports port 443 563
+  acl Safe_ports port 80 81 8080 81 443 563
+  acl CONNECT method CONNECT
+  
+  http_access allow manager localhost
+  http_access allow manager myserver
+  http_access deny manager
+  http_access deny !Safe_ports
+  http_access deny CONNECT !SSL_ports
+  # http_access allow all
+  
+  cache_effective_user squid
+  cache_effective_group squid
+  
+  cache_mem 20 MB
+  
+  memory_pools on
+  
+  cachemgr_passwd disable shutdown</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that all directives should start at the beginning of the line, so if
+you cut and paste from the text make sure you remove the leading whitespace
+from each line.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Running_One_Webserver_and_Squid_">Running One Webserver and Squid in httpd Accelerator Mode</A></H1></CENTER>
+<P>
+When I was first told about Squid, I thought: ``Hey, now I can drop the
+<CODE>httpd_docs</CODE> server and have just Squid and the <CODE>httpd_perl</CODE>
+servers``. Since all my static objects will be cached by squid, I do not
+need the light <CODE>httpd_docs</CODE> server.
+
+<P>
+But I was a wrong. Why? Because I still have the overhead of loading the
+objects into Squid the first time. If a site has many of them, unless a
+huge chunk of memory is devoted to Squid they won't all be cached and the
+heavy mod_perl server will still have the task of serving static objects.
+
+<P>
+How do we measure the overhead? The difference between the two servers is
+in memory consumption, everything else (e.g. I/O) should be equal. So you
+have to estimate the time needed to fetch each static object for the first
+time at a peak period and thus the number of additional servers you need
+for serving the static objects. This will allow you to calculate the
+additional memory requirements. I imagine that this amount could be
+significant in some installations.
+
+<P>
+So on for production servers I have decided to to stick with the Squid,
+httpd_docs and httpd_perl scenario, where I can optimize and fine tune
+everything. But if in your case there is almost no static objects to serve,
+the httpd_docs server is definitely redundant. And all you need are the
+mod_perl server and Squid to buffer the output from it.
+
+<P>
+If you want to proceed with this setup, install mod_perl enabled Apache and
+Squid. Then use a configuration similar to the previous section, but now
+httpd_docs is not there anymore. Also we do not need the redirector anymore
+and we specify <CODE>httpd_accel_host</CODE> as a name of the server and not <CODE>virtual</CODE>. Because we do not redirect there is no need to bind two servers on the
+same port so there are neither <CODE>Bind</CODE>
+nor <CODE>Listen</CODE> directives in <EM>httpd.conf</EM>.
+
+<P>
+The modified configuration for this simlified setup (see the explanations
+in the previous section):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd_accel_host put.your.hostname.here
+  httpd_accel_port 8080
+  http_port 80
+  icp_port 0
+  
+  acl QUERY urlpath_regex /cgi-bin /perl
+  no_cache deny QUERY
+  
+  # debug_options 28
+  
+  # redirect_program /usr/lib/squid/redirect.pl
+  # redirect_children 10
+  # redirect_rewrites_host_header off
+  
+  request_body_max_size 1000 KB
+  
+  acl all src 0.0.0.0/0.0.0.0
+  acl manager proto cache_object
+  acl localhost src 127.0.0.1/255.255.255.255
+  acl myserver src 127.0.0.1/255.255.255.255
+  acl SSL_ports port 443 563
+  acl Safe_ports port 80 81 8080 81 443 563
+  acl CONNECT method CONNECT
+  
+  http_access allow manager localhost
+  http_access allow manager myserver
+  http_access deny manager
+  http_access deny !Safe_ports
+  http_access deny CONNECT !SSL_ports
+  # http_access allow all
+  
+  cache_effective_user squid
+  cache_effective_group squid
+  
+  cache_mem 20 MB
+  
+  memory_pools on
+  
+  cachemgr_passwd disable shutdown</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_proxy">mod_proxy</A></H1></CENTER>
+<P>
+mod_proxy implements a proxy/cache for Apache. It implements proxying
+capability for FTP, CONNECT (for SSL), HTTP/0.9, and HTTP/1.0. The module
+can be configured to connect to other proxy modules for these and other
+protocols.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Concepts_and_Configuration_Direc">Concepts and Configuration Directives</A></H2></CENTER>
+<P>
+In the following explanation, we will use <EM>www.example.com</EM> as the main server users access when they want to get some kind of service
+and <EM>backend.example.com</EM> as a machine that does the heavy work. The main and the back-end are
+different servers, they may or may not coexist on the same machine.
+
+<P>
+The mod_proxy module is built into the server that answers requests to the <EM>www.example.com</EM> hostname. For the matter of this discussion it doesn't matter what
+functionality is built into the
+<EM>backend.example.com</EM> server, obviously it'll be mod_perl for most of us.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="ProxyPass">ProxyPass</A></H3></CENTER>
+<P>
+You can use the <CODE>ProxyPass</CODE> configuration directive for mapping remote hosts into the space of the
+local server; the local server does not act as a proxy in the conventional
+sense, but appears to be a mirror of the remote server.
+
+<P>
+Let's explore what this rule does:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ProxyPass   /modperl/ <A HREF="http://backend.example.com/modperl/">http://backend.example.com/modperl/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When a user initiates a request to <A
+HREF="http://www.example.com/modperl/foo.pl">http://www.example.com/modperl/foo.pl</A>,
+the request will be redirected to <A
+HREF="http://backend.example.com/modperl/foo.pl">http://backend.example.com/modperl/foo.pl</A>,
+and starting from this moment user will see <A
+HREF="http://backend.example.com/">http://backend.example.com/</A> in her
+location window, instead of <A
+HREF="http://www.example.com/.">http://www.example.com/.</A>
+
+<P>
+You have probably noticed many examples of this from real life Internet
+sites you've visited. Free-email service providers and other similar heavy
+online services display the login or the main page from their main server,
+and then when you log-in you see something like
+<EM>x11.example.com</EM>, then <EM>w59.example.com</EM>, etc. These are the back-end servers that do the actual work.
+
+<P>
+Obviously this is not an ideal solution, but usually users don't really
+care about what they see in the location window. So you can get away with
+this approach. As I'll show in a minute there is a better solution which
+removes this caveat and provides even more useful functionalities.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="ProxyPassReverse">ProxyPassReverse</A></H3></CENTER>
+<P>
+This directive lets Apache adjust the URL in the <CODE>Location</CODE> header on HTTP redirect responses. This is essential for example, when
+Apache is used as a reverse proxy to avoid by-passing the reverse proxy
+because of HTTP redirects on the back-end servers which stay behind the
+reverse proxy. Generally used in conjunction with the <CODE>ProxyPass</CODE>
+directive to build a complete front-end proxy server.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ProxyPass          /modperl/  <A HREF="http://backend.example.com/modperl/">http://backend.example.com/modperl/</A>
+  ProxyPassReverse   /modperl/  <A HREF="http://backend.example.com/modperl/">http://backend.example.com/modperl/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When a user initiates a request to <A
+HREF="http://www.example.com/modperl/foo.pl">http://www.example.com/modperl/foo.pl</A>,
+the request will be redirected to <A
+HREF="http://backend.example.com/modperl/foo.pl">http://backend.example.com/modperl/foo.pl</A>
+but on the way back
+<CODE>ProxyPassReverse</CODE> will correct the location URL to become <A
+HREF="http://www.example.com/modperl/foo.pl">http://www.example.com/modperl/foo.pl</A>
+. This happens completely transparently. The end user will never know that
+something has happened to his request behind the scenes.
+
+<P>
+Note that this <CODE>ProxyPassReverse</CODE> directive can also be used in conjunction with the proxy pass-through
+feature:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteRule ... [P]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+from mod_rewrite because its doesn't depend on a corresponding
+<CODE>ProxyPass</CODE> directive.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Security_Issues">Security Issues</A></H3></CENTER>
+<P>
+Whenever you use mod_proxy you need to make sure that your server will not
+become a proxy for free riders. Allowing clients to issue proxy requests is
+controlled by the <CODE>ProxyRequests</CODE> directive. Its default setting is <CODE>off</CODE>, which means proxy requests are handled only if generated internally (by <CODE>ProxyPass</CODE> or <CODE>RewriteRule...[P]</CODE>
+directives.) Do not use the <CODE>ProxyRequests</CODE> directive on your reverse proxy servers.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Buffering_Feature">Buffering Feature</A></H2></CENTER>
+<P>
+In addition to correcting the URI on its way back from the back-end server,
+mod_proxy also provides buffering services which mod_perl and similar heavy
+modules benefit from. The buffering feature allows mod_perl to pass the
+generated data to mod_proxy and move on to serve new requests, instead of
+waiting for a possibly slow client to receive all the data.
+
+<P>
+This figure depicts this feature:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>                [socket]                   wire     `o'
+  [mod_perl] =&gt; [      ] =&gt; [mod_proxy] =&gt; ____ =&gt;  /|\
+                [buffer]                            / \</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+From looking at this figure it's easy to see that the bottleneck is the
+socket buffer; it has to be able to absorb all the data that mod_perl has
+generated in order to free the mod_perl process immediately; mod_proxy will
+take the data as fast as mod_perl can deliver it, freeing the mod_perl
+server to service new requests as soon as possible while mod_proxy feeds
+the client at whatever rate the client requires.
+
+<P>
+<CODE>ProxyReceiveBufferSize</CODE> is the name of the parameter that specifies the size of the socket buffer.
+Configuring:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ProxyReceiveBufferSize 16384</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+will create a buffer of 16KB in size. If mod_perl generates output which is
+less than 16KB, the process will be immediately untied and allowed to serve
+new requests, if the output is bigger than 16KB, the following process will
+take place:
+
+<OL>
+<P><LI>
+<P>
+The first 16KB will enter the system buffer.
+
+<P><LI>
+<P>
+mod_proxy picks the first 8KB and sends it down the wire.
+
+<P><LI>
+<P>
+mod_perl writes the next 8KB into the place of the 8KB of data that was
+just sent off by mod_proxy.
+
+</OL>
+<P>
+Stages 2 and 3 are repeated until mod_perl has no more data to send. When
+this happens, mod_perl can serve a new request while stage 2 is repeated
+until all the data was picked from the system buffer and sent down the
+wire.
+
+<P>
+Of course you want to set the buffer size as large as possible, since you
+want the heavy mod_perl processes to be utilized in the most efficient way,
+so you don't want them to waste their time waiting for a client to receive
+the data, especially if a client has a slow downstream connection.
+
+<P>
+As the <CODE>ProxyReceiveBufferSize</CODE> name states, its buffering feature applies only to <EM>downstream data</EM> (coming from the origin server to the proxy) and not upstream data. There
+is no buffering of data uploaded from the client browser to the proxy, thus
+you cannot use this technique to prevent the heavy mod_perl server from
+being tied up during a large POST such as a file upload. Falling back to
+mod_cgi seems to be the best solution for these specific scripts whose
+major function is receiving large amounts of upstream data.
+
+<P>
+&lt;META: check this ---&gt; 
+
+<P>
+Of course just like mod_perl, mod_proxy writes the data it proxy-passes
+into its outgoing socket buffer, therefore the mod_proxy process gets
+released as soon as the last chunk of data is deposited into this buffer,
+even if the client didn't complete the download. Its the OS's problem to
+complete the transfer and release the TCP socket used for this transfer.
+
+<P>
+Therefore if you don't use mod_proxy and mod_perl sends its data directly
+to the client, and you have a big socket buffer, the mod_perl process will
+be released as soon as the last chunk of data enters the buffer. Just like
+with mod_proxy, the OS will deal with completing the data transfer.
+
+<P>
+&lt;based on this comment&gt; yes, too (but receive and transmit buffer may
+be of different size, depending on the OS)
+
+<P>
+The problem I don't know is, does the call to close the socket wait, until
+all data is actually send successfully or not. If it doesn't wait, you may
+not be noticed of any failure, but because the proxing Apache can write as
+fast to the socket transmission buffer as it can read, it should be
+possible that the proxing Apache copies all the data from the receive to
+the transmission buffer and after that releasing the receive buffer, so the
+mod_perl Apache is free to do other things, while the proxing Apache still
+wait until the client returns the success of data transmission. (The last,
+is the part I am not sure on)
+
+<P>
+&lt;/META&gt;
+
+<P>
+Unfortunately you cannot set the socket buffer size as large as you want
+because there is a limit of the available physical memory and OSs have
+their own upper limits on the possible buffer size.
+
+<P>
+This doesn't mean that you cannot change the OS imposed limits, but to do
+that you have to know the techniques for doing that. In the next section we
+will present a few OSs and the ways to increase their socket buffer sizes.
+
+<P>
+To increase the physical memory limits you just have to add more memory.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Setting_the_Buffering_Limits_on_">Setting the Buffering Limits on Various OSs</A></H2></CENTER>
+<P>
+As we just saw there are a few kinds of parameters we might want to adjust
+for our needs.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="IOBUFSIZE_Source_Code_Definition">IOBUFSIZE Source Code Definition</A></H3></CENTER>
+<P>
+The first parameter is used by <EM>proxy_util.c:ap_proxy_send_fb()</EM> to loop over content being proxy passed in 8KB chunks (as of this writing),
+passing that on to the client. In other words it specifies the size of the
+data that is sent down the wire.
+
+<P>
+This parameter is defined by the <CODE>IOBUFSIZE</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #define IOBUFSIZE 8192</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You have no control over this setting in the server configuration file,
+therefore you might want to change it in the source files, before you
+compile the server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="ProxyReceiveBufferSize_Configura">ProxyReceiveBufferSize Configuration Directive</A></H3></CENTER>
+<P>
+You can control the socket buffer size with the
+<CODE>ProxyReceiveBufferSize</CODE> directive:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ProxyReceiveBufferSize 16384</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The above setting will set a buffer size of 16KB. If it is not set
+explicitly, or if it is set to 0, then the default buffer size is used. The
+number should be an integral multiple of 512.
+
+<P>
+Note that if you set the value of <CODE>ProxyReceiveBufferSize</CODE> larger than the OS limit, the default value will be used.
+
+<P>
+Both the default and the maximum possible value of
+<CODE>ProxyReceiveBufferSize</CODE> depend on the Operating System.
+
+<UL>
+<P><LI><STRONG><A NAME="item_Linux">Linux</A></STRONG>
+<P>
+For 2.2 kernels the maximum limit is in <EM>/proc/sys/net/core/rmem_max</EM>
+and the default value is in <EM>/proc/sys/net/core/rmem_default</EM>. If you want to increase <CODE>RCVBUF</CODE> size above 65535, the default maximum value, you have to raise first the
+absolute limit in
+<EM>/proc/sys/net/core/rmem_max</EM>. To do that at the run time, execute this command to raise it to 128KB:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % echo 131072 &gt; /proc/sys/net/core/rmem_max</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You probably want to put this command into <EM>/etc/rc.d/rc.local</EM> so the change will take effect at system reboot.
+
+<P>
+On Linux OS with kernel 2.2.5 the maximum and default values are either
+32KB or 64KB. You can also change the default and maximum values during
+kernel compilation; for that you should alter the
+<CODE>SK_RMEM_DEFAULT</CODE> and <CODE>SK_RMEM_MAX</CODE> definitions respectively. (Since kernel source files tend to change, use
+<CODE>grep(1)</CODE> utility to find the files.)
+
+<P><LI><STRONG><A NAME="item_FreeBSD">FreeBSD</A></STRONG>
+<P>
+Under FreeBSD it's possible to configure the kernel to have bigger socket
+buffers:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % sysctl -w kern.ipc.maxsockbuf=2621440</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_Solaris">Solaris</A></STRONG>
+<P>
+Under Solaris this upper limit is specified by <EM>tcp_max_buf</EM>
+parameter and is 256KB.
+
+<P><LI><STRONG><A NAME="item_Other">Other OSs</A></STRONG>
+<P>
+[ReaderMeta]: If you use an OS that is not listed here and know how to
+increase the socket buffer size please let me know.
+
+</UL>
+<P>
+When you tell the kernel to use bigger sockets you can set bigger values
+for <EM>ProxyReceiveBufferSize</EM>. e.g. 1048576 (1MB).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Hacking_the_Code">Hacking the Code</A></H3></CENTER>
+<P>
+Some folks have patched the Apache's 1.3.x source code to make the
+application buffer configurable as well. After the patch there are two
+configuration directives available:
+
+<UL>
+<P><LI>
+<P>
+ProxyReceiveBufferSize -- sets the socket buffer size
+
+<P><LI>
+<P>
+ProxyInternalBufferSize -- sets the application buffer size
+
+</UL>
+<P>
+To patch the source, rename <CODE>ap_breate()</CODE> to
+<CODE>ap_bcreate_size()</CODE> and add a size parameter, which defaults to <EM>IOBUFSIZE</EM> if 0 is passed. Then add
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #define ap_bcreate(p,flags) ap_bcreate(p,flags,0)</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and add a new <CODE>ap_bcreate()</CODE> which calls
+<CODE>ap_bcreate_size()</CODE> for binary compatibility.
+
+<P>
+Actually the <CODE>ProxyReceiveBufferSize</CODE> should be called
+<CODE>ProxySocketBufferSize</CODE>. This would also remove some of the confusion about what it actually does.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Caching_Feature">Caching Feature</A></H2></CENTER>
+<P>
+META: complete the conf details
+
+<P>
+Apache does caching as well. It's relevant to mod_perl only if you produce
+proper headers, so your scripts' output can be cached. See the Apache
+documentation for more details on the configuration of this capability.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Build_Process">Build Process</A></H2></CENTER>
+<P>
+To build mod_proxy into Apache just add <EM>--enable-module=proxy</EM>
+during the Apache <STRONG>./configure</STRONG> stage. Since you probably will need the mod_rewrite capability enable it as
+well with
+<EM>--enable-module=rewrite</EM>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Front_end_Back_end_Proxying_with">Front-end Back-end Proxying with Virtual Hosts</A></H1></CENTER>
+<P>
+This section explains a configuration setup for proxying your back-end
+mod_perl servers when you need to use Virtual Hosts.
+
+<P>
+The term <EM>Virtual Host</EM> refers to the practice of maintaining more than one server on one machine,
+as differentiated by their apparent hostname. For example, it is often
+desirable for companies sharing a web server to have their own domains,
+with web servers accessible as
+<EM>www.company1.com</EM> and <EM>www.company2.com</EM>, without requiring the user to know any extra path information.
+
+<P>
+The approach is to use a unique port number for each virtual host at the
+back-end server, so you can redirect from the front-end server to
+localhost:1234, and name-based virtual servers on the front end, though any
+technique on the front-end will do.
+
+<P>
+If you run the front-end and the back-end servers on the same machine you
+can prevent any direct outside connections to the back-end server if you
+bind tightly to address <CODE>127.0.0.1</CODE> (<EM>localhost</EM>) as you will see in the following configuration example.
+
+<P>
+The front-end (light) server configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;VirtualHost 10.10.10.10&gt;
+    ServerName www.example.com
+    ServerAlias example.com
+    RewriteEngine On
+    RewriteOptions 'inherit'
+    RewriteRule \.(gif|jpg|png|txt|html)$ - [last]
+    RewriteRule ^/(.*)$ <A HREF="http://localhost:4077/">http://localhost:4077/</A>$1 [proxy]
+  &lt;/VirtualHost&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &lt;VirtualHost 10.10.10.10&gt;
+    ServerName foo.example.com
+    RewriteEngine On
+    RewriteOptions 'inherit'
+    RewriteRule \.(gif|jpg|png|txt|html)$ - [last]
+    RewriteRule ^/(.*)$ <A HREF="http://localhost:4078/">http://localhost:4078/</A>$1 [proxy]
+  &lt;/VirtualHost&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The above front-end configuration handles two virtual hosts:
+<EM>www.example.com</EM> and <EM>foo.example.com</EM>. The two setups are almost identical.
+
+<P>
+The front-end server will handle files with the extensions <EM>.gif</EM>,
+<EM>.jpg</EM>, <EM>.png</EM>, <EM>.txt</EM> and <EM>.html</EM> internally, the rest will be proxied to be handled by the back-end server.
+
+<P>
+The only difference between the two virtual hosts settings is that the
+former rewrites requests to port <CODE>4077</CODE> at the back-end machine and the latter to port <CODE>4078</CODE>.
+
+<P>
+If your server is configured to run traditional CGI scripts (under mod_cgi)
+as well as mod_perl CGI programs, then it would be beneficial to configure
+the front-end server to run the traditional CGI scripts directly. This can
+be done by altering the <CODE>gif|jpg|png|txt</CODE>
+
+<EM>Rewrite</EM> rule to add <CODE>|cgi</CODE> at the end if all your mod_cgi scripts have the <EM>.cgi</EM> extension, or adding a new rule to handle all
+<CODE>/cgi-bin/*</CODE> locations locally.
+
+<P>
+The back-end (heavy) server configuration:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Port 80
+  
+  PerlPostReadRequestHandler My::ProxyRemoteAddr
+  
+  Listen 4077
+  &lt;VirtualHost localhost:4077&gt;
+    ServerName www.example.com
+    DocumentRoot /home/httpd/docs/www.example.com       
+    DirectoryIndex index.shtml index.html
+  &lt;/VirtualHost&gt;
+  
+  Listen 4078
+  &lt;VirtualHost localhost:4078&gt;
+    ServerName foo.example.com
+    DocumentRoot /home/httpd/docs/foo.example.com
+    DirectoryIndex index.shtml index.html
+  &lt;/VirtualHost&gt;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The back-end server knows to tell which virtual host the request is made
+to, by checking the port number the request was proxied to and using the
+appropriate virtual host section to handle it.
+
+<P>
+We set "Port&nbsp;80" so that any redirects don't get sent directly to the back-end port.
+
+<P>
+To get the <EM>real</EM> remote IP addresses from proxy, the
+<A HREF="././scenario.html#Getting_the_Remote_Server_IP_in_">My::ProxyRemoteAddr</A>
+handler is used based on the <CODE>mod_proxy_add_forward</CODE> Apache module. Prior to mod_perl 1.22 this setting must have been set
+per-virtual host, since it wasn't inherited by the virtual hosts.
+
+<P>
+The following configuration is yet another useful example showing the other
+way around. It specifies what to be proxied and then the rest is served by
+the front end:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine     on
+  RewriteLogLevel   0
+  RewriteRule       ^/(perl.*)$  <A HREF="http://127.0.0.1:8052/">http://127.0.0.1:8052/</A>$1   [P,L]
+  NoCache           *
+  ProxyPassReverse  /  <A HREF="http://www.example.com/">http://www.example.com/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So we don't have to specify the rule for static objects to be served by the
+front-end as we did in the previous example to handle files with the
+extensions <EM>.gif</EM>, <EM>.jpg</EM>, <EM>.png</EM> and <EM>.txt</EM> internally.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Getting_the_Remote_Server_IP_in_">Getting the Remote Server IP in the Back-end server in the Proxy Setup</A></H1></CENTER>
+<P>
+Ask Bjoern Hansen has written the <CODE>mod_proxy_add_forward</CODE> module for Apache. It sets the <CODE>X-Forwarded-For</CODE> field when doing a
+<CODE>ProxyPass</CODE>, similar to what Squid can do. Its location is specified in the <A HREF="././download.html#mod_proxy_add_forward">download</A> section.
+
+<P>
+Basically, this module adds an extra HTTP header to proxying requests. You
+can access that header in the mod_perl-enabled server, and set the IP
+address of the remote server. You won't need to compile anything into the
+back-end server.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Build">Build</A></H2></CENTER>
+<P>
+Download the module and use its location as a value of the
+<EM>--activate-module</EM> argument for the <EM>./configure</EM> utility within the Apache source code, so the module can be found.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure \
+  &quot;--with-layout=Apache&quot; \
+  &quot;--activate-module=src/modules/extra/mod_proxy_add_forward.c&quot; \
+  &quot;--enable-module=proxy_add_forward&quot; \
+  ... other options ...</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<EM>--enable-module=proxy_add_forward</EM> enables this module as you have guessed already.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Usage">Usage</A></H2></CENTER>
+<P>
+If you are using <CODE>Apache::Registry</CODE> or <CODE>Apache::PerlRun</CODE> modules just put the following code into <EM>startup.pl</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use Apache::Constants ();
+  sub My::ProxyRemoteAddr ($) {
+    my $r = shift;
+   
+    # we'll only look at the X-Forwarded-For header if the requests
+    # comes from our proxy at localhost
+    return Apache::Constants::OK 
+        unless ($r-&gt;connection-&gt;remote_ip eq &quot;127.0.0.1&quot;) 
+            and $r-&gt;header_in('X-Forwarded-For');
+  
+    # Select last value in the chain -- original client's ip
+    if (my ($ip) = $r-&gt;headers_in-&gt;{'X-Forwarded-For'} =~ /([^,\s]+)$/) {
+      $r-&gt;connection-&gt;remote_ip($ip);
+    }
+        
+    return Apache::Constants::OK;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And in the mod_perl's <EM>httpd.conf</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlPostReadRequestHandler My::ProxyRemoteAddr</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and the right thing will happen transparently for your scripts. Otherwise
+if you write your own mod_perl content handler, you can retrieve it
+directly in your code using a similar code.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Security">Security</A></H2></CENTER>
+<P>
+Different sites have different needs. If you use the header to set the IP
+address, Apache believes it. This is reflected in the logging for example.
+You really don't want anyone but your own system to set the header, which
+is why the <EM>recommended code</EM> above checks where the request really came from before changing <CODE>remote_ip</CODE>.
+
+<P>
+Generally you shouldn't trust the <CODE>X-Forwarded-For</CODE> header. You only want to rely on <CODE>X-Forwarded-For</CODE> headers from proxies you control yourself. If you know how to spoof a
+cookie you've probably got the general idea on making HTTP headers and can
+spoof the
+<CODE>X-Forwarded-For</CODE> header as well. The only address you can count on as being a reliable value
+is the one from
+<CODE>r-&gt;connection-&gt;remote_ip</CODE>.
+
+<P>
+From that point on, the remote IP address is correct. You should be able to
+access <CODE>$ENV{REMOTE_ADDR}</CODE> environment variable as usual.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Caveats">Caveats</A></H2></CENTER>
+<P>
+It was reported that Ben Laurie's Apache-SSL does not seem to put the IP
+addresses in the <CODE>X-Forwarded-For</CODE> header--it does not set up such a header at all. However, the <CODE>$ENV{REMOTE_ADDR}</CODE> environment variable it sets up contains the IP address of the original
+client machine.
+
+<P>
+Prior to mod_perl 1.22 there was a need to repeat the
+PerlPostReadRequestHandler&nbsp;My::ProxyRemoteAddr directive for each virtual host, since it wasn't inherited by the virtual
+hosts.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="mod_proxy_add_forward_Module_s_O">mod_proxy_add_forward Module's Order Precedence</A></H2></CENTER>
+<P>
+Some users report that they cannot get this module to work as advertised.
+They verify that the module is built in, but the front-end server is not
+generating the <CODE>X-Forwarded-For</CODE> header when requests are being proxied to the back-end server. As a result,
+the back-end server has no idea what the remote IP is.
+
+<P>
+As it turns out, <EM>mod_proxy_add_forward</EM> needs to be configured in Apache before <EM>mod_proxy</EM> in order to operate properly, since Apache gives highest precedence to the
+last defined module.
+
+<P>
+Moving the two build options required to enable
+<EM>mod_proxy_add_forward</EM> while configuring Apache appears to have no effect on the default
+configuration order of modules, since in each case, the resulting builds
+show <EM>mod_proxy_add_forward</EM> last in the list (or first via <EM>/server-info</EM>).
+
+<P>
+One solution is to explicitly define the configuration order in the
+<EM>http.conf</EM> file, so that <EM>mod_proxy_add_forward</EM> appears before
+<EM>mod_proxy</EM>, and therefore gets executed after <EM>mod_proxy</EM>. (Modules are being executed in <EM>reverse</EM> order, i.e. module that was <EM>Added</EM>
+first will be executed last.)
+
+<P>
+Obviously, this list would need to be tailored to match the build
+environment, but to ease this task just insert an <CODE>AddModule</CODE>
+directive before each entry reported by <CODE>httpd -l</CODE> (and removing
+<EM>httpd_core.c</EM>, of course):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ClearModuleList
+  AddModule mod_env.c
+  [more modules snipped]
+  AddModule mod_proxy_add_forward.c
+  AddModule mod_proxy.c
+  AddModule mod_rewrite.c
+  AddModule mod_setenvif.c</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that the above snippet is added to <EM>httpd.conf</EM> of the front-end server.
+
+<P>
+Another solution is to reorder the module list during configuration by
+using one or more <CODE>--permute-module</CODE> arguments to the <EM>./configure</EM>
+utility. (Try <CODE>./configure --help</CODE> to see if your version of Apache supports this option.)  <CODE>--permute-module=foo:bar</CODE> will swap the position of <EM>mod_foo</EM> and <EM>mod_bar</EM> in the list,
+<CODE>--permute-module=BEGIN:foo</CODE> will move <EM>mod_foo</EM> to the beginning of the list, and <CODE>--permute-module=foo:END</CODE> will move <EM>mod_foo</EM> to the end. For example suppose your module list from <CODE>httpd -l</CODE> looks like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  http_core.c
+  [more modules snipped]
+  mod_proxy.c
+  mod_setenvif.c
+  mod_proxy_add_forward.c</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You might add the following arguments to <EM>./configure</EM> to move
+<EM>mod_proxy_add_forward</EM> to the position in the list just before
+<EM>mod_proxy</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ./configure \
+  &quot;--with-layout=Apache&quot; \
+  &quot;--activate-module=src/modules/extra/mod_proxy_add_forward.c&quot; \
+  &quot;--enable-module=proxy_add_forward&quot; \
+  ... other options ...
+  &quot;--permute-module=proxy:proxy_add_forward&quot; \
+  &quot;--permute-module=setenvif:END&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+With this change, the <CODE>X-Forwarded-For</CODE> header is now being sent to the back-end server, and the remote IP appears
+in the back-end server's <EM>access_log</EM> file.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="HTTP_Authentication_With_Two_Ser">HTTP Authentication With Two Servers Plus a Proxy</A></H1></CENTER>
+<P>
+Assuming that you have a setup of one ``front-end'' server, which proxies
+the ``back-end'' (mod_perl) server, if you need to perform authentication
+in the ``back-end'' server it should handle all authentication itself. If
+Apache proxies correctly, it will pass through all authentication
+information, making the ``front-end'' Apache somewhat ``dumb'', as it does
+nothing but pass through the information.
+
+<P>
+In the configuration file your <CODE>Auth</CODE> configuration directives need to be inside the <CODE>&lt;Directory ...&gt;</CODE>
+... <CODE>&lt;/Directory&gt;</CODE> sections because if you use the section
+<CODE>&lt;Location ...&gt;</CODE> ... <CODE>&lt;/Location&gt;</CODE> the proxy server will take the authentication information for itself and
+not pass it on.
+
+<P>
+The same applies to mod_ssl and similar Apache SSL modules. If it gets
+plugged into a front-end server, it will properly encode/decode all the SSL
+requests. So if your machine is secured from inside, your back-end server
+can do secure transactions.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="mod_rewrite_Examples">mod_rewrite Examples</A></H1></CENTER>
+<P>
+In the mod_proxy + mod_perl servers scenario, <CODE>ProxyPass</CODE> was used to redirect all requests to the mod_perl server, by matching the
+beginning of the relative URI (e.g. <EM>/perl</EM>). What should you do if you want everything, but files with extensions
+like <EM>.gif</EM>, <EM>.cgi</EM>
+and similar, to be proxypassed to the mod_perl server. These files are to
+to be served by the light Apache server which carries the mod_proxy module.
+
+<P>
+The following example rewrites everything to the mod_perl server. It
+locally handles all requests for files with extensions <EM>gif</EM>, <EM>jpg</EM>,
+<EM>png</EM>, <EM>css</EM>, <EM>txt</EM>, <EM>cgi</EM> and relative URIs starting with
+<EM>/cgi-bin</EM> (e.g. if you want some scripts to be executed under mod_cgi).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine On
+  # handle GIF and JPG images and traditional CGI's directly
+  RewriteRule \.(gif|jpg|png|css|txt|cgi)$ - [last]
+  RewriteRule ^/cgi-bin - [last]
+  # pass off everything but images to the heavy-weight server via proxy
+  RewriteRule ^/(.*)$ <A HREF="http://localhost:4077/">http://localhost:4077/</A>$1 [proxy]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That is, first, handle locally what you want to handle locally, then hand
+off everything else to the back-end guy.
+
+<P>
+This is the configuration of the logging facilities. 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteLogLevel 1
+  RewriteLog &quot;| /usr/local/apache_proxy/bin/rotatelogs \
+  /usr/local/apache-common/logs/r_log 86400&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It says: log all the rewrites thru the pipe to the <CODE>rotatelogs</CODE>
+utility which will rotate the logs every 2 hours (86400 secs).
+
+<P>
+More examples:
+
+<P>
+Redirect all those IE5 requests for <EM>favicon.ico</EM> to a central image:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteRule .*favicon.ico /wherever/favicon.ico [PT,NS]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+A quick way to make dynamic pages look static:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteRule ^/wherever/([a-zA-Z]+).html /perl-bin/$1.cgi [PT]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Instead of keeping all your Perl scripts in <EM>/perl</EM> and your static content everywhere else, you could keep your static content
+in special directories and keep your Perl scripts everywhere else. You can
+still use the light/heavy apache separation approach described before, with
+a few minor modifications.
+
+<P>
+In the <EM>light</EM> Apache's <EM>httpd.conf</EM> file, turn rewriting on:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine On</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now list all directories that contain only static objects. For example if
+the only relative to <CODE>DocumentRoot</CODE> directories are <EM>/images</EM> and
+<EM>style</EM> you can set the following rule:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteRule ^/(images|style) - [L]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>[L]</CODE> (<EM>Last</EM>) means that the rewrite engine should stop if it has a match. This is
+necessary because the very last rewrite rule proxies everything to the <EM>heavy</EM> server:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteRule ^/(.*) <A HREF="http://www.example.com:8080/">http://www.example.com:8080/</A>$1 [P]</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This line is the difference between a server for which static content is
+the default and one for which dynamic (perlish) content is the default.
+
+<P>
+You should also add the <EM>reverse rewrite rule</EM> as before:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ProxyPassReverse / <A HREF="http://www.example.com/">http://www.example.com/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+so that the user doesn't see the port number <CODE>:8080</CODE> in the browser's location window.
+
+<P>
+It is possible to use <CODE>localhost</CODE> in the <CODE>RewriteRule</CODE> above if the heavy and light servers are on the same machine. So if we sum
+up the above setup we get:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  RewriteEngine On
+  RewriteRule ^/(images|style) - [L]
+  RewriteRule ^/(.*) <A HREF="http://www.example.com:8080/">http://www.example.com:8080/</A>$1 [P]
+  ProxyPassReverse / <A HREF="http://www.example.com/">http://www.example.com/</A></pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Caching_in_mod_proxy">Caching in mod_proxy</A></H1></CENTER>
+<P>
+This is not really mod_perl related, so I'll just stress one point. If you
+want the caching to work the following HTTP headers should be supplied: <CODE>Last-Modified</CODE>, <CODE>Content-Length</CODE> and
+<CODE>Expires</CODE>.
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./strategy.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./porting.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/12/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

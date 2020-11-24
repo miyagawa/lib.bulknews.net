@@ -1,0 +1,53 @@
+package MT::Plugin::BlogPedia;
+# $Id$
+#
+# Tatsuhiko Miyagawa <miyagawa@edge.jp>
+# EDGE, Co.,Ltd.
+#
+
+use strict;
+use Encode::compat;
+use Encode;
+use HTTP::Request::Common;
+use LWP::UserAgent;
+use XML::Simple;
+use URI;
+
+my $url   = URI->new("http://bulkfeeds.net/app/terms.xml");
+my $pedia = "http://bulkfeeds.net/app/search2?q=%s";
+my $blog_charset  = "euc-jp";
+my $pedia_charset = "utf-8";
+
+
+use MT::Template::Context;
+MT::Template::Context->add_global_filter(markup_blogpedia => \&markup_blogpedia);
+
+sub markup_blogpedia {
+    my $content = shift;
+
+    my $postbody = $content;
+    my $ua  = LWP::UserAgent->new;
+    eval {
+	Encode::from_to($postbody, $blog_charset => "utf-8");
+	my $req = POST $url, [ content => $postbody ];
+	my $xml = $ua->request($req)->content;
+	my $data = XMLin($xml, ForceArray => [ "term" ]);
+	my $pat = join "|", map {
+	    Encode::_utf8_off($_);
+	    quotemeta($_);
+	} @{$data->{term}};
+
+	$content =~ s{($pat)}{
+	    qq(<a href=") .
+	    sprintf($pedia, Encode::encode($pedia_charset, $1)) .
+	    qq(">$1</a>)
+	}egi;
+    };
+    if ($@) {
+	print STDERR "error: $@";
+    }
+
+    return $content;
+}
+
+1;

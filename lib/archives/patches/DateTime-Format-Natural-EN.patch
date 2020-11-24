@@ -1,0 +1,115 @@
+=== lib/DateTime/Format/Natural/EN.pm
+==================================================================
+--- lib/DateTime/Format/Natural/EN.pm	(revision 5793)
++++ lib/DateTime/Format/Natural/EN.pm	(local)
+@@ -140,9 +140,15 @@
+ 
+         if ($tokens[$i] =~ /^at$/i) {
+             next;
+-        } elsif ($tokens[$i] =~ /^(\d{1,2})(:\d{2})?\s?(am|pm)?$/i) {
++        } elsif ($tokens[$i] =~ /^(\d{1,2})(:\d{2})?(am|pm)?$/i) {
+             my $hour_token = $1; my $min_token = $2;
+             my $timeframe = $3;
++
++            if (!$timeframe && $tokens[$i+1] && $tokens[$i+1] =~ /^[ap]m$/i) {
++                $timeframe = $tokens[$i+1];
++                $i++;
++            }
++
+             $hour = $hour_token; 
+             $min_token =~ s!:!!;
+             $min  = $min_token || '00';
+@@ -153,6 +159,7 @@
+                     $min  = '00' unless $min_token;
+                 }
+             }
++            $sec = 0;
+         }
+ 
+         if ($tokens[$i] =~ /^(\d{1,2})(?:st|nd|rd|th)$/i) {
+@@ -313,6 +320,10 @@
+ 
+ =head1 FUNCTIONS
+ 
++=head2 new
++
++Creates a new DateTime::Format::Natural::EN object.
++
+ =head2 parse_datetime
+ 
+ Creates a C<DateTime> object from a human readable date/time string.
+=== t/01_test.t
+==================================================================
+--- t/01_test.t	(revision 5793)
++++ t/01_test.t	(local)
+@@ -0,0 +1,49 @@
++#!/usr/bin/perl
++use strict;
++use warnings;
++use t::time;
++use DateTime::Format::Natural::EN;
++
++BEGIN {
++    eval { require Test::Base };
++    if ($@) {
++        print "1..0 # Skip Test::Base needed\n";
++        exit;
++    }
++    import Test::Base;
++};
++
++$t::time::time = 1163956496;
++
++filters 'chomp';
++filters { input => [ 'datetime', 'iso8601' ] };
++
++sub datetime {
++    DateTime::Format::Natural::EN->parse_datetime($_[0]);
++}
++
++sub iso8601 {
++    $_[0]->iso8601;
++}
++
++__END__
++
++===
++--- input:    tomorrow
++--- expected: 2006-11-20T09:14:56
++
++===
++--- input:    tomorrow 1pm
++--- expected: 2006-11-20T13:00:00
++
++===
++--- input:    tomorrow 1:55pm
++--- expected: 2006-11-20T13:55:00
++
++===
++--- input:    tomorrow 1:55 pm
++--- expected: 2006-11-20T13:55:00
++
++===
++--- input:    4 am tomorrow
++--- expected: 2006-11-20T04:00:00
+
+Property changes on: t/01_test.t
+___________________________________________________________________
+Name: svn:executable
+ +*
+
+=== t/time.pm
+==================================================================
+--- t/time.pm	(revision 5793)
++++ t/time.pm	(local)
+@@ -0,0 +1,10 @@
++package t::time;
++use strict;
++
++our $time;
++
++BEGIN {
++    *CORE::GLOBAL::localtime = sub { CORE::localtime($time) };
++}
++
++1;

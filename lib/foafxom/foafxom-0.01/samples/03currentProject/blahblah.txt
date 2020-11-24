@@ -1,0 +1,2 @@
+Current Project
+meta-resource: http://project.example.com/

@@ -1,0 +1,8 @@
+Changes
+MANIFEST			This list of files
+Makefile.PL
+lib/Sledgex/Plugin/Token.pm
+t/00_compile.t
+t/01_token.t
+t/view/bar.html
+t/view/foo.html

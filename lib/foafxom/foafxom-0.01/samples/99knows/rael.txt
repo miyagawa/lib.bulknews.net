@@ -1,0 +1,5 @@
+Rael Dornafest
+meta-weblog: http://www.raelity.org/
+meta-mbox: 69e06039141567c1d68093a7ce4fb9b8534e92ef
+meta-nick: rael
+

@@ -1,0 +1,1553 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl Guide</title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>mod_perl Guide</h1>
+
+    <center>
+      <p>
+	<b>
+	  Deploying mod_perl technology to give rocket speed to
+	  your CGI/Perl scripts.
+	</b>
+      </p>
+    </center>
+
+    <center><p><b>Version 1.29 May 31, 2001</b></p></center>
+ 
+
+    <table align=center width="70%">
+ 
+      <tr>
+	<td>	  
+	  <div class="notice">
+	    <b>Full Version Master Copy URL</b>: <a
+	    href="http://perl.apache.org/guide/"><b>http://perl.apache.org/guide/</b></a><br>
+	  </div>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index.html">Dense TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="toc"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Table of Contents:
+	    </font>
+	  </h3>
+
+	  <ul>
+	  <div class="toc">
+	    <LI><A HREF="intro.html"><B><FONT SIZE=+1>Introduction. Incentives. Credits. </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="intro.html#What_is_mod_perl">What is mod_perl</A>
+	<UL>
+
+		<LI><A HREF="intro.html#mod_cgi">mod_cgi</A>
+		<LI><A HREF="intro.html#C_API">C API</A>
+		<LI><A HREF="intro.html#Perl_API">Perl API</A>
+		<LI><A HREF="intro.html#Apache_Registry">Apache::Registry</A>
+		<LI><A HREF="intro.html#Apache_PerlRun">Apache::PerlRun</A>
+	</UL>
+
+	<LI><A HREF="intro.html#What_will_you_learn">What will you learn</A>
+	<LI><A HREF="intro.html#High_Profile_Sites_Running_mod_p">High-Profile Sites Running mod_perl</A>
+	<LI><A HREF="intro.html#References_and_Acknowledgments">References and Acknowledgments</A>
+</UL>
+<P>
+<LI><A HREF="start.html"><B><FONT SIZE=+1>Guide's Overview </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="start.html#What_s_inside_">What's inside?</A>
+</UL>
+<P>
+<LI><A HREF="perl.html"><B><FONT SIZE=+1>Perl Reference </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="perl.html#A_Must_Read_">A Must Read!</A>
+	<LI><A HREF="perl.html#perldoc_s_Rarely_Known_But_Very_">perldoc's Rarely Known But Very Useful Options</A>
+	<LI><A HREF="perl.html#Tracing_Warnings_Reports">Tracing Warnings Reports</A>
+	<LI><A HREF="perl.html#Variables_Globally_Lexically_Sc">Variables Globally, Lexically Scoped And Fully Qualified</A>
+	<UL>
+
+		<LI><A HREF="perl.html#Symbols_Symbol_Tables_and_Packa">Symbols, Symbol Tables and Packages; Typeglobs</A>
+		<UL>
+
+			<LI><A HREF="perl.html#Lexical_Variables_and_Symbols">Lexical Variables and Symbols</A>
+		</UL>
+
+		<LI><A HREF="perl.html#Additional_reading_references">Additional reading references</A>
+	</UL>
+
+	<LI><A HREF="perl.html#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested Subroutines</A>
+	<UL>
+
+		<LI><A HREF="perl.html#The_Poison">The Poison</A>
+		<LI><A HREF="perl.html#The_Diagnosis">The Diagnosis</A>
+		<LI><A HREF="perl.html#The_Remedy">The Remedy</A>
+	</UL>
+
+	<LI><A HREF="perl.html#Understanding_Closures_the_Ea">Understanding Closures -- the Easy Way</A>
+	<LI><A HREF="perl.html#When_You_Cannot_Get_Rid_of_The_I">When You Cannot Get Rid of The Inner Subroutine</A>
+	<UL>
+
+		<LI><A HREF="perl.html#Remedies_for_Inner_Subroutines">Remedies for Inner Subroutines</A>
+	</UL>
+
+	<LI><A HREF="perl.html#use_require_do_INC_and">use(), require(), do(), %INC and @INC Explained</A>
+	<UL>
+
+		<LI><A HREF="perl.html#The_INC_array">The @INC array</A>
+		<LI><A HREF="perl.html#The_INC_hash">The %INC hash</A>
+		<LI><A HREF="perl.html#Modules_Libraries_and_Program_F">Modules, Libraries and Program Files</A>
+		<LI><A HREF="perl.html#require_">require()</A>
+		<LI><A HREF="perl.html#use_">use()</A>
+		<LI><A HREF="perl.html#do_">do()</A>
+	</UL>
+
+	<LI><A HREF="perl.html#Using_Global_Variables_and_Shari">Using Global Variables and Sharing Them Between Modules/Packages</A>
+	<UL>
+
+		<LI><A HREF="perl.html#Making_Variables_Global">Making Variables Global</A>
+		<LI><A HREF="perl.html#Making_Variables_Global_With_str">Making Variables Global With strict Pragma On</A>
+		<LI><A HREF="perl.html#Using_Exporter_pm_to_Share_Globa">Using Exporter.pm to Share Global Variables</A>
+		<LI><A HREF="perl.html#Using_the_Perl_Aliasing_Feature_">Using the Perl Aliasing Feature to Share Global Variables</A>
+		<LI><A HREF="perl.html#Using_Non_Hardcoded_Configuratio">Using Non-Hardcoded Configuration Module Names</A>
+	</UL>
+
+	<LI><A HREF="perl.html#The_Scope_of_the_Special_Perl_Va">The Scope of the Special Perl Variables</A>
+	<LI><A HREF="perl.html#Compiled_Regular_Expressions">Compiled Regular Expressions </A>
+	<LI><A HREF="perl.html#Exception_Handling_for_mod_perl">Exception Handling for mod_perl</A>
+	<UL>
+
+		<LI><A HREF="perl.html#Trapping_Exceptions_in_Perl">Trapping Exceptions in Perl</A>
+		<LI><A HREF="perl.html#Alternative_Exception_Handling_T">Alternative Exception Handling Techniques</A>
+		<LI><A HREF="perl.html#Better_Exception_Handling">Better Exception Handling</A>
+		<UL>
+
+			<LI><A HREF="perl.html#A_Little_Housekeeping">A Little Housekeeping</A>
+			<LI><A HREF="perl.html#An_Exception_Class">An Exception Class</A>
+		</UL>
+
+		<LI><A HREF="perl.html#Catching_Uncaught_Exceptions">Catching Uncaught Exceptions</A>
+		<UL>
+
+			<LI><A HREF="perl.html#Using_SIG_DIE_">Using $SIG{__DIE__}</A>
+			<LI><A HREF="perl.html#Overriding_the_Core_die_Functi">Overriding the Core die() Function</A>
+		</UL>
+
+		<LI><A HREF="perl.html#A_Single_UnCaught_Exception_Clas">A Single UnCaught Exception Class</A>
+		<LI><A HREF="perl.html#Some_Uses">Some Uses</A>
+		<LI><A HREF="perl.html#Conclusions">Conclusions</A>
+		<LI><A HREF="perl.html#The_My_Exception_class_in_its_e">The My::Exception class in its entirety</A>
+		<LI><A HREF="perl.html#Other_Implementations">Other Implementations</A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="install.html"><B><FONT SIZE=+1>mod_perl Installation </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="install.html#A_Summary_of_a_Basic_mod_perl_In">A Summary of a Basic mod_perl Installation</A>
+	<LI><A HREF="install.html#The_Gory_Details">The Gory Details</A>
+	<UL>
+
+		<LI><A HREF="install.html#Source_Configuration_perl_Makef">Source Configuration (perl Makefile.PL ...)</A>
+		<UL>
+
+			<LI><A HREF="install.html#Configuration_parameters">Configuration parameters</A>
+			<UL>
+
+				<LI><A HREF="install.html#APACHE_SRC">APACHE_SRC</A>
+				<LI><A HREF="install.html#DO_HTTPD_NO_HTTPD_PREP_HTTPD">DO_HTTPD, NO_HTTPD, PREP_HTTPD</A>
+				<LI><A HREF="install.html#Callback_Hooks">Callback Hooks</A>
+				<LI><A HREF="install.html#EVERYTHING">EVERYTHING</A>
+				<LI><A HREF="install.html#PERL_TRACE">PERL_TRACE</A>
+				<LI><A HREF="install.html#APACHE_HEADER_INSTALL">APACHE_HEADER_INSTALL</A>
+				<LI><A HREF="install.html#PERL_STATIC_EXTS">PERL_STATIC_EXTS</A>
+				<LI><A HREF="install.html#APACI_ARGS">APACI_ARGS</A>
+				<LI><A HREF="install.html#APACHE_PREFIX">APACHE_PREFIX</A>
+			</UL>
+
+			<LI><A HREF="install.html#Environment_Variables">Environment Variables</A>
+			<UL>
+
+				<LI><A HREF="install.html#APACHE_USER_and_APACHE_GROUP">APACHE_USER and APACHE_GROUP</A>
+			</UL>
+
+			<LI><A HREF="install.html#Reusing_Configuration_Parameters">Reusing Configuration Parameters</A>
+			<LI><A HREF="install.html#Discovering_Whether_Some_Option_">Discovering Whether Some Option Was Configured</A>
+			<LI><A HREF="install.html#Using_an_Alternative_Configurati">Using an Alternative Configuration File</A>
+			<LI><A HREF="install.html#perl_Makefile_PL_Troubleshooting">perl Makefile.PL Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="install.html#_A_test_compilation_with_your_Ma">&quot;A test compilation with your Makefile configuration failed...&quot;</A>
+				<LI><A HREF="install.html#Missing_or_Misconfigured_libgdbm">Missing or Misconfigured libgdbm.so</A>
+				<LI><A HREF="install.html#About_gdbm_db_and_ndbm_librarie">About gdbm, db and ndbm libraries</A>
+				<LI><A HREF="install.html#Undefined_reference_to_PL_perl_">Undefined reference to `PL_perl_destruct_level'</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="install.html#mod_perl_Building_make_">mod_perl Building (make)</A>
+		<UL>
+
+			<LI><A HREF="install.html#make_Troubleshooting">make Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="install.html#Undefined_reference_to_Perl_new">Undefined reference to 'Perl_newAV'</A>
+				<LI><A HREF="install.html#Unrecognized_format_specifier_fo">Unrecognized format specifier for...</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="install.html#Built_Server_Testing_make_test_">Built Server Testing (make test)</A>
+		<UL>
+
+			<LI><A HREF="install.html#Manual_Testing">Manual Testing</A>
+			<LI><A HREF="install.html#make_test_Troubleshooting">make test Troubleshooting</A>
+			<UL>
+
+				<LI><A HREF="install.html#make_test_fails">make test fails</A>
+				<LI><A HREF="install.html#mod_perl_c_is_incompatible_with_">mod_perl.c is incompatible with this version of Apache</A>
+				<LI><A HREF="install.html#make_test_skipping_test_on_">make test......skipping test on this platform</A>
+				<LI><A HREF="install.html#make_test_Fails_Due_to_Misconfig">make test Fails Due to Misconfigured localhost Entry</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="install.html#Installation_make_install_">Installation (make install)</A>
+		<LI><A HREF="install.html#Building_Apache_and_mod_perl_by_">Building Apache and mod_perl by Hand</A>
+	</UL>
+
+	<LI><A HREF="install.html#Installation_Scenarios_for_Stand">Installation Scenarios for Standalone mod_perl </A>
+	<UL>
+
+		<LI><A HREF="install.html#The_All_In_One_Way">The All-In-One Way</A>
+		<LI><A HREF="install.html#The_Flexible_Way">The Flexible Way</A>
+		<LI><A HREF="install.html#Build_mod_perl_as_a_DSO_inside_t">Build mod_perl as a DSO inside the Apache Source Tree via APACI</A>
+		<UL>
+
+			<LI><A HREF="install.html#libperl_so_and_libperl_a">libperl.so and libperl.a</A>
+		</UL>
+
+		<LI><A HREF="install.html#Build_mod_perl_as_a_DSO_outside_">Build mod_perl as a DSO outside the Apache Source Tree via APXS</A>
+	</UL>
+
+	<LI><A HREF="install.html#Installation_Scenarios_for_mod_p">Installation Scenarios for mod_perl and Other Components</A>
+	<UL>
+
+		<LI><A HREF="install.html#mod_perl_and_mod_ssl_openssl_">mod_perl and mod_ssl (+openssl)</A>
+		<LI><A HREF="install.html#mod_perl_and_mod_ssl_Rolled_from">mod_perl and mod_ssl Rolled from RPMs</A>
+		<LI><A HREF="install.html#mod_perl_and_apache_ssl_openss">mod_perl and apache-ssl (+openssl)</A>
+		<LI><A HREF="install.html#mod_perl_and_Stronghold">mod_perl and Stronghold</A>
+		<UL>
+
+			<LI><A HREF="install.html#Note_For_Solaris_2_5_users">Note For Solaris 2.5 users</A>
+		</UL>
+
+		<LI><A HREF="install.html#mod_perl_and_Raven_SSL">mod_perl and Raven SSL</A>
+		<UL>
+
+			<LI><A HREF="install.html#Dynamic_DSO_mod_perl_and_Raven">Dynamic (DSO) mod_perl and Raven SSL Installation</A>
+			<LI><A HREF="install.html#Static_mod_perl_and_dynamic_Rave">Static mod_perl and dynamic Raven SSL Installation</A>
+		</UL>
+
+		<LI><A HREF="install.html#mod_perl_and_mod_php">mod_perl and mod_php</A>
+	</UL>
+
+	<LI><A HREF="install.html#mod_perl_Installation_with_the_C">mod_perl Installation with the CPAN.pm Interactive Shell</A>
+	<LI><A HREF="install.html#Installing_on_multiple_machines">Installing on multiple machines</A>
+	<LI><A HREF="install.html#using_RPM_and_other_packages_to_">using RPM and other packages to install mod_perl</A>
+	<UL>
+
+		<LI><A HREF="install.html#A_word_on_mod_perl_RPM_packages">A word on mod_perl RPM packages</A>
+		<LI><A HREF="install.html#Getting_Started">Getting Started</A>
+		<LI><A HREF="install.html#Compiling_RPM_source_files">Compiling RPM source files</A>
+		<LI><A HREF="install.html#Mix_and_Match_RPM_and_source">Mix and Match RPM and source</A>
+		<LI><A HREF="install.html#Installing_a_single_apache_mod_p">Installing a single apache+mod_perl RPM</A>
+		<LI><A HREF="install.html#Compiling_libapreq_Apache_Requ">Compiling libapreq (Apache::Request) with the RH 6.0 mod_perl RPM</A>
+		<LI><A HREF="install.html#Installing_separate_Apache_and_m">Installing separate Apache and mod_perl RPMs</A>
+		<LI><A HREF="install.html#Testing_the_mod_perl_API">Testing the mod_perl API</A>
+	</UL>
+
+	<LI><A HREF="install.html#Installation_Without_Superuser_P">Installation Without Superuser Privileges</A>
+	<UL>
+
+		<LI><A HREF="install.html#Installing_Perl_Modules_into_a_D">Installing Perl Modules into a Directory of Choice</A>
+		<LI><A HREF="install.html#Making_Your_Scripts_Find_the_Loc">Making Your Scripts Find the Locally Installed Modules</A>
+		<LI><A HREF="install.html#The_CPAN_pm_Shell_and_Locally_In">The CPAN.pm Shell and Locally Installed Modules</A>
+		<LI><A HREF="install.html#Making_a_Local_Apache_Installati">Making a Local Apache Installation</A>
+		<LI><A HREF="install.html#Manual_Local_mod_perl_Enabled_Ap">Manual Local mod_perl Enabled Apache Installation</A>
+		<UL>
+
+			<LI><A HREF="install.html#Resource_Usage">Resource Usage</A>
+		</UL>
+
+		<LI><A HREF="install.html#Local_mod_perl_Enabled_Apache_In">Local mod_perl Enabled Apache Installation with CPAN.pm</A>
+	</UL>
+
+	<LI><A HREF="install.html#Automating_installation">Automating installation</A>
+	<LI><A HREF="install.html#How_can_I_tell_whether_mod_perl_">How can I tell whether mod_perl is running?</A>
+	<UL>
+
+		<LI><A HREF="install.html#Checking_the_error_log">Checking the error_log</A>
+		<LI><A HREF="install.html#Testing_by_viewing_perl_status">Testing by viewing /perl-status</A>
+		<LI><A HREF="install.html#Testing_via_telnet">Testing via telnet</A>
+		<LI><A HREF="install.html#Testing_via_a_CGI_script">Testing via a CGI script</A>
+		<LI><A HREF="install.html#Testing_via_lwp_request">Testing via lwp-request</A>
+	</UL>
+
+	<LI><A HREF="install.html#General_Notes">General Notes</A>
+	<UL>
+
+		<LI><A HREF="install.html#Is_it_possible_to_run_mod_perl_e">Is it possible to run mod_perl enabled Apache as suExec?</A>
+		<LI><A HREF="install.html#Should_I_Rebuild_mod_perl_if_I_h">Should I Rebuild mod_perl if I have Upgraded Perl?</A>
+		<LI><A HREF="install.html#Perl_installation_requirements">Perl installation requirements</A>
+		<LI><A HREF="install.html#mod_auth_dbm_nuances">mod_auth_dbm nuances</A>
+		<LI><A HREF="install.html#Stripping_Apache_to_make_it_almo">Stripping Apache to make it almost a Perl-server</A>
+		<LI><A HREF="install.html#Saving_the_config_status_Files_w">Saving the config.status Files with mod_perl, php, ssl and Other Components</A>
+		<LI><A HREF="install.html#What_Compiler_Should_Be_Used_to_">What Compiler Should Be Used to Build mod_perl?</A>
+	</UL>
+
+	<LI><A HREF="install.html#OS_Related_Notes">OS Related Notes</A>
+	<LI><A HREF="install.html#Pros_and_Cons_of_Building_mod_pe">Pros and Cons of Building mod_perl as DSO</A>
+</UL>
+<P>
+<LI><A HREF="config.html"><B><FONT SIZE=+1>mod_perl Configuration </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="config.html#Server_Configuration">Server Configuration</A>
+	<LI><A HREF="config.html#Apache_Configuration">Apache Configuration</A>
+	<UL>
+
+		<LI><A HREF="config.html#Configuration_Directives">Configuration Directives</A>
+		<LI><A HREF="config.html#_htaccess_files">.htaccess files</A>
+		<LI><A HREF="config.html#E_lt_DirectoryE_gt_E_lt_Locati">&lt;Directory&gt;, &lt;Location&gt; and &lt;Files&gt; Sections</A>
+		<LI><A HREF="config.html#How_Directory_Location_and_File">How Directory, Location and Files Sections are Merged</A>
+		<LI><A HREF="config.html#Sub_Grouping_of_Location_Dir">Sub-Grouping of &lt;Location&gt;, &lt;Directory&gt; and &lt;Files&gt; Sections</A>
+		<LI><A HREF="config.html#Options_Directive">Options Directive</A>
+	</UL>
+
+	<LI><A HREF="config.html#mod_perl_Configuration">mod_perl Configuration</A>
+	<UL>
+
+		<LI><A HREF="config.html#Alias_Configurations">Alias Configurations</A>
+		<UL>
+
+			<LI><A HREF="config.html#Running_CGI_PerlRun_and_Regist">Running CGI, PerlRun, and Registry Scripts Located in the Same Directory</A>
+		</UL>
+
+		<LI><A HREF="config.html#_Location_Configuration">&lt;Location&gt; Configuration</A>
+		<LI><A HREF="config.html#Overriding_Location_Setting_in">Overriding &lt;Location&gt; Setting in &quot;Sub-Location&quot;</A>
+		<LI><A HREF="config.html#PerlModule_and_PerlRequire_Direc">PerlModule and PerlRequire Directives</A>
+		<LI><A HREF="config.html#Perl_Handlers">Perl*Handlers</A>
+		<LI><A HREF="config.html#The_handler_subroutine">The handler subroutine</A>
+		<LI><A HREF="config.html#Stacked_Handlers">Stacked Handlers</A>
+		<LI><A HREF="config.html#Perl_Method_Handlers">Perl Method Handlers</A>
+		<LI><A HREF="config.html#PerlFreshRestart">PerlFreshRestart</A>
+		<LI><A HREF="config.html#PerlSetVar_PerlSetEnv_and_PerlP">PerlSetVar, PerlSetEnv and PerlPassEnv</A>
+		<LI><A HREF="config.html#PerlSetupEnv">PerlSetupEnv</A>
+		<LI><A HREF="config.html#PerlWarn_and_PerlTaintCheck">PerlWarn and PerlTaintCheck</A>
+		<LI><A HREF="config.html#MinSpareServers_MaxSpareServers_">MinSpareServers MaxSpareServers StartServers MaxClients MaxRequestsPerChild</A>
+	</UL>
+
+	<LI><A HREF="config.html#The_Startup_File">The Startup File</A>
+	<UL>
+
+		<LI><A HREF="config.html#The_Sample_Startup_File">The Sample Startup File</A>
+		<LI><A HREF="config.html#What_Modules_You_Should_Add_to_t">What Modules You Should Add to the Startup File and Why</A>
+		<LI><A HREF="config.html#The_Confusion_with_use_in_the_">The Confusion with use() in the Server Startup File</A>
+	</UL>
+
+	<LI><A HREF="config.html#Apache_Configuration_in_Perl">Apache Configuration in Perl</A>
+	<UL>
+
+		<LI><A HREF="config.html#Usage">Usage</A>
+		<LI><A HREF="config.html#Enabling">Enabling</A>
+		<LI><A HREF="config.html#Caveats">Caveats</A>
+		<LI><A HREF="config.html#Verifying">Verifying</A>
+		<LI><A HREF="config.html#Strict_Perl_Sections">Strict &lt;Perl&gt; Sections</A>
+		<LI><A HREF="config.html#Debugging">Debugging</A>
+		<LI><A HREF="config.html#References">References</A>
+	</UL>
+
+	<LI><A HREF="config.html#Validating_the_Configuration_Syn">Validating the Configuration Syntax</A>
+	<LI><A HREF="config.html#Enabling_Remote_Server_Configura">Enabling Remote Server Configuration Reports</A>
+	<LI><A HREF="config.html#Publishing_Port_Numbers_other_th">Publishing Port Numbers other than 80</A>
+	<LI><A HREF="config.html#Configuring_Apache_mod_perl_wi">Configuring Apache + mod_perl with mod_macro</A>
+	<LI><A HREF="config.html#General_Pitfalls">General Pitfalls</A>
+	<UL>
+
+		<LI><A HREF="config.html#My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A>
+		<LI><A HREF="config.html#My_Script_Works_under_mod_cgi_b">My Script Works under mod_cgi, but when Called via mod_perl I Get a 'Save-As' Prompt</A>
+		<LI><A HREF="config.html#Is_There_a_Way_to_Provide_a_Diff">Is There a Way to Provide a Different startup.pl File for Each Individual Virtual Host</A>
+		<LI><A HREF="config.html#Is_There_a_Way_to_Modify_INC_on">Is There a Way to Modify @INC on a Per-Virtual-Host or Per-Location Basis.</A>
+		<LI><A HREF="config.html#A_Script_From_One_Virtual_Host_C">A Script From One Virtual Host Calls a Script with the Same Path From the Other Virtual Host</A>
+		<LI><A HREF="config.html#the_Server_no_Longer_Retrieves_t">the Server no Longer Retrieves the DirectoryIndex Files for a Directory</A>
+	</UL>
+
+	<LI><A HREF="config.html#Configuration_Security_Concerns">Configuration Security Concerns</A>
+	<LI><A HREF="config.html#Apache_Restarts_Twice_On_Start">Apache Restarts Twice On Start</A>
+	<LI><A HREF="config.html#Knowing_the_proxy_pass_ed_Connec">Knowing the proxy_pass'ed Connection Type</A>
+	<LI><A HREF="config.html#Adding_Custom_Configuration_Dire">Adding Custom Configuration Directives </A>
+</UL>
+<P>
+<LI><A HREF="control.html"><B><FONT SIZE=+1>Controlling and Monitoring the Server </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="control.html#Restarting_Techniques">Restarting Techniques</A>
+	<LI><A HREF="control.html#Server_Stopping_and_Restarting">Server Stopping and Restarting </A>
+	<LI><A HREF="control.html#Speeding_up_the_Apache_Terminati">Speeding up the Apache Termination and Restart</A>
+	<LI><A HREF="control.html#Using_apachectl_to_Control_the_S">Using apachectl to Control the Server</A>
+	<LI><A HREF="control.html#Safe_Code_Updates_on_a_Live_Prod">Safe Code Updates on a Live Production Server</A>
+	<LI><A HREF="control.html#An_Intentional_Disabling_of_Live">An Intentional Disabling of Live Scripts</A>
+	<LI><A HREF="control.html#SUID_Start_up_Scripts">SUID Start-up Scripts</A>
+	<UL>
+
+		<LI><A HREF="control.html#Introduction_to_SUID_Executables">Introduction to SUID Executables</A>
+		<LI><A HREF="control.html#Apache_Startup_SUID_Script_s_Sec">Apache Startup SUID Script's Security</A>
+		<LI><A HREF="control.html#Sample_Apache_Startup_SUID_Scrip">Sample Apache Startup SUID Script</A>
+	</UL>
+
+	<LI><A HREF="control.html#Preparing_for_Machine_Reboot">Preparing for Machine Reboot</A>
+	<LI><A HREF="control.html#Monitoring_the_Server_A_watchdo">Monitoring the Server.  A watchdog.</A>
+	<LI><A HREF="control.html#Running_a_Server_in_Single_Proce">Running a Server in Single Process Mode</A>
+	<LI><A HREF="control.html#Starting_a_Personal_Server_for_E">Starting a Personal Server for Each Developer</A>
+	<LI><A HREF="control.html#Wrapper_to_Emulate_the_Server_Pe">Wrapper to Emulate the Server Perl Environment</A>
+	<LI><A HREF="control.html#Server_Maintenance_Chores">Server Maintenance Chores</A>
+	<UL>
+
+		<LI><A HREF="control.html#Handling_Log_Files">Handling Log Files</A>
+		<UL>
+
+			<LI><A HREF="control.html#Log_Rotation">Log Rotation</A>
+			<LI><A HREF="control.html#Non_Scheduled_Emergency_Log_Rota">Non-Scheduled Emergency Log Rotation</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="control.html#Swapping_Prevention">Swapping Prevention</A>
+	<LI><A HREF="control.html#Preventing_mod_perl_Processes_Fr">Preventing mod_perl Processes From Going Wild</A>
+	<UL>
+
+		<LI><A HREF="control.html#All_RAM_Consumed">All RAM Consumed </A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="strategy.html"><B><FONT SIZE=+1>Choosing the Right Strategy </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="strategy.html#Do_it_like_I_do_it_">Do it like I do it!?</A>
+	<LI><A HREF="strategy.html#mod_perl_Deployment_Overview">mod_perl Deployment Overview</A>
+	<LI><A HREF="strategy.html#Alternative_architectures_for_ru">Alternative architectures for running one and two servers</A>
+	<UL>
+
+		<LI><A HREF="strategy.html#Standalone_mod_perl_Enabled_Apac">Standalone mod_perl Enabled Apache Server</A>
+		<LI><A HREF="strategy.html#One_Plain_Apache_and_One_mod_per">One Plain Apache and One mod_perl-enabled Apache Servers</A>
+		<LI><A HREF="strategy.html#One_light_non_Apache_and_One_mod">One light non-Apache and One mod_perl enabled Apache Servers</A>
+	</UL>
+
+	<LI><A HREF="strategy.html#Adding_a_Proxy_Server_in_http_Ac">Adding a Proxy Server in http Accelerator Mode</A>
+	<LI><A HREF="strategy.html#Implementations_of_Proxy_Servers">Implementations of Proxy Servers</A>
+	<UL>
+
+		<LI><A HREF="strategy.html#The_Squid_Server">The Squid Server</A>
+		<LI><A HREF="strategy.html#Apache_s_mod_proxy">Apache's mod_proxy</A>
+	</UL>
+
+	<LI><A HREF="strategy.html#When_One_Machine_is_not_Enough_f">When One Machine is not Enough for RDBMS DataBase and mod_perl</A>
+	<UL>
+
+		<LI><A HREF="strategy.html#Servers_Requirements">Servers' Requirements</A>
+		<LI><A HREF="strategy.html#The_Problem">The Problem</A>
+		<LI><A HREF="strategy.html#The_Solution">The Solution</A>
+		<UL>
+
+			<LI><A HREF="strategy.html#Pros">Pros</A>
+			<LI><A HREF="strategy.html#Cons">Cons</A>
+		</UL>
+
+		<LI><A HREF="strategy.html#Three_Machines_Model">Three Machines Model</A>
+	</UL>
+
+	<LI><A HREF="strategy.html#Running_More_than_One_mod_perl_S">Running More than One mod_perl Server on the Same Machine.</A>
+	<LI><A HREF="strategy.html#SSL_functionality_and_a_mod_perl">SSL functionality and a mod_perl Server</A>
+</UL>
+<P>
+<LI><A HREF="scenario.html"><B><FONT SIZE=+1>Real World Scenarios </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="scenario.html#Assumptions">Assumptions </A>
+	<LI><A HREF="scenario.html#Standalone_mod_perl_Enabled_Apac">Standalone mod_perl Enabled Apache Server</A>
+	<UL>
+
+		<LI><A HREF="scenario.html#Installation_in_10_lines">Installation in 10 lines</A>
+		<LI><A HREF="scenario.html#Installation_in_10_paragraphs">Installation in 10 paragraphs</A>
+		<LI><A HREF="scenario.html#Configuration">Configuration</A>
+	</UL>
+
+	<LI><A HREF="scenario.html#One_Plain_and_One_mod_perl_enabl">One Plain and One mod_perl enabled Apache Servers</A>
+	<UL>
+
+		<LI><A HREF="scenario.html#Configuration_and_Compilation_of">Configuration and Compilation of the Sources.</A>
+		<UL>
+
+			<LI><A HREF="scenario.html#Building_the_httpd_docs_Server">Building the httpd_docs Server</A>
+			<LI><A HREF="scenario.html#Building_the_httpd_perl_Server">Building the httpd_perl Server</A>
+		</UL>
+
+		<LI><A HREF="scenario.html#Configuration_of_the_servers">Configuration of the servers</A>
+		<UL>
+
+			<LI><A HREF="scenario.html#Basic_httpd_docs_Server_Configur">Basic httpd_docs Server Configuration</A>
+			<LI><A HREF="scenario.html#Basic_httpd_perl_Server_Configur">Basic httpd_perl Server Configuration</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="scenario.html#Running_Two_webservers_and_Squid">Running Two webservers and Squid in httpd Accelerator Mode</A>
+	<LI><A HREF="scenario.html#Running_One_Webserver_and_Squid_">Running One Webserver and Squid in httpd Accelerator Mode</A>
+	<LI><A HREF="scenario.html#mod_proxy">mod_proxy</A>
+	<UL>
+
+		<LI><A HREF="scenario.html#Concepts_and_Configuration_Direc">Concepts and Configuration Directives</A>
+		<UL>
+
+			<LI><A HREF="scenario.html#ProxyPass">ProxyPass</A>
+			<LI><A HREF="scenario.html#ProxyPassReverse">ProxyPassReverse</A>
+			<LI><A HREF="scenario.html#Security_Issues">Security Issues</A>
+		</UL>
+
+		<LI><A HREF="scenario.html#Buffering_Feature">Buffering Feature</A>
+		<LI><A HREF="scenario.html#Setting_the_Buffering_Limits_on_">Setting the Buffering Limits on Various OSs</A>
+		<UL>
+
+			<LI><A HREF="scenario.html#IOBUFSIZE_Source_Code_Definition">IOBUFSIZE Source Code Definition</A>
+			<LI><A HREF="scenario.html#ProxyReceiveBufferSize_Configura">ProxyReceiveBufferSize Configuration Directive</A>
+			<LI><A HREF="scenario.html#Hacking_the_Code">Hacking the Code</A>
+		</UL>
+
+		<LI><A HREF="scenario.html#Caching_Feature">Caching Feature</A>
+		<LI><A HREF="scenario.html#Build_Process">Build Process</A>
+	</UL>
+
+	<LI><A HREF="scenario.html#Front_end_Back_end_Proxying_with">Front-end Back-end Proxying with Virtual Hosts</A>
+	<LI><A HREF="scenario.html#Getting_the_Remote_Server_IP_in_">Getting the Remote Server IP in the Back-end server in the Proxy Setup</A>
+	<UL>
+
+		<LI><A HREF="scenario.html#Build">Build</A>
+		<LI><A HREF="scenario.html#Usage">Usage</A>
+		<LI><A HREF="scenario.html#Security">Security</A>
+		<LI><A HREF="scenario.html#Caveats">Caveats</A>
+		<LI><A HREF="scenario.html#mod_proxy_add_forward_Module_s_O">mod_proxy_add_forward Module's Order Precedence</A>
+	</UL>
+
+	<LI><A HREF="scenario.html#HTTP_Authentication_With_Two_Ser">HTTP Authentication With Two Servers Plus a Proxy</A>
+	<LI><A HREF="scenario.html#mod_rewrite_Examples">mod_rewrite Examples</A>
+	<LI><A HREF="scenario.html#Caching_in_mod_proxy">Caching in mod_proxy</A>
+</UL>
+<P>
+<LI><A HREF="porting.html"><B><FONT SIZE=+1>CGI to mod_perl Porting. mod_perl Coding guidelines. </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="porting.html#Document_Coverage">Document Coverage</A>
+	<LI><A HREF="porting.html#Before_you_start_to_code">Before you start to code</A>
+	<LI><A HREF="porting.html#Exposing_Apache_Registry_secret">Exposing Apache::Registry secrets</A>
+	<UL>
+
+		<LI><A HREF="porting.html#The_First_Mystery">The First Mystery</A>
+		<LI><A HREF="porting.html#The_Second_Mystery">The Second Mystery</A>
+	</UL>
+
+	<LI><A HREF="porting.html#Sometimes_it_Works_Sometimes_it">Sometimes it Works, Sometimes it Doesn't</A>
+	<UL>
+
+		<LI><A HREF="porting.html#An_Easy_Break_in">An Easy Break-in</A>
+		<LI><A HREF="porting.html#Thinking_mod_cgi">Thinking mod_cgi</A>
+		<LI><A HREF="porting.html#Regular_Expression_Memory">Regular Expression Memory</A>
+	</UL>
+
+	<LI><A HREF="porting.html#Script_s_name_space">Script's name space</A>
+	<LI><A HREF="porting.html#_INC_and_mod_perl">@INC and mod_perl</A>
+	<LI><A HREF="porting.html#Reloading_Modules_and_Required_F">Reloading Modules and Required Files</A>
+	<UL>
+
+		<LI><A HREF="porting.html#Restarting_the_server">Restarting the server</A>
+		<LI><A HREF="porting.html#Using_Apache_StatINC_for_the_De">Using Apache::StatINC for the Development Process</A>
+		<LI><A HREF="porting.html#Using_Apache_Reload">Using Apache::Reload </A>
+		<UL>
+
+			<LI><A HREF="porting.html#Register_Modules_Implicitly">Register Modules Implicitly</A>
+			<LI><A HREF="porting.html#Register_Modules_Explicitly">Register Modules Explicitly</A>
+			<LI><A HREF="porting.html#Special_Touch_File">Special &quot;Touch&quot; File</A>
+			<LI><A HREF="porting.html#Caveats">Caveats</A>
+			<LI><A HREF="porting.html#Availability">Availability</A>
+		</UL>
+
+		<LI><A HREF="porting.html#Configuration_Files_Writing_Dy">Configuration Files: Writing, Dynamically Updating and Reloading</A>
+		<UL>
+
+			<LI><A HREF="porting.html#Writing_Configuration_Files">Writing Configuration Files</A>
+			<LI><A HREF="porting.html#Reloading_Configuration_Files">Reloading Configuration Files</A>
+			<LI><A HREF="porting.html#Dynamically_updating_configurati">Dynamically updating configuration files</A>
+		</UL>
+
+		<LI><A HREF="porting.html#Reloading_handlers">Reloading handlers</A>
+	</UL>
+
+	<LI><A HREF="porting.html#Name_collisions_with_Modules_and">Name collisions with Modules and libs</A>
+	<LI><A HREF="porting.html#More_package_name_related_issues">More package name related issues</A>
+	<LI><A HREF="porting.html#_END_and_DATA_tokens">__END__ and __DATA__ tokens</A>
+	<LI><A HREF="porting.html#Output_from_system_calls">Output from system calls</A>
+	<LI><A HREF="porting.html#Using_format_and_write_">Using format() and write()</A>
+	<LI><A HREF="porting.html#Terminating_requests_and_process">Terminating requests and processes, the exit() and child_terminate() functions</A>
+	<LI><A HREF="porting.html#die_and_mod_perl">die() and mod_perl</A>
+	<LI><A HREF="porting.html#Return_Codes">Return Codes</A>
+	<LI><A HREF="porting.html#Testing_the_Code_from_the_Shell">Testing the Code from the Shell</A>
+	<LI><A HREF="porting.html#I_O_is_different">I/O is different</A>
+	<LI><A HREF="porting.html#STDIN_STDOUT_and_STDERR_streams">STDIN, STDOUT and STDERR streams</A>
+	<LI><A HREF="porting.html#Redirecting_STDOUT_into_a_Scalar">Redirecting STDOUT into a Scalar</A>
+	<LI><A HREF="porting.html#Apache_print_and_CORE_print_">Apache::print() and CORE::print()</A>
+	<LI><A HREF="porting.html#Global_Variables_Persistence">Global Variables Persistence</A>
+	<LI><A HREF="porting.html#Generating_correct_HTTP_Headers">Generating correct HTTP Headers</A>
+	<LI><A HREF="porting.html#NPH_Non_Parsed_Headers_scripts">NPH (Non Parsed Headers) scripts</A>
+	<LI><A HREF="porting.html#BEGIN_blocks">BEGIN blocks </A>
+	<LI><A HREF="porting.html#END_blocks">END blocks</A>
+	<LI><A HREF="porting.html#CHECK_Blocks">CHECK Blocks</A>
+	<LI><A HREF="porting.html#Command_Line_Switches_w_T_e">Command Line Switches (-w, -T, etc)</A>
+	<UL>
+
+		<LI><A HREF="porting.html#Warnings">Warnings</A>
+		<LI><A HREF="porting.html#Taint_Mode">Taint Mode</A>
+		<LI><A HREF="porting.html#Other_switches">Other switches</A>
+	</UL>
+
+	<LI><A HREF="porting.html#The_strict_pragma">The strict pragma</A>
+	<LI><A HREF="porting.html#Passing_ENV_variables_to_CGI">Passing ENV variables to CGI</A>
+	<LI><A HREF="porting.html#_M_and_other_time_file_tests_u">-M and other time() file tests under mod_perl</A>
+	<LI><A HREF="porting.html#Apache_and_syslog">Apache and syslog</A>
+	<LI><A HREF="porting.html#File_tests_operators">File tests operators</A>
+	<LI><A HREF="porting.html#Filehandlers_and_locks_leakages">Filehandlers and locks leakages</A>
+	<LI><A HREF="porting.html#Code_has_been_changed_but_it_se">Code has been changed, but it seems the script is running the old code</A>
+	<LI><A HREF="porting.html#The_Script_Is_Too_Dirty_But_It_">The Script Is Too Dirty, But It Does The Job And I Cannot Afford To Rewrite It.</A>
+	<LI><A HREF="porting.html#Apache_PerlRun_a_closer_look">Apache::PerlRun--a closer look</A>
+	<LI><A HREF="porting.html#Sharing_variables_between_proces">Sharing variables between processes</A>
+	<LI><A HREF="porting.html#Transitioning_from_Apache_Regis">Transitioning from Apache::Registry to Apache handlers</A>
+	<UL>
+
+		<LI><A HREF="porting.html#Starting_with_mod_cgi_Compatible">Starting with mod_cgi Compatible Script</A>
+		<LI><A HREF="porting.html#Converting_into_Perl_Content_Han">Converting into Perl Content Handler</A>
+		<LI><A HREF="porting.html#Converting_to_use_Apache_Perl_Mo">Converting to use Apache Perl Modules</A>
+		<LI><A HREF="porting.html#Conclusion">Conclusion</A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="performance.html"><B><FONT SIZE=+1>Performance Tuning </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="performance.html#The_Big_Picture">The Big Picture</A>
+	<LI><A HREF="performance.html#System_Analysis">System Analysis</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Software_Requirements">Software Requirements</A>
+		<LI><A HREF="performance.html#Hardware_Requirements">Hardware Requirements</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Essential_Tools">Essential Tools</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Benchmarking_Applications">Benchmarking Applications</A>
+		<UL>
+
+			<LI><A HREF="performance.html#Benchmarking_Perl_Code">Benchmarking Perl Code</A>
+			<LI><A HREF="performance.html#Benchmarking_a_Graphic_Hits_Coun">Benchmarking a Graphic Hits Counter with Persistent DB Connections</A>
+			<LI><A HREF="performance.html#Benchmarking_Response_Times">Benchmarking Response Times</A>
+			<UL>
+
+				<LI><A HREF="performance.html#ApacheBench">ApacheBench</A>
+				<LI><A HREF="performance.html#httperf">httperf</A>
+				<LI><A HREF="performance.html#http_load">http_load</A>
+				<LI><A HREF="performance.html#the_crashme_Script">the crashme Script</A>
+			</UL>
+
+			<LI><A HREF="performance.html#Benchmarking_PerlHandlers">Benchmarking PerlHandlers</A>
+		</UL>
+
+		<LI><A HREF="performance.html#Code_Profiling_Techniques">Code Profiling Techniques</A>
+		<LI><A HREF="performance.html#Measuring_the_Memory_of_the_Proc">Measuring the Memory of the Process</A>
+		<LI><A HREF="performance.html#Measuring_the_Memory_Usage_of_Su">Measuring the Memory Usage of Subroutines </A>
+	</UL>
+
+	<LI><A HREF="performance.html#Know_Your_Operating_System">Know Your Operating System</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Sharing_Memory">Sharing Memory</A>
+		<UL>
+
+			<LI><A HREF="performance.html#How_Shared_Is_My_Memory_">How Shared Is My Memory?</A>
+			<LI><A HREF="performance.html#Calculating_Real_Memory_Usage">Calculating Real Memory Usage</A>
+			<LI><A HREF="performance.html#Are_My_Variables_Shared_">Are My Variables Shared?</A>
+			<LI><A HREF="performance.html#Preloading_Perl_Modules_at_Serve">Preloading Perl Modules at Server Startup</A>
+			<LI><A HREF="performance.html#Preloading_Registry_Scripts_at_S">Preloading Registry Scripts at Server Startup</A>
+			<LI><A HREF="performance.html#Modules_Initializing_at_Server_S">Modules Initializing at Server Startup</A>
+			<UL>
+
+				<LI><A HREF="performance.html#Initializing_DBI_pm">Initializing DBI.pm</A>
+				<LI><A HREF="performance.html#Initializing_CGI_pm">Initializing CGI.pm</A>
+			</UL>
+
+		</UL>
+
+		<LI><A HREF="performance.html#Increasing_Shared_Memory_With_me">Increasing Shared Memory With mergemem</A>
+		<LI><A HREF="performance.html#Forking_and_Executing_Subprocess">Forking and Executing Subprocesses from mod_perl</A>
+		<UL>
+
+			<LI><A HREF="performance.html#Forking_a_New_Process">Forking a New Process</A>
+			<LI><A HREF="performance.html#Freeing_the_Parent_Process">Freeing the Parent Process</A>
+			<LI><A HREF="performance.html#Detaching_the_Forked_Process">Detaching the Forked Process</A>
+			<LI><A HREF="performance.html#Avoiding_Zombie_Processes">Avoiding Zombie Processes</A>
+			<LI><A HREF="performance.html#A_Complete_Fork_Example">A Complete Fork Example</A>
+			<LI><A HREF="performance.html#Starting_a_Long_Running_External">Starting a Long Running External Program</A>
+			<LI><A HREF="performance.html#Starting_a_Short_Running_Externa">Starting a Short Running External Program</A>
+			<LI><A HREF="performance.html#Executing_system_or_exec_in_">Executing system() or exec() in the Right Way</A>
+		</UL>
+
+		<LI><A HREF="performance.html#OS_Specific_Parameters_for_Proxy">OS Specific Parameters for Proxying</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Performance_Tuning_by_Tweaking_A">Performance Tuning by Tweaking Apache Configuration</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Configuration_Tuning_with_Apache">Configuration Tuning with ApacheBench</A>
+		<LI><A HREF="performance.html#Choosing_MaxClients">Choosing MaxClients</A>
+		<LI><A HREF="performance.html#Choosing_MaxRequestsPerChild">Choosing MaxRequestsPerChild</A>
+		<LI><A HREF="performance.html#Choosing_MinSpareServers_MaxSpa">Choosing MinSpareServers, MaxSpareServers and StartServers</A>
+		<LI><A HREF="performance.html#Summary_of_Benchmarking_to_tune_">Summary of Benchmarking to tune all 5 parameters</A>
+		<LI><A HREF="performance.html#KeepAlive">KeepAlive</A>
+		<LI><A HREF="performance.html#PerlSetupEnv_Off">PerlSetupEnv Off</A>
+		<LI><A HREF="performance.html#Reducing_the_Number_of_stat_Ca">Reducing the Number of stat() Calls Made by Apache</A>
+	</UL>
+
+	<LI><A HREF="performance.html#TMTOWTDI_Convenience_and_Habit_">TMTOWTDI: Convenience and Habit vs. Performance</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Apache_Registry_PerlHandler_vs_">Apache::Registry PerlHandler vs. Custom PerlHandler</A>
+		<LI><A HREF="performance.html#_Bloatware_modules">&quot;Bloatware&quot; modules</A>
+		<LI><A HREF="performance.html#Apache_args_vs_Apache_Request">Apache::args vs. Apache::Request::param vs. CGI::param</A>
+		<LI><A HREF="performance.html#Using_1_Under_mod_perl_and_Be">Using $|=1 Under mod_perl and Better print() Techniques.</A>
+		<LI><A HREF="performance.html#Global_vs_Fully_Qualified_Varia">Global vs. Fully Qualified Variables</A>
+		<LI><A HREF="performance.html#Object_Methods_Calls_vs_Functio">Object Methods Calls vs. Function Calls</A>
+		<UL>
+
+			<LI><A HREF="performance.html#The_Overhead_with_Light_Subrouti">The Overhead with Light Subroutines</A>
+			<LI><A HREF="performance.html#The_Overhead_with_Heavy_Subrouti">The Overhead with Heavy Subroutines</A>
+			<LI><A HREF="performance.html#Are_All_Methods_Slower_than_Func">Are All Methods Slower than Functions?</A>
+		</UL>
+
+		<LI><A HREF="performance.html#Imported_Symbols_and_Memory_Usag">Imported Symbols and Memory Usage</A>
+		<LI><A HREF="performance.html#Interpolation_Concatenation_or_">Interpolation, Concatenation or List</A>
+		<LI><A HREF="performance.html#Using_Perl_stat_Call_s_Cached_">Using Perl stat() Call's Cached Results</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Apache_Registry_and_Derivatives">Apache::Registry and Derivatives Specific Notes</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Be_Careful_with_Symbolic_Links">Be Careful with Symbolic Links</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Improving_Performance_by_Prevent">Improving Performance by Prevention</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Memory_leakage">Memory leakage</A>
+		<UL>
+
+			<LI><A HREF="performance.html#Reading_In_A_Whole_File">Reading In A Whole File</A>
+			<LI><A HREF="performance.html#Copying_Variables_Between_Functi">Copying Variables Between Functions</A>
+			<LI><A HREF="performance.html#Work_With_Databases">Work With Databases</A>
+		</UL>
+
+		<LI><A HREF="performance.html#Keeping_the_Shared_Memory_Limit">Keeping the Shared Memory Limit</A>
+		<LI><A HREF="performance.html#Limiting_the_Size_of_the_Process">Limiting the Size of the Processes</A>
+		<LI><A HREF="performance.html#Limiting_Other_Resources_Used_by">Limiting Other Resources Used by Apache Child Processes</A>
+		<UL>
+
+			<LI><A HREF="performance.html#OS_Specific_notes">OS Specific notes</A>
+		</UL>
+
+		<LI><A HREF="performance.html#Limiting_the_Number_of_Processes">Limiting the Number of Processes Serving the Same Resource</A>
+		<LI><A HREF="performance.html#Limiting_the_Request_Rate_Speed_">Limiting the Request Rate Speed (Robot Blocking)</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Perl_Modules_for_Performance_Imp">Perl Modules for Performance Improvement</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Sending_Plain_HTML_as_Compressed">Sending Plain HTML as Compressed Output</A>
+		<LI><A HREF="performance.html#Caching_Components_with_HTML_Ma">Caching Components with HTML::Mason</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Efficient_Work_with_Databases_un">Efficient Work with Databases under mod_perl</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Persistent_DB_Connections">Persistent DB Connections</A>
+		<UL>
+
+			<LI><A HREF="performance.html#Preopening_Connections_at_the_Ch">Preopening Connections at the Child Process' Fork Time</A>
+			<LI><A HREF="performance.html#Caching_prepare_Statements">Caching prepare() Statements</A>
+		</UL>
+
+		<LI><A HREF="performance.html#mod_perl_Database_Performance_Im">mod_perl Database Performance Improving</A>
+		<UL>
+
+			<LI><A HREF="performance.html#Analysis_of_the_Problem">Analysis of the Problem</A>
+			<LI><A HREF="performance.html#Optimizing_Database_Connections">Optimizing Database Connections</A>
+			<LI><A HREF="performance.html#Utilizing_the_Database_Server_s_">Utilizing the Database Server's Cache</A>
+			<LI><A HREF="performance.html#Eliminating_SQL_Statement_Parsin">Eliminating SQL Statement Parsing</A>
+			<LI><A HREF="performance.html#Conclusion">Conclusion</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="performance.html#Using_3rd_Party_Applications">Using 3rd Party Applications</A>
+	<UL>
+
+		<LI><A HREF="performance.html#Proxying_the_mod_perl_Server">Proxying the mod_perl Server</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Upload_and_Download_of_Big_Files">Upload and Download of Big Files</A>
+	<LI><A HREF="performance.html#Apache_mod_perl_Build_Options">Apache/mod_perl Build Options</A>
+	<UL>
+
+		<LI><A HREF="performance.html#mod_perl_Process_Size_as_a_Funct">mod_perl Process Size as a Function of Compiled in C Modules and mod_perl Features</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Perl_Build_Options">Perl Build Options</A>
+	<UL>
+
+		<LI><A HREF="performance.html#_DTWO_POT_OPTIMIZE_and_DPACK_MA">-DTWO_POT_OPTIMIZE and -DPACK_MALLOC Perl Build Options</A>
+		<LI><A HREF="performance.html#_Dusemymalloc_Perl_Build_Option">-Dusemymalloc Perl Build Option</A>
+	</UL>
+
+	<LI><A HREF="performance.html#Architecture_Specific_Compile_Op">Architecture Specific Compile Options</A>
+</UL>
+<P>
+<LI><A HREF="frequent.html"><B><FONT SIZE=+1>Frequent mod_perl problems </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="frequent.html#Coverage">Coverage</A>
+	<LI><A HREF="frequent.html#my_scoped_variable_in_nested_s">my() scoped variable in nested subroutines</A>
+	<LI><A HREF="frequent.html#Segfaults_caused_by_PerlFreshRes">Segfaults caused by PerlFreshRestart</A>
+</UL>
+<P>
+<LI><A HREF="troubleshooting.html"><B><FONT SIZE=+1>Warnings and Errors Troubleshooting Index </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="troubleshooting.html#General_Advice">General Advice </A>
+	<LI><A HREF="troubleshooting.html#Building_and_Installation">Building and Installation </A>
+	<LI><A HREF="troubleshooting.html#Configuration_and_Startup">Configuration and Startup</A>
+	<UL>
+
+		<LI><A HREF="troubleshooting.html#libexec_libperl_so_open_failed_">libexec/libperl.so: open failed: No such file or directory</A>
+		<LI><A HREF="troubleshooting.html#install_driver_Oracle_failed_C">install_driver(Oracle) failed: Can't load '.../DBD/Oracle/Oracle.so' for module DBD::Oracle</A>
+		<LI><A HREF="troubleshooting.html#Invalid_command_PerlHandler_">Invalid command 'PerlHandler'...</A>
+		<LI><A HREF="troubleshooting.html#RegistryLoader_Translation_of_u">RegistryLoader: Translation of uri [...] to filename failed</A>
+		<LI><A HREF="troubleshooting.html#_Apache_pm_failed_to_load_">&quot;Apache.pm failed to load!&quot;</A>
+	</UL>
+
+	<LI><A HREF="troubleshooting.html#Code_Parsing_and_Compilation">Code Parsing and Compilation</A>
+	<UL>
+
+		<LI><A HREF="troubleshooting.html#Value_of_x_will_not_stay_shared">Value of $x will not stay shared at - line 5</A>
+		<LI><A HREF="troubleshooting.html#Value_of_x_may_be_unavailable_a">Value of $x may be unavailable at - line 5.</A>
+		<LI><A HREF="troubleshooting.html#Can_t_locate_loadable_object_for">Can't locate loadable object for module XXX</A>
+		<LI><A HREF="troubleshooting.html#Can_t_locate_object_method_get_">Can't locate object method &quot;get_handlers&quot;...</A>
+		<LI><A HREF="troubleshooting.html#Missing_right_bracket_at_line_">Missing right bracket at line ...</A>
+		<LI><A HREF="troubleshooting.html#Can_t_load_auto_DBI_DBI_so_">Can't load '.../auto/DBI/DBI.so' for module DBI</A>
+	</UL>
+
+	<LI><A HREF="troubleshooting.html#Runtime">Runtime</A>
+	<UL>
+
+		<LI><A HREF="troubleshooting.html#_exit_signal_Segmentation_fault_">&quot;exit signal Segmentation fault (11)&quot; with mysql</A>
+		<LI><A HREF="troubleshooting.html#foo_at_dev_null_line_0">foo ... at /dev/null line 0</A>
+		<LI><A HREF="troubleshooting.html#Preventing_mod_perl_Processes_Fr">Preventing mod_perl Processes From Going Wild</A>
+		<LI><A HREF="troubleshooting.html#Segfaults_when_using_XML_Parser">Segfaults when using XML::Parser</A>
+		<LI><A HREF="troubleshooting.html#My_CGI_Perl_Code_Gets_Returned_a">My CGI/Perl Code Gets Returned as Plain Text Instead of Being Executed by the Webserver</A>
+		<LI><A HREF="troubleshooting.html#Incorrect_line_number_reporting_">Incorrect line number reporting in error/warn log messages</A>
+		<LI><A HREF="troubleshooting.html#rwrite_returned_1">rwrite returned -1</A>
+		<LI><A HREF="troubleshooting.html#Can_t_upgrade_that_kind_of_scala">Can't upgrade that kind of scalar ...</A>
+		<LI><A HREF="troubleshooting.html#caught_SIGPIPE_in_process">caught SIGPIPE in process</A>
+		<LI><A HREF="troubleshooting.html#Client_hit_STOP_or_Netscape_bit_">Client hit STOP or Netscape bit it!</A>
+		<LI><A HREF="troubleshooting.html#Global_symbol_foo_requires_ex">Global symbol &quot;$foo&quot; requires explicit package name</A>
+		<LI><A HREF="troubleshooting.html#Use_of_uninitialized_value_at_e">Use of uninitialized value at (eval 80) line 12.</A>
+		<LI><A HREF="troubleshooting.html#Undefined_subroutine_Apache_RO">Undefined subroutine &amp;Apache::ROOT::perl::test_2epl::some_function called at</A>
+		<LI><A HREF="troubleshooting.html#Callback_called_exit">Callback called exit</A>
+		<LI><A HREF="troubleshooting.html#Out_of_memory_">Out of memory!</A>
+		<LI><A HREF="troubleshooting.html#server_reached_MaxClients_settin">server reached MaxClients setting, consider raising the MaxClients setting</A>
+		<LI><A HREF="troubleshooting.html#syntax_error_at_dev_null_line_1">syntax error at /dev/null line 1, near &quot;line arguments:&quot;</A>
+		<LI><A HREF="troubleshooting.html#Can_t_call_method_register_clea">Can't call method &quot;register_cleanup&quot; (CGI.pm)</A>
+	</UL>
+
+	<LI><A HREF="troubleshooting.html#Shutdown_and_Restart">Shutdown and Restart</A>
+	<UL>
+
+		<LI><A HREF="troubleshooting.html#Evil_things_might_happen_when_us">Evil things might happen when using PerlFreshRestart</A>
+		<LI><A HREF="troubleshooting.html#Constant_subroutine_XXX_redefine">Constant subroutine XXX redefined</A>
+		<LI><A HREF="troubleshooting.html#Can_t_undef_active_subroutine">Can't undef active subroutine</A>
+		<LI><A HREF="troubleshooting.html#_warn_child_process_30388_did_n">[warn] child process 30388 did not exit, sending another SIGHUP</A>
+		<LI><A HREF="troubleshooting.html#Processes_Get_Stuck_on_Graceful_">Processes Get Stuck on Graceful Restart</A>
+		<LI><A HREF="troubleshooting.html#httpd_keeps_on_growing_after_eac">httpd keeps on growing after each restart</A>
+	</UL>
+
+	<LI><A HREF="troubleshooting.html#Windows_OS_specific_notes">Windows OS specific notes</A>
+	<UL>
+
+		<LI><A HREF="troubleshooting.html#Apache_DBI">Apache::DBI </A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="correct_headers.html"><B><FONT SIZE=+1>Issuing Correct HTTP Headers </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="correct_headers.html#SYNOPSIS">SYNOPSIS</A>
+	<LI><A HREF="correct_headers.html#The_Origin_of_this_Chapter">The Origin of this Chapter</A>
+	<LI><A HREF="correct_headers.html#DESCRIPTION">DESCRIPTION</A>
+	<LI><A HREF="correct_headers.html#1_Why_Headers">1) Why Headers</A>
+	<LI><A HREF="correct_headers.html#2_Which_Headers">2) Which Headers</A>
+	<UL>
+
+		<LI><A HREF="correct_headers.html#2_1_Date_Related_Headers">2.1) Date Related Headers</A>
+		<LI><A HREF="correct_headers.html#2_1_1_Date">2.1.1) Date</A>
+		<LI><A HREF="correct_headers.html#2_1_2_Last_Modified">2.1.2) Last-Modified</A>
+		<LI><A HREF="correct_headers.html#2_1_3_Expires_and_Cache_Control">2.1.3) Expires and Cache-Control</A>
+		<LI><A HREF="correct_headers.html#2_2_Content_Related_Headers">2.2) Content Related Headers</A>
+		<LI><A HREF="correct_headers.html#2_2_1_Content_Type">2.2.1) Content-Type</A>
+		<LI><A HREF="correct_headers.html#2_2_2_Content_Length">2.2.2) Content-Length</A>
+		<LI><A HREF="correct_headers.html#2_2_3_Entity_Tags">2.2.3) Entity Tags</A>
+		<LI><A HREF="correct_headers.html#2_3_Content_Negotiation">2.3) Content Negotiation</A>
+		<LI><A HREF="correct_headers.html#2_3_1_Vary">2.3.1) Vary</A>
+	</UL>
+
+	<LI><A HREF="correct_headers.html#3_Requests">3) Requests</A>
+	<UL>
+
+		<LI><A HREF="correct_headers.html#3_1_HEAD">3.1) HEAD</A>
+		<LI><A HREF="correct_headers.html#3_2_POST">3.2) POST</A>
+		<LI><A HREF="correct_headers.html#3_3_GET">3.3) GET</A>
+		<LI><A HREF="correct_headers.html#3_4_Conditional_GET">3.4) Conditional GET</A>
+	</UL>
+
+	<LI><A HREF="correct_headers.html#4_Avoiding_Dealing_with_Header">4.) Avoiding Dealing with Headers</A>
+	<LI><A HREF="correct_headers.html#References">References</A>
+	<UL>
+
+		<LI><A HREF="correct_headers.html#_1_">[1]</A>
+		<LI><A HREF="correct_headers.html#_2_">[2]</A>
+		<LI><A HREF="correct_headers.html#_3_">[3]</A>
+		<LI><A HREF="correct_headers.html#_4_">[4]</A>
+		<LI><A HREF="correct_headers.html#_5_">[5]</A>
+	</UL>
+
+	<LI><A HREF="correct_headers.html#Other_resources">Other resources</A>
+</UL>
+<P>
+<LI><A HREF="security.html"><B><FONT SIZE=+1>Protecting Your Site </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="security.html#The_Importance_of_Your_site_s_Se">The Importance of Your site's Security</A>
+	<LI><A HREF="security.html#Illustrated_Security_Scenarios">Illustrated Security Scenarios</A>
+	<UL>
+
+		<LI><A HREF="security.html#Non_authenticated_access_for_int">Non authenticated access for internal IPs, Authenticated for external IPs</A>
+	</UL>
+
+	<LI><A HREF="security.html#Authentication_code_snippets">Authentication code snippets</A>
+	<UL>
+
+		<LI><A HREF="security.html#Forcing_re_authentication">Forcing re-authentication</A>
+		<LI><A HREF="security.html#OK_AUTH_REQUIRED_and_FORBIDDEN_">OK, AUTH_REQUIRED and FORBIDDEN in Authentication handlers</A>
+	</UL>
+
+	<LI><A HREF="security.html#Apache_Auth_modules">Apache:Auth* modules</A>
+</UL>
+<P>
+<LI><A HREF="databases.html"><B><FONT SIZE=+1>mod_perl and Relational Databases </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="databases.html#Why_Relational_SQL_Databases">Why Relational (SQL) Databases</A>
+	<LI><A HREF="databases.html#Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A>
+	<UL>
+
+		<LI><A HREF="databases.html#Introduction">Introduction</A>
+		<LI><A HREF="databases.html#When_should_this_module_be_used_">When should this module be used and when shouldn't it be used?</A>
+		<LI><A HREF="databases.html#Configuration">Configuration</A>
+		<LI><A HREF="databases.html#Preopening_DBI_connections">Preopening DBI connections</A>
+		<LI><A HREF="databases.html#Debugging_Apache_DBI">Debugging Apache::DBI</A>
+		<LI><A HREF="databases.html#Database_Locking_Risks">Database Locking Risks</A>
+		<LI><A HREF="databases.html#Troubleshooting">Troubleshooting</A>
+		<UL>
+
+			<LI><A HREF="databases.html#The_Morning_Bug">The Morning Bug</A>
+			<LI><A HREF="databases.html#Opening_connections_with_differe">Opening connections with different parameters</A>
+			<LI><A HREF="databases.html#Cannot_find_the_DBI_handler">Cannot find the DBI handler</A>
+			<LI><A HREF="databases.html#Apache_DBI_does_not_work">Apache:DBI does not work</A>
+			<LI><A HREF="databases.html#Skipping_connection_cache_during">Skipping connection cache during server startup</A>
+			<LI><A HREF="databases.html#Debugging_code_which_deploys_DBI">Debugging code which deploys DBI</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="databases.html#mysql_use_result_vs_mysql_store">mysql_use_result vs. mysql_store_result.</A>
+	<LI><A HREF="databases.html#Optimize_Run_Two_SQL_Engine_Ser">Optimize: Run Two SQL Engine Servers</A>
+	<LI><A HREF="databases.html#Some_useful_code_snippets_to_be_">Some useful code snippets to be used with relational Databases</A>
+	<UL>
+
+		<LI><A HREF="databases.html#Turning_SQL_query_writing_into_a">Turning SQL query writing into a short and simple task</A>
+		<LI><A HREF="databases.html#The_My_DB_module">The My::DB module</A>
+		<LI><A HREF="databases.html#My_DB_Module_s_Usage_Examples">My::DB Module's Usage Examples</A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="dbm.html"><B><FONT SIZE=+1>mod_perl and dbm files </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="dbm.html#Where_and_Why_to_use_dbm_files">Where and Why to use dbm files</A>
+	<LI><A HREF="dbm.html#mod_perl_and_dbm">mod_perl and dbm</A>
+	<LI><A HREF="dbm.html#Locking_dbm_Handlers_and_Write_L">Locking dbm Handlers and Write Lock Starvation Hazards</A>
+	<LI><A HREF="dbm.html#Flawed_Locking_Methods_Which_Mus">Flawed Locking Methods Which Must Not Be Used</A>
+	<LI><A HREF="dbm.html#Locking_Wrappers_Overview">Locking Wrappers Overview</A>
+	<LI><A HREF="dbm.html#Tie_DB_Lock">Tie::DB_Lock</A>
+	<LI><A HREF="dbm.html#DB_File_Lock2">DB_File::Lock2</A>
+</UL>
+<P>
+<LI><A HREF="multiuser.html"><B><FONT SIZE=+1>mod_perl for ISPs. mod_perl and Virtual Hosts </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="multiuser.html#ISPs_providing_mod_perl_services">ISPs providing mod_perl services - a fantasy or a reality</A>
+	<UL>
+
+		<LI><A HREF="multiuser.html#Virtual_Servers_Technologies">Virtual Servers Technologies</A>
+	</UL>
+
+	<LI><A HREF="multiuser.html#Virtual_Hosts_in_the_guide">Virtual Hosts in the guide</A>
+</UL>
+<P>
+<LI><A HREF="debug.html"><B><FONT SIZE=+1>Debugging mod_perl </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="debug.html#Warning_and_Errors_Explained">Warning and Errors Explained</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Curing_The_Internal_Server_Erro">Curing The &quot;Internal Server Error&quot;</A>
+		<LI><A HREF="debug.html#Helping_error_log_to_Help_Us">Helping error_log to Help Us</A>
+		<LI><A HREF="debug.html#The_Importance_of_Warnings">The Importance of Warnings</A>
+		<UL>
+
+			<LI><A HREF="debug.html#diagnostics_pragma">diagnostics pragma</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="debug.html#Handling_the_User_pressed_Stop_">Handling the 'User pressed Stop button' case</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Detecting_Aborted_Connections">Detecting Aborted Connections</A>
+		<LI><A HREF="debug.html#The_Importance_of_Cleanup_Code">The Importance of Cleanup Code</A>
+		<UL>
+
+			<LI><A HREF="debug.html#Critical_Section">Critical Section</A>
+			<LI><A HREF="debug.html#Safe_Resource_Locking_and_Cleanu">Safe Resource Locking and Cleanup Code</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="debug.html#Handling_Server_Timeout_Cases_an">Handling Server Timeout Cases and Working with $SIG{ALRM}</A>
+	<LI><A HREF="debug.html#Looking_inside_the_server">Looking inside the server</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Apache_Status_Embedded_Inter">Apache::Status -- Embedded Interpreter Status Information</A>
+		<UL>
+
+			<LI><A HREF="debug.html#Minimal_Configuration">Minimal Configuration</A>
+			<LI><A HREF="debug.html#Extended_Configuration">Extended Configuration</A>
+			<LI><A HREF="debug.html#Usage">Usage</A>
+			<LI><A HREF="debug.html#Compiled_Registry_Scripts_sectio">Compiled Registry Scripts section seems to be empty.</A>
+		</UL>
+
+		<LI><A HREF="debug.html#mod_status">mod_status</A>
+		<LI><A HREF="debug.html#Apache_VMonitor_Visual_Syste">Apache::VMonitor -- Visual System and Apache Server Monitor</A>
+	</UL>
+
+	<LI><A HREF="debug.html#Sometimes_My_Script_Works_Somet">Sometimes My Script Works, Sometimes It Does Not</A>
+	<LI><A HREF="debug.html#Code_Debug">Code Debug</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Locating_and_correcting_Syntax_E">Locating and correcting Syntax Errors</A>
+		<LI><A HREF="debug.html#Using_Apache_FakeRequest_to_Deb">Using Apache::FakeRequest to Debug Apache Perl Modules</A>
+		<LI><A HREF="debug.html#Finding_the_Line_Which_Triggered">Finding the Line Which Triggered the Error or Warning</A>
+		<LI><A HREF="debug.html#Using_print_for_Debugging">Using print() for Debugging</A>
+		<LI><A HREF="debug.html#Using_print_and_Data_Dumper_f">Using print() and Data::Dumper for Debugging</A>
+		<LI><A HREF="debug.html#The_Importance_of_a_Good_Concise">The Importance of a Good Concise Coding Style</A>
+		<LI><A HREF="debug.html#Introduction_to_the_Perl_Debugge">Introduction to the Perl Debugger</A>
+		<LI><A HREF="debug.html#Interactive_Perl_Debugging_under">Interactive Perl Debugging under mod_cgi</A>
+		<LI><A HREF="debug.html#Non_Interactive_Perl_Debugging_u">Non-Interactive Perl Debugging under mod_perl</A>
+		<LI><A HREF="debug.html#Interactive_mod_perl_Debugging">Interactive mod_perl Debugging</A>
+		<LI><A HREF="debug.html#ptkdb_and_Interactive_mod_perl_D">ptkdb and Interactive mod_perl Debugging</A>
+		<LI><A HREF="debug.html#Debugging_when_Server_Crashes_on">Debugging when Server Crashes on Startup before Writing to Log File.</A>
+	</UL>
+
+	<LI><A HREF="debug.html#Hanging_Processes_Detection_and">Hanging Processes: Detection and Diagnostics</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Hanging_because_of_the_OS_Proble">Hanging because of the OS Problem</A>
+		<LI><A HREF="debug.html#An_Example_of_Code_that_Might_Ha">An Example of Code that Might Hang a Process</A>
+		<LI><A HREF="debug.html#Detecting_hanging_processes">Detecting hanging processes</A>
+		<LI><A HREF="debug.html#Determination_of_the_reason">Determination of the reason</A>
+		<UL>
+
+			<LI><A HREF="debug.html#Using_the_Perl_Trace">Using the Perl Trace</A>
+			<LI><A HREF="debug.html#Using_the_System_Calls_Trace">Using the System Calls Trace</A>
+			<LI><A HREF="debug.html#Using_the_Interactive_Debugger">Using the Interactive Debugger</A>
+		</UL>
+
+	</UL>
+
+	<LI><A HREF="debug.html#Debugging_Hanging_processes_con">Debugging Hanging processes (continued)</A>
+	<UL>
+
+		<LI><A HREF="debug.html#Debugging_core_Dumping_Code">Debugging core Dumping Code</A>
+	</UL>
+
+	<LI><A HREF="debug.html#PERL_DEBUG_1_Build_Option">PERL_DEBUG=1 Build Option</A>
+	<LI><A HREF="debug.html#Apache_Debug">Apache::Debug</A>
+	<LI><A HREF="debug.html#Debug_Tracing">Debug Tracing</A>
+	<LI><A HREF="debug.html#gdb_says_there_are_no_debugging_">gdb says there are no debugging symbols</A>
+	<LI><A HREF="debug.html#Debugging_Signal_Handlers_SIG_">Debugging Signal Handlers ($SIG{FOO})</A>
+	<LI><A HREF="debug.html#Code_Profiling">Code Profiling</A>
+	<LI><A HREF="debug.html#Devel_Peek">Devel::Peek</A>
+	<LI><A HREF="debug.html#How_can_I_find_out_if_a_mod_perl">How can I find out if a mod_perl code has a memory leak</A>
+	<LI><A HREF="debug.html#Debugging_your_code_in_Single_Se">Debugging your code in Single Server Mode</A>
+	<LI><A HREF="debug.html#Apache_DumpHeaders_Watch_HTTP">Apache::DumpHeaders - Watch HTTP Transaction Via Headers</A>
+	<LI><A HREF="debug.html#Apache_DebugInfo_Log_Various_">Apache::DebugInfo - Log Various Bits Of Per-Request Data</A>
+</UL>
+<P>
+<LI><A HREF="browserbugs.html"><B><FONT SIZE=+1>Workarounds for some known bugs in browsers. </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="browserbugs.html#Preventing_QUERY_STRING_from_get">Preventing QUERY_STRING from getting corrupted because of &amp;entity key names</A>
+	<LI><A HREF="browserbugs.html#IE_4_x_does_not_re_post_data_to_">IE 4.x does not re-post data to a non-port-80 URL</A>
+</UL>
+<P>
+<LI><A HREF="modules.html"><B><FONT SIZE=+1>Apache::* modules </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="modules.html#Apache_Session_Maintain_sessi">Apache::Session - Maintain session state across HTTP requests</A>
+	<LI><A HREF="modules.html#Apache_DBI_Initiate_a_persist">Apache::DBI - Initiate a persistent database connection</A>
+	<LI><A HREF="modules.html#Apache_Watchdog_RunAway_Hang">Apache::Watchdog::RunAway - Hanging Processes Monitor and Terminator</A>
+	<LI><A HREF="modules.html#Apache_VMonitor_Visual_Syste">Apache::VMonitor -- Visual System and Apache Server Monitor</A>
+	<LI><A HREF="modules.html#Apache_GTopLimit_Limit_Apache">Apache::GTopLimit - Limit Apache httpd processes</A>
+	<LI><A HREF="modules.html#Apache_Request_libapreq_Gen">Apache::Request (libapreq) - Generic Apache Request Library</A>
+	<LI><A HREF="modules.html#Apache_RequestNotes_Allow_Eas">Apache::RequestNotes - Allow Easy, Consistent Access to Cookie and Form Data Across Each Request Phase</A>
+	<LI><A HREF="modules.html#Apache_PerlRun_Run_unaltered_">Apache::PerlRun - Run unaltered CGI scripts under mod_perl</A>
+	<LI><A HREF="modules.html#Apache_RegistryNG_Apache_Re">Apache::RegistryNG -- Apache::Registry New Generation</A>
+	<LI><A HREF="modules.html#Apache_RegistryBB_Apache_Re">Apache::RegistryBB -- Apache::Registry Bare Bones </A>
+	<LI><A HREF="modules.html#Apache_OutputChain_Chain_Sta">Apache::OutputChain -- Chain Stacked Perl Handlers</A>
+	<LI><A HREF="modules.html#Apache_Filter_Alter_the_outpu">Apache::Filter - Alter the output of previous handlers</A>
+	<LI><A HREF="modules.html#Apache_GzipChain_compress_HTM">Apache::GzipChain - compress HTML (or anything) in the OutputChain</A>
+	<LI><A HREF="modules.html#Apache_Gzip_Auto_compress_web">Apache::Gzip - Auto-compress web files with Gzip</A>
+	<LI><A HREF="modules.html#Apache_PerlVINC_Allows_Module">Apache::PerlVINC - Allows Module Versioning in Location blocks and Virtual Hosts</A>
+	<LI><A HREF="modules.html#Apache_LogSTDERR">Apache::LogSTDERR</A>
+	<LI><A HREF="modules.html#Apache_RedirectLogFix">Apache::RedirectLogFix</A>
+	<LI><A HREF="modules.html#Apache_SubProcess">Apache::SubProcess</A>
+</UL>
+<P>
+<LI><A HREF="snippets.html"><B><FONT SIZE=+1>Code Snippets </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="snippets.html#Redirecting_Errors_to_the_Client">Redirecting Errors to the Client Instead of error_log</A>
+	<LI><A HREF="snippets.html#Reusing_Data_from_POST_request">Reusing Data from POST request</A>
+	<LI><A HREF="snippets.html#Redirecting_POST_Requests">Redirecting POST Requests</A>
+	<LI><A HREF="snippets.html#Redirecting_While_Maintaining_En">Redirecting While Maintaining Environment Variables</A>
+	<LI><A HREF="snippets.html#Terminating_a_Child_Process_on_R">Terminating a Child Process on Request Completion</A>
+	<LI><A HREF="snippets.html#More_on_Relative_Paths">More on Relative Paths</A>
+	<LI><A HREF="snippets.html#Watching_the_error_log_File_With">Watching the error_log File Without Telneting to the Server</A>
+	<LI><A HREF="snippets.html#Accessing_Variables_from_the_Cal">Accessing Variables from the Caller's Package</A>
+	<LI><A HREF="snippets.html#Handling_Cookies">Handling Cookies</A>
+	<LI><A HREF="snippets.html#Sending_Multiple_Cookies_with_th">Sending Multiple Cookies with the Perl API</A>
+	<LI><A HREF="snippets.html#Sending_Cookies_in_REDIRECT_Resp">Sending Cookies in REDIRECT Response</A>
+	<LI><A HREF="snippets.html#Passing_and_Preserving_Custom_Da">Passing and Preserving Custom Data Structures Between Handlers</A>
+	<LI><A HREF="snippets.html#Passing_Notes_Between_mod_perl_a">Passing Notes Between mod_perl and other (non-Perl) Apache Modules</A>
+	<LI><A HREF="snippets.html#Passing_Environment_Variables_Be">Passing Environment Variables Between Handlers</A>
+	<LI><A HREF="snippets.html#CGI_params_in_the_mod_perl_ish_">CGI::params in the mod_perl-ish Way</A>
+	<LI><A HREF="snippets.html#Subclassing_Apache_Request">Subclassing Apache::Request</A>
+	<LI><A HREF="snippets.html#Sending_Email_from_mod_perl">Sending Email from mod_perl</A>
+	<LI><A HREF="snippets.html#A_Simple_Handler_To_Print_The_En">A Simple Handler To Print The Environment Variables</A>
+	<LI><A HREF="snippets.html#mod_rewrite_in_Perl">mod_rewrite in Perl</A>
+	<LI><A HREF="snippets.html#URI_Rewrite_in_PerlTransHandler">URI Rewrite in PerlTransHandler </A>
+	<LI><A HREF="snippets.html#Setting_PerlHandler_Based_on_MIM">Setting PerlHandler Based on MIME Type</A>
+	<LI><A HREF="snippets.html#SSI_and_Embperl_Doing_Both">SSI and Embperl -- Doing Both</A>
+	<LI><A HREF="snippets.html#Getting_the_Front_end_Server_s_N">Getting the Front-end Server's Name in the Back-end Server</A>
+	<LI><A HREF="snippets.html#Authentication_Snippets">Authentication Snippets</A>
+	<LI><A HREF="snippets.html#Emulating_the_Authentication_Mec">Emulating the Authentication Mechanism</A>
+	<LI><A HREF="snippets.html#An_example_of_using_Apache_Sess">An example of using Apache::Session::DBI with cookies</A>
+	<LI><A HREF="snippets.html#Using_DESTROY_to_Finalize_Output">Using DESTROY to Finalize Output</A>
+	<LI><A HREF="snippets.html#Setting_Environment_Variables_Fo">Setting Environment Variables For Scripts Called From CGI.</A>
+	<LI><A HREF="snippets.html#Mysql_Backup_and_Restore_Scripts">Mysql Backup and Restore Scripts</A>
+</UL>
+<P>
+<LI><A HREF="hardware.html"><B><FONT SIZE=+1>Choosing an Operating System and Hardware </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="hardware.html#Is_it_important_">Is it important?</A>
+	<LI><A HREF="hardware.html#Choosing_an_Operating_System">Choosing an Operating System</A>
+	<UL>
+
+		<LI><A HREF="hardware.html#Stability_and_Robustness">Stability and Robustness</A>
+		<LI><A HREF="hardware.html#Memory_Management">Memory Management</A>
+		<LI><A HREF="hardware.html#Memory_Leaks">Memory Leaks</A>
+		<LI><A HREF="hardware.html#Sharing_Memory">Sharing Memory</A>
+		<LI><A HREF="hardware.html#Cost_and_Support">Cost and Support</A>
+		<LI><A HREF="hardware.html#Discontinued_Products">Discontinued Products</A>
+		<LI><A HREF="hardware.html#OS_Releases">OS Releases</A>
+	</UL>
+
+	<LI><A HREF="hardware.html#Choosing_Hardware">Choosing Hardware</A>
+	<UL>
+
+		<LI><A HREF="hardware.html#Machine_Strength_Demands_Accordi">Machine Strength Demands According to Expected Site Traffic</A>
+		<UL>
+
+			<LI><A HREF="hardware.html#Single_Strong_Machine_vs_Many_We">Single Strong Machine vs Many Weaker Machines</A>
+		</UL>
+
+		<LI><A HREF="hardware.html#Internet_Connection">Internet Connection</A>
+		<LI><A HREF="hardware.html#I_O_Performance">I/O Performance</A>
+		<LI><A HREF="hardware.html#Memory">Memory</A>
+		<LI><A HREF="hardware.html#CPU">CPU</A>
+		<LI><A HREF="hardware.html#Bottlenecks">Bottlenecks</A>
+		<UL>
+
+			<LI><A HREF="hardware.html#Solving_Hardware_Requirement_Con">Solving Hardware Requirement Conflicts</A>
+		</UL>
+
+		<LI><A HREF="hardware.html#Conclusion">Conclusion</A>
+	</UL>
+
+</UL>
+<P>
+<LI><A HREF="advocacy.html"><B><FONT SIZE=+1>mod_perl Advocacy </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="advocacy.html#Thoughts_about_scalability_and_f">Thoughts about scalability and flexibility</A>
+	<LI><A HREF="advocacy.html#The_boss_the_developer_and_advo">The boss, the developer and advocacy</A>
+	<LI><A HREF="advocacy.html#A_summary_of_perl_cgi_discussion">A summary of perl/cgi discussion at slashdot.org</A>
+</UL>
+<P>
+<LI><A HREF="help.html"><B><FONT SIZE=+1>Getting Help and Further Learning </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="help.html#READ_ME_FIRST">READ ME FIRST</A>
+	<LI><A HREF="help.html#Contacting_me">Contacting me</A>
+	<LI><A HREF="help.html#Get_help_with_mod_perl">Get help with mod_perl</A>
+	<LI><A HREF="help.html#Get_help_with_Perl">Get help with Perl</A>
+	<LI><A HREF="help.html#Get_help_with_Perl_CGI">Get help with Perl/CGI</A>
+	<LI><A HREF="help.html#Get_help_with_Apache">Get help with Apache </A>
+	<LI><A HREF="help.html#Get_help_with_DBI_and_SQL">Get help with DBI and SQL</A>
+	<LI><A HREF="help.html#Get_help_with_Squid_Internet_O">Get help with Squid - Internet Object Cache</A>
+	<LI><A HREF="help.html#Get_help_with_CVS_Concurrent_">Get help with CVS -- Concurrent Version Control</A>
+	<LI><A HREF="help.html#Get_help_with_Performance_and_Sc">Get help with Performance and Scalability</A>
+	<LI><A HREF="help.html#Get_help_with_Unix_OS_flavors_">Get help with Unix OS flavors -- Unix OS related resources</A>
+</UL>
+<P>
+<LI><A HREF="download.html"><B><FONT SIZE=+1>Appendix A: Downloading software and documentation </FONT></B></A></LI><P>
+<UL>
+
+	<LI><A HREF="download.html#Coverage">Coverage</A>
+	<LI><A HREF="download.html#Perl">Perl</A>
+	<LI><A HREF="download.html#CPAN_Downloads">CPAN Downloads</A>
+	<LI><A HREF="download.html#Apache">Apache</A>
+	<LI><A HREF="download.html#mod_perl">mod_perl</A>
+	<LI><A HREF="download.html#Squid_Internet_Object_Cache">Squid - Internet Object Cache</A>
+	<LI><A HREF="download.html#thttpd_tiny_turbo_throttling_H">thttpd - tiny/turbo/throttling HTTP server</A>
+	<LI><A HREF="download.html#mod_throttle_access">mod_throttle_access </A>
+	<LI><A HREF="download.html#mod_proxy_add_forward">mod_proxy_add_forward</A>
+	<LI><A HREF="download.html#httperf_webserver_Benchmarkin">httperf -- webserver Benchmarking tool</A>
+	<LI><A HREF="download.html#http_load_another_webserver_B">http_load -- another webserver Benchmarking tool</A>
+	<LI><A HREF="download.html#ab_ApacheBench">ab -- ApacheBench</A>
+	<LI><A HREF="download.html#Daquiri_yet_another_webserver">Daquiri -- yet another webserver Benchmarking tool</A>
+	<LI><A HREF="download.html#High_Availability_and_Load_Balan">High-Availability and Load Balancing Projects</A>
+	<UL>
+
+		<LI><A HREF="download.html#mod_backhand_Load_Balancing_f">mod_backhand -- Load Balancing for Apache</A>
+		<LI><A HREF="download.html#mod_redundancy">mod_redundancy</A>
+		<LI><A HREF="download.html#High_Availability_Linux_Project">High-Availability Linux Project</A>
+		<LI><A HREF="download.html#lbnamed_a_Load_Balancing_Name_">lbnamed - a Load Balancing Name Server Written in Perl</A>
+		<LI><A HREF="download.html#Network_Address_Translation_and_">Network Address Translation and Networks: Virtual Servers (Load Balancing)</A>
+		<LI><A HREF="download.html#Linux_Virtual_Server_Project">Linux Virtual Server Project</A>
+		<LI><A HREF="download.html#Efficient_Support_for_P_HTTP_in_">Efficient Support for P-HTTP in Cluster-Based Web Servers</A>
+		<LI><A HREF="download.html#IP_Filter">IP Filter</A>
+	</UL>
+
+	<LI><A HREF="download.html#Apache_Request">Apache::Request</A>
+	<LI><A HREF="download.html#DataBases">DataBases</A>
+	<LI><A HREF="download.html#libgtop">libgtop</A>
+</UL>
+<P>
+	  </div>
+
+	</ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index.html">Dense TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="changes"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Changes:
+	    </font>
+	  </h3>
+
+	  <ul>
+
+	    <li> 
+      The Guide's <a href="CHANGES">Changes</a> file.
+	    </li>
+	  </ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <a name="download"></a>
+	  <h3>
+	    <font color="#008B8B">
+	      Download:
+	    </font>
+	  </h3>
+	
+
+	  <ul>
+
+	    <li> 
+	      The latest CVS snapshots of the POD sources
+	      and the build script you can build the HTMLs from,
+	      are available from  <a
+		href="http://www.stason.org/guide-snapshots/">
+		http://www.stason.org/guide-snapshots/</a>.
+	    </li>
+
+	    <li> 
+	      <b>This</b> release's HTML files, POD sources 
+	      and build script are available from <a
+		href="http://www.perl.com/CPAN-local/authors/id/S/ST/STAS/">
+		my directory at CPAN or its mirrors</a> or <a
+		href="http://search.cpan.org/search?mode=module&query=mod_perl_guide">search.cpan.org</a>.
+	    </li>
+
+	    <li> 
+	      <!-- this link must be FQDN, since the split version
+	      will link to the broken link if you don't do it, since
+	      we don't copy the pdf to the split version -->
+	      Here is the <a href="http://perl.apache.org/guide/mod_perl_guide.pdf.gz"> Book-like
+		version </a> (PDF format).<br>  
+                <B>IMPORTANT</B>: When you
+		download a file with .gz extension many browsers do
+		you a "favor" and uncompress it, but forget to remove
+		the .gz extension. Just remove this extension if your
+		tools complain that the file is broken if you try to
+		uncompress it again.<br>
+                To read PDF files you can
+		use: <code>ghostview</code> (<code>gv</code>),
+	      <code>xpdf</code> or <code>acroread</code> (with
+	      <code>acroread</code> you can search the text and us the
+	      hyperlinks).  You can use the
+	      <code>pdf2ps</code> utility to convert PDF to
+	      PostSscript format.
+	    </li>
+
+	  </ul>
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+
+	  <A NAME="search"></A>
+	  <h3>
+	    <font color="#008B8B">
+	      Search:
+	    </font>
+	  </h3>
+
+	  <div class="search">
+	    Using <a
+	    href="http://www.nexial.com/nextrieve/"><b>nextrieve</b></a>
+	    engine on <b>split</b> Guide version (by Vivek Khera):
+	    <form
+	      action="http://thingy.kcilink.com/cgi-bin/modperlguide.cgi"
+	      method="post">
+	      <center>
+		<input type=text name=q value="" size=25> 
+		<input type=submit value=" Search ">
+	      </center>
+	    </form>
+	  </div>
+
+	  <div class="search">	
+	    Using
+	    <a href="http://sunsite.berkeley.edu/SWISH-E/">
+	      <b>SWISH-E</b></a> engine + Perl filters on <b>split</b>
+	      Guide version (by Randy Kobes):
+	    <form method="GET"
+	      action="http://theoryx5.uwinnipeg.ca/cgi-bin/guide-search"
+	      enctype="application/x-www-form-urlencoded" name="search">
+	      <center>
+		<input type="text" name="query" size=25>
+		<input type="submit" name="Submit" value=" Search ">
+		<input type="hidden" name=".cgifields" value="where">
+		<input type="hidden" name=".cgifields" value="match">
+	      </center>
+	    </form>
+	  </div>
+
+	  <div class="search">	  
+	    Using
+	    <a href="http://sunsite.berkeley.edu/SWISH-E/">
+	      <b>SWISH-E</b></A> engine on <b>full</b> Guide version
+	      (perl.apache.org) (bad results):
+	    <form action="http://search.apache.org/" method="post">
+	      <center>
+		<input type="text" name="keyword" value="" size=25>
+		<input type="hidden" name="what" value="perl">
+		<input type="hidden" name="results" value=40>
+		<input type="submit" value="Search">
+	      </center>
+	    </form>    
+	  </div>
+	  
+
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <p>&nbsp;</p>
+	  <div class="navbar">	  
+	    [ <A HREF="#toc">TOC</A> ] 
+			      [ <A HREF="index.html">Dense TOC</A> ] 
+	    | <a href="#changes">Changes</a>
+	    | <a href="#download">Download</a>
+	    | <a href="#search">Search</a> 
+	  </div>
+	  <p>&nbsp;</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>	  
+	  <div class="notice">
+	    Full Version Master Copy URL: <a
+	    href="http://perl.apache.org/guide/"><b>http://perl.apache.org/guide</b></a><br>
+	    Copyright &copy; 1998-2001 Stas Bekman. All rights
+	    reserved. (Distributed under GPL license)
+	  </div>
+	</td>
+      </tr>
+
+    </table>
+ 
+
+    <hr>
+
+    <center>
+      <table cellspacing=2 cellpadding=2>
+	
+	<tr align=center valign=top>
+	  <td align=center valign=center>
+	    
+	    <b><font size=-1>
+		Written by <a
+		  href="help.html#Contacting_me">Stas
+		  Bekman</a>.<br> Last Modified at 05/31/2001
+	      </font></b>
+	    <br>
+	    
+	  </td>
+
+	  <td>
+	    
+	    <a href="http://perl.apache.org"><img
+	    src="images/mod_perl2.jpg"
+		border=0 alt="Mod Perl Icon" border=0 height=59 width=150></a>
+	    <br>
+
+	  </td>
+
+	  <td>
+
+	    <font size=-2>
+	      Use of the Camel for Perl is <BR> a trademark of <A
+	      HREF="http://www.ora.com">O'Reilly &amp;
+	      Associates</A>,<BR> and is used by permission. 
+	    </font>
+	    <br>
+	    
+	  </td>
+	  
+	</tr>
+      </table>
+    </center>
+    
+  </body>
+</html>
+

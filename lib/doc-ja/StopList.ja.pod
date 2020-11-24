@@ -1,0 +1,112 @@
+=head1 NAME
+
+DBIx::FullTextSearch::StopList - Stopwords for DBIx::FullTextSearch
+
+=head1 SYNOPSIS
+
+  use DBIx::FullTextSearch::StopList;
+  # connect to database (regular DBI)
+  my $dbh = DBI->connect('dbi:mysql:database', 'user', 'passwd');
+
+  # create a new empty stop word list
+  my $sl1 = DBIx::FullTextSearch::StopList->create_empty($dbh, 'sl_web_1');
+
+  # or create a new one with default stop words
+  my $sl2 = DBIx::FullTextSearch::StopList->create_default($dbh, 'sl_web_2', 'english');
+
+  # or open an existing one
+  my $sl3 = DBIx::FullTextSearch::StopList->open($dbh, 'sl_web_3');
+
+  # add stop words
+  $sl1->add_stop_word(['a','in','on','the']);
+
+  # remove stop words
+  $sl2->remove_stop_word(['be','because','been','but','by']);
+
+  # check if word is in stoplist
+  $bool = $sl1->is_stop_word('in');
+
+  # empty stop words
+  $sl3->empty;
+
+  # drop stop word table
+  $sl2->drop;
+
+=head1 DESCRIPTION
+
+DBIx::FullTextSearch::StopList provides stop lists that can be used -L<DBIx::FullTextSearch>.
+StopList objects can be reused accross several FullTextSearch objects.
+
+=head1 METHODS
+
+=over 4
+
+=head2 CONSTRUCTERS
+
+=item create_empty
+
+  my $sl = DBIx::FullTextSearch::StopList->create_empty($dbh, $sl_name);
+
+This class method creates a new StopList object.
+
+=item create_default
+
+  my $sl = DBIx::FullTextSearch::StopList->create_default($dbh, $sl_name, $language);
+
+This class method creates a new StopList object, with default words loaded in for the
+given language.  Supported languages include Danish, Dutch, English, Finnish, French,
+German, Italian, Portuguese, Spanish, and Swedish.
+
+=item open
+
+  my $sl = DBIx::FullTextSearch::StopList->open($dbh, $sl_name);
+
+Opens and returns StopList object
+
+=head2 OBJECT METHODS
+
+=item add_stop_word
+
+  $sl->add_stop_word(\@stop_words);
+
+Adds stop words to StopList object.  Expects array reference as argument.
+
+=item remove_stop_word
+
+  $sl->remove_stop_word(\@stop_words);
+
+Remove stop words from StopList object.  
+
+=item is_stop_word
+
+  $bool = $sl->is_stop_word($stop_word);
+
+Returns true iff stop_word is StopList object
+
+=item empty
+
+  $sl->empty;
+
+Removes all stop words in StopList object.
+
+=item drop
+
+  $sl->drop;
+
+Removes table associated with the StopList object.
+
+=back
+
+=head1 AUTHOR
+
+T.J. Mather, tjmather@tjmather.com,
+http://www.tjmather.com/
+
+=head1 COPYRIGHT
+
+All rights reserved. This package is free software; you can
+redistribute it and/or modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<DBIx::FullTextSearch>

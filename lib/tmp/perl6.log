@@ -1,0 +1,267 @@
+15:50 <#perl6:damian> Hello???
+15:50 >#perl6:miyagawa< Hi!
+15:50 >#perl6:miyagawa< yes here it is
+15:50 <#perl6:damian> Sorry, it took me a little whilse to learn how to navigate IRC.
+15:50 >#perl6:miyagawa< heh
+15:50 >#perl6:miyagawa< thanks
+15:50 <#perl6:damian> I've never used IRC before.
+15:50 >#perl6:miyagawa< I guess so
+15:51 >#perl6:miyagawa< Dan's sleeping right now, but I hope he'll get up earlier than ordinary day ;)
+15:51 <#perl6:damian> So, it's about 15:50 where you are?
+15:51 >#perl6:miyagawa< Exactly. 15:51 right noe
+15:52 >#perl6:miyagawa< I've found you uploaded Perl6::Placeholders today onto CPAN
+15:52 <#perl6:damian> I hope Dan will get up early too. otherwise I'm going to have to make up answers to any parrot questions ;-)
+15:52 >#perl6:miyagawa< Yeah (re parrot)
+15:52 <#perl6:damian> Yes. And a new version of Perl6::Currying.
+15:52 >#perl6:miyagawa< is this a separation of closure and $^a $^b stuff?
+15:52 <#perl6:damian> Exactly!
+15:53 >#perl6:miyagawa< oh, good
+15:53 <#perl6:damian> My next diary entry will ex-plain it all for those who haven't been following the mailing list.
+15:53 >#perl6:miyagawa< Good, I hope I can see it
+15:54 >#perl6:miyagawa< Oh well Dan has sent me Apo5 this morning
+15:54 <#perl6:damian> Did you liek it?
+15:54 <#perl6:damian> s/liek/like/
+15:54 >#perl6:miyagawa< I printed it out and it covers 30 pages, which is hard for me to look through till the beginning of the talk
+15:55 <#perl6:damian> It's very exciting, I think. 
+15:55 <#perl6:damian> Big changes, but all for the better.
+15:55 >#perl6:miyagawa< would you be kind enough for me to summarize the biggest changes?
+15:56 <#perl6:damian> Okay. Patience please...I type slowly.
+15:56 <#perl6:damian> The main change is that most of the syntax is different...
+15:57 >#perl6:miyagawa< ok
+15:57 <#perl6:damian> For example...
+15:57 <#perl6:damian> (?...) is gone...
+15:57 <#perl6:damian> Instead....
+15:58 <#perl6:damian> (...) *always* captures
+15:58 >#perl6:miyagawa< I see
+15:58 <#perl6:damian> [...] is not a character class, it's *non-capturing* group
+15:58 <#perl6:damian> <...> is a special assertion (more in a minute)
+15:58 <#perl6:damian> {...} is a code block to execute *inside* the regex
+15:59 >#perl6:miyagawa< ok, I'll try skimming into it before bothring you by asking, thanks!
+15:59 <#perl6:damian> <...> assertions do many things. Examples...
+15:59 <#perl6:damian> <[a-z]> is character class
+15:59 >#perl6:miyagawa< there seems many syntax changes 
+15:59 <#perl6:damian> <subrule> is a nested regex
+15:59 <#perl6:damian> Yes. The whole syntax is different...
+16:00 <#perl6:damian> ...unless you say: m:perl5/pattern/
+16:00 <#perl6:damian> ...or just m:5/pattern/
+16:01 <#perl6:damian> You can *name* a captured substring like this: /$key=(\w+) $val=(.*)/
+16:01 <#perl6:damian> *Many* changes. people will be scared initially, but they will come to
+16:01 <#perl6:damian> love the new syntax. It's *much* *much* cleaner and it makes sense when
+16:02 <#perl6:damian> you understand it.
+16:02 >#perl6:miyagawa< I hope so
+16:02 + TheDamian (TheDamian!~damian@indy05.csse.monash.edu.au) to #perl6
+16:03 <#perl6:TheDamian> I just changed to a faster machine.
+16:03 <#perl6:TheDamian> I'm still here, just faster :-)
+16:03 >#perl6:miyagawa< goood
+16:04 <#perl6:TheDamian> BTW, the final version of Apo5 will probably be very different from the one Dan sent you today
+16:04 >#perl6:miyagawa< ok
+16:04 >#perl6:miyagawa< try http://bulknews.net/lib/slides/jus-perl6/
+16:04 <#perl6:TheDamian> Larry and I are workign through a lot of changes.
+16:05 >#perl6:miyagawa< ok. I'll note that (re changes in Apo5)
+16:05 <#perl6:TheDamian> looking...
+16:05 >#perl6:miyagawa< they're encoded in Japanese SJIS, take care ..
+16:05 >#perl6:miyagawa< but MSIE will automaticaly render that I think
+16:06 <#perl6:TheDamian> Okay...have to change browser...
+16:07 <#perl6:TheDamian> Sorry...I'm on a 56K modem...it's very slow...
+16:08 <#perl6:TheDamian> Okay, I can see the files (now if I could only read Japanese! ;-)
+16:08 >#perl6:miyagawa< cool
+16:08 >#perl6:miyagawa< some parts are in English so I hope you can get the overview
+16:09 <#perl6:TheDamian> Yes. I'm getting the idea. 
+16:09 <#perl6:TheDamian> he he...does F**KED translate well into Japanese??? ;-)
+16:10 >#perl6:miyagawa< I wish so ;)
+16:10 <#perl6:TheDamian> Hmm: Damian Conway (Paid Employee) should probably be: Damian Conway (Evil Assistant)
+16:10 >#perl6:miyagawa< Can you suggest your title is better than "a paid employee"? Dan has said "Mad Scientist"
+16:10 >#perl6:miyagawa< Evil Assistant will do! thanks ;)
+16:12 >lathos< TheDamian is now on #perl6, which is a channel for me to ask Damian/Dan in the question time of the presentation
+16:12 <#perl6:TheDamian> You could say that Apo5 will appear mid-June
+16:12 <#perl6:TheDamian> The timeline is too optimistic...
+16:12 <#perl6:TheDamian> Best guesses are:
+16:12 <#perl6:TheDamian> Design finished: June 2003
+16:13 <#perl6:TheDamian> Alpha: May 2003
+16:13 <#perl6:TheDamian> Beta: July 2003
+16:13 >#perl6:miyagawa< Design: June 2002? (not 2003)
+16:13 <#perl6:TheDamian> 6.0.0.: January 2004
+16:13 <#perl6:TheDamian> No. 2003.
+16:13 >#perl6:miyagawa< ok ;)
+16:14 <#perl6:TheDamian> It has proved *much* harder than anyone expected.
+16:14 >#perl6:miyagawa< I guess so
+16:14 >#perl6:miyagawa< Dan has said parrot beta will be out before the winter
+16:15 <#perl6:TheDamian> I'm sure he's right. But Parrot is the assembler language underneath Perl6.
+16:15 <#perl6:TheDamian> Not perl 6 itself.
+16:15 >#perl6:miyagawa< yes 
+16:16 <#perl6:TheDamian> The slides are looking good. I'll keep looking through them.
+16:16 <#perl6:TheDamian> Is there anything you wanted to ask me before you do the talk?
+16:17 >#perl6:miyagawa< my INT $foo is compile time, my int $foo is run-time. is it right?
+16:18 >#perl6:miyagawa< =~ defaults to "smart-match", rather than just in "given ... when"
+16:18 <#perl6:TheDamian> on the "is/but" slide...
+16:18 <#perl6:TheDamian> de
+16:19 <#perl6:TheDamian> Sorry, my modem mangled that last bit.
+16:19 <#perl6:TheDamian> To answer your questions:
+16:19 <#perl6:TheDamian> "my INT $foo is compile time, my int $foo is run-time." No.
+16:19 >#perl6:miyagawa< there're some differences between Exegesis and TPJ article (Sky isn't falling)
+16:19 <#perl6:TheDamian> INT means "stores only integers but must be an actual Perl variable"
+16:20 <#perl6:TheDamian> int means "stores only integers but may be optimized to a native data type".
+16:20 >#perl6:miyagawa< ok
+16:20 <#perl6:TheDamian> What's the difference? If you use INT, you can use properties; if you use int, you can't.
+16:21 >#perl6:miyagawa< user-defined?
+16:21 <#perl6:TheDamian> Re =~: Yes, it's always a smart-match, whether in a given, or not.
+16:21 <#perl6:TheDamian> Yes. Many differences between Exegeses and TPJ article (and Apocalypses)
+16:22 <#perl6:TheDamian> Sorry? "user-defined"???
+16:22 >#perl6:miyagawa< can Properties be user defined?
+16:22 >#perl6:miyagawa< If so, it sounds like Tie ...
+16:22 <#perl6:TheDamian> Yes. User-defined properties must begin with an uppercase letter.
+16:23 >#perl6:miyagawa< ok
+16:24 >#perl6:miyagawa< is there something like "Class Factory is abstract" or "Class Enumerable is interface"?
+16:24 >#perl6:miyagawa< which will sound cool ;)
+16:25 <#perl6:TheDamian> You will certainly be able to mark a class as being an interface:
+16:25 <#perl6:TheDamian> class Enumerable is interface
+16:25 <#perl6:TheDamian> Not sure about abstract classes. If there isn't a built-in property like:
+16:26 <#perl6:TheDamian> class Factory is abstract
+16:26 <#perl6:TheDamian> then you can always create your own:
+16:26 <#perl6:TheDamian> class Factory is Abstract;
+16:26 <#perl6:TheDamian> :-)
+16:26 >#perl6:miyagawa< Cooll
+16:27 >#perl6:miyagawa< ok now I'll move to the event hall
+16:27 >#perl6:miyagawa< see ya again later
+16:27 <#perl6:TheDamian> Bye.
+17:17 >#perl6:miyagawa< now I come to the hall, thanks for the correction email
+17:31 <#perl6:TheDamian> You're welcome. I believe you start in 30 minutes. Any last questions before I go eat dnner?
+17:32 <#perl6:TheDamian> (I will be back here on-line by 19:30 your time)
+18:29 >#perl6:miyagawa< now I start the talk ...
+18:33 + Mongo (Mongo!~mongo@ip68-9-176-175.ri.ri.cox.net) to #perl6
+18:34 <#perl6:Mongo> Oh, woops. I saw miyagawa and thought I was missing out on a popular channel. :)
+18:35 <#perl6:Mongo> I'll leave you to answer the miyagawa's perl6 questions in peace.
+18:35 - Mongo from #perl6 ()
+18:52 + Dan (Dan!Snak@63.120.19.221) to #perl6
+19:28 >#perl6:miyagawa< ok
+19:28 >#perl6:miyagawa< now is a half-break time
+19:29 <#perl6:damian> how is it going?
+19:29 >#perl6:miyagawa< it goes well
+19:29 >#perl6:miyagawa< I put an emphasis on DWIM like your TPJ articles
+19:29 <#perl6:damian> I'm glad. I will be around now until you need me.
+19:30 >#perl6:miyagawa< k, thanks
+19:30 <#perl6:Dan> Cool. I'm here, and passing for concious
+19:30 <#perl6:damian> Hi Dan.
+19:30 >#perl6:miyagawa< Parrot talks go after the breaktime
+19:30 <#perl6:damian> DWIM is an excellent emphasis. It reduces fear.
+19:30 <#perl6:Dan> Hi Damian.
+19:30 <#perl6:Dan> DWIM is a wonderful thing.
+19:31 >#perl6:miyagawa< yeah but Apo5 scares me a little ;)
+19:31 <#perl6:Dan> Then you need to read it again. Then it'll scare you a lot. After that you'll really like it. :)
+19:31 <#perl6:damian> <grin> Yes. Larry and I are now terrified of it! ;-)
+19:32 <#perl6:damian> But we love it to.
+19:32 <#perl6:Dan> Heh. Just wait until someone comes up with yacc2regex.pl
+19:32 <#perl6:damian> It's RecDescent to regex I want!
+19:33 >#perl6:miyagawa< I just told the audience that you two are available for questions, so the question time will come earlier than I expect
+19:33 <#perl6:damian> Of course, I'm trying hard to shoe-horn all of recdsecent *into* perl 6 regexes! ;-)
+19:33 <#perl6:damian> No problem. Go ahead.
+19:33 >#perl6:miyagawa< thanks
+19:34 <#perl6:Dan> Works for me
+19:35 >#perl6:miyagawa< and again, this talk is the 2nd Perl6 related talk in Japan, so the questions will be rather basic ;)
+19:35 >#perl6:miyagawa< Dan, thank you for waking up so early!
+19:35 <#perl6:Dan> Hey, not a problem.
+19:36 <#perl6:Dan> (Which was quite a surprise to me, actually ;)
+19:37 <#perl6:damian> he he. We'll see how bright you are in 11 hours time during the weekly teleconference! ;-)
+19:37 >#perl6:miyagawa< k, now I restart the latter half
+19:37 <#perl6:Dan> I only have to live up to my normal levels, so it shouldn't be tough.
+19:38 <#perl6:damian> Okay. I'm going to write up my Conway Channel diary. I'll keep an eye on this channel though.
+19:58 >#perl6:miyagawa< ok question time
+19:58 <#perl6:damian> Okay.
+19:58 <#perl6:Dan> I'm here.
+19:59 >#perl6:miyagawa< how do I extend Perl6 without XS>
+19:59 >#perl6:miyagawa< ?
+19:59 <#perl6:damian> A question for Dan, first, I suspect.
+19:59 <#perl6:Dan> You'll be able to generate interfaces to C libraries without any XS.
+20:00 <#perl6:Dan> We'll autogenerate wrapper code from simple interface descriptions.
+20:00 >#perl6:miyagawa< thanks
+20:01 <#perl6:damian> Larry also mentioned that Perl 6's (optional) stronger typing will make
+20:01 >#perl6:miyagawa< in Parrot, can we use Perl's libraries from outside Perl? (like Ruby)
+20:02 <#perl6:Dan> Absolutely, yes.
+20:02 >#perl6:miyagawa< how?
+20:03 <#perl6:Dan> They'll look like ruby libraries to ruby code. Load and run them just like you would any other ruby library.
+20:03 >#perl6:miyagawa< Damian: how will the Camel book for Perl6 be?
+20:03 <#perl6:Dan> Thick. And heavy. :)
+20:04 <#perl6:damian> The Camel for Perl 6 will be very much like Camel 3 in structure.
+20:04 <#perl6:damian> There will be more topics to cover, so it will be thick and heavy.
+20:05 <#perl6:damian> But there will be fewer exceptions and "curiosities" to explain,
+20:05 <#perl6:damian> so it won't be much thicker, or much heavier.
+20:05 <#perl6:Dan> "Chapter 7: Nothing to see here. Move along, citizen"
+20:05 <#perl6:damian> Oh, and it may have different authors names on it. ;-)
+20:06 <#perl6:damian> One important thing...
+20:06 <#perl6:damian> There will be a lot more of it devoted to OO.
+20:06 >#perl6:miyagawa< will Parrot run efficiently with 649K RAM?
+20:06 >#perl6:miyagawa< err 640M RAM
+20:07 <#perl6:Dan> 640 Megabytes? Oh, yes, no problem. 
+20:07 >#perl6:miyagawa< what about 640K>
+20:07 <#perl6:Dan> We're shooting for the sub-megabyte footprint so it'll work OK in handheld devices. Palms, WinCE, & suchlike things.
+20:08 >#perl6:miyagawa< ok
+20:08 <#perl6:Dan> 640K total might be stretching it some. Depends on Unicode library size.
+20:08 >#perl6:miyagawa< heh
+20:11 >#perl6:miyagawa< how do you think that so many people scares Perl6?
+20:11 <#perl6:Dan> D'you mean "Why are so many people scared of perl 6"?
+20:12 <#perl6:damian> That's easy...
+20:12 <#perl6:damian> Suppose you have been married to someone for 15 years...
+20:12 >#perl6:miyagawa< when we run 3 scripts in parrot, do we need 3 parrot VMs?
+20:13 <#perl6:Dan> Three simultaneously in separate processes, or three in one process, one right after another?
+20:13 <#perl6:damian> And one day she decides she's going to change things...
+20:13 <#perl6:Dan> If it's three in three separate processes, then yes. Much of the memory will be shared by the OS.
+20:14 <#perl6:damian> And you don't know what she's going to change...
+20:14 <#perl6:damian> And you don't *want* her to change...
+20:14 <#perl6:damian> Even if it's change for the better...
+20:14 <#perl6:Dan> If it's three one right after another in the same process, then I've not thought about it much. We could have some sort of persistence. I'd not given it much thought.
+20:14 <#perl6:damian> Because you don't *know* it will be better...yet.
+20:14 <#perl6:Dan> If someone's got a good case, we can see what we can do. :)
+20:15 <#perl6:damian> people fear change, especially in those things they love.
+20:15 <#perl6:damian> And people love Perl.
+20:15 <#perl6:damian> (They'll still love Perl 6...they just don't know it yet ;-)
+20:17 >#perl6:miyagawa< are there more special variables in Perl6 than 5?
+20:17 <#perl6:Dan> Fewer. far fewer.
+20:17 <#perl6:damian> No. Many fewer.
+20:18 <#perl6:damian> Most of the things we used special variables for in Perl 5...
+20:18 <#perl6:damian> ...will become methods on objects in Perl 6.
+20:18 <#perl6:damian> For example, $| is gone. Now it's $filehandle.autoflush()
+20:19 <#perl6:damian> So you don't accidentally clobber the wrong filehandle.
+20:20 <#perl6:damian> Similarly the four separate "error" variables have been reduced to one.
+20:20 <#perl6:damian> We learnt our lesson: globals are more trouble than they're worth.
+20:21 <#perl6:Dan> I remember that every time I think about Python support... :(
+20:21 >#perl6:miyagawa< can wo do JIT in parrot?
+20:21 <#perl6:Dan> Yep. Right this very minute--just pass in the -j flag to parrot. :)
+20:22 <#perl6:Dan> Only on x86, SPARC, and Alpha, but more to come.
+20:22 >#perl6:miyagawa< if Java is supported in parrot, what will be the benefit to run Java code in parrot, rather than Java VM?
+20:23 <#perl6:Dan> You'll be able to use perl/ruby/python/.NET libraries with Java programs. And Java libraries in perl/ruby/python/.NET programs.
+20:24 <#perl6:Dan> Oh, and you'll be able to run Java much. much slower. :)
+20:26 >#perl6:miyagawa< can I use CPAN modules (for Perl5) in Perl6 or other parrot languages?
+20:26 <#perl6:Dan> Yes.
+20:27 <#perl6:Dan> Assuming, of course, that the perl 5 code will run on Parrot. Some XS will not be translatable.
+20:27 >#perl6:miyagawa< when will you come to Japan, Damian?
+20:27 <#perl6:damian> The perl6 interpreter will recognize any file starting with C<package Name;>
+20:27 <#perl6:damian> and treat it like perl 5 code.
+20:28 <#perl6:damian> I will come to Japan when the opportunity presents itself.
+20:28 <#perl6:damian> I had hoped to come there on business this year, but the US economy has
+20:28 <#perl6:damian> made that difficult.
+20:29 <#perl6:damian> I very much *want* to visit and speak to the local Mongers.
+20:29 >#perl6:miyagawa< the talk is finished, thank you!
+20:29 >#perl6:miyagawa< big applause from the audience, to you two
+20:29 <#perl6:damian> My pleasure. :-)
+20:29 <#perl6:Dan> You're very welcome.
+20:30 <#perl6:damian> Thank-you. :-)
+20:30 <#perl6:Dan> Gah! Flights into Tokyo are *expensive*.
+20:31 >#perl6:miyagawa< yeah ..
+20:32 <#perl6:damian> Hmmmm. Early next year I may try to fly back from the US via Tokyo.
+20:32 <#perl6:damian> But, since the perl Foundation probably won't be supporting me then...
+20:32 <#perl6:damian> ...i may need to find a business opportunity there as well.
+20:33 >#perl6:miyagawa< I hope so
+20:33 <#perl6:Dan> We'll just have to make sure you're on an O'Reilly book tour,then. :)
+20:33 <#perl6:damian> <grin>
+20:34 <#perl6:damian> Anyway, time for me to go. It's been fun. 
+20:34 <#perl6:Dan> miyagawa: Are there any web pages up for YARPC?
+20:34 <#perl6:Dan> Later, Damian.
+20:34 >#perl6:miyagawa< http:///ya.c.tokyo.pm.org
+20:35 <#perl6:Dan> I bet I'm about to feel linguistically challenged. :)
+20:35 >#perl6:miyagawa< thanks Damian
+20:35 >#perl6:miyagawa< . means \w
+20:35 >#perl6:miyagawa< ;)
+20:36 <#perl6:Dan> Heh. I figured. It hadn't come up yet, and I was waiting to be reminded of yet another language I don't read.
+20:36 >#perl6:miyagawa< grreat
+20:37 >#perl6:miyagawa< ok, I'll go to the pub party, thanks!
+20:37 <#perl6:Dan> No problem. Bye.

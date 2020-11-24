@@ -1,0 +1,4716 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: Perl Reference </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      Perl Reference 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./start.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./install.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#A_Must_Read_">A Must Read!</A>
+	<LI><A HREF="#perldoc_s_Rarely_Known_But_Very_">perldoc's Rarely Known But Very Useful Options</A>
+	<LI><A HREF="#Tracing_Warnings_Reports">Tracing Warnings Reports</A>
+	<LI><A HREF="#Variables_Globally_Lexically_Sc">Variables Globally, Lexically Scoped And Fully Qualified</A>
+	<UL>
+
+		<LI><A HREF="#Symbols_Symbol_Tables_and_Packa">Symbols, Symbol Tables and Packages; Typeglobs</A>
+		<UL>
+
+			<LI><A HREF="#Lexical_Variables_and_Symbols">Lexical Variables and Symbols</A>
+		</UL>
+
+		<LI><A HREF="#Additional_reading_references">Additional reading references</A>
+	</UL>
+
+	<LI><A HREF="#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested Subroutines</A>
+	<UL>
+
+		<LI><A HREF="#The_Poison">The Poison</A>
+		<LI><A HREF="#The_Diagnosis">The Diagnosis</A>
+		<LI><A HREF="#The_Remedy">The Remedy</A>
+	</UL>
+
+	<LI><A HREF="#Understanding_Closures_the_Ea">Understanding Closures - the Easy Way</A>
+	<LI><A HREF="#When_You_Cannot_Get_Rid_of_The_I">When You Cannot Get Rid of The Inner Subroutine</A>
+	<UL>
+
+		<LI><A HREF="#Remedies_for_Inner_Subroutines">Remedies for Inner Subroutines</A>
+	</UL>
+
+	<LI><A HREF="#use_require_do_INC_and">use(), require(), do(), %INC and @INC Explained</A>
+	<UL>
+
+		<LI><A HREF="#The_INC_array">The @INC array</A>
+		<LI><A HREF="#The_INC_hash">The %INC hash</A>
+		<LI><A HREF="#Modules_Libraries_and_Program_F">Modules, Libraries and Program Files</A>
+		<LI><A HREF="#require_">require()</A>
+		<LI><A HREF="#use_">use()</A>
+		<LI><A HREF="#do_">do()</A>
+	</UL>
+
+	<LI><A HREF="#Using_Global_Variables_and_Shari">Using Global Variables and Sharing Them Between Modules/Packages</A>
+	<UL>
+
+		<LI><A HREF="#Making_Variables_Global">Making Variables Global</A>
+		<LI><A HREF="#Making_Variables_Global_With_str">Making Variables Global With strict Pragma On</A>
+		<LI><A HREF="#Using_Exporter_pm_to_Share_Globa">Using Exporter.pm to Share Global Variables</A>
+		<LI><A HREF="#Using_the_Perl_Aliasing_Feature_">Using the Perl Aliasing Feature to Share Global Variables</A>
+		<LI><A HREF="#Using_Non_Hardcoded_Configuratio">Using Non-Hardcoded Configuration Module Names</A>
+	</UL>
+
+	<LI><A HREF="#The_Scope_of_the_Special_Perl_Va">The Scope of the Special Perl Variables</A>
+	<LI><A HREF="#Compiled_Regular_Expressions">Compiled Regular Expressions </A>
+	<LI><A HREF="#Exception_Handling_for_mod_perl">Exception Handling for mod_perl</A>
+	<UL>
+
+		<LI><A HREF="#Trapping_Exceptions_in_Perl">Trapping Exceptions in Perl</A>
+		<LI><A HREF="#Alternative_Exception_Handling_T">Alternative Exception Handling Techniques</A>
+		<LI><A HREF="#Better_Exception_Handling">Better Exception Handling</A>
+		<UL>
+
+			<LI><A HREF="#A_Little_Housekeeping">A Little Housekeeping</A>
+			<LI><A HREF="#An_Exception_Class">An Exception Class</A>
+		</UL>
+
+		<LI><A HREF="#Catching_Uncaught_Exceptions">Catching Uncaught Exceptions</A>
+		<UL>
+
+			<LI><A HREF="#Using_SIG_DIE_">Using $SIG{__DIE__}</A>
+			<LI><A HREF="#Overriding_the_Core_die_Functi">Overriding the Core die() Function</A>
+		</UL>
+
+		<LI><A HREF="#A_Single_UnCaught_Exception_Clas">A Single UnCaught Exception Class</A>
+		<LI><A HREF="#Some_Uses">Some Uses</A>
+		<LI><A HREF="#Conclusions">Conclusions</A>
+		<LI><A HREF="#The_My_Exception_class_in_its_e">The My::Exception class in its entirety</A>
+		<LI><A HREF="#Other_Implementations">Other Implementations</A>
+	</UL>
+
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="A_Must_Read_">A Must Read!</A></H1></CENTER>
+<P>
+This document was born because some users are reluctant to learn Perl,
+prior to jumping into mod_perl. I will try to cover some of the most
+frequent pure Perl questions being asked at the list.
+
+<P>
+Before you decide to skip this chapter make sure you know all the
+information provided here. The rest of the Guide assumes that you have read
+this chapter and understood it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="perldoc_s_Rarely_Known_But_Very_">perldoc's Rarely Known But Very Useful Options</A></H1></CENTER>
+<P>
+First of all, I want to stress that you cannot become a Perl hacker without
+knowing how to read Perl documentation and search through it. Books are
+good, but an easily accessible and searchable Perl reference at your
+fingertips is a great time saver. It always has the up-to-date information
+for the version of perl you're using.
+
+<P>
+Of course you can use online Perl documentation at the Web. The two major
+sites are <A HREF="http://www.perldoc.com">http://www.perldoc.com</A> and
+<A
+HREF="http://theoryx5.uwinnipeg.ca/CPAN/perl/.">http://theoryx5.uwinnipeg.ca/CPAN/perl/.</A>
+
+
+<P>
+The <CODE>perldoc</CODE> utility provides you with access to the documentation installed on your
+system. To find out what Perl manpages are available execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perldoc perl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To find what functions perl has, execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perldoc perlfunc</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+To learn the syntax and to find examples of a specific function, you would
+execute (e.g. for <CODE>open()</CODE>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perldoc -f open</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note: In perl5.005_03 and earlier, there is a bug in this and the <CODE>-q</CODE> 
+options of <CODE>perldoc</CODE>. It won't call <CODE>pod2man</CODE>, but will display the section in POD format instead. Despite this bug it's
+still readable and very useful. 
+
+<P>
+The Perl FAQ (<EM>perlfaq</EM> manpage) is in several sections. To search through the sections for <CODE>open</CODE> you would execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perldoc -q open</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This will show you all the matching Question and Answer sections, still in
+POD format.
+
+<P>
+To read the <EM>perldoc</EM> manpage you would execute:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perldoc perldoc</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Tracing_Warnings_Reports">Tracing Warnings Reports</A></H1></CENTER>
+<P>
+Sometimes it's very hard to understand what a warning is complaining about.
+You see the source code, but you cannot understand why some specific
+snippet produces that warning. The mystery often results from the fact that
+the code can be called from different places if it's located inside a
+subroutine.
+
+<P>
+Here is an example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  warnings.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  correct();
+  incorrect();
+  
+  sub correct{
+    print_value(&quot;Perl&quot;);
+  }
+  
+  sub incorrect{
+    print_value();
+  }
+  
+  sub print_value{
+    my $var = shift;
+    print &quot;My value is $var\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the code above, <CODE>print_value()</CODE> prints the passed value.
+Subroutine <CODE>correct()</CODE> passes the value to print, but in
+subroutine <CODE>incorrect()</CODE> we forgot to pass it. When we run the
+script:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./warnings.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+we get the warning:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Use of uninitialized value at ./warnings.pl line 16.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Perl complains about an undefined variable <CODE>$var</CODE> at the line that attempts to print its value:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print &quot;My value is $var\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But how do we know why it is undefined? The reason here obviously is that
+the calling function didn't pass the argument. But how do we know who was
+the caller? In our example there are two possible callers, in the general
+case there can be many of them, perhaps located in other files.
+
+<P>
+We can use the <CODE>caller()</CODE> function, which tells who has called
+us, but even that might not be enough: it's possible to have a longer
+sequence of called subroutines, and not just two. For example, here it is
+sub <CODE>third()</CODE> which is at fault, and putting sub
+<CODE>caller()</CODE> in sub <CODE>second()</CODE> would not help us very
+much:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub third{
+    second();
+  }
+  sub second{
+    my $var = shift;
+    first($var);
+  }
+  sub first{
+    my $var = shift;
+   print &quot;Var = $var\n&quot;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The solution is quite simple. What we need is a full calls stack trace to
+the call that triggered the warning.
+
+<P>
+The <CODE>Carp</CODE> module comes to our aid with its <CODE>cluck()</CODE> function. Let's
+modify the script by adding a couple of lines. The rest of the script is
+unchanged.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  warnings2.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  use Carp ();
+  local $SIG{__WARN__} = \&amp;Carp::cluck;
+  
+  correct();
+  incorrect();
+  
+  sub correct{
+    print_value(&quot;Perl&quot;);
+  }
+  
+  sub incorrect{
+    print_value();
+  }
+  
+  sub print_value{
+    my $var = shift;
+    print &quot;My value is $var\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now when we execute it, we see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Use of uninitialized value at ./warnings2.pl line 19.
+    main::print_value() called at ./warnings2.pl line 14
+    main::incorrect() called at ./warnings2.pl line 7</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Take a moment to understand the calls stack trace. The deepest calls are
+printed first. So the second line tells us that the warning was triggered
+in <CODE>print_value();</CODE> the third, that <CODE>print_value()</CODE>
+was called by subroutine, <CODE>incorrect().</CODE>
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  script =&gt; incorrect() =&gt; print_value()</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We go into <CODE>incorrect()</CODE> and indeed see that we forgot to pass the variable. Of course when you
+write a subroutine like <CODE>print_value</CODE> it would be a good idea to check the passed arguments before starting
+execution. We omitted that step to contrive an easily debugged example.
+
+<P>
+Sure, you say, I could find that problem by simple inspection of the code! 
+
+<P>
+Well, you're right. But I promise you that your task would be quite
+complicated and time consuming if your code has some thousands of lines. In
+addition, under mod_perl, certain uses of the <CODE>eval</CODE>
+operator and ``here documents'' are known to throw off Perl's line
+numbering, so the messages reporting warnings and errors can have incorrect
+line numbers. (See <A HREF="././debug.html#Finding_the_Line_Which_Triggered">Finding the Line Which Triggered the Error or Warning</A> for more information).
+
+<P>
+Getting the trace helps a lot.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Variables_Globally_Lexically_Sc">Variables Globally, Lexically Scoped And Fully Qualified</A></H1></CENTER>
+<P>
+META: this material is new and requires polishing so read with care.
+
+<P>
+You will hear a lot about namespaces, symbol tables and lexical scoping in
+Perl discussions, but little of it will make any sense without a few key
+facts:
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Symbols_Symbol_Tables_and_Packa">Symbols, Symbol Tables and Packages; Typeglobs</A></H2></CENTER>
+<P>
+There are two important types of symbol: package global and lexical. We
+will talk about lexical symbols later, for now we will talk only about
+package global symbols, which we will refer to simply as
+<EM>global symbols</EM>.
+
+<P>
+The names of pieces of your code (subroutine names) and the names of your
+global variables are symbols. Global symbols reside in one symbol table or
+another. The code itself and the data do not; the symbols are the names of
+pointers which point (indirectly) to the memory areas which contain the
+code and data. (Note for C/C++ programmers: we use the term `pointer' in a
+general sense of one piece of data referring to another piece of data not
+in a specific sense as used in C or C++.)
+
+<P>
+There is one symbol table for each package, (which is why <EM>global
+symbols</EM> are really <EM>package global symbols</EM>).
+
+<P>
+You are always working in one package or another.
+
+<P>
+Like in C, where the first function you write must be called
+<CODE>main(),</CODE> the first statement of your first Perl script is in
+package <CODE>main::</CODE>
+which is the default package. Unless you say otherwise by using the
+<CODE>package</CODE> statement, your symbols are all in package <CODE>main::</CODE>. You should be aware straight away that files and packages are <EM>not
+related</EM>. You can have any number of packages in a single file; and a single
+package can be in one file or spread over many files. However it is very
+common to have a single package in a single file. To declare a package you
+write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    package mypackagename;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+From the following line you are in package <CODE>mypackagename</CODE> and any symbols you declare reside in that package. When you create a
+symbol (variable, subroutine etc.) Perl uses the name of the package in
+which you are currently working as a prefix to create the fully qualified
+name of the symbol.
+
+<P>
+When you create a symbol, Perl creates a symbol table entry for that symbol
+in the current package's symbol table (by default
+<CODE>main::</CODE>). Each symbol table entry is called a <EM>typeglob</EM>. Each typeglob can hold information on a scalar, an array, a hash, a
+subroutine (code), a filehandle, a directory handle and a format, each of
+which all have the same name. So you see now that there are two
+indirections for a global variable: the symbol, (the thing's name), points
+to its typeglob and the typeglob for the thing's type (scalar, array, etc.)
+points to the data. If we had a scalar and an array with the same name
+their name would point to the same typeglob, but for each type of data the
+typeglob points to somewhere different and so the scalar's data and the
+array's data are completely separate and independent, they just happen to
+have the same name.
+
+<P>
+Most of the time, only one part of a typeglob is used (yes, it's a bit
+wasteful). You will by now know that you distinguish between them by using
+what the authors of the Camel book call a <EM>funny character</EM>. So if we have a scalar called `<CODE>line</CODE>' we would refer to it in code as
+<CODE>$line</CODE>, and if we had an array of the same name, that would be written, <CODE>@line</CODE>. Both would point to the same typeglob (which would be called <CODE>*line</CODE>), but because of the <EM>funny character</EM> (also known as <EM>decoration</EM>) perl won't confuse the two. Of course we might confuse ourselves, so some
+programmers don't ever use the same name for more than one type of
+variable.
+
+<P>
+Every global symbol is in some package's symbol table. To refer to a global
+symbol we could write the <EM>fully qualified</EM> name, e.g. <CODE>$main::line</CODE>. If we are in the same package as the symbol we can omit the package name,
+e.g.  <CODE>$line</CODE> (unless you use the &lt;strict&gt; pragma and then you will have to predeclare the variable using
+the
+<CODE>vars</CODE> pragma). We can also omit the package name if we have imported the symbol
+into our current package's namespace. If we want to refer to a symbol that
+is in another package and which we haven't imported we must use the fully
+qualified name, e.g. <CODE>$otherpkg::box</CODE>.
+
+<P>
+Most of the time you do not need to use the fully qualified symbol name
+because most of the time you will refer to package variables from within
+the package. This is very like C++ class variables. You can work entirely
+within package <CODE>main::</CODE> and never even know you are using a package, nor that the symbols have
+package names. In a way, this is a pity because you may fail to learn about
+packages and they are extremely useful.
+
+<P>
+The exception is when you <EM>import</EM> the variable from another package. This creates an alias for the variable
+in the <EM>current</EM> package, so that you can access it without using the fully qualified name.
+
+<P>
+Whilst global variables are useful for sharing data and are necessary in
+some contexts it is usually wisest to minimise their use and use <EM>lexical
+variables</EM>, discussed next, instead.
+
+<P>
+Note that when you create a variable, the low-level business of allocating
+memory to store the information is handled automatically by Perl. The
+intepreter keeps track of the chunks of memory to which the pointers are
+pointing and takes care of undefining variables. When all references to a
+variable have ceased to exist then the perl garbage collector is free to
+take back the memory used ready for recycling. However perl almost never
+returns back memory it has already used to the operating system during the
+lifetime of the process.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Lexical_Variables_and_Symbols">Lexical Variables and Symbols</A></H3></CENTER>
+<P>
+The symbols for lexical variables (i.e. those declared using the keyword <CODE>my</CODE>) are the only symbols which do <EM>not</EM> live in a symbol table. Because of this, they are not available from
+outside the block in which they are declared. There is no typeglob
+associated with a lexical variable and a lexical variable can refer only to
+a scalar, an array, a hash or a code reference. (Since perl-5.6 it can also
+refer to a file glob).
+
+<P>
+If you need access to the data from outside the package then you can return
+it from a subroutine, or you can create a global variable (i.e. one which
+has a package prefix) which points or refers to it and return that. The
+pointer or reference must be global so that you can refer to it by a fully
+qualified name. But just like in C try to avoid having global variables.
+Using OO methods generally solves this problem, by providing methods to get
+and set the desired value within the object that can be lexically scoped
+inside the package and passed by reference.
+
+<P>
+The phrase ``lexical variable'' is a bit of a misnomer, we are really
+talking about ``lexical symbols''. The data can be referenced by a global
+symbol too, and in such cases when the lexical symbol goes out of scope the
+data will still be accessible through the global symbol. This is perfectly
+legitimate and cannot be compared to the terrible mistake of taking a
+pointer to an automatic C variable and returning it from a function--when
+the pointer is dereferenced there will be a segmentation fault. (Note for
+C/C++ programmers: having a function return a pointer to an auto variable
+is a disaster in C or C++; the perl equivalent, returning a reference to a
+lexical variable created in a function is normal and useful.)
+
+<UL>
+<P><LI>
+<P>
+<CODE>my()</CODE> vs. <CODE>use vars</CODE>:
+
+<P>
+With use <CODE>vars(),</CODE> you are making an entry in the symbol table,
+and you are telling the compiler that you are going to be referencing that
+entry without an explicit package name.
+
+<P>
+With <CODE>my(),</CODE> NO ENTRY IS PUT IN THE SYMBOL TABLE. The compiler
+figures out <CODE>at compile time</CODE> which <CODE>my()</CODE> variables (i.e. lexical variables) are the same as
+each other, and once you hit execute time you cannot go looking those
+variables up in the symbol table.
+
+<P><LI>
+<P>
+<CODE>my()</CODE> vs. <CODE>local()</CODE>:
+
+<P>
+<CODE>local()</CODE> creates a temporal-limited package-based scalar,
+array, hash, or glob -- when the scope of definition is exited at runtime,
+the previous value (if any) is restored. References to such a variable are
+*also* global... only the value changes. (Aside: that is what causes
+variable suicide. :)
+
+<P>
+<CODE>my()</CODE> creates a lexically-limited non-package-based scalar,
+array, or hash -- when the scope of definition is exited at compile-time,
+the variable ceases to be accessible. Any references to such a variable at
+runtime turn into unique anonymous variables on each scope exit.
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Additional_reading_references">Additional reading references</A></H2></CENTER>
+<P>
+For more information see: <A HREF="././perl.html#Using_Global_Variables_and_Shari">Using global variables and sharing them between modules/packages</A> and an article by Mark-Jason Dominus about how Perl handles variables and
+namespaces, and the difference between <CODE>use vars()</CODE> and <CODE>my()</CODE> - <A
+HREF="http://www.plover.com/~mjd/perl/FAQs/Namespaces.html">http://www.plover.com/~mjd/perl/FAQs/Namespaces.html</A>
+.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested Subroutines</A></H1></CENTER>
+<P>
+Before we proceed let's make the assumption that we want to develop the
+code under the <CODE>strict</CODE> pragma. We will use lexically scoped variables (with help of the
+<CODE>my()</CODE> operator) whenever it's possible.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Poison">The Poison</A></H2></CENTER>
+<P>
+Let's look at this code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  nested.pl
+  -----------
+  #!/usr/bin/perl
+  
+  use strict;
+  
+  sub print_power_of_2 {
+    my $x = shift;
+  
+    sub power_of_2 {
+      return $x ** 2; 
+    }
+  
+    my $result = power_of_2();
+    print &quot;$x^2 = $result\n&quot;;
+  }
+  
+  print_power_of_2(5);
+  print_power_of_2(6);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Don't let the weird subroutine names fool you, the
+<CODE>print_power_of_2()</CODE> subroutine should print the square of the
+number passed to it. Let's run the code and see whether it works:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./nested.pl
+  
+  5^2 = 25
+  6^2 = 25</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Ouch, something is wrong. May be there is a bug in Perl and it doesn't work
+correctly with the number 6? Let's try again using 5 and 7:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print_power_of_2(5);
+  print_power_of_2(7);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And run it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./nested.pl
+  
+  5^2 = 25
+  7^2 = 25</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Wow, does it works only for 5? How about using 3 and 5:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  print_power_of_2(3);
+  print_power_of_2(5);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and the result is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./nested.pl
+  
+  3^2 = 9
+  5^2 = 9</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we start to understand--only the first call to the
+<CODE>print_power_of_2()</CODE> function works correctly. Which makes us
+think that our code has some kind of memory for the results of the first
+execution, or it ignores the arguments in subsequent executions.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Diagnosis">The Diagnosis</A></H2></CENTER>
+<P>
+Let's follow the guidelines and use the <CODE>-w</CODE> flag. Now execute the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./nested.pl
+  
+  Variable &quot;$x&quot; will not stay shared at ./nested.pl line 9.
+  5^2 = 25
+  6^2 = 25</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We have never seen such a warning message before and we don't quite
+understand what it means. The <CODE>diagnostics</CODE> pragma will certainly help us. Let's prepend this pragma before the <CODE>strict</CODE> pragma in our code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/bin/perl -w
+  
+  use diagnostics;
+  use strict;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And execute it:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./nested.pl
+  
+  Variable &quot;$x&quot; will not stay shared at ./nested.pl line 10 (#1)
+    
+    (W) An inner (nested) named subroutine is referencing a lexical
+    variable defined in an outer subroutine.
+    
+    When the inner subroutine is called, it will probably see the value of
+    the outer subroutine's variable as it was before and during the
+    *first* call to the outer subroutine; in this case, after the first
+    call to the outer subroutine is complete, the inner and outer
+    subroutines will no longer share a common value for the variable.  In
+    other words, the variable will no longer be shared.
+    
+    Furthermore, if the outer subroutine is anonymous and references a
+    lexical variable outside itself, then the outer and inner subroutines
+    will never share the given variable.
+    
+    This problem can usually be solved by making the inner subroutine
+    anonymous, using the sub {} syntax.  When inner anonymous subs that
+    reference variables in outer subroutines are called or referenced,
+    they are automatically rebound to the current values of such
+    variables.
+    
+  5^2 = 25
+  6^2 = 25</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Well, now everything is clear. We have the <STRONG>inner</STRONG> subroutine <CODE>power_of_2()</CODE> and the <STRONG>outer</STRONG> subroutine <CODE>print_power_of_2()</CODE> in our code.
+
+<P>
+When the inner <CODE>power_of_2()</CODE> subroutine is called for the first
+time, it sees the value of the outer <CODE>print_power_of_2()</CODE>
+subroutine's <CODE>$x</CODE>
+variable. On subsequent calls the inner subroutine's <CODE>$x</CODE> variable won't be updated, no matter what new values are given to <CODE>$x</CODE> in the outer subroutine. There are two copies of the <CODE>$x</CODE> variable, no longer a single one shared by the two routines.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_Remedy">The Remedy</A></H2></CENTER>
+<P>
+The <CODE>diagnostics</CODE> pragma suggests that the problem can be solved by making the inner
+subroutine anonymous.
+
+<P>
+An anonymous subroutine can act as a <EM>closure</EM> with respect to lexically scoped variables. Basically this means that if
+you define a subroutine in a particular <STRONG>lexical</STRONG> context at a particular moment, then it will run in that same context
+later, even if called from outside that context. The upshot of this is that
+when the subroutine
+<STRONG>runs</STRONG>, you get the same copies of the lexically scoped variables which were
+visible when the subroutine was <STRONG>defined</STRONG>. So you can pass arguments to a function when you define it, as well as
+when you invoke it.
+
+<P>
+Let's rewrite the code to use this technique:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  anonymous.pl
+  --------------
+  #!/usr/bin/perl
+  
+  use strict;
+  
+  sub print_power_of_2 {
+    my $x = shift;
+  
+    my $func_ref = sub {
+      return $x ** 2;
+    };
+  
+    my $result = &amp;$func_ref();
+    print &quot;$x^2 = $result\n&quot;;
+  }
+  
+  print_power_of_2(5);
+  print_power_of_2(6);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now <CODE>$func_ref</CODE> contains a reference to an anonymous subroutine, which we later use when we
+need to get the power of two. Since it is anonymous, the subroutine will
+automatically be rebound to the new value of the outer scoped variable <CODE>$x</CODE>, and the results will now be as expected.
+
+<P>
+Let's verify:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./anonymous.pl
+  
+  5^2 = 25
+  6^2 = 36</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So we can see that the problem is solved. 
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Understanding_Closures_the_Ea">Understanding Closures -- the Easy Way</A></H1></CENTER>
+<P>
+In Perl, a closure is just a subroutine that refers to one or more lexical
+variables declared outside the subroutine itself and must therefore create
+a distinct clone of the environment on the way out.
+
+<P>
+And both named subroutines and anonymous subroutines can be closures.
+
+<P>
+Here's how to tell if a subroutine is a closure or not:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  for (1..5) {
+    push @a, sub { &quot;hi there&quot; };
+  }
+  for (1..5) {
+    {
+      my $b;
+      push @b, sub { $b.&quot;hi there&quot; };
+    }
+  }
+  print &quot;anon normal:\n&quot;, join &quot;\t\n&quot;,@a,&quot;\n&quot;;
+  print &quot;anon closure:\n&quot;,join &quot;\t\n&quot;,@b,&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which generates:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  anon normal:
+  CODE(0x80568e4)       
+  CODE(0x80568e4)       
+  CODE(0x80568e4)       
+  CODE(0x80568e4)       
+  CODE(0x80568e4)       
+  
+  anon closure:
+  CODE(0x804b4c0)       
+  CODE(0x8056b54)       
+  CODE(0x8056bb4)       
+  CODE(0x80594d8)       
+  CODE(0x8059538)       </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note how each code reference from the non-closure is identical, but the
+closure form must generate distinct coderefs to point at the distinct
+instances of the closure.
+
+<P>
+And now the same with named subroutines:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  for (1..5) {
+    sub a { &quot;hi there&quot; };
+    push @a, \&amp;a;
+  }
+  for (1..5) {
+    {
+      my $b;
+      sub b { $b.&quot;hi there&quot; };
+      push @b, \&amp;b;
+    }
+  }
+  print &quot;normal:\n&quot;, join &quot;\t\n&quot;,@a,&quot;\n&quot;;
+  print &quot;closure:\n&quot;,join &quot;\t\n&quot;,@b,&quot;\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+which generates:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  anon normal:
+  CODE(0x80568c0)       
+  CODE(0x80568c0)       
+  CODE(0x80568c0)       
+  CODE(0x80568c0)       
+  CODE(0x80568c0)       
+  
+  anon closure:
+  CODE(0x8056998)       
+  CODE(0x8056998)       
+  CODE(0x8056998)       
+  CODE(0x8056998)       
+  CODE(0x8056998)       </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We can see that both versions has generated the same code reference. For
+the subroutine <EM>a</EM> it's easy, since it doesn't include any lexical variables defined outside
+it in the same lexical scope. 
+
+<P>
+As for the subroutine <EM>b</EM>, it's indeed a closure, but Perl won't recompile it since it's a named
+subroutine (see the <EM>perlsub</EM>
+manpage). It's something that we don't want to happen in our code unless we
+want it for this special effect, similar to <EM>static</EM>
+variables in C.
+
+<P>
+This is the underpinnings of that famous <EM>"won't stay shared"</EM>
+message. A <EM>my</EM> variable in a named subroutine context is generating identical code
+references and therefore it ignores any future changes to the lexical
+variables outside of it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="When_You_Cannot_Get_Rid_of_The_I">When You Cannot Get Rid of The Inner Subroutine</A></H1></CENTER>
+<P>
+First you might wonder, why in the world will someone need to define an
+inner subroutine? Well, for example to reduce some of Perl's script startup
+overhead you might decide to write a daemon that will compile the scripts
+and modules only once, and cache the pre-compiled code in memory. When some
+script is to be executed, you just tell the daemon the name of the script
+to run and it will do the rest and do it much faster since compilation has
+already taken place.
+
+<P>
+Seems like an easy task, and it is. The only problem is once the script is
+compiled, how do you execute it? Or let's put it the other way: after it
+was executed for the first time and it stays compiled in the daemon's
+memory, how do you call it again? If you could get all developers to code
+their scripts so each has a subroutine called <CODE>run()</CODE> that will
+actually execute the code in the script then we've solved half the problem.
+
+<P>
+But how does the daemon know to refer to some specific script if they all
+run in the <CODE>main::</CODE> name space? One solution might be to ask the developers to declare a
+package in each and every script, and for the package name to be derived
+from the script name. However, since there is a chance that there will be
+more than one script with the same name but residing in different
+directories, then in order to prevent namespace collisions the directory
+has to be a part of the package name too. And don't forget that the script
+may be moved from one directory to another, so you will have to make sure
+that the package name is corrected every time the script gets moved.
+
+<P>
+But why enforce these strange rules on developers, when we can arrange for
+our daemon to do this work? For every script that the daemon is about to
+execute for the first time, the script should be wrapped inside the package
+whose name is constructed from the mangled path to the script and a
+subroutine called <CODE>run().</CODE> For example if the daemon is about to
+execute the script <EM>/tmp/hello.pl</EM>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  hello.pl
+  --------
+  #!/usr/bin/perl
+  print &quot;Hello\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Prior to running it, the daemon will change the code to be:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  wrapped_hello.pl
+  ----------------
+  package cache::tmp::hello_2epl;
+  
+  sub run{
+    #!/usr/bin/perl 
+    print &quot;Hello\n&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The package name is constructed from the prefix <CODE>cache::</CODE>, each directory separation slash is replaced with <CODE>::</CODE>, and non alphanumeric characters are encoded so that for example <CODE>.</CODE> (a dot) becomes <CODE>_2e</CODE> (an underscore followed by the ASCII code for a dot in hex representation).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> % perl -e 'printf &quot;%x&quot;,ord(&quot;.&quot;)'</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+prints: <CODE>2e</CODE>. The underscore is the same you see in URL encoding except the <CODE>%</CODE> character is used instead (<CODE>%2E</CODE>), but since <CODE>%</CODE> has a special meaning in Perl (prefix of hash variable) it couldn't be
+used.
+
+<P>
+Now when the daemon is requested to execute the script
+<EM>/tmp/hello.pl</EM>, all it has to do is to build the package name as before based on the
+location of the script and call its <CODE>run()</CODE> subroutine:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use cache::tmp::hello_2epl;
+  cache::tmp::hello_2epl::run();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We have just written a partial prototype of the daemon we wanted. The only
+outstanding problem is how to pass the path to the script to the daemon.
+This detail is left as an exercise for the reader.
+
+<P>
+If you are familiar with the <CODE>Apache::Registry</CODE> module, you know that it works in almost the same way. It uses a different
+package prefix and the generic function is called <CODE>handler()</CODE>
+and not <CODE>run().</CODE> The scripts to run are passed through the HTTP
+protocol's headers.
+
+<P>
+Now you understand that there are cases where your normal subroutines can
+become inner, since if your script was a simple:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  simple.pl
+  ---------
+  #!/usr/bin/perl 
+  sub hello { print &quot;Hello&quot; }
+  hello();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Wrapped into a <CODE>run()</CODE> subroutine it becomes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  simple.pl
+  ---------
+  package cache::simple_2epl;
+  
+  sub run{
+    #!/usr/bin/perl 
+    sub hello { print &quot;Hello&quot; }
+    hello();
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Therefore, <CODE>hello()</CODE> is an inner subroutine and if you have used
+<CODE>my()</CODE> scoped variables defined and altered outside and used
+inside <CODE>hello(),</CODE> it won't work as you expect starting from the
+second call, as was explained in the previous section.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Remedies_for_Inner_Subroutines">Remedies for Inner Subroutines</A></H2></CENTER>
+<P>
+First of all there is nothing to worry about, as long as you don't forget
+to turn the warnings On. If you do happen to have the ``<A HREF="././perl.html#my_Scoped_Variable_in_Nested_S">my() Scoped Variable in Nested  Subroutines</A>'' problem, Perl will always alert you.
+
+<P>
+Given that you have a script that has this problem, what are the ways to
+solve it? There are many of them and we will discuss some of them here.
+
+<P>
+We will use the following code to show the different solutions.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run{
+  
+    my $counter = 0;
+  
+    increment_counter();
+    increment_counter();
+  
+    sub increment_counter{
+      $counter++;
+      print &quot;Counter is equal to $counter !\n&quot;;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This code executes the <CODE>run()</CODE> subroutine three times, which in
+turn initializes the <CODE>$counter</CODE> variable to 0, every time it is executed and then calls the inner
+subroutine <CODE>increment_counter()</CODE> twice. Sub
+<CODE>increment_counter()</CODE> prints <CODE>$counter</CODE>'s value after incrementing it. One might expect to see the following
+output:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  run: [time 1]
+  Counter is equal to 1 !
+  Counter is equal to 2 !
+  run: [time 2]
+  Counter is equal to 1 !
+  Counter is equal to 2 !
+  run: [time 3]
+  Counter is equal to 1 !
+  Counter is equal to 2 !</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But as we have already learned from the previous sections, this is not what
+we are going to see. Indeed, when we run the script we see:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./multirun.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Variable &quot;$counter&quot; will not stay shared at ./nested.pl line 18.
+  run: [time 1]
+  Counter is equal to 1 !
+  Counter is equal to 2 !
+  run: [time 2]
+  Counter is equal to 3 !
+  Counter is equal to 4 !
+  run: [time 3]
+  Counter is equal to 5 !
+  Counter is equal to 6 !</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Obviously, the <CODE>$counter</CODE> variable is not reinitialized on each execution of <CODE>run().</CODE> It
+retains its value from the previous execution, and sub
+<CODE>increment_counter()</CODE> increments that.
+
+<P>
+One of the workarounds is to use globally declared variables, with the
+<CODE>vars</CODE> pragma.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun1.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  use vars qw($counter);
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run {
+  
+    $counter = 0;
+  
+    increment_counter();
+    increment_counter();
+  
+    sub increment_counter{
+      $counter++;
+      print &quot;Counter is equal to $counter !\n&quot;;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you run this and the other solutions offered below, the expected output
+will be generated:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./multirun1.pl
+  
+  run: [time 1]
+  Counter is equal to 1 !
+  Counter is equal to 2 !
+  run: [time 2]
+  Counter is equal to 1 !
+  Counter is equal to 2 !
+  run: [time 3]
+  Counter is equal to 1 !
+  Counter is equal to 2 !</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+By the way, the warning we saw before has gone, and so has the problem,
+since there is no <CODE>my()</CODE> (lexically defined) variable used in the nested subroutine.
+
+<P>
+Another approach is to use fully qualified variables. This is better, since
+less memory will be used, but it adds a typing overhead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun2.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run {
+  
+    $main::counter = 0;
+  
+    increment_counter();
+    increment_counter();
+  
+    sub increment_counter{
+      $main::counter++;
+      print &quot;Counter is equal to $main::counter !\n&quot;;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+You can also pass the variable to the subroutine by value and make the
+subroutine return it after it was updated. This adds time and memory
+overheads, so it may not be good idea if the variable can be very large, or
+if speed of execution is an issue.
+
+<P>
+Don't rely on the fact that the variable is small during the development of
+the application, it can grow quite big in situations you don't expect. For
+example, a very simple HTML form text entry field can return a few
+megabytes of data if one of your users is bored and wants to test how good
+your code is. It's not uncommon to see users copy-and-paste 10Mb core dump
+files into a form's text fields and then submit it for your script to
+process.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun3.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run {
+  
+    my $counter = 0;
+  
+    $counter = increment_counter($counter);
+    $counter = increment_counter($counter);
+  
+    sub increment_counter{
+      my $counter = shift;
+  
+      $counter++;
+      print &quot;Counter is equal to $counter !\n&quot;;
+  
+      return $counter;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Finally, you can use references to do the job. The version of
+<CODE>increment_counter()</CODE> below accepts a reference to the <CODE>$counter</CODE>
+variable and increments its value after first dereferencing it. When you
+use a reference, the variable you use inside the function is physically the
+same bit of memory as the one outside the function. This technique is often
+used to enable a called function to modify variables in a calling function.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun4.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run {
+  
+    my $counter = 0;
+  
+    increment_counter(\$counter);
+    increment_counter(\$counter);
+  
+    sub increment_counter{
+      my $r_counter = shift;
+  
+      $$r_counter++;
+      print &quot;Counter is equal to $$r_counter !\n&quot;;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here is yet another and more obscure reference usage. We modify the value
+of <CODE>$counter</CODE> inside the subroutine by using the fact that variables in <CODE>@_</CODE> are aliases for the actual scalar parameters. Thus if you called a function
+with two arguments, those would be stored in
+<CODE>$_[0]</CODE> and <CODE>$_[1]</CODE>. In particular, if an element <CODE>$_[0]</CODE> is updated, the corresponding argument is updated (or an error occurs if it
+is not updatable as would be the case of calling the function with a
+literal, e.g. <EM>increment_counter(5)</EM>).
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun5.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }
+  
+  sub run {
+  
+    my $counter = 0;
+  
+    increment_counter($counter);
+    increment_counter($counter);
+  
+    sub increment_counter{
+      $_[0]++;
+      print &quot;Counter is equal to $_[0] !\n&quot;;
+    }
+  
+  } # end of sub run</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The approach given above should be properly documented of course.
+
+<P>
+Here is a solution that avoids the problem entirely by splitting the code
+into two files; the first is really just a wrapper and loader, the second
+file contains the heart of the code.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun6.pl
+  -----------
+  #!/usr/bin/perl -w
+  
+  use strict;
+  require 'multirun6-lib.pl' ;
+  
+  for (1..3){
+    print &quot;run: [time $_]\n&quot;;
+    run();
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Separate file:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  multirun6-lib.pl
+  ----------------
+  use strict ;
+  
+  my $counter;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub run {
+    $counter = 0;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    increment_counter();
+    increment_counter();
+  }
+  
+  sub increment_counter{
+    $counter++;
+    print &quot;Counter is equal to $counter !\n&quot;;
+  }
+  
+  1 ;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now you have at least six workarounds to choose from.
+
+<P>
+For more information please refer to perlref and perlsub manpages.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="use_require_do_INC_and">use(), require(), do(), %INC and @INC Explained</A></H1></CENTER>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_INC_array">The @INC array</A></H2></CENTER>
+<P>
+<CODE>@INC</CODE> is a special Perl variable which is the equivalent of the shell's <CODE>PATH</CODE> variable. Whereas <CODE>PATH</CODE> contains a list of directories to search for executables, <CODE>@INC</CODE> contains a list of directories from which Perl modules and libraries can be
+loaded.
+
+<P>
+When you <CODE>use(),</CODE> <CODE>require()</CODE> or <CODE>do()</CODE> a
+filename or a module, Perl gets a list of directories from the <CODE>@INC</CODE> variable and searches them for the file it was requested to load. If the
+file that you want to load is not located in one of the listed directories,
+you have to tell Perl where to find the file. You can either provide a path
+relative to one of the directories in <CODE>@INC</CODE>, or you can provide the full path to the file.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_INC_hash">The %INC hash</A></H2></CENTER>
+<P>
+<CODE>%INC</CODE> is another special Perl variable that is used to cache the names of the
+files and the modules that were successfully loaded and compiled by
+<CODE>use(),</CODE> <CODE>require()</CODE> or <CODE>do()</CODE> statements.
+Before attempting to load a file or a module with <CODE>use()</CODE> or
+<CODE>require(),</CODE> Perl checks whether it's already in the <CODE>%INC</CODE> hash. If it's there, the loading and therefore the compilation are not
+performed at all. Otherwise the file is loaded into memory and an attempt
+is made to compile it. <CODE>do()</CODE> does unconditional loading--no
+lookup in the <CODE>%INC</CODE> hash is made.
+
+<P>
+If the file is successfully loaded and compiled, a new key-value pair is
+added to <CODE>%INC</CODE>. The key is the name of the file or module as it was passed to the one of
+the three functions we have just mentioned, and if it was found in any of
+the <CODE>@INC</CODE> directories except <CODE>&quot;.&quot;</CODE>
+the value is the full path to it in the file system.
+
+<P>
+The following examples will make it easier to understand the logic.
+
+<P>
+First, let's see what are the contents of <CODE>@INC</CODE> on my system:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -e 'print join &quot;\n&quot;, @INC'
+  /usr/lib/perl5/5.00503/i386-linux
+  /usr/lib/perl5/5.00503
+  /usr/lib/perl5/site_perl/5.005/i386-linux
+  /usr/lib/perl5/site_perl/5.005
+  .</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Notice the <CODE>.</CODE> (current directory) is the last directory in the list.
+
+<P>
+Now let's load the module <CODE>strict.pm</CODE> and see the contents of <CODE>%INC</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % perl -e 'use strict; print map {&quot;$_ =&gt; $INC{$_}\n&quot;} keys %INC'
+  
+  strict.pm =&gt; /usr/lib/perl5/5.00503/strict.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since <CODE>strict.pm</CODE> was found in <EM>/usr/lib/perl5/5.00503/</EM> directory and <EM>/usr/lib/perl5/5.00503/</EM> is a part of <CODE>@INC</CODE>, <CODE>%INC</CODE> includes the full path as the value for the key <CODE>strict.pm</CODE>.
+
+<P>
+Now let's create the simplest module in <CODE>/tmp/test.pm</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  test.pm
+  -------
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+It does nothing, but returns a true value when loaded. Now let's load it in
+different ways:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /tmp
+  % perl -e 'use test; print map {&quot;$_ =&gt; $INC{$_}\n&quot;} keys %INC'
+  
+  test.pm =&gt; test.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Since the file was found relative to <CODE>.</CODE> (the current directory), the relative path is inserted as the value. If we
+alter <CODE>@INC</CODE>, by adding
+<EM>/tmp</EM> to the end:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /tmp
+  % perl -e 'BEGIN{push @INC, &quot;/tmp&quot;} use test; \
+  print map {&quot;$_ =&gt; $INC{$_}\n&quot;} keys %INC'
+  
+  test.pm =&gt; test.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Here we still get the relative path, since the module was found first
+relative to <CODE>&quot;.&quot;</CODE>. The directory <EM>/tmp</EM> was placed after <CODE>.</CODE> in the list. If we execute the same code from a different directory, the
+<CODE>&quot;.&quot;</CODE> directory won't match,
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /
+  % perl -e 'BEGIN{push @INC, &quot;/tmp&quot;} use test; \
+  print map {&quot;$_ =&gt; $INC{$_}\n&quot;} keys %INC'
+  
+  test.pm =&gt; /tmp/test.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+so we get the full path. We can also prepend the path with
+<CODE>unshift(),</CODE> so it will be used for matching before <CODE>&quot;.&quot;</CODE> and therefore we will get the full path as well:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % cd /tmp
+  % perl -e 'BEGIN{unshift @INC, &quot;/tmp&quot;} use test; \
+  print map {&quot;$_ =&gt; $INC{$_}\n&quot;} keys %INC'
+  
+  test.pm =&gt; /tmp/test.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  BEGIN{unshift @INC, &quot;/tmp&quot;}</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+can be replaced with the more elegant:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use lib &quot;/tmp&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Which is almost equivalent to our <CODE>BEGIN</CODE> block and is the recommended approach.
+
+<P>
+These approaches to modifying <CODE>@INC</CODE> can be labor intensive, since if you want to move the script around in the
+file-system you have to modify the path. This can be painful, for example,
+when you move your scripts from development to a production server.
+
+<P>
+There is a module called <CODE>FindBin</CODE> which solves this problem in the plain Perl world, but unfortunately it
+won't work under mod_perl, since it's a module and as any module it's
+loaded only once. So the first script using it will have all the settings
+correct, but the rest of the scripts will not if located in a different
+directory from the first.
+
+<P>
+For the sake of completeness, I'll present this module anyway.
+
+<P>
+If you use this module, you don't need to write a hard coded path. The
+following snippet does all the work for you (the file is
+<EM>/tmp/load.pl</EM>):
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  load.pl
+  -------
+  #!/usr/bin/perl
+  
+  use FindBin ();
+  use lib &quot;$FindBin::Bin&quot;;
+  use test;
+  print &quot;test.pm =&gt; $INC{'test.pm'}\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the above example <CODE>$FindBin::Bin</CODE> is equal to <EM>/tmp</EM>. If we move the script somewhere else... e.g. <EM>/tmp/new_dir</EM> in the code above
+<CODE>$FindBin::Bin</CODE> equals <EM>/tmp/new_dir</EM>.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % /tmp/load.pl
+  
+  test.pm =&gt; /tmp/test.pm</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is just like <CODE>use lib</CODE> except that no hard coded path is required.
+
+<P>
+You can use this workaround to make it work under mod_perl.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  do 'FindBin.pm';
+  unshift @INC, &quot;$FindBin::Bin&quot;;
+  require test;
+  #maybe test::import( ... ) here if need to import stuff</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This has a slight overhead because it will load from disk and recompile the <CODE>FindBin</CODE> module on each request. So it may not be worth it.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Modules_Libraries_and_Program_F">Modules, Libraries and Program Files</A></H2></CENTER>
+<P>
+Before we proceed, let's define what we mean by <EM>module</EM>, 
+<EM>library</EM> and <EM>program file</EM>.
+
+<UL>
+<P><LI><STRONG><A NAME="item_Libraries">Libraries</A></STRONG>
+<P>
+These are files which contain Perl subroutines and other code.
+
+<P>
+When these are used to break up a large program into manageable chunks they
+don't generally include a package declaration; when they are used as
+subroutine libraries they often do have a package declaration.
+
+<P>
+Their last statement returns true, a simple <CODE>1;</CODE> statement ensures that.
+
+<P>
+They can be named in any way desired, but generally their extension is
+<EM>.pl</EM>.
+
+<P>
+Examples:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  config.pl
+  ----------
+  # No package so defaults to main::
+  $dir = &quot;/home/httpd/cgi-bin&quot;;
+  $cgi = &quot;/cgi-bin&quot;;
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  mysubs.pl
+  ----------
+  # No package so defaults to main::
+  sub print_header{
+    print &quot;Content-type: text/plain\r\n\r\n&quot;;
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  web.pl
+  ------------
+  package web ;
+  # Call like this: web::print_with_class('loud',&quot;Don't shout!&quot;);
+  sub print_with_class{
+    my( $class, $text ) = @_ ;
+    print qq{&lt;span class=&quot;$class&quot;&gt;$text&lt;/span&gt;};
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_Modules">Modules</A></STRONG>
+<P>
+A file which contains perl subroutines and other code.
+
+<P>
+It generally declares a package name at the beginning of it.
+
+<P>
+Modules are generally used either as function libraries (which <EM>.pl</EM>
+files are still but less commonly used for), or as object libraries where a
+module is used to define a class and its methods.
+
+<P>
+Its last statement returns true.
+
+<P>
+The naming convention requires it to have a <EM>.pm</EM> extension.
+
+<P>
+Example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  MyModule.pm
+  -----------
+  package My::Module;
+  $My::Module::VERSION = 0.01;
+  
+  sub new{ return bless {}, shift;}
+  END { print &quot;Quitting\n&quot;}
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P><LI><STRONG><A NAME="item_Program">Program Files</A></STRONG>
+<P>
+Many Perl programs exist as a single file. Under Linux and other Unix-like
+operating systems the file often has no suffix since the operating system
+can determine that it is a perl script from the first line (shebang line)
+or if it's Apache that executes the code, there is a variety of ways to
+tell how and when the file should be executed. Under Windows a suffix is
+normally used, for example <CODE>.pl</CODE> or
+<CODE>.plx</CODE>.
+
+<P>
+The program file will normally <CODE>require()</CODE> any libraries and <CODE>use()</CODE>
+any modules it requires for execution.
+
+<P>
+It will contain Perl code but won't usually have any package names.
+
+<P>
+Its last statement may return anything or nothing.
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="require_">require()</A></H2></CENTER>
+<P>
+<CODE>require()</CODE> reads a file containing Perl code and compiles it.
+Before attempting to load the file it looks up the argument in <CODE>%INC</CODE> to see whether it has already been loaded. If it has,
+<CODE>require()</CODE> just returns without doing a thing. Otherwise an
+attempt will be made to load and compile the file.
+
+<P>
+<CODE>require()</CODE> has to find the file it has to load. If the argument
+is a full path to the file, it just tries to read it. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;/home/httpd/perl/mylibs.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If the path is relative, <CODE>require()</CODE> will attempt to search for
+the file in all the directories listed in <CODE>@INC</CODE>. For example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;mylibs.pl&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If there is more than one occurrence of the file with the same name in the
+directories listed in <CODE>@INC</CODE> the first occurrence will be used.
+
+<P>
+The file must return <EM>TRUE</EM> as the last statement to indicate successful execution of any
+initialization code. Since you never know what changes the file will go
+through in the future, you cannot be sure that the last statement will
+always return <EM>TRUE</EM>. That's why the suggestion is to put ``<CODE>1;</CODE>'' at the end of file.
+
+<P>
+Although you should use the real filename for most files, if the file is a <A HREF="././perl.html#Modules_Libraries_and_Program_F">module</A>, you may use the following convention instead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require My::Module;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is equal to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require &quot;My/Module.pm&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If <CODE>require()</CODE> fails to load the file, either because it
+couldn't find the file in question or the code failed to compile, or it
+didn't return <EM>TRUE</EM>, then the program would <CODE>die().</CODE> To prevent this the
+<CODE>require()</CODE> statement can be enclosed into an
+<CODE>eval()</CODE> exception-handling block, as in this example:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require.pl
+  ----------
+  #!/usr/bin/perl -w
+  
+  eval { require &quot;/file/that/does/not/exists&quot;};
+  if ($@) {
+    print &quot;Failed to load, because : $@&quot;
+  }
+  print &quot;\nHello\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+When we execute the program:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./require.pl
+  
+  Failed to load, because : Can't locate /file/that/does/not/exists in
+  @INC (@INC contains: /usr/lib/perl5/5.00503/i386-linux
+  /usr/lib/perl5/5.00503 /usr/lib/perl5/site_perl/5.005/i386-linux
+  /usr/lib/perl5/site_perl/5.005 .) at require.pl line 3.
+  
+  Hello</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We see that the program didn't <CODE>die(),</CODE> because <EM>Hello</EM> was printed. This <EM>trick</EM> is useful when you want to check whether a user has some module installed,
+but if she hasn't it's not critical, perhaps the program can run without
+this module with reduced functionality.
+
+<P>
+If we remove the <CODE>eval()</CODE> part and try again:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  require.pl
+  ----------
+  #!/usr/bin/perl -w
+  
+  require &quot;/file/that/does/not/exists&quot;;
+  print &quot;\nHello\n&quot;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  % ./require1.pl
+  
+  Can't locate /file/that/does/not/exists in @INC (@INC contains:
+  /usr/lib/perl5/5.00503/i386-linux /usr/lib/perl5/5.00503
+  /usr/lib/perl5/site_perl/5.005/i386-linux
+  /usr/lib/perl5/site_perl/5.005 .) at require1.pl line 3.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The program just <CODE>die()s</CODE> in the last example, which is what you
+want in most cases.
+
+<P>
+For more information refer to the perlfunc manpage.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="use_">use()</A></H2></CENTER>
+<P>
+<CODE>use(),</CODE> just like <CODE>require(),</CODE> loads and compiles
+files containing Perl code, but it works with
+<A HREF="././perl.html#Modules_Libraries_and_Program_F">modules</A> only. The only way to pass a module to load is by its module name and not
+its filename. If the module is located in <EM>MyCode.pm</EM>, the correct way to <CODE>use()</CODE> it is:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use MyCode</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+and not:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use &quot;MyCode.pm&quot;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+<CODE>use()</CODE> translates the passed argument into a file name
+replacing <CODE>::</CODE>
+with the operating system's path separator (normally <CODE>/</CODE>) and appending <EM>.pm</EM> at the end. So <CODE>My::Module</CODE> becomes <EM>My/Module.pm</EM>.
+
+<P>
+<CODE>use()</CODE> is exactly equivalent to:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> BEGIN { require Module; Module-&gt;import(LIST); }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Internally it calls <CODE>require()</CODE> to do the loading and
+compilation chores. When <CODE>require()</CODE> finishes its job,
+<CODE>import()</CODE> is called unless
+<CODE>()</CODE> is the second argument. The following pairs are equivalent:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use MyModule;
+  BEGIN {require MyModule; MyModule-&gt;import; }
+  
+  use MyModule qw(foo bar);
+  BEGIN {require MyModule; MyModule-&gt;import(&quot;foo&quot;,&quot;bar&quot;); }
+  
+  use MyModule ();
+  BEGIN {require MyModule; }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The first pair exports the default tags. This happens if the module sets <CODE>@EXPORT</CODE> to a list of tags to be exported by default. The module's manpage normally
+describes what tags are exported by default.
+
+<P>
+The second pair exports only the tags passed as arguments. 
+
+<P>
+The third pair describes the case where the caller does not want any
+symbols to be imported.
+
+<P>
+<CODE>import()</CODE> is not a builtin function, it's just an ordinary static method call into
+the ``<CODE>MyModule</CODE>'' package to tell the module to import the list of features back into the
+current package. See the Exporter manpage for more information.
+
+<P>
+When you write your own modules, always remember that it's better to use <CODE>@EXPORT_OK</CODE> instead of <CODE>@EXPORT</CODE>, since the former doesn't export symbols unless it was asked to. Exports
+pollute the namespace of the module user. Also avoid short or common symbol
+names to reduce the risk of name clashes.
+
+<P>
+When functions and variables aren't exported you can still access them
+using their full names, like <CODE>$My::Module::bar</CODE> or
+<CODE>$My::Module::foo()</CODE>. By convention you can use a leading underscore on names to informally
+indicate that they are <EM>internal</EM> and not for public use.
+
+<P>
+There's a corresponding ``<CODE>no</CODE>'' command that un-imports symbols imported by <CODE>use</CODE>, i.e., it calls <CODE>Module-&gt;unimport(LIST)</CODE>
+instead of <CODE>import()</CODE>.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="do_">do()</A></H2></CENTER>
+<P>
+While <CODE>do()</CODE> behaves almost identically to
+<CODE>require(),</CODE> it reloads the file unconditionally. It doesn't
+check <CODE>%INC</CODE> to see whether the file was already loaded.
+
+<P>
+If <CODE>do()</CODE> cannot read the file, it returns <CODE>undef</CODE> and sets <CODE>$!</CODE> to report the error. If <CODE>do()</CODE> can read the file but cannot
+compile it, it returns <CODE>undef</CODE> and puts an error message in <CODE>$@</CODE>. If the file is successfully compiled, <CODE>do()</CODE> returns the value
+of the last expression evaluated.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Using_Global_Variables_and_Shari">Using Global Variables and Sharing Them Between Modules/Packages</A></H1></CENTER>
+<P>
+It helps when you code your application in a structured way, using the perl
+packages, but as you probably know once you start using packages it's much
+harder to share the variables between the various packagings. A
+configuration package comes to mind as a good example of the package that
+will want its variables to be accessible from the other modules.
+
+<P>
+Of course using the Object Oriented (OO) programming is the best way to
+provide an access to variables through the access methods. But if you are
+not yet ready for OO techniques you can still benefit from using the
+techniques we are going to talk about.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Making_Variables_Global">Making Variables Global</A></H2></CENTER>
+<P>
+When you first wrote <CODE>$x</CODE> in your code you created a (package) global variable. It is visible
+everywhere in your program, although if used in a package other than the
+package in which it was declared (<CODE>main::</CODE> by default), it must be referred to with its fully qualified name, unless
+you have imported this variable with <CODE>import().</CODE> This will work
+only if you do not use <CODE>strict</CODE> pragma; but you <EM>have</EM> to use this pragma if you want to run your scripts under mod_perl. Read <A HREF="././porting.html#The_strict_pragma">The strict pragma</A> to find out why. 
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Making_Variables_Global_With_str">Making Variables Global With strict Pragma On</A></H2></CENTER>
+<P>
+First you use :
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use strict;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then you use:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> use vars qw($scalar %hash @array);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This declares the named variables as package globals in the current
+package. They may be referred to within the same file and package with
+their unqualified names; and in different files/packages with their fully
+qualified names. 
+
+<P>
+With perl5.6 you can use the <CODE>our</CODE> operator instead:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  our qw($scalar %hash @array);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to share package global variables between packages, here is
+what you can do.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Using_Exporter_pm_to_Share_Globa">Using Exporter.pm to Share Global Variables</A></H2></CENTER>
+<P>
+Assume that you want to share the <CODE>CGI.pm</CODE> object (I will use <CODE>$q</CODE>) between your modules. For example, you create it in <CODE>script.pl</CODE>, but you want it to be visible in <CODE>My::HTML</CODE>. First, you make <CODE>$q</CODE>
+global.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  script.pl:
+  ----------------
+  use vars qw($q);
+  use CGI;
+  use lib qw(.); 
+  use My::HTML qw($q); # My/HTML.pm is in the same dir as script.pl
+  $q = CGI-&gt;new;
+  
+  My::HTML::printmyheader();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Note that we have imported <CODE>$q</CODE> from <CODE>My::HTML</CODE>. And <CODE>My::HTML</CODE>
+does the export of <CODE>$q</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  My/HTML.pm
+  ----------------
+  package My::HTML;
+  use strict;
+  
+  BEGIN {
+    use Exporter ();
+  
+    @My::HTML::ISA         = qw(Exporter);
+    @My::HTML::EXPORT      = qw();
+    @My::HTML::EXPORT_OK   = qw($q);
+  
+  }
+  
+  use vars qw($q);
+  
+  sub printmyheader{
+    # Whatever you want to do with $q... e.g.
+    print $q-&gt;header();
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+So the <CODE>$q</CODE> is shared between the <CODE>My::HTML</CODE> package and
+<CODE>script.pl</CODE>. It will work vice versa as well, if you create the object in <CODE>My::HTML</CODE> but use it in <CODE>script.pl</CODE>. You have true sharing, since if you change <CODE>$q</CODE> in <CODE>script.pl</CODE>, it will be changed in <CODE>My::HTML</CODE> as well.
+
+<P>
+What if you need to share <CODE>$q</CODE> between more than two packages? For example you want My::Doc to share <CODE>$q</CODE> as well.
+
+<P>
+You leave <CODE>My::HTML</CODE> untouched, and modify <EM>script.pl</EM> to include:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre> use My::Doc qw($q);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Then you add the same <CODE>Exporter</CODE> code that we used in <CODE>My::HTML</CODE>, into <CODE>My::Doc</CODE>, so that it also exports <CODE>$q</CODE>.
+
+<P>
+One possible pitfall is when you want to use <CODE>My::Doc</CODE> in both
+<CODE>My::HTML</CODE> and <EM>script.pl</EM>. Only if you add
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use My::Doc qw($q);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+into <CODE>My::HTML</CODE> will <CODE>$q</CODE> be shared. Otherwise <CODE>My::Doc</CODE> will not share <CODE>$q</CODE> any more. To make things clear here is the code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  script.pl:
+  ----------------
+  use vars qw($q);
+  use CGI;
+  use lib qw(.); 
+  use My::HTML qw($q); # My/HTML.pm is in the same dir as script.pl
+  use My::Doc  qw($q); # Ditto
+  $q = new CGI;
+  
+  My::HTML::printmyheader();</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  My/HTML.pm
+  ----------------
+  package My::HTML;
+  use strict;
+  
+  BEGIN {
+    use Exporter ();
+  
+    @My::HTML::ISA         = qw(Exporter);
+    @My::HTML::EXPORT      = qw();
+    @My::HTML::EXPORT_OK   = qw($q);
+  
+  }
+  
+  use vars     qw($q);
+  use My::Doc  qw($q);
+  
+  sub printmyheader{
+    # Whatever you want to do with $q... e.g.
+    print $q-&gt;header();
+  
+    My::Doc::printtitle('Guide');
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  My/Doc.pm
+  ----------------
+  package My::Doc;
+  use strict;
+  
+  BEGIN {
+    use Exporter ();
+  
+    @My::Doc::ISA         = qw(Exporter);
+    @My::Doc::EXPORT      = qw();
+    @My::Doc::EXPORT_OK   = qw($q);
+  
+  }
+  
+  use vars qw($q);
+  
+  sub printtitle{
+    my $title = shift || 'None';
+    
+    print $q-&gt;h1($title);
+  }
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Using_the_Perl_Aliasing_Feature_">Using the Perl Aliasing Feature to Share Global Variables</A></H2></CENTER>
+<P>
+As the title says you can import a variable into a script or module without
+using <CODE>Exporter.pm</CODE>. I have found it useful to keep all the configuration variables in one
+module <CODE>My::Config</CODE>. But then I have to export all the variables in order to use them in other
+modules, which is bad for two reasons: polluting other packages' name
+spaces with extra tags which increases the memory requirements; and adding
+the overhead of keeping track of what variables should be exported from the
+configuration module and what imported, for some particular package. I
+solve this problem by keeping all the variables in one hash <CODE>%c</CODE> and exporting that. Here is an example of <CODE>My::Config</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Config;
+  use strict;
+  use vars qw(%c);
+  %c = (
+    # All the configs go here
+    scalar_var =&gt; 5,
+  
+    array_var  =&gt; [qw(foo bar)],
+  
+    hash_var   =&gt; {
+                   foo =&gt; 'Foo',
+                   bar =&gt; 'BARRR',
+                  },
+  );
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now in packages that want to use the configuration variables I have either
+to use the fully qualified names like <CODE>$My::Config::test</CODE>, which I dislike or import them as described in the previous section. But
+hey, since we have only one variable to handle, we can make things even
+simpler and save the loading of the <CODE>Exporter.pm</CODE> package. We will use the Perl aliasing feature for exporting and saving the
+keystrokes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::HTML;
+  use strict;
+  use lib qw(.);
+    # Global Configuration now aliased to global %c
+  use My::Config (); # My/Config.pm in the same dir as script.pl
+  use vars qw(%c);
+  *c = \%My::Config::c;
+  
+    # Now you can access the variables from the My::Config
+  print $c{scalar_var};
+  print $c{array_var}[0];
+  print $c{hash_var}{foo};</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Of course <CODE>$c</CODE> is global everywhere you use it as described
+above, and if you change it somewhere it will affect any other packages you
+have aliased <CODE>$My::Config::c</CODE> to.
+
+<P>
+Note that aliases work either with global or <CODE>local()</CODE> vars - you cannot write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my *c = \%My::Config::c; # ERROR!</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Which is an error. But you can write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  local *c = \%My::Config::c;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+For more information about aliasing, refer to the Camel book, second
+edition, pages 51-52.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Using_Non_Hardcoded_Configuratio">Using Non-Hardcoded Configuration Module Names</A></H2></CENTER>
+<P>
+You have just seen how to use a configuration module for configuration
+centralization and an easy access to the information stored in this module.
+However, there is somewhat of a chicken-and-egg problem--how to let your
+other modules know the name of this file? Hardcoding the name is
+brittle--if you have only a single project it should be fine, but if you
+have more projects which use different configurations and you will want to
+reuse their code you will have to find all instances of the hardcoded name
+and replace it. 
+
+<P>
+Another solution could be to have the same name for a configuration module,
+like <CODE>My::Config</CODE> but putting a different copy of it into different locations. But this won't
+work under mod_perl because of the namespace collision. You cannot load
+different modules which uses the same name, only the first one will be
+loaded.
+
+<P>
+Luckily, there is another solution which allows us to stay flexible.
+<CODE>PerlSetVar</CODE> comes to rescue. Just like with environment variables, you can set server's
+global Perl variables which can be retrieved from any module and script.
+Those statements are placed into the
+<EM>httpd.conf</EM> file. For example
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlSetVar FooBaseDir       /home/httpd/foo
+  PerlSetVar FooConfigModule  Foo::Config</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we <CODE>require()</CODE> the file where the above configuration will
+be used.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  PerlRequire /home/httpd/perl/startup.pl</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In the <EM>startup.pl</EM> we might have the following code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>    # retrieve the configuration module path
+  use Apache:
+  my $s             = Apache-&gt;server;
+  my $base_dir      = $s-&gt;dir_config('FooBaseDir')      || '';
+  my $config_module = $s-&gt;dir_config('FooConfigModule') || '';
+  die &quot;FooBaseDir and FooConfigModule aren't set in httpd.conf&quot; 
+    unless $base_dir and $config_module;
+  
+    # build the real path to the config module
+  my $path = &quot;$base_dir/$config_module&quot;;
+  $path =~ s|::|/|;
+  $path .= &quot;.pm&quot;;
+    # we have something like &quot;/home/httpd/foo/Foo/Config.pm&quot;
+  
+    # now we can pull in the configuration module
+  require $path;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Now we know the module name and it's loaded, so for example if we need to
+use some variables stored in this module to open a database connection, we
+will do:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Apache::DBI-&gt;connect_on_init
+  (&quot;DBI:mysql:${$config_module.'::DB_NAME'}::${$config_module.'::SERVER'}&quot;,
+   ${$config_module.'::USER'},
+   ${$config_module.'::USER_PASSWD'},
+   {
+    PrintError =&gt; 1, # warn() on errors
+    RaiseError =&gt; 0, # don't die on error
+    AutoCommit =&gt; 1, # commit executes immediately
+   }
+  );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Where variable like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  ${$config_module.'::USER'}</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In our example are really:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $Foo::Config::USER</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If you want to access these variable from within your code at the run time,
+instead accessing to the server object <CODE>$c</CODE>, use the request object <CODE>$r</CODE>:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $r = shift;
+  my $base_dir      = $r-&gt;dir_config('FooBaseDir')      || '';
+  my $config_module = $r-&gt;dir_config('FooConfigModule') || '';
+  </pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="The_Scope_of_the_Special_Perl_Va">The Scope of the Special Perl Variables</A></H1></CENTER>
+<P>
+Special Perl variables like <CODE>$|</CODE> (buffering), <CODE>$^T</CODE> (script's start time), <CODE>$^W</CODE> (warnings mode), <CODE>$/</CODE> (input record separator), <CODE>$\</CODE>
+(output record separator) and many more are all true global variables; they
+do not belong to any particular package (not even <CODE>main::</CODE>) and are universally available. This means that if you change them, you
+change them anywhere across the entire program; furthermore you cannot
+scope them with <CODE>my().</CODE> However you can <CODE>local()ise</CODE>
+them which means that any changes you apply will only last until the end of
+the enclosing scope. In the mod_perl situation where the child server
+doesn't usually exit, if in one of your scripts you modify a global
+variable it will be changed for the rest of the process' life and will
+affect all the scripts executed by the same process. Therefore localising
+these variables is highly recommended, I'd say mandatory.
+
+<P>
+We will demonstrate the case on the input record separator variable. If you
+undefine this variable, the diamond operator (readline) will suck in the
+whole file at once if you have enough memory. Remembering this you should
+never write code like the example below.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $/ = undef; # BAD!
+  open IN, &quot;file&quot; ....
+    # slurp it all into a variable
+  $all_the_file = &lt;IN&gt;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The proper way is to have a <CODE>local()</CODE> keyword before the special
+variable is changed, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  local $/ = undef; 
+  open IN, &quot;file&quot; ....
+    # slurp it all inside a variable
+  $all_the_file = &lt;IN&gt;;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+But there is a catch. <CODE>local()</CODE> will propagate the changed value
+to the code below it. The modified value will be in effect until the script
+terminates, unless it is changed again somewhere else in the script.
+
+<P>
+A cleaner approach is to enclose the whole of the code that is affected by
+the modified variable in a block, like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+    local $/ = undef; 
+    open IN, &quot;file&quot; ....
+      # slurp it all inside a variable
+    $all_the_file = &lt;IN&gt;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That way when Perl leaves the block it restores the original value of the <CODE>$/</CODE> variable, and you don't need to worry elsewhere in your program about its
+value being changed here.
+
+<P>
+Note that if you call a subroutine after you've set a global variable but
+within the enclosing block, the global variable will be visible with its
+new value inside the subroutine.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Compiled_Regular_Expressions">Compiled Regular Expressions</A></H1></CENTER>
+<P>
+When using a regular expression that contains an interpolated Perl
+variable, if it is known that the variable (or variables) will not change
+during the execution of the program, a standard optimization technique is
+to add the <CODE>/o</CODE> modifier to the regex pattern. This directs the compiler to build the
+internal table once, for the entire lifetime of the script, rather than
+every time the pattern is executed. Consider:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $pat = '^foo$'; # likely to be input from an HTML form field
+  foreach( @list ) {
+    print if /$pat/o;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+This is usually a big win in loops over lists, or when using the
+<CODE>grep()</CODE> or <CODE>map()</CODE> operators.
+
+<P>
+In long-lived mod_perl scripts, however, the variable may change with each
+invocation and this can pose a problem. The first invocation of a fresh
+httpd child will compile the regex and perform the search correctly.
+However, all subsequent uses by that child will continue to match the
+original pattern, regardless of the current contents of the Perl variables
+the pattern is supposed to depend on. Your script will appear to be broken.
+
+<P>
+There are two solutions to this problem:
+
+<P>
+The first is to use <CODE>eval q//</CODE>, to force the code to be evaluated each time. Just make sure that the eval
+block covers the entire loop of processing, and not just the pattern match
+itself.
+
+<P>
+The above code fragment would be rewritten as: 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $pat = '^foo$';
+  eval q{
+    foreach( @list ) {
+      print if /$pat/o;
+    }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Just saying:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  foreach( @list ) {
+    eval q{ print if /$pat/o; };
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+means that we recompile the regex for every element in the list even though
+the regex doesn't change.
+
+<P>
+You can use this approach if you require more than one pattern match
+operator in a given section of code. If the section contains only one
+operator (be it an <CODE>m//</CODE> or <CODE>s///</CODE>), you can rely on the property of the null pattern, that reuses the last
+pattern seen. This leads to the second solution, which also eliminates the
+use of eval.
+
+<P>
+The above code fragment becomes: 
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $pat = '^foo$';
+  &quot;something&quot; =~ /$pat/; # dummy match (MUST NOT FAIL!)
+  foreach( @list ) {
+    print if //;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The only gotcha is that the dummy match that boots the regular expression
+engine must absolutely, positively succeed, otherwise the pattern will not
+be cached, and the <CODE>//</CODE> will match everything. If you can't count on fixed text to ensure the match
+succeeds, you have two possibilities.
+
+<P>
+If you can guarantee that the pattern variable contains no meta-characters
+(things like *, +, ^, $...), you can use the dummy match:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $pat =~ /\Q$pat\E/; # guaranteed if no meta-characters present</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+If there is a possibility that the pattern can contain meta-characters, you
+should search for the pattern or the non-searchable \377 character as
+follows:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  &quot;\377&quot; =~ /$pat|^\377$/; # guaranteed if meta-characters present</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Another approach:
+
+<P>
+It depends on the complexity of the regex to which you apply this
+technique. One common usage where a compiled regex is usually more
+efficient is to ``<EM>match any one of a group of patterns</EM>'' over and over again.
+
+<P>
+Maybe with a helper routine, it's easier to remember. Here is one slightly
+modified from Jeffery Friedl's example in his book ``<EM>Mastering Regular Expressions</EM>''.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #####################################################
+  # Build_MatchMany_Function
+  # -- Input:  list of patterns
+  # -- Output: A code ref which matches its $_[0]
+  #            against ANY of the patterns given in the
+  #            &quot;Input&quot;, efficiently.
+  #
+  sub Build_MatchMany_Function {
+    my @R = @_;
+    my $expr = join '||', map { &quot;\$_[0] =~ m/\$R[$_]/o&quot; } ( 0..$#R );
+    my $matchsub = eval &quot;sub { $expr }&quot;;
+    die &quot;Failed in building regex @R: $@&quot; if $@;
+    $matchsub;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Example usage:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  @some_browsers = qw(Mozilla Lynx MSIE AmigaVoyager lwp libwww);
+  $Known_Browser=Build_MatchMany_Function(@some_browsers);
+  
+  while (&lt;ACCESS_LOG&gt;) {
+    # ...
+    $browser = get_browser_field($_);
+    if ( ! &amp;$Known_Browser($browser) ) {
+      print STDERR &quot;Unknown Browser: $browser\n&quot;;
+    }
+    # ...
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+And of course you can use the <CODE>qr()</CODE> operator which makes the
+code even more efficient:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  my $pat = '^foo$';
+  my $re  = qr($pat);
+  foreach( @list ) {
+      print if /$re/o;
+    }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The <CODE>qr()</CODE> operator compiles the pattern for each request and
+then use the compiled version in the actual match.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Exception_Handling_for_mod_perl">Exception Handling for mod_perl</A></H1></CENTER>
+<P>
+Here are some guidelines for clean(er) exception handling in mod_perl, although the technique presented can be
+applied to all of your Perl programming.
+
+<P>
+The reasoning behind this document is the current broken status of
+<CODE>$SIG{__DIE__}</CODE> in the perl core - see both the perl5-porters and the mod_perl mailing list
+archives for details on this discussion. (It's broken in at least Perl
+v5.6.0 and probably in later versions as well). In short summary,
+$SIG{__DIE__} is a little bit too global, and catches exceptions even when
+you want to catch them yourself, using an <CODE>eval{}</CODE> block.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Trapping_Exceptions_in_Perl">Trapping Exceptions in Perl</A></H2></CENTER>
+<P>
+To trap an exception in Perl we use the <CODE>eval{}</CODE> construct. Many people initially make the mistake that this is the same as
+the <CODE>eval
+EXPR</CODE> construct, which compiles and executes code at run time, but that's not the
+case. <CODE>eval{}</CODE> compiles at compile time, just like the rest of your code, and has next to
+zero run-time penalty. For the hardcore C programmers among you, it uses
+the <CODE>setjmp/longjmp</CODE> POSIX routines internally, just like C++ exceptions.
+
+<P>
+When in an eval block, if the code being executed <CODE>die()'s</CODE> for
+any reason, an exception is thrown. This exception can be caught by
+examining the <CODE>$@</CODE> variable immediately after the eval block; if
+<CODE>$@</CODE> is true then an exception occurred and <CODE>$@</CODE> contains the exception in the form of a string. The full construct looks
+like this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  eval {
+      # Some code here
+  }; # Note important semi-colon there
+  if ($@) # $@ contains the exception that was thrown
+  {
+      # Do something with the exception
+  }
+  else # optional
+  {
+      # No exception was thrown
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Most of the time when you see these exception handlers there is no else
+block, because it tends to be OK if the code didn't throw an exception.
+
+<P>
+Perl's exception handling is similar to that of other languages, though it
+may not seem so at first sight:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  Perl                             Other language
+  -------------------------------  ------------------------------------
+  eval {                           try {
+    # execute here                   // execute here
+    # raise our own exception:       // raise our own exception:
+    die &quot;Oops&quot; if /error/;           if(oops==1){throw Exception.Oops;}
+    # execute more                   // execute more
+  } ;                              }
+  if($@) {                         catch {
+    # handle exceptions              switch( Exception.id ) {
+    if( $@ =~ /Fail/ ) {               Fail : fprintf( stderr, &quot;Failed\n&quot; ) ;
+        print &quot;Failed\n&quot; ;                    break ;
+    }
+    elsif( $@ =~ /Oops/ ) {            Oops : throw Exception ;
+        # Pass it up the chain                 
+        die if $@ =~ /Oops/;
+    }
+    else {                             default :
+        # handle all other           }
+        # exceptions here          }
+    }                              // If we got here all is OK or handled
+  }
+  else { # optional
+    # all is well
+  }
+  # all is well or has been handled</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Alternative_Exception_Handling_T">Alternative Exception Handling Techniques</A></H2></CENTER>
+<P>
+An often suggested method for handling global exceptions in mod_perl, and
+other perl programs in general, is a <STRONG>__DIE__</STRONG> handler, which can be set up by either assigning a function name as a
+string to
+<CODE>$SIG{__DIE__}</CODE> (not particularly recommended, because of the possible namespace clashes)
+or assigning a code reference to
+<CODE>$SIG{__DIE__}</CODE>. The usual way of doing so is to use an anonymous subroutine:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $SIG{__DIE__} = sub { print &quot;Eek - we died with:\n&quot;, $_[0]; };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The current problem with this is that <CODE>$SIG{__DIE__}</CODE> is a global setting in your script, so while you can potentially hide away
+your exceptions in some external module, the execution of <CODE>$SIG{__DIE__}</CODE>
+is fairly magical, and interferes not just with your code, but with all
+code in every module you import. Beyond the magic involved,
+<CODE>$SIG{__DIE__}</CODE> actually interferes with perl's normal exception handling mechanism, the <CODE>eval{}</CODE> construct. Witness:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $SIG{__DIE__} = sub { print &quot;handler\n&quot;; };
+  
+  eval {
+      print &quot;In eval\n&quot;;
+      die &quot;Failed for some reason\n&quot;;
+  };
+  if ($@) {
+      print &quot;Caught exception: $@&quot;;
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The code unfortunately prints out:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  In eval
+  handler</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Which isn't quite what you would expect, especially if that
+<CODE>$SIG{__DIE__}</CODE> handler is hidden away deep in some other module that you didn't know
+about. There are work arounds however. One is to localise <CODE>$SIG{__DIE__}</CODE> in every exception trap you write:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  eval {
+      local $SIG{__DIE__};
+      ...
+  };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Obviously this just doesn't scale - you don't want to be doing that for
+every exception trap in your code, and it's a slow down. A second work
+around is to check in your handler if you are trying to catch this
+exception:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $SIG{__DIE__} = sub {
+      die $_[0] if $^S;
+      print &quot;handler\n&quot;;
+  };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+However this won't work under <CODE>Apache::Registry</CODE> - you're always in an eval block there!
+
+<P>
+The other problem with <CODE>$SIG{__DIE__}</CODE> also relates to its global nature. Because you might have more than one
+application running under mod_perl, you can't be sure which has set a <CODE>$SIG{__DIE__}</CODE> handler when and for what. This can become extremely confusing when you
+start scaling up from a set of simple registry scripts that might rely on
+CGI::Carp for global exception handling (which uses <CODE>$SIG{__DIE__}</CODE> to trap exceptions) to having many applications installed with a variety of
+exception handling mechanisms in place.
+
+<P>
+You should warn people about this danger of <CODE>$SIG{__DIE__}</CODE> and inform them of better ways to code. The following material is an
+attempt to do just that.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Better_Exception_Handling">Better Exception Handling</A></H2></CENTER>
+<P>
+The <CODE>eval{}</CODE> construct in itself is a fairly weak way to handle exceptions as strings.
+There's no way to pass more information in your exception, so you have to
+handle your exception in more than one place - at the location the error
+occurred, in order to construct a sensible error message, and again in your
+exception handler to de-construct that string into something meaningful
+(unless of course all you want your exception handler to do is dump the
+error to the browser). The other problem is that you have no way of
+automatically detecting where the exception occured using <CODE>eval{}</CODE> construct. In a <CODE>$SIG{__DIE__}</CODE>
+block you always have the use of the <CODE>caller()</CODE> function to
+detect where the error occured. But we can fix that...
+
+<P>
+A little known fact about exceptions in perl 5.005 is that you can call die
+with an object. The exception handler receives that object in
+<CODE>$@</CODE>. This is how you are advised to handle exceptions now, as it provides an
+extremely flexible and scalable exceptions solution, potentially providing
+almost all of the power Java exceptions.
+
+<P>
+[As a footnote here, the only thing that is really missing here from Java
+exceptions is a guaranteed Finally clause, although its possible to get
+about 98.62% of the way towards providing that using <CODE>eval{}</CODE>.]
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="A_Little_Housekeeping">A Little Housekeeping</A></H3></CENTER>
+<P>
+First though, before we delve into the details, a little housekeeping is in
+order. Most, if not all, mod_perl programs consist of a main routine that
+is entered, and then dispatches itself to a routine depending on the
+parameters passed and/or the form values. In a normal C program this is
+your <CODE>main()</CODE> function, in a mod_perl handler this is your
+<CODE>handler()</CODE> function/method. The exception to this rule seems to
+be Apache::Registry scripts, although the techniques described here can be
+easily adapted.
+
+<P>
+In order for you to be able to use exception handling to its best advantage
+you need to change your script to have some sort of global exception
+handling. This is much more trivial than it sounds. If you're using <CODE>Apache::Registry</CODE> to emulate CGI you might consider wrapping your entire script in one big
+eval block, but I would discourage that. A better method would be to
+modularise your script into discrete function calls, one of which should be
+a dispatch routine:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  #!/usr/bin/perl -w
+  # Apache::Registry script
+  
+  eval {
+     dispatch();
+  };
+  if ($@) {
+     # handle exception
+  }
+  
+  sub dispatch {
+      ...
+  }
+  
+This is easier with an ordinary mod_perl handler as it is natural to
+have separate functions, rather than a long run-on script:</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  MyHandler.pm
+  ------------
+  sub handler {
+      my $r = shift;
+      
+      eval {
+         dispatch($r);
+      };
+      if ($@) {
+         # handle exception
+      }
+  }
+  
+  sub dispatch {
+      my $r = shift;
+      ...
+  }
+  
+Now that the skeleton code is setup, let's create an exception class,
+making use of Perl 5.005's ability to throw exception objects.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="An_Exception_Class">An Exception Class</A></H3></CENTER>
+<P>
+This is a really simple exception class, that does nothing but contain
+information. A better implementation would probably also handle its own
+exception conditions, but that would be more complex, requiring separate
+packages for each exception type.
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  My/Exception.pm
+  ---------------
+  package My::Exception;
+  
+  sub AUTOLOAD {
+      no strict 'refs', 'subs';
+      if ($AUTOLOAD =~ /.*::([A-Z]\w+)$/) {
+          my $exception = $1;
+          *{$AUTOLOAD} = 
+              sub {
+                  shift;
+                  my ($package, $filename, $line) = caller;
+                  push @_, caller =&gt; {
+                                  package =&gt; $package,
+                                  filename =&gt; $filename,
+                                  line =&gt; $line,
+                                    };
+                  bless { @_ }, &quot;My::Exception::$exception&quot;; 
+              };
+          goto &amp;{$AUTOLOAD};
+      }
+      else {
+          die &quot;No such exception class: $AUTOLOAD\n&quot;;
+      }
+  }
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+OK, so this is all highly magical, but what does it do? It creates a simple
+package that we can import and use as follows:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use My::Exception;
+  
+  die My::Exception-&gt;SomeException( foo =&gt; &quot;bar&quot; );</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+The exception class tracks exactly where we died from using the
+<CODE>caller()</CODE> mechanism, it also caches exception classes so that
+<CODE>AUTOLOAD</CODE> is only called the first time (in a given process) an exception of a
+particular type is thrown (particularly relevant under mod_perl).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Catching_Uncaught_Exceptions">Catching Uncaught Exceptions</A></H2></CENTER>
+<P>
+What about exceptions that are thrown outside of your control? We can fix
+this using one of two possible methods. The first is to override die
+globally using the old magical <CODE>$SIG{__DIE__}</CODE>, and the second, is the cleaner non-magical method of overriding the
+global <CODE>die()</CODE> method to your own <CODE>die()</CODE> method that
+throws an exception that makes sense to your application.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Using_SIG_DIE_">Using $SIG{__DIE__}</A></H3></CENTER>
+<P>
+Overloading using <CODE>$SIG{__DIE__}</CODE> in this case is rather simple, here's some code:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  $SIG{__DIE__} = sub {
+      if(!ref($_[0])) {
+          $err = My::Exception-&gt;UnCaught(text =&gt; join('', @_));
+      }
+      die $err;
+  };</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+All this does is catch your exception and re-throw it. It's not as
+dangerous as we stated earlier that <CODE>$SIG{__DIE__}</CODE> can be, because we're actually re-throwing the exception, rather than
+catching it and stopping there. Even though $SIG{__DIE__} is a global
+handler, because we are simply re-throwing the exception we can let other
+applications outside of our control simply catch the exception and not
+worry about it.
+
+<P>
+There's only one slight buggette left, and that's if some external code
+<CODE>die()'ing</CODE> catches the exception and tries to do string
+comparisons on the exception, as in:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  eval {
+      ... # some code
+      die &quot;FATAL ERROR!\n&quot;;
+  };
+  if ($@) {
+      if ($@ =~ /^FATAL ERROR/) {
+          die $@;
+      }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In order to deal with this, we can overload stringification for our
+<CODE>My::Exception::UnCaught</CODE> class:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  {
+      package My::Exception::UnCaught;
+      use overload '&quot;&quot;' =&gt; \&amp;str;
+  
+      sub str {
+          shift-&gt;{text};
+      }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+We can now let other code happily continue. Note that there is a bug in
+Perl 5.6 which may affect people here: Stringification does not occur when
+an object is operated on by a regular expression (via the =~ operator). A
+work around is to explicitly stringify using qq double quotes, however that
+doesn't help the poor soul who is using other applications. This bug has
+been fixed in later versions of Perl.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H3><A NAME="Overriding_the_Core_die_Functi">Overriding the Core die() Function</A></H3></CENTER>
+<P>
+So what if we don't want to touch <CODE>$SIG{__DIE__}</CODE> at all? We can overcome this by overriding the core die function. This is
+slightly more complex than implementing a <CODE>$SIG{__DIE__}</CODE> handler, but is far less magical, and is the right thing to do, according
+to the
+<A HREF="././help.html#Get_help_with_Perl">perl5-porters mailing list</A>.
+
+<P>
+Overriding core functions has to be done from an external package/module.
+So we're going to add that to our <CODE>My::Exception</CODE>
+module. Here's the relevant parts:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  use vars qw/@ISA @EXPORT/;
+  use Exporter;
+  
+  @EXPORT = qw/die/;
+  @ISA = 'Exporter';
+  
+  sub die (@); # prototype to match CORE::die
+  
+  sub import {
+      my $pkg = shift;
+      $pkg-&gt;export('CORE::GLOBAL', 'die');
+      Exporter::import($pkg,@_);
+  }
+  
+  sub die (@) {
+      if (!ref($_[0])) {
+          CORE::die My::Exception-&gt;UnCaught(text =&gt; join('', @_));
+      }
+      CORE::die $_[0]; # only use first element because its an object
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That wasn't so bad, was it? We're relying on Exporter's
+<CODE>export()</CODE> function to do the hard work for us, exporting the
+<CODE>die()</CODE> function into the <CODE>CORE::GLOBAL</CODE> namespace. If we don't want to overload <CODE>die()</CODE> everywhere this
+can still be an extremely useful technique. By just using Exporter's
+default <CODE>import()</CODE> method we can export our new
+<CODE>die()</CODE> method into any package of our choosing. This allows us
+to short-cut the long calling convention and simply <CODE>die()</CODE> with
+a string, and let the system handle the actual construction into an object
+for us.
+
+<P>
+Along with the above overloaded stringification, we now have a complete
+exception system (well, mostly complete. Exception die-hards would argue
+that there's no ``finally'' clause, and no exception stack, but that's
+another topic for another time).
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="A_Single_UnCaught_Exception_Clas">A Single UnCaught Exception Class</A></H2></CENTER>
+<P>
+Until the Perl core gets its own base exception class (which will likely
+happen for Perl 6, but not sooner), it is vitally important that you decide
+upon a single base exception class for all of the applications that you
+install on your server, and a single exception handling technique. The
+problem comes when you have multiple applications all doing exception
+handling and all expecting a certain type of ``UnCaught'' exception class.
+Witness the following application:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package Foo;
+  
+  eval {
+     # do something
+  }
+  if ($@) {
+     if ($@-&gt;isa('Foo::Exception::Bar')) {
+        # handle &quot;Bar&quot; exception
+     }
+     elsif ($@-&gt;isa('Foo::Exception::UnCaught')) {
+        # handle uncaught exceptions
+     }
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+All will work well until someone installs application ``TrapMe'' on the
+same machine, which installs its own UnCaught exception handler,
+overloading CORE::GLOBAL::die or installing a $SIG{__DIE__} handler. This
+is actually a case where using $SIG{__DIE__} might actually be preferable,
+because you can change your <CODE>handler()</CODE> routine to look like
+this:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  sub handler {
+      my $r = shift;
+      
+      local $SIG{__DIE__};
+      Foo::Exception-&gt;Init(); # sets $SIG{__DIE__}
+      
+      eval {
+         dispatch($r);
+      };
+      if ($@) {
+         # handle exception
+      }
+  }
+  
+  sub dispatch {
+      my $r = shift;
+      ...
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+In this case the very nature of $SIG{__DIE__} being a lexical variable has
+helped us, something we couldn't fix with overloading CORE::GLOBAL::die.
+However there is still a gotcha. If someone has overloaded
+<CODE>die()</CODE> in one of the applications installed on your mod_perl
+machine, you get the same problems still. So in short: Watch out, and check
+the source code of anything you install to make sure it follows your
+exception handling technique, or just uses <CODE>die()</CODE> with strings.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Some_Uses">Some Uses</A></H2></CENTER>
+<P>
+I'm going to come right out and say now: I abuse this system horribly! I
+throw exceptions all over my code, not because I've hit an ``exceptional''
+bit of code, but because I want to get straight back out of the current
+call stack, without having to have every single level of function call
+check error codes. One way I use this is to return Apache return codes:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # paranoid security check
+  die My::Exception-&gt;RetCode(code =&gt; 204);</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Returns a 204 error code (<CODE>HTTP_NO_CONTENT</CODE>), which is caught at my top level exception handler:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  if ($@-&gt;isa('My::Exception::RetCode')) {
+      return $@-&gt;{code};
+  }</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+That last return statement is in my <CODE>handler()</CODE> method, so
+that's the return code that Apache actually sends. I have other exception
+handlers in place for sending Basic Authentication headers and Redirect
+headers out. I also have a generic <CODE>My::Exception::OK</CODE>
+class, which gives me a way to back out completely from where I am, but
+register that as an OK thing to do.
+
+<P>
+Why do I go to these extents? After all, code like slashcode (the code
+behind <A HREF="http://slashdot.org">http://slashdot.org</A>) doesn't need
+this sort of thing, so why should my web site? Well it's just a matter of
+scalability and programmer style really. There's a lot of literature out
+there about exception handling, so I suggest doing some research.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Conclusions">Conclusions</A></H2></CENTER>
+<P>
+Here I've demonstrated a simple and scalable (and useful) exception
+handling mechanism, that fits perfectly with your current code, and
+provides the programmer with an excellent means to determine what has
+happened in his code. Some users might be worried about the overhead of
+such code. However in use I've found accessing the database to be a much
+more significant overhead, and this is used in some code delivering to
+thousands of users.
+
+<P>
+For similar exception handling techniques, see the section ``<A HREF="././perl.html#Other_Implementations">Other Implementations</A>''.
+
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="The_My_Exception_class_in_its_e">The My::Exception class in its entirety</A></H2></CENTER>
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  package My::Exception
+  
+  use vars qw/@ISA @EXPORT $AUTOLOAD/;
+  use Exporter;
+  @ISA = 'Exporter';
+  @EXPORT = qw/die/;
+  
+  sub die (@);
+  
+  sub import {
+      my $pkg = shift;
+      # allow &quot;use My::Exception 'die';&quot; to mean import locally only
+      $pkg-&gt;export('CORE::GLOBAL', 'die') unless @_;
+      Exporter::import($pkg,@_);
+  }
+    
+  sub die (@) {
+      if (!ref($_[0])) {
+          CORE::die My::Exception-&gt;UnCaught(text =&gt; join('', @_));
+      }
+      CORE::die $_[0];
+  }
+  
+  {
+      package My::Exception::UnCaught;
+      use overload '&quot;&quot;' =&gt; sub { shift-&gt;{text} } ; 
+  }
+  
+  sub AUTOLOAD {
+      no strict 'refs', 'subs';
+      if ($AUTOLOAD =~ /.*::([A-Z]\w+)$/) {
+          my $exception = $1;
+          *{$AUTOLOAD} = 
+              sub {
+                  shift;
+                  my ($package, $filename, $line) = caller;
+                  push @_, caller =&gt; {
+                                  package =&gt; $package,
+                                  filename =&gt; $filename,
+                                  line =&gt; $line,
+                                      };
+                  bless { @_ }, &quot;My::Exception::$exception&quot;; 
+              };
+          goto &amp;{$AUTOLOAD};
+      }
+      else {
+          die &quot;No such exception class: $AUTOLOAD\n&quot;;
+      }
+  }
+  
+  1;</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Other_Implementations">Other Implementations</A></H2></CENTER>
+<P>
+Some users might find it very useful to have the more C++/Java like
+interface of try/catch functions. These are available in several forms that
+all work in slightly different ways. See the documentation for each module
+for details:
+
+<UL>
+<P><LI><STRONG><A NAME="item_Error">Error.pm</A></STRONG>
+<P>
+Graham Barr's excellent OO styled ``try, throw, catch'' module (from
+<A HREF="././download.html#Perl">CPAN</A>). This should be considered your best option for structured exception
+handling because it is well known and well supported and used by a lot of
+other applications.
+
+<P><LI><STRONG><A NAME="item_Exception">Exception::Class and Devel::StackTrace</A></STRONG>
+<P>
+by Dave Rolsky both available from CPAN of course.
+
+<P>
+<CODE>Exception::Class</CODE> is a bit cleaner than the <CODE>AUTOLOAD</CODE> method from above as it can catch typos in exception class names, whereas
+the method above will automatically create a new class for you. In
+addition, it lets you create actual class hierarchies for your exceptions,
+which can be useful if you want to create exception classes that provide
+extra methods or data. For example, an exception class for database errors
+could provide a method for returning the SQL and bound parameters in use at
+the time of the error.
+
+<P><LI><STRONG><A NAME="item_Try">Try.pm</A></STRONG>
+<P>
+Tony Olekshy's. Adds an unwind stack and some other interesting features.
+Not on the CPAN. Available at <A
+HREF="http://www.avrasoft.com/perl/rfc/try-1136.zip">http://www.avrasoft.com/perl/rfc/try-1136.zip</A>
+
+
+</UL>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./start.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./install.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 04/10/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

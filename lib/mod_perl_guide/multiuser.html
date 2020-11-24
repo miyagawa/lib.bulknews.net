@@ -1,0 +1,542 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+   <title>mod_perl guide: mod_perl for ISPs. mod_perl and Virtual Hosts </title>
+   <meta name="Author" content="Stas Bekman">
+   <meta name="Description" content="All Apache/Perl related information: Hints, Guidelines, Scenarios and Troubleshottings">
+   <meta name="keywords" content="mod_perl modperl perl cgi apache webserver speed fast guide mod_perl apache guide help info faq mod_perl installation cgi troubleshooting help no sex speedup free open source OSS mod_perl apache guide">
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Classification" content="information">
+   <link href="./style.css" rel=stylesheet type="text/css" title="refstyle">
+  </head>
+  <body>
+
+    <h1 align=center>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=left></a>
+      <a href="http://perl.apache.org"><img src="images/mod_perl.gif" alt="Mod Perl Icon" border=0 height=30 width=90 align=right></a>
+      mod_perl for ISPs. mod_perl and Virtual Hosts 
+    </h1>
+    <hr>
+    <p>
+    <div class="navbar">
+      <a href="./dbm.html">Prev</a>                                 |
+      <a href="./index.html"         >Contents</a> |
+      <a href="./index.html#search"  >Search</a>   |
+      <a href="./index.html#download">Download</a> |
+      <a href="./debug.html">Next</a>
+    </div>
+    <p>
+
+    <div class="toc">
+      
+<A NAME="toc"></A>
+<P><B>Table of Contents:</B></P>
+
+<UL>
+
+	<LI><A HREF="#ISPs_providing_mod_perl_services">ISPs providing mod_perl services - a fantasy or a reality</A>
+	<UL>
+
+		<LI><A HREF="#Virtual_Servers_Technologies">Virtual Servers Technologies</A>
+	</UL>
+
+	<LI><A HREF="#Virtual_Hosts_in_the_guide">Virtual Hosts in the guide</A>
+</UL>
+
+    </div>
+
+    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+    
+
+	    [ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+<P>
+<CENTER><H1><A NAME="ISPs_providing_mod_perl_services">ISPs providing mod_perl services - a fantasy or a reality</A></H1></CENTER>
+<UL>
+<P><LI>
+<P>
+You installed mod_perl on your box at home, and you fell in love with it.
+So now you want to convert your CGI scripts (which currently are running on
+your favorite ISPs machine) to run under mod_perl. Then you discover that
+your ISP has never heard of mod_perl, or he refuses to install it for you.
+
+<P><LI>
+<P>
+You are an old sailor in the ISP business, you have seen it all, you know
+how many ISPs are out there and you know that the sales margins are too low
+to keep you happy. You are looking for some new service almost no one else
+provides, to attract more clients to become your users and hopefully to
+have a bigger slice of the action than your competitors.
+
+</UL>
+<P>
+If you are a user asking for a mod_perl service or an ISP considering to
+provide this service, this section should make things clear for both of
+you.
+
+<P>
+An ISP has three choices:
+
+<OL>
+<P><LI>
+<P>
+ISPs probably cannot let users run scripts under mod_perl on the main
+server. There are many reasons for this:
+
+<P>
+Scripts might leak memory, due to sloppy programming. There will not be
+enough memory to run as many servers as required, and clients will be not
+satisfied with the service because it will be slower.
+
+<P>
+The question of file permissions is a very important issue: any user who is
+allowed to write and run a CGI script can at least read (if not write) any
+other files that belong to the same user and/or group the web server is
+running as. Note that <A HREF="././install.html#Is_it_possible_to_run_mod_perl_e">it's impossible to run <CODE>suEXEC</CODE> and <CODE>cgiwrap</CODE> extensions under mod_perl</A>.
+
+<P>
+Another issue is the security of the database connections. If you use
+<CODE>Apache::DBI</CODE>, by hacking the <CODE>Apache::DBI</CODE> code you can pick a connection from the pool of cached connections even if
+it was opened by someone else and your scripts are running on the same web
+server.
+
+<P>
+There are many more things to be aware of so at this time you have to say <EM>No</EM>.
+
+<P>
+Of course as an ISP you can run mod_perl internally, without allowing your
+users to map their scripts so that they will run under mod_perl. If as a
+part of your service you provide scripts such as guest books, counters etc.
+which are not available for user modification, you can still can have these
+scripts running very fast.
+
+<P><LI>
+<P>
+But, hey why can't I let my users run their own servers, so I can wash my
+hands of them and don't have to worry about how dirty and sloppy their code
+is (assuming that the users are running their servers under their own
+usernames, to prevent them from stealing code and data from each other).
+
+<P>
+This option is fine as long as you are not concerned about your new systems
+resource requirements. If you have even very limited experience with
+mod_perl, you know that mod_perl enabled Apache servers while freeing up
+your CPU and allowing you to run scripts very much faster, have huge memory
+demands (5-20 times that of plain Apache).
+
+<P>
+The size depends on the code length, the sloppiness of the programming,
+possible memory leaks the code might have and all that multiplied by the
+number of children each server spawns. A very simple example: a server,
+serving an average number of scripts, demanding 10Mb of memory which spawns
+10 children, already raises your memory requirements by 100Mb (the real
+requirement is actually much smaller if your OS allows code sharing between
+processes and programmers exploit these features in their code). Now
+multiply the average required size by the number of server users you intend
+to have and you will get the total memory requirement.
+
+<P>
+Since ISPs never say <EM>No</EM>, you'd better take the inverse approach - think of the largest memory size
+you can afford then divide it by one user's requirements as I have shown in
+this example, and you will know how many mod_perl users you can afford :)
+
+<P>
+But you cannot tell how much memory your users may use? Their requirements
+from a single server can be very modest, but do you know how many servers
+they will run? After all, they have full control of
+<EM>httpd.conf</EM> - and it has to be this way, since this is essential for the user running
+mod_perl.
+
+<P>
+All this rumbling about memory leads to a single question: is it possible
+to prevent users from using more than X memory? Or another variation of the
+question: assuming you have as much memory as you want, can you charge
+users for their average memory usage?
+
+<P>
+If the answer to either of the above questions is <EM>Yes</EM>, you are all set and your clients will prize your name for letting them
+run mod_perl! There are tools to restrict resource usage (see for example
+the man pages for <CODE>ulimit(3)</CODE>, <CODE>getrlimit(2)</CODE>, <CODE>setrlimit(2)</CODE> and
+<CODE>sysconf(3)</CODE>, the last three have the corresponding Perl modules:
+<CODE>BSD::Resource</CODE> and <CODE>Apache::Resource</CODE>).
+
+<P>
+[ReaderMETA]: If you have experience with other resource limiting
+techniques please share it with us. Thank you!
+
+<P>
+If you have chosen this option, you have to provide your client with:
+
+<UL>
+<P><LI>
+<P>
+Shutdown and startup scripts installed together with the rest of your
+daemon startup scripts (e.g <EM>/etc/rc.d</EM> directory), so that when you reboot your machine the user's server will be
+correctly shutdown and will be back online the moment your system starts
+up. Also make sure to start each server under the username the server
+belongs to, or you are going to be in big trouble!
+
+<P><LI>
+<P>
+Proxy services (in forward or httpd accelerator mode) for the user's
+virtual host. Since the user will have to run their server on an
+unprivileged port (&gt;1024), you will have to forward all requests from
+<CODE>user.given.virtual.hostname:80</CODE> (which is
+<CODE>user.given.virtual.hostname</CODE> without the default port 80) to
+<CODE>your.machine.ip:port_assigned_to_user</CODE> . You will also have to tell the users to code their scripts so that any
+self referencing URLs are of the form <CODE>user.given.virtual.hostname</CODE>.
+
+<P>
+Letting the user run a mod_perl server immediately adds a requirement for
+the user to be able to restart and configure their own server. Only root
+can bind to port 80, this is why your users have to use port numbers
+greater than 1024.
+
+<P>
+Another solution would be to use a setuid startup script, but think twice
+before you go with it, since if users can modify the scripts they will get
+a root access. For more information refer to the section ``<A HREF="././control.html#SUID_Start_up_Scripts">SUID Start-up Scripts</A>''.
+
+<P><LI>
+<P>
+Another problem you will have to solve is how to assign ports between
+users. Since users can pick any port above 1024 to run their server, you
+will have to lay down some rules here so that multiple servers do not
+conflict.
+
+<P>
+A simple example will demonstrate the importance of this problem: I am a
+malicious user or I am just a rival of some fellow who runs his server on
+your ISP. All I need to do is to find out what port my rival's server is
+listening to (e.g. using <CODE>netstat(8)</CODE>) and configure my own server to listen on the same port. Although I am
+unable to bind to this port, imagine what will happen when you reboot your
+system and my startup script happens to be run before my rivals! I get the
+port first, now all requests will be redirected to my server. I'll leave to
+your imagination what nasty things might happen then.
+
+<P>
+Of course the ugly things will quickly be revealed, but not before the
+damage has been done.
+
+</UL>
+<P>
+Basically you can preassign each user a port, without them having to worry
+about finding a free one, as well as enforce <CODE>MaxClients</CODE> and similar values by implementing the following scenario:
+
+<P>
+For each user have two configuration files, the main file,
+<EM>httpd.conf</EM> (non-writable by user) and the user's file,
+<EM>username.httpd.conf</EM> where they can specify their own configuration parameters and override the
+ones defined in <EM>httpd.conf</EM>. Here is what the main configuration file looks like:
+
+<P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  httpd.conf
+  ----------
+  # Global/default settings, the user may override some of these
+  ...
+  ...
+  # Included so that user can set his own configuration
+  Include username.httpd.conf</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  # User-specific settings which will override any potentially 
+  # dangerous configuration directives in username.httpd.conf
+  ...
+  ...</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+
+    <table>
+      <tr>
+
+	<td bgcolor="#eeeeee" width="1">
+	  &nbsp;
+        </td>
+
+	<td>
+	  <pre>  username.httpd.conf
+  -------------------
+  # Settings that your user would like to add/override,
+  # like &lt;Location&gt; and PerlModule directives, etc.</pre>
+        </td>
+	    
+      </tr>
+    </table>
+    <P>
+Apache reads the global/default settings first. Then it reads the
+<EM>Include</EM>'d <EM>username.httpd.conf</EM> file with whatever settings the user has chosen, and finally it reads the
+user-specific settings that we don't want the user to override, such as the
+port number. Even if the user changes the port number in his <EM>username.httpd.conf</EM> file, Apache reads our settings last, so they take precedence. Note that
+you can use <A HREF="././config.html#Apache_Configuration_in_Perl">Perl sections</A> to make the configuration much easier.
+
+<P><LI>
+<P>
+A much better, but costly solution is <EM>co-location</EM>. Let the user hook his (or your) stand-alone machine into your network,
+and forget about this user. Of course either the user or you will have to
+undertake all the system administration chores and it will cost your client
+more money.
+
+<P>
+Who are the people who seek mod_perl support? They are people who run
+serious projects/businesses. Money is not usually an obstacle. They can
+afford a stand alone box, thus achieving their goal of autonomy whilst
+keeping their ISP happy.
+
+</OL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H2><A NAME="Virtual_Servers_Technologies">Virtual Servers Technologies</A></H2></CENTER>
+<P>
+As we have just seen one of the obstacles of using mod_perl in ISP
+environments, is the problem of isolating customers using the same machine
+from each other. A number of virtual servers (don't confuse with virtual
+hosts) technologies (both commercial and Open Source) exist today. Here are
+some of them:
+
+<UL>
+<P><LI><STRONG><A NAME="item_The">The User-mode Linux Kernel</A></STRONG>
+<P>
+<A
+HREF="http://user-mode-linux.sourceforge.net/">http://user-mode-linux.sourceforge.net/</A>
+
+
+<P>
+User-Mode Linux is a safe, secure way of running Linux versions and Linux
+processes. Run buggy software, experiment with new Linux kernels or
+distributions, and poke around in the internals of Linux, all without
+risking your main Linux setup.
+
+<P>
+User-Mode Linux gives you a virtual machine that may have more hardware and
+software virtual resources than your actual, physical computer. Disk
+storage for the virtual machine is entirely contained inside a single file
+on your physical machine. You can assign your virtual machine only the
+hardware access you want it to have. With properly limited access, nothing
+you do on the virtual machine can change or damage your real computer, or
+its software.
+
+<P>
+So if you want to completely protect one user from another and yourself
+from your users this might be yet another alternative to the solutions
+suggested at the beginning of this chapter.
+
+<P><LI><STRONG><A NAME="item_VMWare">VMWare Technology</A></STRONG>
+<P>
+Allows running a few instances of the same or different OSs on the same
+machine. This technology comes in two flavors:
+
+<P>
+open source: <A
+HREF="http://www.freemware.org/">http://www.freemware.org/</A> also known
+as plex86
+
+<P>
+commercial: <A HREF="http://www.vmware.com/">http://www.vmware.com/</A>
+
+<P>
+So you may want to run a separate OS for each of your clients
+
+<P><LI><STRONG><A NAME="item_freeVSD">freeVSD Technology</A></STRONG>
+<P>
+freeVSD (http://www.freevsd.org), an open source project sponsored by Idaya
+Ltd. The software enables ISPs to securely partition their physical servers
+into many <EM>virtual servers</EM>, each capable of running popular hosting applications such as Apache,
+Sendmail and MySQL.
+
+<P><LI><STRONG><A NAME="item_S">S/390 IBM server</A></STRONG>
+<P>
+Quoting from: <A
+HREF="http://www.s390.ibm.com/linux/vif/">http://www.s390.ibm.com/linux/vif/</A>
+
+
+<P>
+``The S/390 Virtual Image Facility enables you to run tens to hundreds of
+Linux server images on a single S/390 server. It is ideally suited for
+those who want to move Linux and/or UNIX workloads deployed on multiple
+servers onto a single S/390 server, while maintaining the same number of
+distinct server images. This provides centralized management and operation
+of the multiple image environment, reducing complexity, easing
+administration and lowering costs.''
+
+<P>
+In two words, this a great solution to huge ISPs, as it allows you to run
+hundreds of mod_perl servers while having only one box to maintain. The
+drawback is the price :)
+
+<P>
+Check out this scalable mailing list thread for more details from those who
+know: <A
+HREF="http://archive.develooper.com/scalable@arctic.org/msg00235.html">http://archive.develooper.com/scalable@arctic.org/msg00235.html</A>
+
+
+</UL>
+<P>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<CENTER><H1><A NAME="Virtual_Hosts_in_the_guide">Virtual Hosts in the guide</A></H1></CENTER>
+<P>
+If you are about to use <EM>Virtual Hosts</EM> you might want to read these sections:
+
+<P>
+<A HREF="././config.html#Apache_Configuration_in_Perl">Apache Configuration in Perl</A>
+
+
+
+<P>
+<A HREF="././config.html#Configuring_Apache_mod_perl_wi">Easing the Chores of Configuring Virtual Hosts with mod_macro</A>
+
+
+
+<P>
+<A HREF="././config.html#Is_There_a_Way_to_Provide_a_Diff">Is There a Way to Provide a Different startup.pl File for Each Individual Virtual Host</A>
+
+
+
+<P>
+<A HREF="././config.html#Is_There_a_Way_to_Modify_INC_on">Is There a Way to Modify @INC on a Per-Virtual-Host or Per-Location Basis.</A> 
+
+ 
+
+<P>
+<A HREF="././config.html#A_Script_From_One_Virtual_Host_C">A Script From One Virtual Host Calls a Script with the Same Path From the Other Virtual Host</A>
+
+
+
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+
+
+    <p>
+    <div class="navbar">
+      <a href="./dbm.html">Prev</a>                                 |
+      <A HREF="./index.html"         >Contents</A> |
+      <A HREF="./index.html#search"  >Search</A>   |
+      <A HREF="./index.html#download">Download</A> |
+      <a href="./debug.html">Next</a>
+    </div>
+    <p>
+
+    <table width="60%" align="center">
+
+      <tr>
+	<td>
+	  <div class="notice">
+	  <B>Your corrections of the technical and grammatical
+	     errors are very welcome. You are encouraged to help me
+	     improve this guide.  If you have something to contribute
+	     please <A HREF="help.html#Contacting_me"> send it
+	     directly to me</A>.</B>
+	  </div>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
+	  <div class="ad">
+	    The <a href="http://www.modperl.com/">
+	      <B>Writing Apache Modules with Perl and C</B></a>
+	    book can be purchased online from <a
+	      href="http://www.ora.com/catalog/wrapmod/">O'Reilly </a>
+	    and <a
+	    href="http://www.amazon.com/exec/obidos/ASIN/156592567X/writinapachemodu">
+	      Amazon.com</a>.
+	  </div>
+	</td>
+      </tr>
+
+</table>
+
+<center>
+[ <B><FONT SIZE=-1><A HREF="#toc">TOC</A></FONT></B> ]
+<HR>
+<table cellspacing=2 cellpadding=2>
+
+<tr align=center valign=top>
+<td align=center valign=center>
+
+<b><font size=-1>Written by <a
+href="help.html#Contacting_me">Stas Bekman</a>.<br> Last Modified at 03/11/2001
+</font></b>
+<br>
+
+</td>
+
+<td>
+
+<a href="http://perl.apache.org"><img src="images/mod_perl2.jpg"  border=0 alt="mod_perl icon" border=0 height=59 width=150></a>
+<br>
+
+</td>
+
+<td>
+
+<font size=-2>Use of the Camel for Perl is <br>
+a trademark of <a href="http://www.ora.com">O'Reilly &amp; Associates</a>,<br>
+and is used by permission. </font> 
+<br>
+
+</td>
+
+</tr>
+</table>
+</center>
+
+</body>
+</html>

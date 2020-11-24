@@ -1,0 +1,116 @@
+diff -N -rub HTML-FillInForm-0.16.orig/MANIFEST HTML-FillInForm-0.16/MANIFEST
+--- HTML-FillInForm-0.16.orig/MANIFEST	Fri Jun 29 18:09:42 2001
++++ HTML-FillInForm-0.16/MANIFEST	Fri Jun 29 18:12:32 2001
+@@ -14,3 +14,4 @@
+ t/08_multiple_objects.t
+ t/09_default_type.t
+ t/10_escape.t
++t/11_target.t
+diff -N -rub HTML-FillInForm-0.16.orig/lib/HTML/FillInForm.pm HTML-FillInForm-0.16/lib/HTML/FillInForm.pm
+--- HTML-FillInForm-0.16.orig/lib/HTML/FillInForm.pm	Fri Jun 29 18:09:42 2001
++++ HTML-FillInForm-0.16/lib/HTML/FillInForm.pm	Fri Jun 29 18:08:44 2001
+@@ -49,7 +49,9 @@
+       }
+     }
+   }
+-
++  if (my $target = $option{target}){
++    $self->{'target'} = $target;
++  }
+ #  # get data set from param() method
+ #  foreach my $key ($self->param){
+ #    $self->{fdat}->{$key} = $self->param($key);
+@@ -75,6 +77,25 @@
+ # handles opening HTML tags such as <input ...>
+ sub start {
+   my ($self, $tagname, $attr, $attrseq, $origtext) = @_;
++
++  # set the current form
++  if ($tagname eq 'form') {
++    if (exists $attr->{'name'}) {
++      $self->{'current_form'} = $attr->{'name'};
++    } else {
++      # in case of previous one without </FORM>
++      delete $self->{'current_form'};
++    }
++  }
++
++  # This form is not my target.
++  if (exists $self->{'target'} &&
++      (! exists $self->{'current_form'} ||
++       $self->{'current_form'} ne $self->{'target'})) {
++    $self->{'output'} .= $origtext;
++    return;
++  }
++  
+   # HTML::Parser converts tagname to lowercase, so we don't need /i
+   if ($self->{option_no_value}) {
+     $self->{output} .= '>';
+@@ -214,6 +235,8 @@
+     delete $self->{selectName};
+   } elsif ($tagname eq 'textarea'){
+     delete $self->{outputText};
++  } elsif ($tagname eq 'form') {
++    delete $self->{'current_form'};
+   }
+   $self->{output} .= $origtext;
+ }
+@@ -331,6 +354,18 @@
+ 
+   $output = $fif->fill(file => 'form.tmpl',
+              fobject => $q);
++
++Suppose you have multiple forms in a html and among them there is only
++one form you want to fill in, specify target.
++
++  $output = $fif->fill(scalarref => \$html,
++                       fobject => $q,
++                       target => 'form1');
++
++This will fill in only a form inside
++
++  <FORM name="form1"> ... </FORM>
++
+ 
+ =back
+ 
+diff -N -rub HTML-FillInForm-0.16.orig/t/11_target.t HTML-FillInForm-0.16/t/11_target.t
+--- HTML-FillInForm-0.16.orig/t/11_target.t	Thu Jan  1 09:00:00 1970
++++ HTML-FillInForm-0.16/t/11_target.t	Fri Jun 29 18:12:21 2001
+@@ -0,0 +1,36 @@
++use strict;
++use Test;
++BEGIN { plan tests => 3 }
++
++use HTML::FillInForm;
++
++my $form = <<EOF;
++<FORM name="foo1">
++<INPUT TYPE="TEXT" NAME="foo1" value="nada">
++</FORM>
++<FORM name="foo2">
++<INPUT TYPE="TEXT" NAME="foo2" value="nada">
++</FORM>
++<FORM>
++<INPUT TYPE="TEXT" NAME="foo3" value="nada">
++</FORM>
++EOF
++  ;
++  
++my %fdat = (
++  foo1 => 'bar1',
++  foo2 => 'bar2',
++  foo3 => 'bar3',
++);
++
++my $fif = new HTML::FillInForm;
++my $output = $fif->fill(
++  scalarref => \$form,
++  fdat => \%fdat,
++  target => 'foo2',
++);
++
++my @v = $output =~ m/<input .*?value="(.*?)"/ig;
++ok($v[0], 'nada');
++ok($v[1], 'bar2');
++ok($v[2], 'nada');

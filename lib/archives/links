@@ -1,0 +1,62 @@
+package links;
+use strict;
+
+my $CacheFile = "$blosxom::plugin_state_dir/links.cache";
+my $TitleMax  = 36;
+
+sub start {
+    return 1;
+}
+
+sub story {
+  my($pkg, $path, $filename, $story_ref, $title_ref, $body_ref) = @_;
+
+  $$body_ref =~ s!<links>(.*?)</links>!filter_html($1)!sge or return 0;
+  return 1;
+}
+
+sub filter_html {
+    require Unicode::String;
+    require URI;
+    require YAML;
+
+    my $html = shift;
+    my @lines = grep { defined && length } split /\r?\n/, $html;
+    my $new_html = "<ul>\n";
+
+    my $cache = eval { YAML::LoadFile($CacheFile) } || {};
+    my $changed = 0;
+    for my $line (@lines) {
+	my $url = URI->new($line);
+	my $title = get_title($cache, $url, \$changed);
+	my $u = Unicode::String::utf8($title);
+	if ($u->length > $TitleMax) {
+	    $title = $u->substr(0, $TitleMax) . " ...";
+	}
+	my $host = $url->host;
+	$host =~ s/^www\.//;
+	$title .= " [$host]" if $title ne $host;
+	$new_html .= qq(<li><a href="$url">$title</a></li>\n);
+    }
+    YAML::DumpFile($CacheFile, $cache) if $changed;
+
+    $new_html .= "</ul>\n";
+    $new_html;
+}
+
+sub get_title {
+    my($cache, $url, $changed_ref) = @_;
+    unless ($cache->{$url}) {
+	warn "getting ", $url->as_string;
+	require Jcode;
+	require LWP::Simple;
+	my $html = LWP::Simple::get($url);
+	$html =~ m!<title>\s*(.*?)\s*</title>!si;
+	my $title = $1 ? Jcode->new($1)->utf8 : $url->host;
+	$cache->{$url} = $title;
+	$$changed_ref++;
+    }
+    return $cache->{$url};
+}
+
+1;

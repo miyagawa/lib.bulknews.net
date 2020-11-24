@@ -1,0 +1,44 @@
+diff -ruP XML-Feed-0.05/lib/XML/Feed/RSS.pm XML-Feed-0.05.new/lib/XML/Feed/RSS.pm
+--- XML-Feed-0.05/lib/XML/Feed/RSS.pm	2005-01-01 08:34:23.000000000 +0900
++++ XML-Feed-0.05.new/lib/XML/Feed/RSS.pm	2005-06-17 17:42:35.000000000 +0900
+@@ -4,14 +4,16 @@
+ use strict;
+ 
+ use base qw( XML::Feed );
+-use XML::RSS;
+ use DateTime::Format::Mail;
+ use DateTime::Format::W3CDTF;
+ 
++our $PREFERRED_PARSER = "XML::RSS";
++
+ sub init_string {
+     my $feed = shift;
+     my($str) = @_;
+-    my $rss = $feed->{rss} = XML::RSS->new;
++    eval "use $PREFERRED_PARSER"; die $@ if $@;
++    my $rss = $feed->{rss} = $PREFERRED_PARSER->new;
+     if ($str) {
+         $rss->parse($$str);
+     }
+diff -ruP XML-Feed-0.05/lib/XML/Feed.pm XML-Feed-0.05.new/lib/XML/Feed.pm
+--- XML-Feed-0.05/lib/XML/Feed.pm	2005-01-02 02:35:44.000000000 +0900
++++ XML-Feed-0.05.new/lib/XML/Feed.pm	2005-06-17 17:44:16.000000000 +0900
+@@ -215,6 +215,18 @@
+ A list of the entries/items in the feed. Returns an array containing
+ I<XML::Feed::Entry> objects.
+ 
++=head1 PACKAGE VARIABLES
++
++=over 4
++
++=item C<$XML::Feed::RSS::PREFERRED_PARSER>
++
++If you want to use another RSS parser class than XML::RSS (default), you can change the class by setting C<$PREFERRED_PARSER> variable in XML::Feed::RSS package.
++
++  $XML::Feed::RSS::PREFERRED_PARSER = "XML::RSS::LibXML";
++
++=back
++
+ =head1 LICENSE
+ 
+ I<XML::Feed> is free software; you may redistribute it and/or modify it

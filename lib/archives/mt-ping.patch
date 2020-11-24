@@ -1,0 +1,22 @@
+--- lib/MT/ConfigMgr.pm~	Thu Nov 28 16:18:38 2002
++++ lib/MT/ConfigMgr.pm	Mon Dec 29 17:07:22 2003
+@@ -44,7 +44,7 @@
+     $mgr->define('MailTransfer', Default => 'sendmail');
+     $mgr->define('SMTPServer', Default => 'localhost');
+     $mgr->define('WeblogsPingURL', Default => 'http://rpc.weblogs.com/RPC2');
+-    $mgr->define('BlogsPingURL', Default => 'http://ping.blo.gs/');
++    $mgr->define('BlogsPingURL', Default => 'http://ping.bloggers.jp/rpc/');
+     $mgr->define('MTPingURL', Default => 'http://www.movabletype.org/update/');
+     $mgr->define('CGIMaxUpload', Default => 1_000_000);
+     $mgr->define('DBUmask', Default => '0111');
+--- tmpl/cms/cfg_prefs.tmpl~	Thu Nov 28 16:18:41 2002
++++ tmpl/cms/cfg_prefs.tmpl	Mon Dec 29 17:08:20 2003
+@@ -367,7 +367,7 @@
+ 	<td valign="top" width="198"><font class="instructional"><MT_TRANS phrase="When you update your blog, Movable Type will automatically notify the selected sites."></font></td>
+ 	<td valign="top" width="10"><img src="<TMPL_VAR NAME=STATIC_URI>images/spacer.gif" width="10" height="1"></td>
+ 	<td valign="top"><font class="title"><MT_TRANS phrase="Notify the following sites when I update my blog:"> <a href="#" onclick="openManual('item_Notify_the_following_sites_when_I_update_my_blog')">(?)</a></font><br />
+-	<input type="checkbox" name="ping_blogs" value="1"<TMPL_IF NAME=PING_BLOGS> checked</TMPL_IF>> <font class="title">blo.gs</font><br />
++	<input type="checkbox" name="ping_blogs" value="1"<TMPL_IF NAME=PING_BLOGS> checked</TMPL_IF>> <font class="title">ping.bloggers.jp</font><br />
+ 	<input type="checkbox" name="ping_weblogs" value="1"<TMPL_IF NAME=PING_WEBLOGS> checked</TMPL_IF>> <font class="title">weblogs.com</font><br /><br />
+ 	<font class="title"><MT_TRANS phrase="Others: (separate URLs with a carriage return)"></font><br />
+ 	<textarea<TMPL_IF NAME=AGENT_MOZILLA> cols=""</TMPL_IF> class="config" name="ping_others" rows="4"><TMPL_VAR NAME=PING_OTHERS></textarea></td>

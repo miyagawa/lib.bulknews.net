@@ -1,0 +1,7 @@
+http://www.manning.com/Conway/
+http://perl.oreilly.com/
+http://www.effectiveperl.com/
+http://www.modperl.com/
+http://www-4.ibm.com/software/developer/library/l-perl5.html?dwzone=linux
+http://slashdot.org/books/00/10/24/209236.shtml
+http://www.modperl.com/perl_networking/

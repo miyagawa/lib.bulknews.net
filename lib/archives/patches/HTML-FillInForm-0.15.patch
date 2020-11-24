@@ -1,0 +1,14 @@
+--- FillInForm.pm.orig	Thu Jun 28 12:09:24 2001
++++ FillInForm.pm	Thu Jun 28 12:42:45 2001
+@@ -92 +92 @@
+-	$attr->{'value'} = $self->escapeHTML($value);
++	$attr->{'value'} = $value;
+@@ -127 +127 @@
+-	$self->{output} .= " $key" . qq(="$value");
++	$self->{output} .= sprintf qq( %s="%s"), $key, $self->escapeHTML($value);
+@@ -158 +158 @@
+-	$self->{output} .= " $key" . qq(="$value");
++	$self->{output} .= sprintf qq( %s="%s"), $key, $self->escapeHTML($value);
+@@ -193 +193 @@
+-	if ( $value eq $v ) {
++	if ( $value eq $self->escapeHTML($v) ) {

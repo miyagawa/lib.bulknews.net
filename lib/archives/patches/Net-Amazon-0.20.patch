@@ -1,0 +1,14 @@
+--- lib/Net/Amazon.pm   2004-03-10 14:53:49.000000000 +0900
++++ lib/Net/Amazon.pm.new       2004-03-20 20:19:43.000000000 +0900
+@@ -110,6 +110,11 @@
+         $url =~ s/xml/xml-eu/;
+         return $url;
+     }
++
++    if ($self->{locale} eq "jp") {
++       $url =~ s/\.com/.co.jp/;
++       return $url;
++    }
+
+     return $url;
+ }

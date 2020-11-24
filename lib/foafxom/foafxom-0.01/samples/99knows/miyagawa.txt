@@ -1,0 +1,9 @@
+Tatsuhiko Miyagawa
+meta-foaf: http://blog.bulknews.net/foaf.rdf
+meta-mbox: mailto:miyagawa@bulknews.net
+meta-weblog: http://blog.bulknews.net/
+meta-nick: miyagawa
+
+Note that mbox will be encoded using mbox2sha1 plugin.
+
+
