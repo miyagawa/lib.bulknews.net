@@ -3,20 +3,20 @@ Object-Oriented Programming with Perl Vol.27
           by Tatsuhiko Miyagawa <miyagawa@cpan.org>
 =======================================================
 
-1. Patterns in Perl ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+1. Patterns in Perl ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-Perl QA ¥Á¡¼¥à¤Î Michael Schwern ¤µ¤ó¤Î¥Ç¥¶¥¤¥ó¥Ñ¥¿¡¼¥ó¤Ë´Ø¤¹¤ë¥¹¥é¥¤
-¥É¤¬¸ø³«¤µ¤ì¤Æ¤¤¤Þ¤¹¡£
+Perl QA ãƒãƒ¼ãƒ ã® Michael Schwern ã•ã‚“ã®ãƒ‡ã‚¶ã‚¤ãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ã«é–¢ã™ã‚‹ã‚¹ãƒ©ã‚¤
+ãƒ‰ãŒå…¬é–‹ã•ã‚Œã¦ã„ã¾ã™ã€‚
 
   "Design Patterns in Perl OR Sufficiently Encapsulated Hacks"
   http://magnonel.guild.net/~schwern/talks/Design_Patterns/
 
-¤³¤ÎÆâÍÆ¤Ï¥Ç¥ó¥Þ¡¼¥¯¤Ç³«ºÅ¤µ¤ì¤¿ JAOO ¥«¥ó¥Õ¥¡¥ì¥ó¥¹¤Ç¤ÎÆâÍÆ¤Î¤è¤¦¤Ç¤¹¡£
-¥µ¥Ö¥¿¥¤¥È¥ë¤¬¼¨¤¹¤è¤¦¤Ë¡¢¤­¤ì¤¤¤Ë±£ÊÃ¤µ¤ì¤¿ Hack ¤Ç¤â¤Ã¤Æ¡¢Perl ¤Ç¥Ç
-¥¶¥¤¥ó¥Ñ¥¿¡¼¥ó¤ò¼ÂÁõ¤·¤¿¤ê¡¢¤¢¤ë¤¤¤Ï¥Ñ¥¿¡¼¥ó¤½¤Î¤â¤Î¤¬ÉÔÍ×¤Ë¤Ê¤Ã¤¿¤ê¡¢
-¤È¤¤¤¦¥±¡¼¥¹¤¬¾Ò²ð¤µ¤ì¤Æ¤¤¤Þ¤¹¡£Èó¾ï¤ËÌÌÇò¤¤¤Î¤Ç¡¢¤¼¤Ò¤´Í÷¤¯¤À¤µ¤¤¡£
+ã“ã®å†…å®¹ã¯ãƒ‡ãƒ³ãƒžãƒ¼ã‚¯ã§é–‹å‚¬ã•ã‚ŒãŸ JAOO ã‚«ãƒ³ãƒ•ã‚¡ãƒ¬ãƒ³ã‚¹ã§ã®å†…å®¹ã®ã‚ˆã†ã§ã™ã€‚
+ã‚µãƒ–ã‚¿ã‚¤ãƒˆãƒ«ãŒç¤ºã™ã‚ˆã†ã«ã€ãã‚Œã„ã«éš è”½ã•ã‚ŒãŸ Hack ã§ã‚‚ã£ã¦ã€Perl ã§ãƒ‡
+ã‚¶ã‚¤ãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’å®Ÿè£…ã—ãŸã‚Šã€ã‚ã‚‹ã„ã¯ãƒ‘ã‚¿ãƒ¼ãƒ³ãã®ã‚‚ã®ãŒä¸è¦ã«ãªã£ãŸã‚Šã€
+ã¨ã„ã†ã‚±ãƒ¼ã‚¹ãŒç´¹ä»‹ã•ã‚Œã¦ã„ã¾ã™ã€‚éžå¸¸ã«é¢ç™½ã„ã®ã§ã€ãœã²ã”è¦§ãã ã•ã„ã€‚
 
-¤Ç¡¢slide051.html ¤Ë´Ö°ã¤¤¤¬¤¢¤ê¤Þ¤¹¡£
+ã§ã€slide051.html ã«é–“é•ã„ãŒã‚ã‚Šã¾ã™ã€‚
 
         my $handling_method = \&{$handler.'::'.$orig_meth};
 
@@ -25,35 +25,35 @@ Perl QA ¥Á¡¼¥à¤Î Michael Schwern ¤µ¤ó¤Î¥Ç¥¶¥¤¥ó¥Ñ¥¿¡¼¥ó¤Ë´Ø¤¹¤ë¥¹¥é¥¤
 +            *{'Computer::'.$orig_meth} = $handling_meth;
         }  
 
-¤Ç¤¹¤Í¡£
+ã§ã™ã­ã€‚
 
 
-2. Iterator Pattern ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+2. Iterator Pattern ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-Iterator ¥Ñ¥¿¡¼¥ó¤ò Perl ¤Ç¼ÂÁõ¤¹¤ëÎã¤ò¾Ò²ð¤·¤Þ¤¹¡£
-# ¤³¤ÎÆâÍÆ¤Ï¥Ç¥¶¥¤¥ó¥Ñ¥¿¡¼¥ó ML(*1) ¤Ø¤Î¥Ý¥¹¥È¤òºÆÍøÍÑ¤·¤Æ¤¤¤Þ¤¹¡£
+Iterator ãƒ‘ã‚¿ãƒ¼ãƒ³ã‚’ Perl ã§å®Ÿè£…ã™ã‚‹ä¾‹ã‚’ç´¹ä»‹ã—ã¾ã™ã€‚
+# ã“ã®å†…å®¹ã¯ãƒ‡ã‚¶ã‚¤ãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ ML(*1) ã¸ã®ãƒã‚¹ãƒˆã‚’å†åˆ©ç”¨ã—ã¦ã„ã¾ã™ã€‚
 
-Perl ¤Ç Iterator ¤¬½Ð¤Æ¤¯¤ë²Õ½ê¤È¤¤¤¨¤Ð¡¢¥Ï¥Ã¥·¥å¤ÎÍ×ÁÇ¤òÁàºî¤¹¤ëºÝ¤Î 
-each() ´Ø¿ô¤¬¤½¤ì¤Ë¤¢¤¿¤ê¤Þ¤¹¡£
+Perl ã§ Iterator ãŒå‡ºã¦ãã‚‹ç®‡æ‰€ã¨ã„ãˆã°ã€ãƒãƒƒã‚·ãƒ¥ã®è¦ç´ ã‚’æ“ä½œã™ã‚‹éš›ã® 
+each() é–¢æ•°ãŒãã‚Œã«ã‚ãŸã‚Šã¾ã™ã€‚
 
   while (my($key, $value) = each %hash) {
       print "$key: $value\n";
   }
 
-°ìÊý¡¢¥Ï¥Ã¥·¥å¤ÎÁàºî¤ò¥ª¥Ö¥¸¥§¥¯¥È¤Ë·ë¤Ó¤Ä¤±¤ë tie ¤Ç¤Ï¡¢each ¤òÄó¶¡¤¹
-¤ë¤¿¤á¤Ë NEXTKEY() ¤È¤¤¤¦¥á¥½¥Ã¥É¤ò¼ÂÁõ¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£¤³¤Î¼ÂÁõ¤¬
-¤Þ¤µ¤Ë iterator ¤Ê¤ï¤±¤Ç¤¹¡£
+ä¸€æ–¹ã€ãƒãƒƒã‚·ãƒ¥ã®æ“ä½œã‚’ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«çµã³ã¤ã‘ã‚‹ tie ã§ã¯ã€each ã‚’æä¾›ã™
+ã‚‹ãŸã‚ã« NEXTKEY() ã¨ã„ã†ãƒ¡ã‚½ãƒƒãƒ‰ã‚’å®Ÿè£…ã™ã‚‹å¿…è¦ãŒã‚ã‚Šã¾ã™ã€‚ã“ã®å®Ÿè£…ãŒ
+ã¾ã•ã« iterator ãªã‚ã‘ã§ã™ã€‚
 
-*1) ¥Ç¥¶¥¤¥ó¥Ñ¥¿¡¼¥ó¥á¡¼¥ê¥ó¥°¥ê¥¹¥È
+*1) ãƒ‡ã‚¶ã‚¤ãƒ³ãƒ‘ã‚¿ãƒ¼ãƒ³ãƒ¡ãƒ¼ãƒªãƒ³ã‚°ãƒªã‚¹ãƒˆ
     http://www.hyuki.com/dp/dpml.html
 
-List 1 ¤Ç¤Ï¡¢name ¤òÂ°À­¤Ë¤â¤Ä Book ¥¯¥é¥¹¤Î¤¤¤ì¤â¤Î¤È¤·¤Æ Bookshelf 
-¤ò¤Ä¤¯¤ê¤Þ¤¹¡£Book ¤òÄÉ²Ã¤·¤Æ¤¤¤­¡¢Bookshelf ÆâÉô¤Î Book ¥ê¥¹¥È¤ò 
-iterate ¤¹¤ë¤¿¤á¤Î¥á¥½¥Ã¥É next() ¤ò¼ÂÁõ¤·¤Æ¤¤¤Þ¤¹¡£
+List 1 ã§ã¯ã€name ã‚’å±žæ€§ã«ã‚‚ã¤ Book ã‚¯ãƒ©ã‚¹ã®ã„ã‚Œã‚‚ã®ã¨ã—ã¦ Bookshelf 
+ã‚’ã¤ãã‚Šã¾ã™ã€‚Book ã‚’è¿½åŠ ã—ã¦ã„ãã€Bookshelf å†…éƒ¨ã® Book ãƒªã‚¹ãƒˆã‚’ 
+iterate ã™ã‚‹ãŸã‚ã®ãƒ¡ã‚½ãƒƒãƒ‰ next() ã‚’å®Ÿè£…ã—ã¦ã„ã¾ã™ã€‚
 
-½ÐÎÏ·ë²Ì¤Ï List 2 ¤Î¤è¤¦¤Ë¤Ê¤ê¤Þ¤¹¡£
+å‡ºåŠ›çµæžœã¯ List 2 ã®ã‚ˆã†ã«ãªã‚Šã¾ã™ã€‚
 
-List 1  ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+List 1  ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
   package Book;
   use fields qw(name);
@@ -90,36 +90,36 @@ List 1  ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
 
   $self->reset_iterator();
 
-¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-List 2. ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+List 2. ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
 Around the World in 80 Days
 Bible
 Cinderella
-¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
 
-ÆâÉôÅª¤Ë CPAN ¥â¥¸¥å¡¼¥ë¤Î Tie::IxHash(*2) ¤Î¼ÂÁõ¤òÍøÍÑ¤·¤Æ¤¤¤Þ¤¹¡£¥Ï¥Ã
-¥·¥å¤Î each ¤¬ iterator ¤À¡ª ¤È½ñ¤­¤Þ¤·¤¿¤¬¡¢Perl ¥Ï¥Ã¥·¥å¤ÏÄÌ¾ï¥­¡¼¤Î
-½çÈÖ¤òÊÝÂ¸¤·¤Þ¤»¤ó¡£¤³¤³¤Ç¤Ï½çÈÖ¤òÊÝ»ý¤·¤Æ¤¯¤ì¤ë tiehash ¤È¤·¤Æ 
-Tie::IxHash ¤òÍøÍÑ¤·¤Æ¤¤¤ë¤È¤¤¤¦¤ï¤±¤Ç¤¹¡£
+å†…éƒ¨çš„ã« CPAN ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã® Tie::IxHash(*2) ã®å®Ÿè£…ã‚’åˆ©ç”¨ã—ã¦ã„ã¾ã™ã€‚ãƒãƒƒ
+ã‚·ãƒ¥ã® each ãŒ iterator ã ï¼ ã¨æ›¸ãã¾ã—ãŸãŒã€Perl ãƒãƒƒã‚·ãƒ¥ã¯é€šå¸¸ã‚­ãƒ¼ã®
+é †ç•ªã‚’ä¿å­˜ã—ã¾ã›ã‚“ã€‚ã“ã“ã§ã¯é †ç•ªã‚’ä¿æŒã—ã¦ãã‚Œã‚‹ tiehash ã¨ã—ã¦ 
+Tie::IxHash ã‚’åˆ©ç”¨ã—ã¦ã„ã‚‹ã¨ã„ã†ã‚ã‘ã§ã™ã€‚
 
-¤³¤Î next() ¥á¥½¥Ã¥É¤Ï Bookshelf ¤ÎÃæ¿È¤ò½çÈÖ¤ËÊÖ¤·¡¢¤Ê¤¯¤Ê¤Ã¤¿¤é 
-undef ¤òÊÖ¤·¤Þ¤¹¡£¤³¤¦¤¹¤ë¤È1²ó¤·¤« iterate ¤Ç¤­¤Ê¤¤¤Î¤Ç¡¢¥«¥¦¥ó¥¿¤ò 0 
-¤Ë¤â¤É¤¹¥á¥½¥Ã¥É reset_iterator() ¤â¼ÂÁõ¤·¤Æ¤¤¤Þ¤¹¡£¤³¤Î¼ÂÁõ¤Ï¥â¥í¤Ë 
-Tie::IxHash ¤ÎÆâÉô¹½Â¤¤Ë°ÍÂ¸¤·¤Æ¤¤¤Þ¤¹¤¬¡¢Bookshelf ÆâÉô¤Ç´°·ë¤·¤Æ¤¤¤ë
-¤Î¤ÇÌäÂê¤Ï¤Ê¤¤¤Ç¤·¤ç¤¦¡£
+ã“ã® next() ãƒ¡ã‚½ãƒƒãƒ‰ã¯ Bookshelf ã®ä¸­èº«ã‚’é †ç•ªã«è¿”ã—ã€ãªããªã£ãŸã‚‰ 
+undef ã‚’è¿”ã—ã¾ã™ã€‚ã“ã†ã™ã‚‹ã¨1å›žã—ã‹ iterate ã§ããªã„ã®ã§ã€ã‚«ã‚¦ãƒ³ã‚¿ã‚’ 0 
+ã«ã‚‚ã©ã™ãƒ¡ã‚½ãƒƒãƒ‰ reset_iterator() ã‚‚å®Ÿè£…ã—ã¦ã„ã¾ã™ã€‚ã“ã®å®Ÿè£…ã¯ãƒ¢ãƒ­ã« 
+Tie::IxHash ã®å†…éƒ¨æ§‹é€ ã«ä¾å­˜ã—ã¦ã„ã¾ã™ãŒã€Bookshelf å†…éƒ¨ã§å®Œçµã—ã¦ã„ã‚‹
+ã®ã§å•é¡Œã¯ãªã„ã§ã—ã‚‡ã†ã€‚
 
 *2) Tie::IxHash
     http://search.cpan.org/search?dist=Tie-IxHash
 
 
-3. Errata ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+3. Errata ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-OOP mailmag Vol.16 ¤Ç¡£HTTP::Monkeywrench ¤Î¥µ¥ó¥×¥ë¥³¡¼¥É¤Ë°ìÉô´Ö°ã¤¤
-¤¬¤¢¤Ã¤¿¤è¤¦¤Ç¤¹¡£°Ê²¼¤Î¤è¤¦¤Ë½¤Àµ¤·¤Æ¤¯¤À¤µ¤¤¡£KOMATSU Hiroshi ¤µ¤ó¡¢
-¤´Êó¹ð¤¢¤ê¤¬¤È¤¦¤´¤¶¤¤¤Þ¤·¤¿¡£
+OOP mailmag Vol.16 ã§ã€‚HTTP::Monkeywrench ã®ã‚µãƒ³ãƒ—ãƒ«ã‚³ãƒ¼ãƒ‰ã«ä¸€éƒ¨é–“é•ã„
+ãŒã‚ã£ãŸã‚ˆã†ã§ã™ã€‚ä»¥ä¸‹ã®ã‚ˆã†ã«ä¿®æ­£ã—ã¦ãã ã•ã„ã€‚KOMATSU Hiroshi ã•ã‚“ã€
+ã”å ±å‘Šã‚ã‚ŠãŒã¨ã†ã”ã–ã„ã¾ã—ãŸã€‚
 
 
 --- mag.txt~    Thu Mar 15 06:09:17 2001

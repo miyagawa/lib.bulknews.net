@@ -5,7 +5,7 @@
 # cp eijiro /usr/local/bin
 </PRE></BLOCKQUOTE>
 <H2>PREREQUISTICS</H2>
-�ʲ��� Perl �⥸�塼�뤬ɬ�פǤ���CPAN shell ���饤�󥹥ȡ��뤷�Ƥ���������<P>
+以下の Perl モジュールが必要です。CPAN shell からインストールしてください。<P>
 <UL>
 <LI>Jcode
 <LI>LWP::Simple
@@ -15,13 +15,13 @@
 <LI>Term::ReadLine
 </UL>
 <H2>USAGE</H2>
-���ޥ�ɥ饤�󤫤� <CODE>eijiro ñ��̾</CODE> �Ȥ��Ƽ¹ԡ��±ѡ����¤ϼ�ư�ڴ��Ǥ��������ʤ��Ǽ¹Ԥ���ȥ��󥿥饯�ƥ��֥⡼�ɤˤʤ�ޤ������󥿥饯�ƥ��֥⡼�ɤ� C-d ��ȴ���ޤ���<P>
-�����η�̤� HTML������󥰤��졢<CODE>$ENV{PAGER}</CODE> �ˤ�ä�ɽ������ޤ���<P>
+コマンドラインから <CODE>eijiro 単語名</CODE> として実行。和英・英和は自動切換です。引数なしで実行するとインタラクティブモードになります。インタラクティブモードは C-d で抜けます。<P>
+検索の結果は HTMLレンダリングされ、<CODE>$ENV{PAGER}</CODE> によって表示されます。<P>
 <BLOCKQUOTE><PRE>
 % eijiro foobar
-% eijiro �ۤ��ۤ�
+% eijiro ほげほげ
 % eijiro
-eijiro> �ۤ��ۤ�
+eijiro> ほげほげ
 eijiro> ^D
 </PRE></BLOCKQUOTE>
 <H2>AUTHOR</H2>

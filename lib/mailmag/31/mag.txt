@@ -4,24 +4,24 @@ Object-Oriented Programming with Perl Vol.31
 =======================================================
 
 
-1. Errata ����������������������������������������
+1. Errata ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Vol.29, 30 �Υޥ������ʣ���ս�ǡ�"Exporter" �� "Expoter" ��ɽ������
-���ޤ����Τǡ��������ޤ������Υ��������� [1] �ǤϽ������Ƥ���ޤ���
-�ǻ��Ȥ��Ƥ���������
+Vol.29, 30 のマガジンの複数箇所で、"Exporter" を "Expoter" と表記して
+いましたので、訂正します。過去のアーカイブ [1] では修正してありますの
+で参照してください。
 
-* Kato Atsushi ���󤴻�Ŧ���꤬�Ȥ��������ޤ�����
+* Kato Atsushi さんご指摘ありがとうございました。
 
 [1] http://bulknews.net/lib/mailmag/
 
-2. Date/Time module ������������������������������
+2. Date/Time module ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-2001ǯ��Ĥ��Ȥ��������Ȥ����櫓�ǡ����մط��Υ��饹�򤤤��Ĥ��Ҳ𤷤�
-�ߤ����Ȼפ��ޤ���
+2001年も残すところ数日というわけで、日付関係のクラスをいくつか紹介して
+みたいと思います。
 
-Perl �Ǥϥǥե����ȥ���������ɤ��ꤨ�� Date/Time �⥸�塼�뤬�ʤ��Τ�
-����äȼ夤�Ȥ����Ǥ���datetime@perl.org [2] �Ȥ����᡼��󥰥ꥹ�Ȥ�
-API��ɸ�ಽ�ˤĤ��Ƶ�������Ƥ��ޤ���
+Perl ではデファクトスタンダードたりえる Date/Time モジュールがないのが
+ちょっと弱いところです。datetime@perl.org [2] というメーリングリストで
+APIの標準化について議論されています。
 
 [2] http://lists.perl.org/showlist.cgi?name=datetime
 
@@ -29,68 +29,68 @@ API��ɸ�ಽ�ˤĤ��Ƶ�������Ƥ��ޤ���
 -- Date::Calc
 http://search.cpan.org/search?dist=Date-Calc
 
-�������δؿ��Τۤܤ��٤Ƥ��Υ⥸�塼��ǲ�褹��Ȥ��äƤ�ְ㤤�ʤ�
-�⥸�塼��Ǥ�������Ū�˴ؿ��� export ��������������Ƥ��ޤ����ۤ� 
-XS �ǽ񤫤�Ƥ���Τǹ�®�Ǥ���
+日付操作の関数のほぼすべてこのモジュールで解決するといっても間違いない
+モジュールです。基本的に関数を export する形で定義されています。ほぼ 
+XS で書かれているので高速です。
 
-�ؿ��Υ��󥿡��ե������������OO �ǻȤ������Ȥ����ͤΤ���˺ǿ��Ǥ���
-�� Date::Calc::Object �Ȥ������饹���ɲä���Ƥ��ޤ���overload ��Ȥ�
-�Ʋø����򤪤��ʤ����Ȥ��Ǥ��ޤ������ʤߤˤ��� overload ��ǽ�ϡ�
-Date/Time �Ϥ� OO ���󥿡��ե��������ä����饹�ǤϤۤȤ�ɤΥ��饹��
-���ݡ��Ȥ���Ƥ��ޤ���
+関数のインターフェースがヤダ、OO で使いたいという人のために最新版から
+は Date::Calc::Object というクラスが追加されています。overload を使っ
+て加減算をおこなうことができます。ちなみにこの overload 機能は、
+Date/Time 系の OO インターフェースをもったクラスではほとんどのクラスで
+サポートされています。
 
-Date::Calc �Ȥ��̤ˡ�Date::Manip �Ȥ������å���ʥ⥸�塼��⤢��ޤ���
-�ɤ����㤦�Τ����ɤ��狼��ޤ���C ���Ȥ��ʤ��Ķ��ξ��ϡ��ޤä���Ʊ
-���ؿ��� Pure Perl �Ǽ������� Date::Pcalc ��Ȥ��Ȥ褤�Ǥ��礦��
+Date::Calc とは別に、Date::Manip というソックリなモジュールもあります。
+どこが違うのかは良くわかりません。C が使えない環境の場合は、まったく同
+じ関数を Pure Perl で実装した Date::Pcalc を使うとよいでしょう。
 
 -- Class::Date
 http://search.cpan.org/search?dist=Class-Date
 
-OO �١����Υ��󥿡��ե���������ä��������饹�Ǥ�������Ū��ɬ�פ�
-���줽���ʵ�ǽ�Ϥۤ������Ƥ��ꡢAPI �⤭�줤�ˤޤȤޤäƤ��ޤ��������
-�Ƚ���Ǥ˥Х���¿���ä��Τȡ�Swiss Army Knife �Τ褦�����粽���ĤĤ�
-��Τ��ͥå��ʤȤ������⤷��ޤ���
+OO ベースのインターフェースを持った日付操作クラスです。基本的に必要と
+されそうな機能はほぼ備えており、API もきれいにまとまっています。ちょっ
+と初期版にバグが多かったのと、Swiss Army Knife のように肥大化しつつあ
+るのがネックなところかもしれません。
 
 -- Time::Piece
 http://search.cpan.org/search?dist=Date-Simple
 
-Larry Wall �ιͰƤ���API ��Matt Sergeant �᤬���������⥸�塼��Ǥ���
-Perl ���Ȥ߹��� localtime() �����֥������Ȥ��֤��Ȥ����顢�Ȥ���������
-���������Ƥ��ޤ���
+Larry Wall の考案したAPI をMatt Sergeant 氏が実装したモジュールです。
+Perl の組み込み localtime() がオブジェクトを返すとしたら、という観点か
+ら作成されています。
 
   my $time = Time::Piece->new;
   print $time->year;
 
-�Τ褦�˻Ȥ���ľ��Ū�Ǥ������Υ��饹��ޤ� overload �򥵥ݡ��Ȥ��Ƥ���
-�������٤� perl5.7.x �� Core �⥸�塼��ˤʤ�ޤ�������API �����ꤿ��
-�ʤ����Ȥ�����ͳ���鳰����Ƥ��ޤ���
+のように使え、直感的です。このクラスもまた overload をサポートしていま
+す。一度は perl5.7.x で Core モジュールになりましたが、API を縛りたく
+ない、という理由から外されています。
 
 
 -- Date::Ical
 http://search.cpan.org/search?dist=Date-Ical
 
-�������API ɸ��ե����ޥåȤ��ܻؤ� ICal �ѤΥ��饹�Ǥ���
+日付操作API 標準フォーマットを目指す ICal 用のクラスです。
 
 
 -- Date::Simple
 http://search.cpan.org/search?dist=Date-Simple
 
-Simple �Ȥ���̾�����̤ꡢDate �򥪥֥������ȤȤ��ư����ˤ����äƺ����
-��API������������饹�Ǥ���ʸ���󲽤���� yyyy-mm-dd �� overload ����
-�Τǡ�SQL �����ꤳ��Ȥ��ˤ������Ǥ���
+Simple という名前の通り、Date をオブジェクトとして扱うにあたって最低限
+のAPIを定義したクラスです。文字列化すると yyyy-mm-dd に overload する
+ので、SQL に放りこむときには便利です。
 
-Date ���饹�ˤ⤫����餺��UNIX time �ˤ�äƥ��֥������Ȥ����������
-���ꡢ32bit int ������(2038ǯ����)�򤦤��ޤ���(Date::Calc �Ϥ�������
-����ޤ���) int ��Ȥ鷺�˼��������С�������������Τ褦�Ǥ���
+Date クラスにもかかわらず、UNIX time によってオブジェクトが実装されて
+おり、32bit int の制約(2038年問題)をうけます。(Date::Calc はこの制約が
+ありません) int を使わずに実装したバージョンも制作中のようです。
 
 http://archive.develooper.com/datetime@perl.org/msg00214.html
 
 -- Date::Range
 http://search.cpan.org/search?dist=Date-Range
 
-Tony Bowden �᤬�������������դ��ϰϡפ�ɽ�����륯�饹�Ǥ����������塼
-��ʤɤμ����������Ǥ������ե��饹�Ȥ��Ƥϡ�Date::Simple �����Ѥ��Ƥ�
-�ޤ���
+Tony Bowden 氏が作成した「日付の範囲」を表現するクラスです。スケジュー
+ラなどの実装に便利です。日付クラスとしては、Date::Simple を利用してい
+ます。
 
   my $range = Date::Range->new($date1, $date2);
 
@@ -109,22 +109,22 @@ Tony Bowden �᤬�������������դ��ϰϡפ�ɽ�����륯�饹�Ǥ����������塼
 -- Date::Range::Birth
 http://search.cpan.org/search?dist=Date-Range-Birth
 
-ɮ�Ԥ�����������Date::Range �Υ��֥��饹�Ǥ�������ǯ��οͤ��������ϰ�
-��������뤳�Ȥ��Ǥ��ޤ���
+筆者が作成した、Date::Range のサブクラスです。ある年代の人の誕生日範囲
+を取得することができます。
 
-  # 24�Фοͤ����������ϰ�
+  # 24歳の人の誕生日の範囲
   my $range = Date::Range::Birth->new(24);
 
-  # 2001/01/01 �� 24�Ф��ä���
+  # 2001/01/01 に 24歳だった人
   my $date   = Date::Simple->new(2001, 1, 1);
   my $range2 = Date::Range::Birth->new(24, $date);
 
-  # 20�С�30�Фοͤ����������ϰ�
+  # 20歳〜30歳の人の誕生日の範囲
   my $range3 = Date::Range::Birth->new([ 20, 30 ]);
 
 
-RDBMS�Υơ��֥�˥桼��������������¸���Ƥ������桼�����椫�� 20�Фο�
-�� SELECT ���롢�Ȥ��ä��������Ѥ���������Ǥ���
+RDBMSのテーブルにユーザの誕生日を保存しておき、ユーザの中から 20歳の人
+を SELECT する、といった場合に利用すると便利です。
 
   use DBI;
   use Date::Range::Birth;
@@ -146,15 +146,15 @@ RDBMS�Υơ��֥�˥桼��������������¸���Ƥ������桼�����椫�� 20�Фο�
   $dbh->disconnect;
 
 
-3. �ޤȤ� ����������������������������������������
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-���դ����� Date::Simple, ����ޤ�������ˤ� Time::Piece �����Ѥ���
-���Ȥ򤪴��ᤷ�Ƥ����ޤ���
+日付の操作は Date::Simple, 時刻まで入る場合には Time::Piece を利用する
+ことをお勧めしておきます。
 
-ʣ���ʲø����򤪤��ʤ����ˤ� Date::Calc �����Ѥ���Ȥ褤�Ǥ���������
-�����ե��������ؿ��١����ʤΤǡ�Date::Simple �� Time::Piece ��Ѿ�����
-���饹���������Date::Calc �δؿ��ؤ� wrapper �᥽�åɤ��Ѱդ��Ƥ�����
-�Ȥ��䤹�����⡢�Ȼפ��ޤ���
+複雑な加減算をおこなう場合には Date::Calc を利用するとよいですが、イン
+ターフェースが関数ベースなので、Date::Simple や Time::Piece を継承した
+クラスを定義し、Date::Calc の関数への wrapper メソッドを用意しておくと
+使いやすいかも、と思います。
 
 
 --

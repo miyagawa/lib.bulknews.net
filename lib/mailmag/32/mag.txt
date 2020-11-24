@@ -4,21 +4,21 @@ Object-Oriented Programming with Perl Vol.32
 =======================================================
 
 
-1. News  ����������������������������������������
+1. News  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-��Τ������֤������Ƥ��ޤ��ޤ������ޤ��ܤ��ܤ��񤤤Ƥ��������Ȥ��⤤��
-�����٤�Ǥ���֤ˤ��ä��˥塼���ʤɤ�Ĥ�Ĥ�ȤޤȤ�Ƥߤޤ�����
+ものすごく間があいてしまいました。またぼちぼち書いていきたいとおもいま
+す。休んでいる間にあったニュースなどをつらつらとまとめてみました。
 
 
-* perl 5.7.3 ��꡼��
+* perl 5.7.3 リリース
 
 http://use.perl.org/article.pl?sid=02/03/05/1235220
 http://archive.develooper.com/perl5-porters@perl.org/msg74215.html
 
-perl �γ�ȯ�֥����Ǥ��� 5.7 �κǿ���ӥ���� 5.7.3 ����꡼�������
-������5.7 ����Ϥ���ǽ���ǡ�������� 5.8 RC1 ����꡼�����졢�Ƥޤ�
-�ˤ� 5.8 �����˽Ф�ͽ��Ǥ���5.7, 5.8 ���ѹ����϶ᤤ�����ˤޤȤ�Ƥߤ�
-���ȻפäƤ��ޤ���
+perl の開発ブランチである 5.7 の最新リビジョン 5.7.3 がリリースされま
+した。5.7 系列はこれで終りで、近日中に 5.8 RC1 がリリースされ、夏まで
+には 5.8 が世に出る予定です。5.7, 5.8 の変更点は近いうちにまとめてみよ
+うと思っています。
 
 * Apocalypse 4, Exegesis 4
 
@@ -26,73 +26,73 @@ http://use.perl.org/article.pl?sid=02/04/03/0450238
 http://www.perl.com/pub/a/2002/04/01/exegesis4.html
 http://www.perl.com/pub/a/2002/01/15/apo4.html
 
-Perl6 �Υ��֥������Ȼظ���ǽ�ʤɤ���������Ƥ��������褿�����Ǥ����Ȥ���
-�Ƥ⡢�ͤˤ��񤷤��Ƥʤˤ��ʤ��� ...
+Perl6 のオブジェクト指向機能などもだいぶ全容が見えて来た感じです。といっ
+ても、僕には難しくてなにがなんやら ...
 
-* Perl ��256�ܻȤ���DBI ��ȯ��
+* Perl を256倍使う本DBI 編発売
 
 http://member.nifty.ne.jp/hippo2000/p256dbi/p256dbi.htm
 
-��繧ŵ����ˤ�� Perl256�ܤ���1�Ƥ������������ȯ�䤵��Ƥ��ޤ�����
-�����DBD�ܡ��㤤�ޤ��礦��
+川合孝典さんによる Perl256本の第1弾がアスキーより発売されています。世
+界初のDBD本！買いましょう。
 
-* WEB+DB Press Ϣ�ܳ���
+* WEB+DB Press 連載開始
 
 http://www.gihyo.co.jp/wdpress/
 
-WEB+DB Press Vol.7 ��ꡢPerl Style �Ȥ��������ȥ��Ϣ�ܤ�Ϥ���ޤ�����
-Perl ���Ѥ���Web���ץꥱ�������ȯ�μ�ˡ�ˤĤ��ƽ񤤤Ƥ������Ȼפä�
-���ޤ������� Vol.8 �Ǥ� Class::DBI ���ý���񤤤Ƥ��ޤ��ΤǤ��ڤ��ߤˡ�
+WEB+DB Press Vol.7 より、Perl Style というタイトルで連載をはじめました。
+Perl を用いたWebアプリケーション開発の手法について書いていこうと思って
+います。次回 Vol.8 では Class::DBI の特集を書いていますのでお楽しみに。
 
-* mysql �ץ��ȥ���� Pure Perl ��
+* mysql プロトコルを Pure Perl で
 
 http://search.cpan.org/search?dist=Net-MySQL
 http://search.cpan.org/search?dist=DBD-mysqlPP
 
-������Ƿ����ˤ�� MySQL �ͥåȥ���ץ��ȥ���� Pure Perl �Ǽ�������
-�⥸�塼�뤬 CPAN ����Ͽ����Ƥ��ޤ���IO::Socket �ˤ�äƥץ��ȥ����
-�������Ƥ��뤿�ᡢlibmysql �Τ褦�ʳ����饤�֥���ɬ�פȤ��ʤ��Ȥ���
-�������륹�ݥ���ȡ�
+小山浩之さんによる MySQL ネットワークプロトコルを Pure Perl で実装した
+モジュールが CPAN に登録されています。IO::Socket によってプロトコルを
+実装しているため、libmysql のような外部ライブラリを必要としないところ
+がセールスポイント。
 
 * YAPC NA
 
 http://www.yapc.org/America/
 
-YAPC::NA �Υ쥸���ȥ졼����󤬤Ϥ��ޤäƤ��ޤ������ä������ʡ���
+YAPC::NA のレジストレーションがはじまっています。参加したいなー。
 
-* �ۺ� CPAN �⥸�塼��
+* 拙作 CPAN モジュール
 
-������ʤ��⥸�塼��򤤤��Ĥ��Ĥ��äƤߤޤ�����
+くだらないモジュールをいくつかつくってみました。
 
 - PHP::Session, Apache::Session::PHP
 
 http://search.cpan.org/search?dist=PHP-Session
 http://search.cpan.org/search?dist=Apache-Session-PHP
 
-PHP4 �Υǥե���ȥ��å����ǽ�ˤ�ä���������륻�å����ե������
-�ɤ߽񤭤��뤳�Ȥ��Ǥ��ޤ���PHP �ȥ��å�����ͭ����Ȥ��˻Ȥ�������!?
+PHP4 のデフォルトセッション機能によって生成されるセッションファイルを
+読み書きすることができます。PHP とセッションを共有するときに使うと便利!?
 
 - WWW::Baseball::NPB
 
 http://search.cpan.org/search?dist=WWW-Baseball-NPB
 
-Yahoo! Sports ��������� HTTP��ͳ�Ǽ�������⥸�塼��Ǥ���
+Yahoo! Sports の野球情報を HTTP経由で取得するモジュールです。
 
 - Email::Valid::Loose
 
 http://search.cpan.org/search?dist=Email-Valid-Loose
 
-i-mode �Υ᡼�륢�ɥ쥹�� @ ��ľ���ΥɥåȤ���Ĥ��Ƥ��ޤ���������� 
-RFC822 Ū�ˤ������ǡ�Email::Valid ��Ȥ����������ɥ쥹�ˤʤäƤ��ޤ���
-���������Ǥ����ˡ��Ż��Ǥ���äȺ��ä��Τǡ����������Ƥ��ޤ����֥���
-��������Ǥ���
+i-mode のメールアドレスは @ の直前のドットを許可していますが、これは 
+RFC822 的には不正で、Email::Valid を使うと不正アドレスになってしまいま
+す（当然ですが）。仕事でちょっと困ったので、これも許してしまうサブクラ
+スがこれです。
 
 - Class::DBI::SQLite
 
 http://search.cpan.org/search?dist=Class-DBI-SQLite
 
-C �ǽ񤫤줿�ե�����١����ι�®��SQL���󥸥�sqlite �� Class::DBI ��
-�����Ѥ��뤿��Υ��ɥ���Ǥ����ºݤΥ����ɤϿ��ԤǤ���
+C で書かれたファイルベースの高速なSQLエンジン、sqlite を Class::DBI か
+ら利用するためのアドインです。実際のコードは数行です。
 
 
 

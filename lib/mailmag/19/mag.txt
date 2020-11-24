@@ -4,31 +4,31 @@ Object-Oriented Programming with Perl Vol.19
 =======================================================
 
 
-1. �Ϥ���� ������������������������������������������
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-�Ҥ��ĤŤ�ñ�Υƥ��Ȥ�����Ǥ���
+ひきつづき単体テストの話題です。
 
-ñ�Υƥ��Ȥ� .t �ե�����ˤ�äƹԤ���ˡ�ϰ����Ҳ𤷤ޤ����������饹��
-�礭���ʤäƤ����Ȥ��䡢��ե�������󥰤�Ԥ��ݡ����饹�ȥƥ��Ȥ�����
-����Ȥ�ΤϷ빽���Ѥ��ä��ꤷ�ޤ���
+単体テストを .t ファイルによって行う方法は以前紹介しましたが、クラスが
+大きくなってきたときや、リファクタリングを行う際、クラスとテストの整合
+性をとるのは結構大変だったりします。
 
-�ɤ����᥽�å�API�ʤɤ� pod �ǵ��Ҥ���ʤ顢�����˰��˥ƥ��ȥ����ɤ�
-������Ǥ��ޤ����Ȥ��������ǥ���Ҳ𤷤ޤ���
-
-
-2. Pod::Tests ����������������������������������������
-
-pod (Plain Old Document)(*1) �����ǥƥ��ȥ����ɤ�������⥸�塼�� 
-Pod::Tests[1] �����Ѥ��ޤ���
-
-Pod::Tests �� Perl6 Quality Assurance ô���� Michael Schwern ���󤬺�
-�����줿�⥸�塼��Ǥ����Ƕᤳ�οͤ� p5p (perl5-porters) ��ML�ʤɤǤ�
-�ƥ��Ȥ˴ؤ���ȯ��(*2)��褯����Ƥ���褦�ǡ������� QAô���Ȥ�������
-�Ǥ���
+どうせメソッドAPIなどを pod で記述するなら、そこに一緒にテストコードも
+埋め込んでしまう、というアイデアを紹介します。
 
 
-Pod::Tests ���Τ����˥���ץ�Ǥ���pod ������ perl �ˤ��ƥ��ȥ���
-�ɤ�ʲ��Τ褦�������ߤޤ���
+2. Pod::Tests ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
+
+pod (Plain Old Document)(*1) 形式でテストコードを埋め込むモジュール 
+Pod::Tests[1] を利用します。
+
+Pod::Tests は Perl6 Quality Assurance 担当の Michael Schwern さんが作
+成されたモジュールです。最近この人は p5p (perl5-porters) のMLなどでも
+テストに関する発言(*2)をよくされているようで、さすが QA担当という感じ
+です。
+
+
+Pod::Tests 自体は非常にシンプルです。pod 形式で perl によるテストコー
+ドを以下のように埋め込みます。
 
   =item B<is_pirate>
 
@@ -44,13 +44,13 @@ Pod::Tests ���Τ����˥���ץ�Ǥ���pod ������ perl �ˤ��ƥ��ȥ���
   =end testing
 
 
-"=begin/end testing" �ǰϤޤ줿�֥��å��˥����ɤ�񤭤ޤ���"=for
-testing" �Ȥ�����ˡ�Ǥ⹽��ʤ��褦�Ǥ���
+"=begin/end testing" で囲まれたブロックにコードを書きます。"=for
+testing" という方法でも構わないようです。
 
-���Τ褦�ˤ��ƤǤ��� .pm �ե�������Ф��� pod2tests ���ޥ�ɤ�¹Ԥ���
-�� .t �ե����뤬��ư��������ޤ��Τǡ�ɸ��Ū�� Makefile.PL�ˤ�� make
-test �ǥƥ��Ȥ��Ԥ��ޤ����������ǰʲ��Τ褦�ʥ�����ץȤ�񤤤Ƽ¹Ԥ�
-�Ƥ⤤���Ǥ��礦(�Хå������ˤϰʲ�����ˡ�������������⤷��ޤ���)
+このようにしてできた .pm ファイルに対して pod2tests コマンドを実行する
+と .t ファイルが自動作成されますので、標準的な Makefile.PLによる make
+test でテストが行えますし、自前で以下のようなスクリプトを書いて実行し
+てもいいでしょう(バッチ処理には以下の方法の方がいいかもしれません)
 
   #!/usr/local/bin/perl
   use strict;
@@ -59,10 +59,10 @@ test �ǥƥ��Ȥ��Ԥ��ޤ����������ǰʲ��Τ褦�ʥ�����ץȤ�񤤤Ƽ¹Ԥ�
   runtests(<*.t>);
 
 
-���ʤߤˡ����Υ⥸�塼��� 5.00503 �Ǥϥ��󥹥ȡ���˼��Ԥ��ޤ����ޤ���
-example �� testing ����Ĥ�ʤ����˥��顼�ˤʤäƤ��ޤ��ޤ�(����Ϥ�
-��Ǥ����Τ��⤷��ޤ���)��lib/Pod/Tests.pm �� t/Tests.t �˰ʲ��Υѥ�
-���򤢤Ƥ��ư���褦�ˤʤ�ޤ���
+ちなみに、このモジュールは 5.00503 ではインストールに失敗します。また、
+example と testing が一つもない場合にエラーになってしまいます(それはそ
+れでいいのかもしれませんが)。lib/Pod/Tests.pm と t/Tests.t に以下のパッ
+チをあてると動くようになります。
 
 
 --- Tests.pm.orig       Wed May  2 12:01:28 2001
@@ -100,42 +100,42 @@ example �� testing ����Ĥ�ʤ����˥��顼�ˤʤäƤ��ޤ��ޤ�(����Ϥ�
  do { $_ = <DATA> } until /^__END__$/;
 
 
-(*1) Plain Old Document �� Perl �Υ⥸�塼������κݤˡ�API�ʤɤΥɥ���
-���Ȥ򵭽Ҥ��뤿������ȤߤǤ������˥���ץ�Ǥ������٤����Ȥ�����
-�Ф���Τ����ѤǤ� :-) �ܤ����� perldoc perlpod ��������������
+(*1) Plain Old Document は Perl のモジュール作成の際に、APIなどのドキュ
+メントを記述するための枠組みです。非常にシンプルですが、細かいところを
+覚えるのは大変です :-) 詳しくは perldoc perlpod をご覧ください。
 
-(*2) ���Ȥ��Ф���ʵ����⡣
+(*2) たとえばこんな記事も。
 http://use.perl.org/article.pl?sid=01/04/21/236229&mode=thread&threshold=
 
 
 [1] http://cpan2.org/Asset/display?dist=Pod-Tests
 
-3. �����餻 ������������������������������������������
+3. おしらせ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
 * Web+DB Press Vol.2
 
-����ɾ����[2]����� WEB+DB Press Vol.2[3] �� "Apache �⥸�塼��Ǥ���
-�ޤǤǤ���!" �Ȥ��������ȥ�ǡ�mod_rewrite �˴ؤ��뵭����񤫤��Ƥ���
-�����ޤ�����¾�ˤ� Perl ��Ϣ�Ǥ���췽�줵����繧ŵ����ε����ʤɤ�
-���ä��ɤߤ�����������ޤ�����̣�Τ������Ϥ��Ҥ����ˤʤäƤ���������
+技術評論社[2]さんの WEB+DB Press Vol.2[3] に "Apache モジュールでここ
+までできる!" というタイトルで、mod_rewrite に関する記事を書かせていた
+だきました。他にも Perl 関連では台場圭一さん、川合孝典さんの記事なども
+あって読みごたえがあります。興味のある方はぜひご覧になってください。
 
 * YARPC 19101
 
-2001/5/26 �� YARPC (Yet Another Ruby/Perl Conference) 19101 �����Ť���
-�ޤ�����ǯ���Ԥǳ��Ť��줿 Perl/Ruby Conference [4]������/�����ǤȤ���
-�������Ǥ��礦��������ե���󥹤����Ƥϰʲ��Τ褦�ˤʤäƤ��ޤ���
+2001/5/26 に YARPC (Yet Another Ruby/Perl Conference) 19101 が開催され
+ます。昨年京都で開催された Perl/Ruby Conference [4]の廉価/手作り版といっ
+た感じでしょうか。カンファレンスの内容は以下のようになっています。
 
-10:00��12:00 ���塼�ȥꥢ��(1���� �� Ruby/Perl��1)
-13:00��15:00 ����Ҳ�(30ʬ �� 4)
-15:00��16:00 Lightning Talks(5ʬ �� 11)
-16:00��17:00 BOF(1����)
+10:00〜12:00 チュートリアル(1時間 × Ruby/Perl各1)
+13:00〜15:00 事例紹介(30分 × 4)
+15:00〜16:00 Lightning Talks(5分 × 11)
+16:00〜17:00 BOF(1時間)
 
-����:	2001ǯ5��26��(��) 10:00��17:00
-���:	���������ܼ� B2�ۡ���
+日時:	2001年5月26日(土) 10:00〜17:00
+場所:	アスキー本社 B2ホール
 
-��� Lightning Talks ���ä�ͽ��Ǥ���������դ����Ϥ��Ҥ����ڤˤ����
-�����������ܤ����� YARPC 19101 �Υ�����[5] �����ˤʤäƤ������� (��
-�����������������ޤ���)
+私も Lightning Talks で話す予定です。関東近辺の方はぜひお気軽にご来場
+ください。詳しくは YARPC 19101 のサイト[5] をご覧になってください (最
+新情報も随時更新されます。)
 
 
 

@@ -4,45 +4,45 @@ Object-Oriented Programming with Perl Vol.17
 =======================================================
 
 
-1. �Ϥ���� ������������������������������������������
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-mod_perl[1] �δĶ��ǡ��ǥХå�/�ƥ��Ȥ����ѤǤ���⥸�塼�롢
-Apache::FakeRequest ��Ҳ𤷤ޤ���
+mod_perl[1] の環境で、デバッグ/テストに利用できるモジュール、
+Apache::FakeRequest を紹介します。
 
-2. Apache::FakeRequest  ������������������������������
+2. Apache::FakeRequest  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl �Ǥ����줿 Web ���ץꥱ�������ι�®���Ȥ����������顢mod_perl 
-�������٤���ޤäƤ��ޤ���mod_perl �� Doug MacEachern ����ˤ�äƥ��
-�ƥʥ󥹤���Ƥ��� Apache �Υ⥸�塼��Ǥ���"Apache �Υ⥸�塼��� 
-Perl �ǽ񤱤�" �Ȥ�����ħ����äƤ��ޤ���
+Perl でかかれた Web アプリケーションの高速化という観点から、mod_perl 
+の注目度が高まっています。mod_perl は Doug MacEachern さんによってメン
+テナンスされている Apache のモジュールです。"Apache のモジュールを 
+Perl で書ける" という特徴を持っています。
 
-��Ǥ⡢CGI ������ץȤΥ��󥿡��ե��������ݤä��ޤޡ�����ѥ��뤷��ư
-��뤳�Ȥˤ�ꡢ�ɥ饹�ƥ��å��˹�®�����뤳�Ȥ��Ǥ��� 
-Apache::Registry, Apache::PerlRun �ʤɤ��褯���Ѥ���Ƥ��ޤ���
+中でも、CGI スクリプトのインターフェースを保ったまま、コンパイルして動
+作することにより、ドラスティックに高速化することができる 
+Apache::Registry, Apache::PerlRun などがよく利用されています。
 
-��������˽Ҥ٤��̤ꡢmod_perl ���Τ� Apache API �� Perl ���鿨����
-���ˤ�����Τǡ�Apache �γƥե������Υϥ�ɥ�˼���Υ��饹�Υϥ�ɥ�
-����Ͽ���뤳�Ȥǡ�CGI �Ǥϼ¸��Ǥ��ʤ��ä��褦�ʥ��ץꥱ�����������
-���뤳�Ȥ���ǽ�Ǥ��������դΤ��Ȥϡ����饤�꡼����ѥ�[2] ȯ�Ԥ� 
-"Apache ��ĥ������(��)"[3,4] �˵��Ҥ���Ƥ��ޤ��Τǡ����󤴤��ˤʤ�
-�Ƥ���������
+しかし先に述べた通り、mod_perl 自体は Apache API を Perl から触れるよ
+うにしたもので、Apache の各フェーズのハンドラに自作のクラスのハンドラ
+を登録することで、CGI では実現できなかったようなアプリケーションを作成
+することが可能です。この辺のことは、オライリージャパン[2] 発行の 
+"Apache 拡張ガイド(上)"[3,4] に記述されていますので、是非ごらんになっ
+てください。
 
 
-�����Ǥϡ�mod_perl �ǥϥ�ɥ���������ˤ����äơ���˥åȥƥ��Ⱥ���
-�����ѤǤ���⥸�塼�� Apache::FakeRequest ��Ҳ𤷤ޤ���
+ここでは、mod_perl でハンドラを作成するにあたって、ユニットテスト作成
+に利用できるモジュール Apache::FakeRequest を紹介します。
 
-����ޥ�����ǾҲ𤷤� HTTP::Monkeywrench �� LWP::UserAgent �����Ѥ�����
-���饤����ȥ����ɤ���Υƥ��ȥġ���Ǥ�����XP �Ǥ����Ȥ����� 
-Acceptance Test �����Ѥ���ȸ���Ū���⤷��ޤ���
+前回マガジンで紹介した HTTP::Monkeywrench は LWP::UserAgent を利用した、
+クライアントサイドからのテストツールでした。XP でいうところの 
+Acceptance Test で利用すると効果的かもしれません。
 
-mod_perl �ǥϥ�ɥ����������硢���ץꥱ�������򥯥饹��٥�ǰ�
-�����Ȥˤʤ�ޤ����ƥ᥽�åɤ�ñ�Υƥ��Ȥǰ�����褦�ˤ��Ƥ���������
-�����Ǥ���
+mod_perl でハンドラを作成する場合、アプリケーションをクラスレベルで扱
+うことになります。各メソッドも単体テストで扱えるようにしておくと非常に
+便利です。
 
-���Ȥ��Ф����Ǥϡ��桼���� REMOTE_HOST ��ɽ������ϥ�ɥ�����������
-�Υƥ��Ȥ� Apache::FakeRequest �ǵ��Ҥ��Ƥߤޤ��礦��
+たとえばここでは、ユーザの REMOTE_HOST を表示するハンドラを作成し、そ
+のテストを Apache::FakeRequest で記述してみましょう。
 
-�ϥ�ɥ�ϰʲ��Τ褦�ˤʤ�ޤ���
+ハンドラは以下のようになります。
 
 package Apache::EchoRemoteHost;
 use Apache::Constants;
@@ -57,12 +57,12 @@ sub handler {
 1;
 
 
-HTTP::Monkeywrench �Τ褦�ʥġ���Ǥϡ����饤����ȥ����ɤξ��󤷤���
-��Ǥ��ʤ����ᡢREMOTE_HOST �Τ褦�ʥѥ�᡼���򤤤��뤳�Ȥ��Ǥ��ޤ���
-�����Ǥ� Apache::FakeRequest �ǵ�¤�����ꥯ�����ȥ��֥������Ȥ�ϥ��
-����Ϥ��ƥƥ��Ȥ��Ƥߤޤ���
+HTTP::Monkeywrench のようなツールでは、クライアントサイドの情報しか設
+定できないため、REMOTE_HOST のようなパラメータをいじることができません。
+ここでは Apache::FakeRequest で偽造したリクエストオブジェクトをハンド
+ラに渡してテストしてみます。
 
-Apache::FakeRequest �ǥ��ߥ�졼�Ȥ��륹����ץȤϰʲ��Τ褦�ˤʤ�ޤ���
+Apache::FakeRequest でシミュレートするスクリプトは以下のようになります。
 
 #!/usr/local/bin/perl
 use Apache::EchoRemoteHost;
@@ -72,15 +72,15 @@ my $r = Apache::FakeRequest->new(get_remote_host => 'www.foo.com');
 Apache::EchoRemoteHost::handler($r);
 
 
-���Υ�����ץȤ�¹Ԥ���С�ɸ����Ϥˡ�
+このスクリプトを実行すれば、標準出力に、
 
   Your remote host is: www.foo.com
 
-�Ƚ��Ϥ���ޤ���
+と出力されます。
 
-�ƥ��ȥ�����ץȤȤ���ư�����ˤϡ��ʲ��Τ褦�ˤ���Ф褤�Ǥ��礦��
-�����Ǥ� IO::Scalar �⥸�塼��� STDOUT ��ȥ�åפ��Ƥ��ޤ���Test ��
-��ˡ�ˤĤ��Ƥϡ�Vol.15[5] �� Test �⥸�塼�������ˡ�򻲾Ȥ��Ƥ���������
+テストスクリプトとして動作させるには、以下のようにすればよいでしょう。
+ここでは IO::Scalar モジュールで STDOUT をトラップしています。Test の
+方法については、Vol.15[5] の Test モジュールの利用法を参照してください。
 
 
 #!/usr/local/bin/perl
@@ -102,10 +102,10 @@ ok($stdout, 'Your remote host is: www.foo.com');
 untie *STDOUT;
 
 
-3. �ޤȤ� ��������������������������������������������
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-mod_perl �ϥ�ɥ�ǤΥ��ե饤���˥åȥƥ��Ⱥ����ˤĤ��Ʋ��⤷�ޤ�����
-����ϡ����饹��� Pod �˥ƥ��Ȥ�������Ǥߤޤ���
+mod_perl ハンドラでのオフラインユニットテスト作成について解説しました。
+次回は、クラス内の Pod にテストを埋め込んでみます。
 
 
 [1] http://perl.apache.org/guide/

@@ -4,123 +4,123 @@ Object-Oriented Programming with Perl Vol.25
 =======================================================
 
 
-1. O'Reilly Open Source Convention ����������������
+1. O'Reilly Open Source Convention ＿＿＿＿＿＿＿＿
 
-7/23-27 �� ����ꥫ San Diego �� O'Reilly Open Source Convention ����
-���ޤ�����Perl, Apache, Linux, BSD, Python, MySQL �ʤɡ��͡��ʥ�����
-�󥽡����ƥ��Υ������˴ؤ��륫��ե���󥹤��Ť��줿�褦�Ǥ� (ɮ�ԤϹԤ�
-�Ƥޤ��󡣹Ԥ������ä��Ǥ�)��
+7/23-27 に アメリカ San Diego で O'Reilly Open Source Convention が行
+われました。Perl, Apache, Linux, BSD, Python, MySQL など、様々なオープ
+ンソーステクノロジーに関するカンファレンスが催されたようです (筆者は行っ
+てません。行きたかったです)。
 
-��ǯ�� Perl Conference 5 �Ϥ��� Open Source Convention �ΰ�ĤȤ��Ƴ�
-�Ť���ޤ�����
+今年の Perl Conference 5 はこの Open Source Convention の一環として開
+催されました。
 
 
-2. The State of the Onion 5 ����������������������
+2. The State of the Onion 5 ＿＿＿＿＿＿＿＿＿＿＿
 
-TPC �� keynote speech �� Larry Wall �� State of the Onion����ǯ������
-�� Perl.com �Υ����ȤǾҲ𤵤�Ƥ����̤ꡢPerl 6 �ˤĤ��Ƥ��濴��
+TPC の keynote speech は Larry Wall の State of the Onion。今年の内容
+は Perl.com のサイトで紹介されている通り、Perl 6 についてが中心。
 
-��ǯ�� talk �Ϥ��Ĥ�Ȱ�äơ������� Perl ���ä򤷤��褦�Ǥ��������⡢
-Lightning Talks �����ǡ�55�� x 33�Ĥ� Perl6 �˴ؤ��� talk �ˤ�����Ƥ���
-���褦�Ǥ����٥���Ĥ餷���Τ� Larry ��̼ Heidi ���ä��Ȥ���
+今年の talk はいつもと違って、本当に Perl の話をしたようです。しかも、
+Lightning Talks 形式で、55秒 x 33個の Perl6 に関する talk による内容だっ
+たようです。ベルを鳴らしたのは Larry の娘 Heidi だったとか。
 
-* -> �� . ��
+* -> は . に
 
-���Ǥ� Apocalypse �����餫�ˤʤäƤ����̤ꡢ����黻�� -> �� . (�ɥå�)
-�ˤʤ�ޤ��� $obj = Class.new; �Ȥ����櫓�Ǥ������ޤ� . ��ʸ����Ϣ���
-���ҤȤ��ƻȤ��Ƥ��ޤ����Τǡ�����������ͤ��ʤ��ƤϤʤ�ޤ���
-�����¿ʬ ~(�����) �ˤʤ���������Ȥ������ȤǤ���
+すでに Apocalypse で明らかになっている通り、矢印演算子 -> は . (ドット)
+になります。 $obj = Class.new; というわけです。今まで . は文字列連結演
+算子として使われてきましたので、それの代わりを考えなくてはなりません。
+これは多分 ~(チルダ) になるだろう、ということです。
 
   $obj = Class.new;
   $string = "My name is " ~ $name ~ ".\n";
 
 
-* switch ʸ
+* switch 文
 
-��˾��(?) switch ʸ���о�Ǥ����Ǥ⡢���󥿥����� switch �ǤϤ���ޤ�
-�󡣱Ѹ�餷���ˤ������ Larry �μ�ˤ�����ȡ�switch ... case �ϡ�
-given ... when �ˤʤ�ޤ���
+待望の(?) switch 文の登場です。でも、シンタクスは switch ではありませ
+ん。英語らしさにこだわる Larry の手にかかると、switch ... case は、
+given ... when になります。
 
 
 * local 
 
-local �� temp �Ȳ�̾����ޤ����������� Perl 5 �ˤʤäƤ���� local �ϡ�
-����Υ�������ʥ������פȤ��Ƥ����� my �˾��äƤ��ꡢ�ϥå���ΰ���
-�Ǥ��ü��ѿ�����Ū���ѹ����뤿��˻Ȥ��뤳�Ȥ�¿�������β�̾������
-�Ȥ����ޤ��͡�
+local は temp と改名されます。たしかに Perl 5 になってからの local は、
+本来のローカルなスコープとしての役割は my に譲っており、ハッシュの一要
+素や特殊変数を一時的に変更するために使われることが多く、この改名は妥当
+といえますね。
 
   temp $/ = undef;
 
 
 * pseudo-hash must die!
 
-perl 5.5 ����¸�Ū��Ƴ�����줿 psuedo-hash ���ѻߤ���ޤ�������Τ褦
-�˥���ѥ��Ȥʥϥå�����̤���ˡ���󶡤����褦�Ǥ���
+perl 5.5 から実験的に導入された psuedo-hash は廃止されます。配列のよう
+にコンパクトなハッシュは別の方法で提供されるようです。
 
 
-* �ǥ�ե����
+* デリファレンス
 
-�ǥ�ե���󥹤ϥ������ѿ���ľ��˥��å���Ĥ��뤳�ȤǹԤ��ޤ���
-$foo->[0] �� $foo[0] �ˤʤ�Ȥ����櫓�Ǥ�������� Damian Conway �� 
-Exegesis 2 ���ɤ���ͤʤ�狼��ޤ���͡�
+デリファレンスはスカラ変数の直後にカッコをつけることで行います。
+$foo->[0] が $foo[0] になるというわけです。これは Damian Conway の 
+Exegesis 2 を読んだ人ならわかりますよね。
 
   http://bulknews.net/lib/doc-ja/exegesis2.ja.html
 
 
-* ���饹�ȥ⥸�塼��
+* クラスとモジュール
 
-���饹�ȥ⥸�塼��ˤ����Τʶ��̤��Ĥ�����褦�ˤʤ�ޤ���(����Ū��
-���ҤϤ狼��ޤ���) �ޤ������饹��⥸�塼�����ˡ����֥ѥå�������
-�Ĥ��뤳�Ȥ��Ǥ��ޤ���Unix �����Хѥ��Τ褦�ʵ���ˡ���Ǥ���褦�ˤʤꡢ
-Ĺ���ѥå�����̾ Myclass::SubclassA::SubclassB �򥿥��פ���ɬ�פϤʤ�
-�ʤ뤽���Ǥ���
-
-
-* ���饹�ȥ᥿�ǡ���
-
-�⥸�塼����˥��ȥ�ӥ塼�Ȥ��������ȡ����饹�����Ǥ��ѿ��Ȥ��ư���
-���Ȥ�����ޤ������饹��������ϥ��������᥽�åɤˤ�äƥ����������ޤ���
-�������ä����Ȥߤ������٥���󶡤����褦�ˤʤ�Ȥ����Τϡ�OO ����
-���륢�ץ������Ȥ��Ƥ��礭���Ѳ��Ȥ��������Ǥ���
+クラスとモジュールには明確な区別がつけられるようになります。(具体的な
+記述はわかりませんが) また、クラスやモジュールの中に、サブパッケージを
+つくることができます。Unix の相対パスのような記述法ができるようになり、
+長いパッケージ名 Myclass::SubclassA::SubclassB をタイプする必要はなく
+なるそうです。
 
 
-* ����å�
+* クラスとメタデータ
 
-Perl 6 �δ���Ū�ʥ���åɥ�ǥ�ϡ�5.6 �Ǻ��Ѥ��줿 ithread (���󥿥�
-�꥿�١����Υ���å�) �ˤʤꤽ���Ǥ����⥸�塼��ϴ���Ū�˥���åɥ���
-�դǤʤ���Фʤ餺���⥸�塼����Υ᥿�ǡ����ˤ�äƥ���åɰ���������
-������ɬ�פ�����ޤ����⥸�塼�����ͤˤȤäƤϵ��ˤʤ�Ȥ����Ǥ��͡�
+モジュール内にアトリビュートを宣言すると、クラス内部では変数として扱う
+ことが出来ます。クラス外部からはアクセサメソッドによってアクセスします。
+こういった仕組みが言語レベルで提供されるようになるというのは、OO に対
+するアプローチとしては大きな変化といえそうです。
+
+
+* スレッド
+
+Perl 6 の基本的なスレッドモデルは、5.6 で採用された ithread (インタプ
+リタベースのスレッド) になりそうです。モジュールは基本的にスレッドセー
+フでなければならず、モジュール内のメタデータによってスレッド安全性を宣
+言する必要があります。モジュールを作る人にとっては気になるところですね。
 
 
 * Perl parser
 
-Perl �Ǥ����줿 Perl �ѡ������Ǥ��ޤ���eval ��ѡ������Ϥ��ơ������� 
-Virtual Machine ��Ǽ¹Ԥ�����Ȥ���������ʤ��Ȥ����褽���Ǥ���
+Perl でかかれた Perl パーサができます。eval をパーザに渡して、小さな 
+Virtual Machine 上で実行させるとか、いろんなことが出来そうです。
 
 
 * POD
 
-POD ��˥ƥ��Ȥ�񤯤��Ȥ������褦�ˤʤ�ޤ�������ϰ����Ҳ𤷤� 
-Pod::Tests �Ǥ��礦�͡�
+POD 中にテストを書くことが出来るようになります。これは以前紹介した 
+Pod::Tests でしょうね。
 
   http://search.cpan.org/search?dist=Pod-Tests
 
 
-* �ü��ѿ��ΰ���
+* 特殊変数の扱い
 
-$_ �Ϥ��Τޤ޻Ĥ�ޤ���$( �Ϥʤ��ʤ�Τǡ�$(...) ���Ȥ���褦�ˤʤ��
-�������ȤǤ���
-
-
+$_ はそのまま残ります。$( はなくなるので、$(...) が使えるようになると
+いうことです。
 
 
-�ʾ塢�����Ĥޤ�ǾҲ𤷤ޤ��������ܤ������Ƥϡ�Perl.com �� Simon
-Cozens ����� article ��������������
+
+
+以上、かいつまんで紹介しましたが、詳しい内容は、Perl.com の Simon
+Cozens さんの article をご覧ください。
 
   http://www.perl.com/pub/a/2001/07/25/onion.html
 
-�ޤ���use Perl; �� Nathan Takington ����� journal ���顢mp3 �ǹֱ���
-�Ƥ�ʹ�����Ȥ�����ޤ���
+また、use Perl; の Nathan Takington さんの journal から、mp3 で講演内
+容を聞くことが出来ます。
 
   http://use.perl.org/journal.pl?op=display&uid=29
 

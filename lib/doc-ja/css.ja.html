@@ -13,13 +13,13 @@
 
 	<LI><A HREF="#NAME">NAME</A>
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
-	<LI><A HREF="#_">Ƴ��</A>
-	<LI><A HREF="#_">�����������ȥ�����ץƥ��󥰤Ȥϲ���</A>
-	<LI><A HREF="#_">����塼�����</A>
-	<LI><A HREF="#mod_perl_">mod_perl �ǤΥ���塼�����</A>
+	<LI><A HREF="#_">導入</A>
+	<LI><A HREF="#_">クロスサイトスクリプティングとは何か</A>
+	<LI><A HREF="#_">ソリューション</A>
+	<LI><A HREF="#mod_perl_">mod_perl でのソリューション</A>
 	<LI><A HREF="#Tainting_Apache_Request_A">Tainting + Apache::Request.... Apache::TaintRequest</A>
-	<LI><A HREF="#_">����</A>
-	<LI><A HREF="#_">�꥽����</A>
+	<LI><A HREF="#_">結論</A>
+	<LI><A HREF="#_">リソース</A>
 </UL>
 <!-- INDEX END -->
 
@@ -42,36 +42,36 @@ HREF="http://www.perl.com/pub/a/2002/02/20/css.html">http://www.perl.com/pub/a/2
 
 <P>
 <HR>
-<H1><A NAME="_">Ƴ��</A></H1>
+<H1><A NAME="_">導入</A></H1>
 <P>
-�����������ȥ�����ץƥ��󥰥����å��ϡ������� Web �ǥ٥��åѡ���ľ��
-���Ƥ��롢��ƨ���ʤ��������ƥ������1�ĤǤ��������֥����Ȥ��ȼ�ˤ�
-��Τϡ��桼���� submit ��������ƥ�Ĥ򡢰��դ��륿���ˤĤ��ƥ����å�
-���뤳�Ȥʤ�ɽ�����Ƥ��ޤ��Ȥ��Ǥ���
+クロスサイトスクリプティングアタックは、今日の Web デベロッパーが直面
+している、見逃せないセキュリティ問題の1つです。ウェブサイトが脆弱にな
+るのは、ユーザが submit したコンテンツを、悪意あるタグについてチェック
+することなく表示してしまうときです。
 
 <P>
-�����ˤ⡢Perl �� mod_perl ��Ȥ��Ф�������˴�ñ���н褹�뤳�Ȥ��Ǥ�
-��ΤǤ�����������������б�����ӥ�ȥ���ˤĤ��Ʋ��⤷�������� mod_perl
-�⥸�塼�� <EM>Apache::TaintRequest</EM> ��Ҳ𤷤ޤ������Υ⥸�塼 ���Ȥ��ȡ�perl �ζ��Ϥ� taint �롼��� HTML
-��Ŭ�Ѥ��� mod_perl ���� �ꥱ�������򥻥��奢���ݤĤ��Ȥ��Ǥ��ޤ���
+幸運にも、Perl と mod_perl を使えばこの問題に簡単に対処することができ
+るのです。こうした問題に対応するビルトインについて解説し、新しい mod_perl
+モジュール <EM>Apache::TaintRequest</EM> を紹介します。このモジュー ルを使うと、perl の強力な taint ルールを HTML
+に適用して mod_perl アプ リケーションをセキュアに保つことができます。
 
 <P>
 <HR>
-<H1><A NAME="_">�����������ȥ�����ץƥ��󥰤Ȥϲ���</A></H1>
+<H1><A NAME="_">クロスサイトスクリプティングとは何か</A></H1>
 <P>
-�Ả��Web�����ȤΥ������ƥ�����˴ؤ����ݡ��Ȥ��˥塼������������
-���ޤ����Ƕ�Ǥϰʲ��Τ褦�ʤ��äȤ���˥塼�����إåɥ饤��ˤǤƤ���
-����: Microsoft Wallet �Υ������ƥ��ۡ���, Schwab �ե��ʥ󥷥�륵��
-�Ȥ��ȼ�����Web�����ӥ��򶼤������⡣������������κ����ȤʤäƤ���� �ϡ�<EM>�����������ȥ�����ץƥ���</EM> �����å��Ǥ��������ФΥ��ڥ졼���� �󥷥��ƥ��
-Web�����Х��եȥ������Υۡ�����ͤ��ΤǤϤʤ��������Ȥ�ˬ
-���桼���򹶷���оݤȤ��ޤ����桼������ޤ��ơ������оݤΥ����Ȥ�ư
-Ū�ե�����ˡ�������ץȥ����� (JavaScript, Jscript �ʤ�) �򥵥֥ߥå�
-�����ޤ����оݤ�Web�����Ȥ����ϤΥ�����ץȥ����ɤ�����å����ʤ��ȡ�
-���Τޤ��̲ᤷ�ƥ桼���Υ֥饦���˥����ɤ�ɽ�����Ƥ��ޤ������⤬�Ԥ��
-��ΤǤ���
+近頃、Webサイトのセキュリティ問題に関するレポートがニュースを騒がせて
+います。最近では以下のようなぞっとするニュースがヘッドラインにでていま
+した: Microsoft Wallet のセキュリティホール, Schwab フィナンシャルサイ
+トの脆弱性、Webサービスを脅かす攻撃。こうした問題の根源となっているの は、<EM>クロスサイトスクリプティング</EM> アタックです。サーバのオペレーショ ンシステムや
+Webサーバソフトウェアのホールを突くのではなく、サイトを訪
+れるユーザを攻撃の対象とします。ユーザをだまして、攻撃対象のサイトの動
+的フォームに、スクリプトコード (JavaScript, Jscript など) をサブミット
+させます。対象のWebサイトが入力のスクリプトコードをチェックしないと、
+そのまま通過してユーザのブラウザにコードを表示してしまい、攻撃が行われ
+るのです。
 
 <P>
-�ʲ���URL��ߤƤ���������
+以下のURLをみてください。
 
 <P>
 <CODE>http://www.example.com/search.pl?text=&amp;lt;script&amp;gt;alert(document.cookie)&amp;lt;/script&amp;gt;</CODE>
@@ -80,20 +80,20 @@ Web�����Х��եȥ������Υۡ�����ͤ��ΤǤϤʤ��������Ȥ�ˬ
 
 
 <P>
-�����å���������������󥯤˥桼����ͶƳ���ơ�Web ���ץꥱ������󤬤�
-�����Ϥ�Х�ǡ��Ȥ��Ƥ��ʤ��ȡ����ߤ� cookie �����Ƥ��֥饦����˥ݥ�
-�ץ��åפ���ޤ������Υ���ץ��̵���Ǥ����������å������Ǥ��뤳�ȤϤ�
-������ǤϤ���ޤ��󡣥ѥ���ɤ������ꡢ�������ȥڡ�����񤭴�����
-�ꡢ�̤� Web �����Ȥ�ͶƳ��������Ȥ��ä����Ȥ��Ǥ��ޤ���
+アタッカーがこうしたリンクにユーザを誘導して、Web アプリケーションがこ
+の入力をバリデートしていないと、現在の cookie の内容がブラウザ上にポッ
+プアップされます。このサンプルは無害ですが、アタッカーができることはこ
+れだけではありません。パスワードを盗んだり、スタートページを書き換えた
+り、別の Web サイトに誘導させたりといったことができます。
 
 <P>
-����˰������Ȥˡ�����������󥯤�ͶƳ������ɬ�פ���ʤ��ΤǤ���������
-���������ʤ��Υ��ץꥱ��������HTML��ɽ�������뤳�Ȥ��Ǥ���С������
-��������Ǥ���<STRONG>IMG</STRONG> ������ <STRONG>IFRAME</STRONG> ������Ȥ��С�HTML��ɽ�����줿��
-�֤��̤�URL������ɤ��뤳�Ȥ��Ǥ��ޤ������Ȥ��С��ʲ���HTML���Ҥϡ�
-BadTrans ��ब���Ф���⤪�ΤǤ������Υ��� IFRAME �Ρָ����ִ�
-�˥����ɤ���פȤ���������Ȥäơ�Outlook �� Outlook Express �򹶷⤷
-�ޤ���
+さらに悪いことに、こうしたリンクに誘導させる必要すらないのです。アタッ
+カーがあなたのアプリケーションにHTMLを表示させることができれば、それだ
+けで問題です。<STRONG>IMG</STRONG> タグと <STRONG>IFRAME</STRONG> タグを使えば、HTMLが表示された瞬
+間に別のURLをロードすることができます。たとえば、以下のHTML断片は、
+BadTrans ワームが送出するもおのです。このワームは IFRAME の「見た瞬間
+にロードする」という性質を使って、Outlook と Outlook Express を攻撃し
+ます。
 
 <P>
 <PRE>  --====_ABC1234567890DEF_====
@@ -120,9 +120,9 @@ BadTrans ��ब���Ф���⤪�ΤǤ������Υ��� IFRAME �Ρָ����ִ�
   Content-ID: &lt;EA4DMGBP9p&gt;
 </PRE>
 <P>
-���Υ���ץ�Ǥϡ��������åȤȤʤ륳��ԥ塼����ǥ����ɤ�¹Ԥ��뤳��
-�ˤʤ�ޤ��������å��������Τ褦��HTML��ɽ��������ΤϾ�Ҥ����褦��
-URL��Ȥäơ���ñ�ˤǤ��ޤ�:
+このサンプルでは、ターゲットとなるコンピュータ上でコードを実行すること
+になります。アタッカーがこのようなHTMLを表示させるのは上述したような
+URLを使って、簡単にできます:
 
 <P>
 <CODE>&amp;lt;iframe
@@ -132,30 +132,30 @@ src=&quot;http://www.example.com/search.pl?text=&amp;lt;script&amp;gt;alert(docu
 
 
 <P>
-``�����������ȥ�����ץƥ���'' �� ``������������'' ����ʬ�������Ƥ����
-�ϡ������֥֥饦���� Cookie ���Ф�������򰷤��Ȥ��Ǥ��������ʥ֥饦
-������ܤ���Ƥ���JavaScript ���󥸥�ϡ�Cookie ���������������Ȥ��餷
-�������� Cookie �˥����������뤳�ȤϤǤ��ޤ��󡣤���äȤ����ޤ�������
-��ץȤ����Ѥ��뤳�Ȥˤ�äơ������å����Ϥ��������Х��ѥ����뤳�Ȥ�
-�Ǥ���ΤǤ���
+``クロスサイトスクリプティング'' の ``クロスサイト'' の部分が効いてくるの
+は、ウェブブラウザの Cookie に対する制約を扱うときです。モダンなブラウ
+ザに搭載されているJavaScript エンジンは、Cookie を生成したサイトからし
+か、その Cookie にアクセスすることはできません。ちょっとしたまずいスク
+リプトを利用することによって、アタッカーはこの制約をバイパスすることが
+できるのです。
 
 <P>
-Perl �ˤ������ˤ������ޤ��������ɤ��������åȤȤʤ�ޤ���������������
-������ץƥ��󥰥����å����ɤ������ϡ�Web�֥饦������Υǡ��������Фˡ�
-���ꤷ�ʤ����ȤǤ������٤Ƥ����ϥǡ����Ϥ��䤷���ȻפäƤΤ��ޤʤ��Ƥ�
-�ʤ�ޤ���
+Perl にしろ何にしろ、まずいコードがターゲットとなります。クロスサイト
+スクリプティングアタックを防ぐカギは、Webブラウザからのデータを絶対に、
+信頼しないことです。すべての入力データはあやしいと思ってのぞまなくては
+なりません。
 
 <P>
 <HR>
-<H1><A NAME="_">����塼�����</A></H1>
+<H1><A NAME="_">ソリューション</A></H1>
 <P>
-������������� Perl �� mod_perl ���Ѥ��������ƥ�ǲ�褹��ˤϡ�������
-����ˡ������ޤ����ɤ��ȤƤ⥷��ץ�ʤ�Τǡ��桼�������Ϥ��֥饦��
-��ɽ��������ǽ����������ˤϡ�ɬ���Ȥ��٤��Ǥ���
+こうした問題を Perl や mod_perl を用いたシステムで解決するには、いくつ
+か方法があります。どれもとてもシンプルなもので、ユーザの入力がブラウザ
+に表示される可能性がある場合には、必ず使うべきです。
 
 <P>
-�ʲ��Υ�����ץ� <EM>search.pl</EM> ��ߤƤ�������������ץ�� CGI������ץ� �ǡ�'text'
-�Ȥ����ѥ�᡼���������äơ������ɽ�����ޤ���
+以下のスクリプト <EM>search.pl</EM> をみてください。シンプルな CGIスクリプト で、'text'
+というパラメータを受け取って、それを表示します。
 
 <P>
 <PRE>        #!/usr/bin/perl
@@ -170,25 +170,25 @@ Perl �ˤ������ˤ������ޤ��������ɤ��������åȤȤʤ�ޤ���������������
         print &quot;You entered $text&quot;;
 </PRE>
 <P>
-���Υ�����ץȤϥ��֥ߥåȤ��줿�ǡ����򤽤Τޤ�ɽ�����Ƥ��뤿�ᡢ����
-�������ȥ�����ץƥ��󥰥����å����Ф����ȼ�Ǥ��������ȼ�����Ȥ�Τ�
-���ˤϡ����ϤΥХ�ǡ��������Ȥ߹��फ��ɽ���������� HTML����������
-�����褦�ˤ��ޤ���
+このスクリプトはサブミットされたデータをそのまま表示しているため、クロ
+スサイトスクリプティングアタックに対して脆弱です。この脆弱性をとりのぞ
+くには、入力のバリデーションを組み込むか、表示する前に HTMLエスケープ
+されるようにします。
 
 <P>
-�Х�ǡ��������Ȥ߹���ˤϡ��ʲ��Υ����ɤ���Ϥ������դ��ä��ޤ�����
-�Υ����ɤϱѿ����ȥ��ڡ����ʳ��򤹤٤ƽ���ޤ���
+バリデーションを組み込むには、以下のコードを出力の前に付け加えます。こ
+のコードは英数字とスペース以外をすべて除去します。
 
 <P>
 <PRE>        $text =~ s/[^A-Za-z0-9 ]*/ /g;
 </PRE>
 <P>
-�����������ϥХ�ǡ������ϤϤä��ꤤ�ä����ݤǤ����⤦1�Ĥβ�ˡ�ϡ�
-���֥ߥåȤ��줿�ǡ�����HTML���������פ��뤳�ȤǤ���libwww-perl ��
-CPAN�ǥ����ȥ�ӥ塼�����˴ޤޤ�Ƥ��� HTML::Entities �⥸�塼�뤬��
-�ε�ǽ���äƤ��ޤ������Υ⥸�塼��ϡ�HTMLʸ����HTML����ƥ��ƥ�����
-�˥��󥳡��ɤ��ޤ������Ȥ��С�<STRONG>&lt;</STRONG> �� <STRONG>&lt;</STRONG> �ˡ�<STRONG>"</STRONG> �� 
-<STRONG>&quot;</STRONG> �ˡ��Ȥ��ä������Ѵ�����ޤ���<EM>search.pl</EM> �ˤ��ε�ǽ���� ���ä���Ȱʲ��Τ褦�ˤʤ�ޤ���
+こうした入力バリデーションははっきりいって面倒です。もう1つの解法は、
+サブミットされたデータをHTMLエスケープすることです。libwww-perl の
+CPANディストリビューションに含まれている HTML::Entities モジュールがこ
+の機能をもっています。このモジュールは、HTML文字をHTMLエンティティ参照
+にエンコードします。たとえば、<STRONG>&lt;</STRONG> は <STRONG>&lt;</STRONG> に、<STRONG>"</STRONG> は 
+<STRONG>&quot;</STRONG> に、といった具合に変換されます。<EM>search.pl</EM> にこの機能を付 け加えると以下のようになります。
 
 <P>
 <PRE>        #!/usr/bin/perl
@@ -205,14 +205,14 @@ CPAN�ǥ����ȥ�ӥ塼�����˴ޤޤ�Ƥ��� HTML::Entities �⥸�塼�뤬��
 </PRE>
 <P>
 <HR>
-<H1><A NAME="mod_perl_">mod_perl �ǤΥ���塼�����</A></H1>
+<H1><A NAME="mod_perl_">mod_perl でのソリューション</A></H1>
 <P>
-��Τ褦�ʲ�ˡ�� mod_perl �ǤΥץ�����ߥ󥰤Ǥ�Ʊ�ͤ�ͭ���Ǥ���
-Apache::Registry ������ץȤ� mod_perl �ϥ�ɥ��Ʊ���褦�ˤ��ƥ�����
-�����ȥ�����ץƥ��󥰤��ɤ����Ȥ��Ǥä��ޤ����⤤�ѥե����ޥ󥹤�����
-�ˤϡ�HTML::Entities::encode() �ǤϤʤ���mod_perl ����°���Ƥ��롢���
-��®�� Apache::Util::escape_html() ��Ȥ��Ȥ褤�Ǥ��礦��<EM>search.pl</EM> 
-�� Apache::Registry ������ץȥС�������ʲ��˼����ޤ���
+上のような解法は mod_perl でのプログラミングでも同様に有効です。
+Apache::Registry スクリプトや mod_perl ハンドラも同じようにしてクロス
+サイトスクリプティングを防ぐことがでっきます。高いパフォーマンスを得る
+には、HTML::Entities::encode() ではなく、mod_perl に付属している、より
+高速な Apache::Util::escape_html() を使うとよいでしょう。<EM>search.pl</EM> 
+の Apache::Registry スクリプトバージョンを以下に示します。
 
 <P>
 <PRE>        use Apache::Util;
@@ -230,32 +230,32 @@ Apache::Registry ������ץȤ� mod_perl �ϥ�ɥ��Ʊ���褦�ˤ��ƥ�����
         $r-&gt;print(&quot;You entered &quot;, Apache::Util::html_encode($text));
 </PRE>
 <P>
-���Τ�����Apache::Util::html_encode() ���٤ⲿ�٤⥿���פ���Τ�����
-�����ˤʤäƤ���Ǥ��礦���Ȥ��ˡ�������Ǥ����ϥХ�ǡ������򤷤�
-���ꡢ¾�ǤϤ��Ƥ��ʤ����Ȥ����褦�ʾ��ˡ��������������򥷥�ץ�ˤ�
-��ˤϡ�Apache::TaintRequest �⥸�塼���ȤäƤߤƤ������������Υ⥸�塼
-��� CPAN �� mod_perl Developer's Cookbook �Υ����Ȥ�������Ǥ��ޤ���
+そのうち、Apache::Util::html_encode() を何度も何度もタイプするのがおっ
+くうになってくるでしょう。とくに、ある場所では入力バリデーションをして
+おり、他ではしていない、というような場合に。こうした状況をシンプルにす
+るには、Apache::TaintRequest モジュールを使ってみてください。このモジュー
+ルは CPAN や mod_perl Developer's Cookbook のサイトから入手できます。
 
 <P>
-Apache::TaintRequest �Ϥ������������ HTML���������׽�����ư�����ޤ���
-���Υ⥸�塼��ϡ�mod_perl �� Apache �⥸�塼��� print �ᥫ�˥���򥪡�
-�С��饤�ɤ��ޤ���<EM>print</EM> �᥽�åɤǥƥ����Ȥ� taint �ʱ������Ƥ���� ���ɤ��������å����ޤ���taint
-�Ǥ��ä����ˤϡ����Ϥ������� HTML ���� �����פ��ޤ���
+Apache::TaintRequest はこうした退屈な HTMLエスケープ処理を自動化します。
+このモジュールは、mod_perl の Apache モジュールの print メカニズムをオー
+バーライドします。<EM>print</EM> メソッドでテキストが taint （汚染している） かどうかチェックします。taint
+であった場合には、出力する前に HTML エス ケープします。
 
 <P>
-Perl �ˤϡ�taint-mode �Ȥ����Τ��롢�ӥ�ȥ���Υ������ƥ������å�
-��ǽ������ޤ������Υ����å��ˤ�äơ��ץ������γ�¦�����äƤ���
-<EM>tainted</EM> �ʥǡ��������Τޤޥե������ץ��������ǥ��쥯�ȥ���Ф���
-�¹Ԥ���뤳�Ȥ��ɸ椹�뤳�Ȥ��Ǥ��ޤ���Apache::TaintRequest �Ϥ���<EM>������</EM>
-���ꥹ�Ȥ��ĥ���ơ�Web ���饤����Ȥ�HTML��ɽ�����뤳�Ȥ���
-�ä��ޤ����ǡ����� <EM>untaint</EM> �ʱ�����Ȥ�Τ����ˤ���ˤϡ��̾������ ɽ���ǽ�����������Ǥ���Tainting
-�ϡ�Perl Web �ǥ٥��åѡ��ˤȤäơ���
-�⶯�Ϥʥ������ƥ������ɤˤʤ�ޤ���<STRONG>perlsec</STRONG> �ɥ�����Ȥ⻲�Ȥ�
-�ơ����ʤ�����Web���ץꥱ������󤹤٤Ƥ�Ŭ�Ѥ��Ƥ���������
+Perl には、taint-mode として知られる、ビルトインのセキュリティチェック
+機能があります。このチェックによって、プログラムの外側からやってきた
+<EM>tainted</EM> なデータがそのままファイルやプロセス、ディレクトリに対して
+実行されることを防御することができます。Apache::TaintRequest はこの<EM>危険な</EM>
+操作リストを拡張して、Web クライアントにHTMLを表示することも追
+加します。データを <EM>untaint</EM> （汚染をとりのぞく）するには、通常の正規 表現で処理するだけです。Tainting
+は、Perl Web デベロッパーにとって、最
+も強力なセキュリティガードになります。<STRONG>perlsec</STRONG> ドキュメントも参照し
+て、あなたが書くWebアプリケーションすべてに適用してください。
 
 <P>
-Apache::TaintRequest ��ͭ���ˤ���ˤϡ��ޤ��ʲ��Υǥ��쥯�ƥ��֤�
-httpd.conf ���ɲä��ޤ���
+Apache::TaintRequest を有効にするには、まず以下のディレクティブを
+httpd.conf に追加します。
 
 <P>
 <PRE>       PerlTaintCheck on    
@@ -264,12 +264,12 @@ httpd.conf ���ɲä��ޤ���
 This activates taint mode for the entire mod_perl server.
 
 <P>
-����ˤ�äơ�mod_perl ���������Τ� taint �⡼�ɤ�ͭ���ˤʤ�ޤ���
+これによって、mod_perl サーバ全体に taint モードが有効になります。
 
 <P>
-�Ĥ��ˤ��٤����Ȥϡ�������ץȤ�ϥ�ɥ��Apache::Request �Τ���� ��
-Apache::TaintRequest ��Ȥ��褦�˽������뤳�ȤǤ�����Υ�����ץȤ�
-�ʲ��Τ褦�ˤʤ�ޤ�:
+つぎにやるべきことは、スクリプトやハンドラを、Apache::Request のかわり に
+Apache::TaintRequest を使うように修正することです。上のスクリプトは
+以下のようになります:
 
 <P>
 <PRE>        use Apache::TaintRequest;
@@ -292,28 +292,28 @@ Apache::TaintRequest ��Ȥ��褦�˽������뤳�ȤǤ�����Υ�����ץȤ�
         $r-&gt;print(&quot;You entered &quot;, $text);
 </PRE>
 <P>
-������ץȤǤϤޤ� tainted �ʥե�����ǡ��� 'text' �� <CODE>$text</CODE>
-�˳�Ǽ���� �������Υǡ�������Ϥ���ȡ���ưŪ�� HTML
-���������פ���ޤ������ˡ��ǡ�
-�����Ф��ƥХ�ǡ�������¹Ԥ��ޤ������μ��� print ʸ�Ǥϡ���ưŪ��
-HTML���������פ���뤳�ȤϤ���ޤ���
+スクリプトではまず tainted なフォームデータ 'text' を <CODE>$text</CODE>
+に格納しま す。このデータを出力すると、自動的に HTML
+エスケープされます。次に、デー
+タに対してバリデーションを実行します。その次の print 文では、自動的に
+HTMLエスケープされることはありません。
 
 <P>
 <HR>
 <H1><A NAME="Tainting_Apache_Request_A">Tainting + Apache::Request.... Apache::TaintRequest</A></H1>
 <P>
-Apache::TaintRequest �μ��������ɤϤȤƤ⥷��ץ�Ǥ���Apache::Request
-�⥸�塼��Υ��֥��饹�ǡ��ե�����ե�����ɤȽ��Ϥν������󶡤��ޤ���
-<EM>print</EM> �᥽�åɤ򥪡��С��饤�ɤ��ơ��ǡ�����HTML���������פ��ޤ���
-<EM>new</EM> �᥽�åɤ⥪���С��饤�ɤ��ơ�Apache �� TIEHANDLE ���󥿥ե��� �������Ѥ���
-STDOUT �ؤν��Ϥ� <CODE>print()</CODE> �ǽ����Ǥ���褦�ˤ��ޤ���
+Apache::TaintRequest の実装コードはとてもシンプルです。Apache::Request
+モジュールのサブクラスで、フォームフィールドと出力の処理を提供します。
+<EM>print</EM> メソッドをオーバーライドして、データをHTMLエスケープします。
+<EM>new</EM> メソッドもオーバーライドして、Apache の TIEHANDLE インタフェー スを利用して
+STDOUT への出力も <CODE>print()</CODE> で処理できるようにします。
 
 <P>
-���ϥǡ����������ä��顢���줬 ��������Ƥ��뤫�ɤ�����Ƚ�̤���ɬ��
-������ޤ��������Ǥ� <EM>Taint</EM> �⥸�塼�� (CPAN ��������Ǥ��ޤ�) ���� ���Ǥ���<EM>print</EM> �᥽�åɤ���ǡ����Υ⥸�塼���Ȥäơ�ʸ���󤬱���
-����Ƥ��뤫�ɤ�����HTML���������פ���ɬ�פ����뤫������å����ޤ�����
-������Ƥ�����ˤϡ�mod_perl �� Apache::Util::html_escape() �� HTML
-���������פ��ޤ���
+出力データを受け取ったら、それが 汚染されているかどうかを判別する必要
+があります。ここでは <EM>Taint</EM> モジュール (CPAN から入手できます) が便 利です。<EM>print</EM> メソッドの中で、このモジュールを使って、文字列が汚染
+されているかどうか、HTMLエスケープする必要があるかをチェックします。汚
+染されている場合には、mod_perl の Apache::Util::html_escape() で HTML
+エスケープします。
 
 <P>
 <PRE> package Apache::TaintRequest;
@@ -356,8 +356,8 @@ STDOUT �ؤν��Ϥ� <CODE>print()</CODE> �ǽ����Ǥ���褦�ˤ��ޤ���
  }
 </PRE>
 <P>
-�⥸�塼��κǸ�ˡ�<EM>new()</EM> �᥽�åɤǻȤäƤ���TIEHANDLE ���󥿡��ե���
-�����������ɬ�פ�����ޤ����ʲ��Υ����ɤ� <EM>TIEHANDLE</EM> �� <EM>PRINT</EM> �� ���åɤ�������Ƥ��ޤ���
+モジュールの最後に、<EM>new()</EM> メソッドで使っているTIEHANDLE インターフェー
+スを定義する必要があります。以下のコードで <EM>TIEHANDLE</EM> と <EM>PRINT</EM> メ ソッドを実装しています。
 
 <P>
 <PRE> 
@@ -372,27 +372,27 @@ STDOUT �ؤν��Ϥ� <CODE>print()</CODE> �ǽ����Ǥ���褦�ˤ��ޤ���
  }
 </PRE>
 <P>
-���η�̡��������줿�ǡ����ϥ��������פ��졢��������Ƥ��ʤ��ǡ����Ϥ�
-�Τޤ�Web���饤����Ȥ��֤���ޤ���
+この結果、汚染されたデータはエスケープされ、汚染されていないデータはそ
+のままWebクライアントに返されます。
 
 <P>
 <HR>
-<H1><A NAME="_">����</A></H1>
+<H1><A NAME="_">結論</A></H1>
 <P>
-�����������ȥ�����ץƥ��󥰤Ͽ��������Ǥ��������ϡ����ϥ����å���
-HTML���������פǤ��äƤȤƤ⥷��ץ�Ǥ��������٤Ƥξ���Ŭ�Ѥ��ʤ���
-�Ϥʤ�ޤ���1�ĤǤ�ե�����ե�����ɤΥ����å���˺���ȡ��ʤˤ������
-���򤷤Ƥ��ʤ��Τ�Ʊ�ͤ˥����奢�Ǥʤ��ʤäƤ��ޤ��ޤ���
+クロスサイトスクリプティングは深刻な問題です。解決策は、入力チェックと
+HTMLエスケープであってとてもシンプルですが、すべての場合に適用しなくて
+はなりません。1つでもフォームフィールドのチェックを忘れると、なにもチェッ
+クをしていないのと同様にセキュアでなくなってしまいます。
 
 <P>
-�Ĥͤˡ����٤ƤΥǡ���������å����Ƥ��뤳�Ȥ��ݾڤ��뤿���
-Apache::TaintRequest �ϳ�ȯ����ޤ�����Perl �ζ��Ϥʥǡ��� tainting ��
-ǽ��Ȥäơ��Х�ǡ��Ȥ���Ƥ��ʤ����ϥǡ��������Ϥ����Ȥ��ˤϡ���ư
-��HTML���������פ��ޤ���
+つねに、すべてのデータをチェックしていることを保証するために
+Apache::TaintRequest は開発されました。Perl の強力なデータ tainting 機
+能を使って、バリデートされていない入力データが出力されるときには、自動
+でHTMLエスケープします。
 
 <P>
 <HR>
-<H1><A NAME="_">�꥽����</A></H1>
+<H1><A NAME="_">リソース</A></H1>
 <UL>
 <LI><STRONG><A NAME="item_CERT">CERT Advisory CA-2000-02 Malicious HTML Tags Embedded in Client
 Web Requests</A></STRONG>

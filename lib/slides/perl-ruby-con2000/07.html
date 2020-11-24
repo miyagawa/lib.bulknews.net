@@ -1,5 +1,5 @@
 <HTML>
-<HEAD><TITLE>Perl Conference - ¥â¥¸¥å¡¼¥ë¤Îºî¤êÊı</TITLE>
+<HEAD><TITLE>Perl Conference - ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ä½œã‚Šæ–¹</TITLE>
 <LINK rel="stylesheet" href="default.css">
 </HEAD>
 <BODY>
@@ -8,22 +8,22 @@
 <A href="06.html">[prev]</A> <A href="08.html">[next]</A>
 </DIV>
 <!-- /navi -->
-<H2>¥¯¥é¥¹¤ÎÎã</H2>
+<H2>ã‚¯ãƒ©ã‚¹ã®ä¾‹</H2>
 <HR>
 <UL>
-<LI>¿Í¤òÉ½¤¹<CODE>Person</CODE>¥¯¥é¥¹
+<LI>äººã‚’è¡¨ã™<CODE>Person</CODE>ã‚¯ãƒ©ã‚¹
 <BLOCKQUOTE><PRE><CODE>$p = new Person name => 'Tom', age => 20;
 $p->speak;	# prints "I am Tom, 20 years old."
 </CODE></PRE></BLOCKQUOTE>
-<LI>¼ÂÁõ¤Ï...
+<LI>å®Ÿè£…ã¯...
 <BLOCKQUOTE><PRE><CODE>package Person;
 sub new {
-    my $class = shift;		# ¥¯¥é¥¹Ì¾¤¬Âè1°ú¿ô
-    my $self = { @_ };		# °ú¿ô¤ò¥Ï¥Ã¥·¥å¤Ç¼õ¤±¤ë
-    bless $self, $class;	# ¥¯¥é¥¹¤Ë bless ¤¹¤ë
+    my $class = shift;		# ã‚¯ãƒ©ã‚¹åãŒç¬¬1å¼•æ•°
+    my $self = { @_ };		# å¼•æ•°ã‚’ãƒãƒƒã‚·ãƒ¥ã§å—ã‘ã‚‹
+    bless $self, $class;	# ã‚¯ãƒ©ã‚¹ã« bless ã™ã‚‹
 }
 sub speak {
-    my $self = shift;		# ¥ª¥Ö¥¸¥§¥¯¥È¼«¿È
+    my $self = shift;		# ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆè‡ªèº«
     printf 'I am %s, %d years old.', $self->{name}, $self->{age};
 }
 1;

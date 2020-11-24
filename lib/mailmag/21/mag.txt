@@ -4,20 +4,20 @@ Object-Oriented Programming with Perl Vol.21
 =======================================================
 
 
-1. Topics ��������������������������������������������
+1. Topics ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-�����Ҳ𤷤���Perl 6 �Ȥ�����������ڤ򸫤뤳�Ȥ������ Larry Wall 
-���ۼ�Ͽ�������Ƥ���ؤ����᤬ Damian Conway �� Exegesis 2 �Ǥ���
+前回も紹介した、Perl 6 という言語の片鱗を見ることが出来る Larry Wall 
+の黙示録、そしてそれへの注釈が Damian Conway の Exegesis 2 です。
 
-  * �᥽�åɸƤӽФ����ѹ�
-  * �ץ��ѥƥ��Ȥ�����ǰ���ɲ�
-  * is �黻��
-  * �ѿ��Υץ�ե��������ѹ�
+  * メソッド呼び出しの変更
+  * プロパティという概念の追加
+  * is 演算子
+  * 変数のプレフィクスの変更
 
-�Ȥ��ä���̣�����ȥԥå���������Ū�ʥץ�����ॵ��ץ�ȤȤ�˷Ǻܤ���
-�Ƥ��ޤ�������äȰ�����Τ����Ƥߤޤ��礦��
+といった興味深いトピックが、具体的なプログラムサンプルとともに掲載され
+ています。ちょっと一部をのぞいてみましょう。
 
-��������
+＿＿＿＿
 
 So, without further ado, let's write some Perl 6:
 
@@ -84,31 +84,31 @@ So, without further ado, let's write some Perl 6:
         }
 
 
-��������
+＿＿＿＿
 
 
-Damian Conway ����ε��Ĥ���äơ�����ˮ���� Web �Ǹ������Ƥ��ޤ���
+Damian Conway さんの許可をもらって、この邦訳を Web で公開しています。
 
   http://bulknews.net/lib/doc-ja/exegesis2.ja.html?m
 
-���Ҥ����ˤʤäƤߤƤ���������Perl 6 �˾���٤�ʤ��褦��...��
+ぜひご覧になってみてください。Perl 6 に乗り遅れないように...。
 
 
-2. YARPC 19101  ��������������������������������������
+2. YARPC 19101  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
 
-5/26 �� Yet Anothet Ruby/Perl Conference ���Ԥ��ޤ������ȤƤ�ڤ���
-���٥�ȤǤ��������Ĥ˴ؤ��줿�ߤʤ��ޤˤϿ����鴶�դ������Ȥ��⤤��
-����
+5/26 に Yet Anothet Ruby/Perl Conference が行われました。とても楽しい
+イベントでした。運営に関わられたみなさまには心から感謝したいとおもいま
+す。
 
-Lightning Talks �ˤ����Ѥ������饤�ɤ򤳤���Ǹ������Ƥ��ޤ���(PDF����)
+Lightning Talks にて利用したスライドをこちらで公開しています。(PDF形式)
 
   http://bulknews.net/lib/slides/yarpc19101/
 
 
-3. ����ͽ�� ������������������������������������������
+3. 次回予告 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Damian Conway �� NEXT.pm �ˤĤ��ƾҲ𤷤����Ȼפ��ޤ���
+Damian Conway の NEXT.pm について紹介したいと思います。
 
 
 --

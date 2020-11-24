@@ -3,53 +3,53 @@ Object-Oriented Programming with Perl Vol.26
           by Tatsuhiko Miyagawa <miyagawa@cpan.org>
 =======================================================
 
-1. 2001/09/09 ���� ��������������������������������
+1. 2001/09/09 問題 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-2001ǯ9��9������Ť�����ޤ�����������(*1)��UNIX epoch (1970/01/01) ��
-��� timestamp �����Ʒ�夬�ꤷ��10��ˤʤ�ޤ������ޤɤ���timestamp 
-�����Ĺʸ����ǰ��äƤ��륢�ץꥱ�������⾯�ʤ��Ǥ��礦���顢�����
-������ˤ����Ǥ��礦���������ե���ȥ���ɤΥ��ץꥱ�������� Perl ��
-�ȤäƤ����硢sort �ؿ��μ谷�������դ�ɬ�פǤ���
+2001年9月9日が近づいて来ました。この日(*1)、UNIX epoch (1970/01/01) か
+らの timestamp が初めて桁上がりして10桁になります。いまどき、timestamp 
+を固定長文字列で扱っているアプリケーションも少ないでしょうから、問題は
+起こりにくいでしょう。ただ、フロントエンドのアプリケーションに Perl を
+使っている場合、sort 関数の取扱いに注意が必要です。
 
-*1) ���Τˤ�
+*1) 正確には
     % perl -le 'print scalar localtime(1_000_000_000)'
     Sun Sep  9 10:46:40 2001
 
 
-2. Dunce::time ������������������������������������
+2. Dunce::time ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl �� sort �ؿ��ϥ����ɥ֥��å��˲���Ϳ���ʤ���硢ʸ����Ȥ��Ƥ���
-�Ӥ�Ԥ��ޤ������ͤȤ�����Ӥ�������С�����Ū�˻��ꤹ��ɬ�פ�����ޤ���
+Perl の sort 関数はコードブロックに何も与えない場合、文字列としての比
+較を行います。数値として比較したければ、明示的に指定する必要があります。
 
   % perl -le 'print join " ", sort 1, 2, 10'
   1 10 2
   % perl -le 'print join " ", sort { $a <=> $b } 1, 2, 10'
   1 2 10
 
-��äơ�time() �ؿ��Ǽ������� timestamp �򡢲���ͤ����� sort() ���Ϥ�
-����硢��夬��򤭤ä����ˡ�����ط������äƤ��ޤ����Ȥ����ꤵ��ޤ���
+よって、time() 関数で取得した timestamp を、何も考えずに sort() に渡し
+た場合、桁上がりをきっかけに、前後関係が狂ってしまうことが想定されます。
 
-�����ǡ�time() ��ʸ������Ӥ�ȥ�åפ���⥸�塼�� Dunce::time ��Ĥ���
-�Ƥߤޤ�����CPAN �ˤ⥢�åץ����ɤ��Ƥ���ޤ���
+そこで、time() の文字列比較をトラップするモジュール Dunce::time をつくっ
+てみました。CPAN にもアップロードしてあります。
 
   Dunce::time
   http://search.cpan.org/search?dist=Dunce-time
 
-ñ�ʤ륢���ǥ���Τǡ��ӥ�ȥ��� time() �ؿ����񤭤��ơ����ͤǤʤ���
-�֥������ȥ�ե���󥹤�񤯤褦�ˤ��ޤ��������ơ��黻�ҥ����С�������
-�����Ѥ��ơ�ʸ������Ӥ�ȥ�åפ��롢�Ȥ��������Ǥ���
+単なるアイデアもので、ビルトイン time() 関数を上書きして、数値でなくオ
+ブジェクトリファレンスを書くようにします。そして、演算子オーバーロード
+を利用して、文字列比較をトラップする、というだけです。
 
-�����褦�ʥ⥸�塼��ˡ�Y2K ��ȥ�åפ��� D'oh-Year �Ȥ����Τ������
-�����Ȥ�����ꡢ���Υ⥸�塼��Υɥ�����Ȥˤ��ä� TODO ��������Ƥ�
-���������ä��ꤷ�ޤ�����
+似たようなモジュールに、Y2K をトラップする D'oh-Year というのがありま
+す。というより、このモジュールのドキュメントにあった TODO を実装してみ
+ただけだったりしますが。
 
   D'oh-Year
   http://search.cpan.org/search?dist=D-oh-Year
 
-3. �黻�ҥ����С�������  ��������������������������
+3. 演算子オーバーロード  ＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl 5 �Υ����С������ɵ�ǽ�ϥ���ץ�˼����Ǥ��ޤ���overload �ץ饰��
-�ˤ�äơ������С������ɤ���黻�Ҥȡ��б�����᥽�åɤ�������ޤ���
+Perl 5 のオーバーロード機能はシンプルに実装できます。overload プラグマ
+によって、オーバーロードする演算子と、対応するメソッドを定義します。
 
   package Foo;
   use overload '""' => \&as_string;
@@ -58,21 +58,21 @@ Perl 5 �Υ����С������ɵ�ǽ�ϥ���ץ�˼����Ǥ��ޤ���overload �ץ饰��
       return 'foo';
   }
 
-���Τ褦�ˤ���С�Foo ���饹�Υ��󥹥��󥹤�ʸ���������ˤϡ�'foo' 
-�Ȥ���ʸ���Ȥ���ɾ������ޤ���
+このようにすれば、Foo クラスのインスタンスを文字列に落す場合には、'foo' 
+という文字として評価されます。
 
   package main;
   my $foo = bless {}, 'Foo';
   print $foo; # "foo"
 
 
-Dunce::time �Ǥϡ�ʸ������� (cmp) �򥪡��С������ɤ����㳰��夲��
-(*2)�褦�ˤ��Ƥ��ޤ�����äơ��ǡ����١����ʤɤˤ��ä��������Τ�ʸ
-������Ӥ�����ˤϡ���ǰ�ʤ�����̤Ϥʤ��Ǥ���
+Dunce::time では、文字列比較 (cmp) をオーバーロードし、例外を上げる
+(*2)ようにしています。よって、データベースなどにいったん落したものを文
+字列比較する場合には、残念ながら効果はないです。
 
-�ܤ����� perldoc overload, Dunce::time �Υ�������������������
+詳しくは perldoc overload, Dunce::time のソースをご覧ください。
 
-*2) import ���ץ����� warning �伫ư��������褦�ˤ�Ǥ��ޤ�.
+*2) import オプションで warning や自動修正するようにもできます.
 
 
 --

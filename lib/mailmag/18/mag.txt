@@ -4,20 +4,20 @@ Object-Oriented Programming with Perl Vol.18
 =======================================================
 
 
-1. �Ϥ���� ������������������������������������������
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-����Ϥ���ä����ʤ����Ƥ���Υ��ơ�DBI.pm �Υ��åץǡ��Ⱦ��������
-���ޤ���
+今回はちょっと普段の内容から離れて、DBI.pm のアップデート情報をお伝え
+します。
 
 
-2. DBI  ����������������������������������������������
+2. DBI  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl �ǥǡ����١������ץꥱ������������������ɬ�������äˤʤ� 
-DBI.pm[1]��Tim Bunce ���󤬺��������ǡ����١������󥿡��ե������⥸�塼
-��Ǥ���
+Perl でデータベースアプリケーションを作成する場合は必ずお世話になる 
+DBI.pm[1]。Tim Bunce さんが作成したデータベースインターフェースモジュー
+ルです。
 
-�Ĥ������С�����󥢥åפ��� 1.15[2] ����꡼������ޤ������ѹ����ʤ�
-�ϰʲ��Τ褦�ˤʤäƤ��ޤ���
+つい先日バージョンアップして 1.15[2] がリリースされました。変更点など
+は以下のようになっています。
 
 Changes in DBI 1.15,    28th March 2001
 
@@ -66,34 +66,34 @@ Changes in DBI 1.15,    28th March 2001
     Perl 5.004 doesn't. The leak is not a DBI or driver bug.
 
 
-�����֥��ץꥱ���������äƤ������ˤȤäƤ� select*_hashref ���礭
-���ѹ��Ǥ������ޤޤǤ� fetchall_arrayref({}) �Ȥ�����ˡ�Ǽ¸��ϤǤ���
-������������� prepare, execute �μ�֤⤤��ʤ��ʤ�ޤ�����(*1)
+ウェブアプリケーションを作っている方にとっては select*_hashref が大き
+な変更です。いままでも fetchall_arrayref({}) という方法で実現はできま
+したが、これで prepare, execute の手間もいらなくなりました。(*1)
 
-���Ȥ��� selectall_hashref ���Ѥ��뤳�Ȥǡ�
+たとえば selectall_hashref を用いることで、
 
   id | name  | email 
   ---+-------+---------
   1  | foo   | foo@bar
   2  | bar   | bar@foo
 
-�Ȥ��ä��ơ��֥뤫�顢
+といったテーブルから、
 
   [ { id => 1, name => 'foo', email => 'foo@bar' },
     { id => 2, name => 'bar', email => 'bar@foo' } ]
 
-�Ȥ��ä��֥ϥå����ե���󥹤������ե���󥹡פ���ñ�˼����Ǥ��ޤ���
-���ξ��Ǥ���� 
+といった「ハッシュリファレンスの配列リファレンス」が簡単に取得できます。
+この場合であれば 
 
   $dbh->selectall_hashref('SELECT id, name, email FROM users');
 
-�Τ褦�ˤ��ƤǤ���Ǥ��礦�����������ե���󥹤�����Ǥ��Ƥʤˤ�����
-�������Ȥ����ȡ�HTML::Template �� TMPL_LOOP �ˤ��Τޤ������Ǥ���Ȥ���
-���ȤǤ���DBI �� HTML::Template �ǥ�����+�ǡ����١����Υ��ץꥱ������
-���������Ƥ���ͤ�¿�����Ȼפ��ޤ���������ʤȤ����ʤ�ͭ���ˤʤ�ޤ�
-�͡�
+のようにしてできるでしょう。この配列リファレンスを取得できてなにがうれ
+しいかというと、HTML::Template の TMPL_LOOP にそのまま代入できるという
+ことです。DBI と HTML::Template でウェブ+データベースのアプリケーショ
+ンを作成している人も多いかと思いますが、そんなときかなり有効になります
+ね。
 
-*1 ��������٤ⷫ���֤��� execute ������� prepare ������ͭ���Ǥ���
+*1 もちろん何度も繰り返して execute する場合は prepare の方が有利です。
 
 
 [1] http://cpan2.org/Asset/display?dist=DBI

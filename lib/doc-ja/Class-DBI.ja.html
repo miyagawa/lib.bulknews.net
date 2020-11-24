@@ -2,21 +2,21 @@
 <HTML><HEAD><TITLE>search.cpan.org: The Ultimate CPAN Search</TITLE>
 <LINK REL="stylesheet" href="perldoc.css">
 </HEAD><BODY BGCOLOR="#FFFFFF" VLINK="#AA0000" FGCOLOR="#000000" LINK="#005555" ALINK="#006666">
-<HTML><HEAD><TITLE>Class::DBI - ���֥������ȤΥ���ץ�ʱ�³</TITLE></HEAD><BODY>
+<HTML><HEAD><TITLE>Class::DBI - オブジェクトのシンプルな永続</TITLE></HEAD><BODY>
 
-<p>����ʸ���Class::DBI�ν���С������Υɥ�����Ȥ���������Τǡ����ߤΥС������Ȥ�������������ޤ���<a href="http://search.cpan.org/dist/Class-DBI/">CPAN ����ǿ��ΥС������</a> ������������Ƥ��ǧ���Ƥ���������</p>
+<p>この文書はClass::DBIの初期バージョンのドキュメントを訳したもので、現在のバージョンとは整合性がありません。<a href="http://search.cpan.org/dist/Class-DBI/">CPAN から最新のバージョン</a> を取得して内容を確認してください。</p>
 
-<H1><A NAME="NAME">̾��
+<H1><A NAME="NAME">名前
 
-</A></H1><PRE>  Class::DBI - ���֥������ȤΥ���ץ�ʱ�³
+</A></H1><PRE>  Class::DBI - オブジェクトのシンプルな永続
 
 </PRE><PRE>
-</PRE><P><HR><H1><A NAME="SYNOPSIS">����
+</PRE><P><HR><H1><A NAME="SYNOPSIS">概要
 
 </A></H1><PRE>  package Film;
   use base qw(Class::DBI);
 
-</PRE><PRE>  # Class::DBI �ˤ��ʤ��Υ��饹�Τ��Ȥ򶵤��Ƥ�����
+</PRE><PRE>  # Class::DBI にあなたのクラスのことを教えてあげる
   Film-&gt;table('Movies');
   Film-&gt;columns(All     =&gt; qw( Title Director Rating NumExplodingSheep ));
   Film-&gt;columns(Primary =&gt; qw( Title ));
@@ -24,174 +24,174 @@
                {AutoCommit =&gt; 1});
 
 </PRE><PRE>
-</PRE><PRE>  #-- ������������ץȤ�����! --#
+</PRE><PRE>  #-- 一方、スクリプトの方で! --#
   use Film;
 
-</PRE><PRE>  # "Bad Taste" �Ѥαǲ襨��ȥ�򿷤������
+</PRE><PRE>  # "Bad Taste" 用の映画エントリを新しく作る
   $btaste = Film-&gt;new({ Title       =&gt; 'Bad Taste',
                         Director    =&gt; 'Peter Jackson',
                         Rating      =&gt; 'R',
                         NumExplodingSheep   =&gt; 1
                       });
   
-</PRE><PRE>  # 'Gone With The Wind' �Υ���ȥ��ǡ����١��������������
+</PRE><PRE>  # 'Gone With The Wind' のエントリをデータベースから取得する
   my $gone = Film-&gt;retrieve('Gone With The Wind');
   
-</PRE><PRE>  # �ʤ�ȿ����ʾ��̤����Ĥ��äơ�Scarlet ���Ӥ�������������ä�!
+</PRE><PRE>  # なんと新たな場面が見つかって、Scarlet と羊の猥褻シーンだった!
   $gone-&gt;NumExplodingSheep(5);
   $gone-&gt;Rating('NC-17');
   $gone-&gt;commit;
 
-</PRE><PRE>  # 'Bladerunner' ����ȥ����Ф�
+</PRE><PRE>  # 'Bladerunner' エントリを取り出す
   my $blrunner = Film-&gt;retrieve('Bladerunner');
 
-</PRE><PRE>  # 'Bladerunner' �Υ��ԡ���Ĥ��äơ��ǥ��쥯�����������åȤΥ���ȥ��Ĥ���
+</PRE><PRE>  # 'Bladerunner' のコピーをつくって、ディレクターズ・カットのエントリをつくる
   my $blrunner_dc = $blrunner-&gt;copy("Bladerunner: Director's Cut");
 
-</PRE><PRE>  # Ishtar �Ϥ⤦�ʤ��Ƥ⤤��
+</PRE><PRE>  # Ishtar はもうなくてもいい
   Film-&gt;retrieve('Ishtar')-&gt;delete;
 
-</PRE><PRE>  # PG �Υ쥤�ƥ��󥰤���ıǲ������õ��
+</PRE><PRE>  # PG のレイティングを持つ映画を全部探す
   @films = Film-&gt;search('Rating', 'PG');
 
-</PRE><PRE>  # Bob �����Ĥ򤷤��ǲ������õ��
+</PRE><PRE>  # Bob が監督をした映画を全部探す
   @films = Film-&gt;search_like('Director', 'Bob %');
 
 </PRE><PRE>
-</PRE><P><HR><H1><A NAME="DESCRIPTION">����
+</PRE><P><HR><H1><A NAME="DESCRIPTION">説明
 
-</A></H1><P>�錄����SQL�����������ʤ���SQL���������ߤ��SQL���������Ǥ⡢�ᤷ�����ʡ�
-���֥������Ȥ��³������ˡ����Ϥ���ä��夦����ޤ�������ʤȤ�����������SQL �ǡ����١�������äȤ����ʥ���塼�����ˤʤ�ޤ���
+</A></H1><P>わたしはSQLが嫌い。あなたもSQLが嫌い。みんなSQLが嫌い。でも、悲しいかな、
+オブジェクトを永続させるニーズはしょっちゅうあります。そんなとき、たいがいSQL データベースがもっとも柔軟なソリューションになります。
 
-<P>���Υ⥸�塼��ϡ�������SQL��DBI���μ��ǡ���ΨŪ�ǡ�����ץ�ǡ���ĥ���ι⤤
-��³���֥������Ȥ򥻥åȥ��åפ��뤿��Τ�ΤǤ���
+<P>このモジュールは、少しのSQLとDBIの知識で、効率的で、シンプルで、拡張性の高い
+永続オブジェクトをセットアップするためのものです。
 
-<P>�������ޤ��Ѥ��ơ����饹�Υǡ����ؤΥ���������ưŪ���󶡤��ޤ���
-�����Υ��������ˤ�äơ��ǡ����١����ؤΥ������������椷�ޤ���
+<P>スキーマを用いて、クラスのデータへのアクセサを自動的に提供します。
+これらのアクセサによって、データベースへのアクセスを制御します。
 
-<H2><A NAME="How_to_set_it_up">���åȥ��åפ���ˡ
+<H2><A NAME="How_to_set_it_up">セットアップの方法
 
-</A></H2><P>���ʤ��Υ��饹���³��������ȤƤ��ñ����ˡ�򼨤��ޤ���
-�ġ��Υ᥽�åɤˤĤ��Ƥξܺ٤ϡ����Ȥǡ�
+</A></H2><P>あなたのクラスを永続化させるとても簡単な方法を示します。
+個々のメソッドについての詳細は、あとで。
 
-<DL><DT><A NAME="Set_up_a_database_"><STRONG><P><I>�ǡ����١����򥻥åȥ��åפ��롣</I>
+<DL><DT><A NAME="Set_up_a_database_"><STRONG><P><I>データベースをセットアップする。</I>
 
-</STRONG></A><DD>���åȥ��åפ��줿�ǡ����١��������äơ�DBI.pm ��
-���Υǡ����١������󥸥��ɬ�פ� DBD:: �ɥ饤�Х⥸�塼�뤬���󥹥ȡ��뤵��Ƥ���
-ɬ�פ�����ޤ����ܺ٤� DBI �ȡ��ǡ����١����Υɥ�����Ȥ��ɤ�ǲ�������
+</STRONG></A><DD>セットアップされたデータベースがあって、DBI.pm と
+そのデータベースエンジンに必要な DBD:: ドライバモジュールがインストールされている
+必要があります。詳細は DBI と、データベースのドキュメントを読んで下さい。
 
-<P>���ä����ϡ�DBD::CSV �Ǥ�����פǤ���
+<P>困った時は、DBD::CSV でも大丈夫です。
 
-<DT><A NAME="Set_up_a_table_for_your_objects_to_be_stored_in_"><STRONG><P><I>���֥������Ȥ��Ǽ����ơ��֥�򥻥åȥ��åפ��롣</I>
+<DT><A NAME="Set_up_a_table_for_your_objects_to_be_stored_in_"><STRONG><P><I>オブジェクトを格納するテーブルをセットアップする。</I>
 
-</STRONG></A><DD>Class::DBI �ϡ�����ץ�� 1���饹/1�ơ��֥��ǥ��ư��ޤ���
-���饹�ѤΥơ��֥�򥻥åȥ��åפ���ΤϤ��ʤ��ε�̳�Ǥ������Υץ�������ư������Τϡ�ʣ���ˤʤꤹ����Ǥ��礦 (���줫�������������ʤ���ޤ�����)��
+</STRONG></A><DD>Class::DBI は、シンプルな 1クラス/1テーブルモデルで動作します。
+クラス用のテーブルをセットアップするのはあなたの義務です。このプロセスを自動化するのは、複雑になりすぎるでしょう (だれかが私を説得するならやりますけど)。
 
-<P>�����ۤɤαǲ����Ǥ����ȡ�����ʴ����Υơ��֥���������ɬ�פ�����ޤ���
+<P>さきほどの映画の例でいうと、こんな感じのテーブルを作成する必要があります。
 
 <PRE>  CREATE TABLE Movies (
          Title      VARCHAR(255)    PRIMARY KEY,
          Director   VARCHAR(80),
-         Rating     CHAR(5),    /* �����ʤ��Ȥ� 'NC-17' �˥ե��åȤ��� */
+         Rating     CHAR(5),    /* すくなくとも 'NC-17' にフィットする */
          NumExplodingSheep      INTEGER
   )
 
-</PRE><DT><A NAME="Inherit_from_Class_DBI_"><STRONG><P><I>Class::DBI ��Ѿ����롣</I>
+</PRE><DT><A NAME="Inherit_from_Class_DBI_"><STRONG><P><I>Class::DBI を継承する。</I>
  
-</STRONG></A><DD>����ϡ�base.pm ��Ȥ��ۤ�����@ISA ���ɲä�����ˡ��깥�ޤ����Ǥ���
-�ʤ��ʤ顢���ʤ��Υ��饹�� Class::DBI ���� protected �Υե�����ɤ�Ѿ�����ɬ�פ����뤫��Ǥ���
-����ˡ����饹�򵿻��ϥå���(pseudo-hash) �Ǽ��������硢���줬���פǤ���
+</STRONG></A><DD>これは、base.pm を使うほうが、@ISA に追加する方法より好ましいです。
+なぜなら、あなたのクラスは Class::DBI から protected のフィールドを継承する必要があるからです。
+それに、クラスを疑似ハッシュ(pseudo-hash) で実装する場合、これが重要です。
 
 <PRE>  package Film;
   use base qw(Class::DBI);
 
-</PRE><DT><A NAME="Declare_your_columns_"><STRONG><P><I>������������롣</I>
+</PRE><DT><A NAME="Declare_your_columns_"><STRONG><P><I>カラムを宣言する。</I>
 
-</STRONG></A><DD>columns() ��Ȥ��ޤ����ե�����ɤ�̾���ϥǡ����١����Υ����̾��1��1���б����ʤ��ƤϤʤ�ޤ���
-Class::DBI �ϡ�(Class:Accessor ��ͳ��)���ξ��󤫤饢����������ޤ���
+</STRONG></A><DD>columns() を使います。フィールドの名前はデータベースのカラム名に1対1で対応しなくてはなりません。
+Class::DBI は、(Class:Accessor 経由で)この情報からアクセサを作ります。
 
 <PRE>  Film-&gt;columns(All =&gt; qw( Title Director Rating NumExplodingSheep ));
 
-</PRE><P>�����������ΨŪ�˹Ԥ���ˡ���ä��Τꤿ����С�<A HREF="#Lazy_Population_of_Columns">"������lazy����©"</A> ��ߤƤ���������
+</PRE><P>カラム宣言を効率的に行う方法をもっと知りたければ、<A HREF="#Lazy_Population_of_Columns">"カラムのlazyな生息"</A> をみてください。
 
-<DT><A NAME="Declare_the_name_of_your_table"><STRONG><P><I>�ơ��֥�̾��������롣</I>
+<DT><A NAME="Declare_the_name_of_your_table"><STRONG><P><I>テーブル名を宣言する。</I>
 
-</STRONG></A><DD>���ʤ��Υ��֥������Ȥ�ɤΥơ��֥�ˤ���뤫��Class::DBI �������ޤ���
-�������ۤɤĤ��ä��ơ��֥�Τ��ȤǤ���
+</STRONG></A><DD>あなたのオブジェクトをどのテーブルにいれるか、Class::DBI に伝えます。
+これは先ほどつくったテーブルのことです。
 
 <PRE>  Film-&gt;table('Movies');
 
-</PRE><DT><A NAME="Declare_which_field_is_your_primary_key"><STRONG><P><I>�ɤΥե�����ɤ� Primary Key ����������롣</I>
+</PRE><DT><A NAME="Declare_which_field_is_your_primary_key"><STRONG><P><I>どのフィールドが Primary Key かを宣言する。</I>
 
-</STRONG></A><DD>�ե�����ɤΤ����ҤȤĤϡ����줾��Υ��֥������Ȥμ��̻ҤǤ���ɬ�פ�����ޤ���
-����ϡ��ǡ����١����Ǥ� PRIMARY KEY �ˤʤ�Ǥ��礦��Class::DBI ��
-���ξ��󤫤顢��Ǽ���줿���֥������Ȥ˴ؤ��ơ�Ŭ�ڤ�SQLʸ���������ޤ���
+</STRONG></A><DD>フィールドのうちひとつは、それぞれのオブジェクトの識別子である必要があります。
+これは、データベースでの PRIMARY KEY になるでしょう。Class::DBI は
+この情報から、格納されたオブジェクトに関して、適切なSQL文を生成します。
 
 <PRE>  Film-&gt;columns(Primary =&gt; 'Title');
 
-</PRE><DT><A NAME="Declare_a_database_connection"><STRONG><P><I>�ǡ����١�����³��������롣</I>
+</PRE><DT><A NAME="Declare_a_database_connection"><STRONG><P><I>データベース接続を宣言する。</I>
 
-</STRONG></A><DD>Class::DBI �Ϥɤ���äƥǡ����١����˥����������뤫�Τ�ɬ�פ�����ޤ���
-����� DBI ����³�򥻥åȥ��åפ��Ƥ����ʤ��ޤ������åȥ��åפ� set_db() �᥽�åɤ�ƤӽФ��ơ�
-'Main' �Ȥ���̾���Υǡ����١�����³��������ƹԤ��ޤ���
+</STRONG></A><DD>Class::DBI はどうやってデータベースにアクセスするか知る必要があります。
+これは DBI の接続をセットアップしておこないます。セットアップは set_db() メソッドを呼び出して、
+'Main' という名前のデータベース接続を定義して行います。
 
 <PRE>  Film-&gt;set_db('Main', 'dbi:mysql', 'user', 'password', {AutoCommit =&gt; 1});
 
-</PRE><P>set_db() �� Ima::DBI ����Ѿ�����Ƥ��ޤ����ܺ٤ϥ⥸�塼��� man page ��ߤƤ���������
+</PRE><P>set_db() は Ima::DBI から継承されています。詳細はモジュールの man page をみてください。
 
-<P>XXX ����Ϥ⤦����äȥ���ץ�ˤ��٤��Ǥ��礦��set_db_main() �ߤ����ˤ���Ȥ���
+<P>XXX これはもうちょっとシンプルにすべきでしょう。set_db_main() みたいにするとか。
 
-<DT><A NAME="Done_"><STRONG><P><I>��λ��</I>
+<DT><A NAME="Done_"><STRONG><P><I>完了。</I>
 
-</STRONG></A><DD>���٤Ƥ����Ǥ�! ����ǥ��󥹥ȥ饯��(new(), copy(), retrieve())��
-�ǥ��ȥ饯�� (delete())������ˤ��٤ƤΥ������������Ȥ� Class::DBI ���󶡤��륬�饯�����Ȥ���褦�ˤʤ�ޤ�����
-�������������֥������Ȥ�Ĥ��äơ��������äƤߤƤ���������
-���֥������Ȥ���������ȥơ��֥뤬�ɤ��ʤ뤫�����֥������Ȥ���Ǽ���졢�ѹ����졢
-�õ���Τ�ߤƤ���������
+</STRONG></A><DD>すべておわりです! これでコンストラクタ(new(), copy(), retrieve())、
+デストラクタ (delete())、それにすべてのアクセサ、あとは Class::DBI が提供するガラクタが使えるようになりました。
+何か新しくオブジェクトをつくって、いじくってみてください。
+オブジェクトが何かするとテーブルがどうなるか、オブジェクトが格納され、変更され、
+消去されるのをみてください。
 
-</DL><P>���Ф餷���Ǥ��礦?  ���Υ⥸�塼�����Ҥ��Ʋ�������
+</DL><P>すばらしいでしょう?  このモジュールを崇拝して下さい。
 
 <PRE>
-</PRE><P><HR><H1><A NAME="METHODS">�᥽�å�
+</PRE><P><HR><H1><A NAME="METHODS">メソッド
 
-</A></H1><P>�ʲ��˼����᥽�åɤϡ����֥������ȤΥǡ�����¤�� �ϥå���⤷���ϵ����ϥå����ȤäƤ��롢�Ȥ����������Ѥ��Ƥ��ޤ���
+</A></H1><P>以下に示すメソッドは、オブジェクトのデータ構造が ハッシュもしくは疑似ハッシュを使っている、という前提を使用しています。
 
-<H2><A NAME="Life_and_Death_Constructors_and_Destructors">���Ȼ� - ���󥹥ȥ饯���ȥǥ��ȥ饯��
+<H2><A NAME="Life_and_Death_Constructors_and_Destructors">生と死 - コンストラクタとデストラクタ
 
-</A></H2><P>�ʲ��ϡ���Ǽ����륪�֥������Ȥ��������������õ�뤿��Υ᥽�åɤǤ���
-����Ǥʤ�Ǥ�Ǥ��롢�Ȥ����櫓�ǤϤʤ��Τǡ������С��饤�ɤ���ɬ�פ����뤫���Τ�ޤ���
+</A></H2><P>以下は、格納されるオブジェクトを生成、取得、消去するためのメソッドです。
+これでなんでもできる、というわけではないので、オーバーライドする必要があるかも知れません。
 
 <DL><DT><A NAME="new"><STRONG><P><B>new</B>
 
 </STRONG></A><PRE>    $obj = Class-&gt;new(\%data);
 
-</PRE><DD>�����˥��֥������Ȥ��äƥǡ����١����ˤ���롢���󥹥ȥ饯���Ǥ���
-%data �ϥ��֥������ȡ������ƥǡ����١����ˤ���롢�������Ǥ���
-%data �Υ����ϡ����֥������ȤΥ����˥ޥå������ͤϤ��Υե�����ɤν���ͤˤʤ�ޤ���
+</PRE><DD>新たにオブジェクトを作ってデータベースにいれる、コンストラクタです。
+%data はオブジェクト、そしてデータベースにいれる、初期情報です。
+%data のキーは、オブジェクトのカラムにマッチし、値はそのフィールドの初期値になります。
 
-<P>$obj �ϥϥå����ե���󥹤���Ĥ����롢Class �Υ��󥹥��󥹤Ǥ���
+<P>$obj はハッシュリファレンスからつくられる、Class のインスタンスです。
 
-<PRE>  # "Bad Taste" �Ѥαǲ襨��ȥ��Ĥ���
+<PRE>  # "Bad Taste" 用の映画エントリをつくる
   $btaste = Film-&gt;new({ Title       =&gt; 'Bad Taste',
                         Director    =&gt; 'Peter Jackson',
                         Rating      =&gt; 'R',
                         NumExplodingSheep   =&gt; 1
                       });
 
-</PRE><P>�⤷ PRIMARY KEY �Υ���ब%data �ˤʤ���硢new() �ϡ����Υ����Υǡ�������������롢�����ꤷ�ޤ���
-sequence() �����Υ��饹���Ф��ƻ��ꤵ��Ƥ���С������Ȥ��ޤ���
-�����Ǥʤ���С�PRIMARY KEY �� AUTO_INCREMENT ���󤬤���Τ������ꤷ�������Ȥ����Ȥ��ޤ���
+</PRE><P>もし PRIMARY KEY のカラムが%data にない場合、new() は、そのカラムのデータは生成される、と想定します。
+sequence() がこのクラスに対して指定されていれば、それを使います。
+そうでなければ、PRIMARY KEY は AUTO_INCREMENT 制約があるのだと想定し、それを使おうとします。
 
-<P>���饹���������饹���Ф��� hasa() �Ǵط����������Ƥ����硢
-new() �� ���Υ������ͤȤ��ƥ��֥������Ȥ��Ϥ����Ȥ��Ǥ��ޤ���
-Class::DBI �Ϥ����ȤޤäȤ��˰����ޤ���
+<P>クラスが外部クラスに対して hasa() で関係を定義されている場合、
+new() に そのキーの値としてオブジェクトを渡すことができます。
+Class::DBI はちゃんとまっとうに扱います。
 
 <PRE>
 </PRE><DT><A NAME="retrieve"><STRONG><P><B>retrieve</B>
 
 </STRONG></A><PRE>  $obj = Class-&gt;retrieve($id);
 
-</PRE><DD>ID ������ơ��ǡ����١������餽��ID����ĥ��֥������Ȥ�������ޤ���
+</PRE><DD>ID を受けて、データベースからそのIDを持つオブジェクトを取得します。
 
 <PRE>  my $gone = Film-&gt;retrieve('Gone With The Wind');
 
@@ -199,8 +199,8 @@ Class::DBI �Ϥ����ȤޤäȤ��˰����ޤ���
 
 </STRONG></A><PRE>  $new_obj = $obj-&gt;copy($new_id);
 
-</PRE><DD>$obj �Υ��ԡ��򡢥���ˤ�ǡ����١�����ˤ�������ޤ���
-�㤦�Τϡ�$new_obj �ϼ�ID �� $new_id ���ͤ���ġ��Ȥ������Ȥ����Ǥ���
+</PRE><DD>$obj のコピーを、メモリにもデータベース上にも作成します。
+違うのは、$new_obj は主ID に $new_id の値を持つ、ということだけです。
 
 <PRE>    my $blrunner_dc = $blrunner-&gt;copy("Bladerunner: Director's Cut");
 
@@ -208,48 +208,48 @@ Class::DBI �Ϥ����ȤޤäȤ��˰����ޤ���
 
 </STRONG></A><PRE>  $obj-&gt;delete;
 
-</PRE><DD>���Υ��֥������Ȥ򡢥ǡ����١����������꤫��������ޤ���
-�����ƤӽФ����顢$obj �Ϥ⤦�Ȥ��ޤ���
+</PRE><DD>このオブジェクトを、データベースからもメモリからも削除します。
+これを呼び出したら、$obj はもう使えません。
 
-</DL><H2><A NAME="Accessors">��������
+</DL><H2><A NAME="Accessors">アクセサ
 
-</A></H2><P>Class::DBI �� Class::Accessor ��Ѿ����Ƥ���Τǡ�
-���ʤ��ΤĤ��ä����֥��饹���Ф��ơ����ƤΥ����ؤΥ��������᥽�åɤ�
-�󶡤��ޤ��������������󶡤��� get() �� set() �Υ᥽�åɤ򥪡��С��饤�ɤ��ơ�
-�ǡ����١����Υȥ�󥶥�������ưŪ������Ǥ���褦�ˤ��Ƥ��ޤ���
+</A></H2><P>Class::DBI は Class::Accessor を継承しているので、
+あなたのつくったサブクラスに対して、全てのカラムへのアクセサメソッドを
+提供します。アクセサが提供する get() と set() のメソッドをオーバーライドして、
+データベースのトランザクションを自動的に制御できるようにしています。
 
-<P>����������ư���ˤ�2�ĤΥ⡼�ɤ�����ޤ�����ư���ߥåȤȥ����ȥ��ߥåȤǤ���
-DBI �μ�ư/�����ȥ��ߥåȤ˻��Ƥ���ΤǤ����������Ʊ���褦�˼�������Ƥ���櫓�ǤϤ���ޤ���
-��ñ�˸����� ... �����ȥ��ߥåȥ⡼�ɤǤϡ��ѹ����뤿��Υ�����������Ӥ�����뤿�ӡ�
-�����ѹ��Ϥ������˥ǡ����١����˽񤭹��ޤ�ޤ���
-�����Ǥʤ���硢�Ĥޤꥪ���ȥ��ߥåȤ� off �ξ�硢commit() ������Ū�˸ƤФ��ޤǡ��ѹ��ϥǡ����١����ˤϽ񤭹��ޤ�ޤ���
+<P>アクセサの動きには2つのモードがあります。手動コミットとオートコミットです。
+DBI の手動/オートコミットに似ているのですが、それと同じように実装されているわけではありません。
+簡単に言うと ... オートコミットモードでは、変更するためのアクセサがよびだされるたび、
+その変更はただちにデータベースに書き込まれます。
+そうでない場合、つまりオートコミットが off の場合、commit() が明示的に呼ばれるまで、変更はデータベースには書き込まれません。
 
-<P>��ư���ߥåȤ���Ϥ�����Ǥ���
+<P>手動コミットの例はこちらです。
 
-<PRE>    # NumExplodingSheep() �� Rating() �� ������
-    # �ǡ����ѹ���������ǡ��ǡ����١����ˤϽ񤭹��ޤ�ʤ���
-    # commit() ���ƤФ��ȡ��ǡ����١�����1�٤˽񤭹��ޤ�롣
+<PRE>    # NumExplodingSheep() と Rating() は メモリ上で
+    # データ変更するだけで、データベースには書き込まれない。
+    # commit() が呼ばれると、データベースに1度に書き込まれる。
     $gone-&gt;NumExplodingSheep(5);
     $gone-&gt;Rating('NC-17');
     $gone-&gt;commit;
 
-</PRE><P>������ϥ����ȥ��ߥåȤ��㡣
+</PRE><P>こちらはオートコミットの例。
 
-<PRE>    # ���Υ��֥������ȤˤĤ��Ƥϡ������ȥ��ߥåȤ� on �ˤ��롣
+<PRE>    # このオブジェクトについては、オートコミットを on にする。
     $gone-&gt;autocommit(1);
 
-</PRE><PRE>    # ���줾��Υ��������ƤӽФ��ˤ�äơ��������ͤ������˽񤭹��ޤ��
+</PRE><PRE>    # それぞれのアクセサ呼び出しによって、新しい値がすぐに書き込まれる
     $gone-&gt;NumExplodingSheep(5);
     $gone-&gt;Rating('NC-17');
 
-</PRE><P>��ư���ߥåȤΤۤ��������֤󥪡��ȥ��ߥåȤ����ΨŪ�Ǥ��礦����
-rollback() �ˤ�äơ��ѹ�����ä��������󶡤���ޤ���
-�����ȥ��ߥåȤϥץ�����ޤˤȤäƤϳڤǤ��礦��
+</PRE><P>手動コミットのほうが、たぶんオートコミットよりも効率的でしょうし、
+rollback() によって、変更を取り消す安全も提供されます。
+オートコミットはプログラマにとっては楽でしょう。
 
-<P>���֥������Ȥ��˴����줿�Ȥ�(�������׳��ˤǤ뤫���ץ�����ब��λ�������)�ˡ�
-�ѹ������ߥåȤ��줺��������Хå��⤵��Ƥ��ʤ���硢
-Class::DBI �� DESTROY �᥽�åɤ��ƤӽФ���ơ��ѹ�����¸����Ƥʤ����ȤˤĤ���
-warning ��ɽ�����ޤ���
+<P>オブジェクトが破棄されたとき(スコープ外にでるか、プログラムが終了した場合)に、
+変更がコミットされず、ロールバックもされていない場合、
+Class::DBI の DESTROY メソッドが呼び出されて、変更が保存されてないことについて
+warning を表示します。
 
 <DL><DT><A NAME="autocommit"><STRONG><P><B>autocommit</B>
 
@@ -259,52 +259,52 @@ warning ��ɽ�����ޤ���
 </PRE><PRE>    $obj-&gt;autocommit($on_or_off);
     $commit_style = $obj-&gt;autocommit;
 
-</PRE><DD>���ߤΥ����ȥ��ߥåȾ��֤ؤΥ�������������̵���ǸƤФ��ȡ������Υ����ȥ��ߥåȾ��֤� on �ʤ� true, off �ʤ� false �Ȥ����֤��ޤ���
-��������ǸƤФ��ȡ������ȥ��ߥåȾ��֤� on �ޤ��� off �˥��åȤ��ޤ���
-true �ͤ� on, false �ͤ� off �Ǥ���
-���饹�᥽�åɤȤ��ƸƤФ��ȡ����Υ��饹�Υ��󥹥��󥹤��٤Ƥ��Ф���Ŭ�Ѥ���ޤ���
-�ġ��Υ��֥������Ȥ���ƤФ줿���ϡ����饹������򥪡��С��饤�ɤ��ơ����Υ��֥������ȤΥ��ߥåȤΤߤ�Ŭ�Ѥ���ޤ���
+</PRE><DD>現在のオートコミット状態へのアクセサ。引数無しで呼ばれると、現状のオートコミット状態を on なら true, off なら false として返します。
+引数ありで呼ばれると、オートコミット状態を on または off にセットします。
+true 値で on, false 値で off です。
+クラスメソッドとして呼ばれると、そのクラスのインスタンスすべてに対して適用されます。
+個々のオブジェクトから呼ばれた場合は、クラスの設定をオーバーライドして、そのオブジェクトのコミットのみに適用されます。
 
-<PRE>  Class-&gt;autocommit(1);     # �����ȥ��ߥåȤϥ��饹���Ф��� on
+<PRE>  Class-&gt;autocommit(1);     # オートコミットはクラスに対して on
   
 </PRE><PRE>  $obj = Class-&gt;retrieve('Aliens Cut My Hair');
-  $obj-&gt;autocommit(0);      # ���Υ��֥������ȤˤĤ��Ƥϥ����ȥ��ߥå� off
+  $obj-&gt;autocommit(0);      # このオブジェクトについてはオートコミット off
 
-</PRE><P>���֥������Ȥ��ȤΥ��ߥåȤ�����ϥǡ����١����ˤϳ�Ǽ����ޤ���
+</PRE><P>オブジェクトごとのコミットの設定はデータベースには格納されません。
 
-<P>�����ȥ��ߥåȤϥǥե���� off �Ǥ���
+<P>オートコミットはデフォルト off です。
 
-<P><B>����</B> ����� DBI �� AutoCommit °���Ȥ� <I>���δط��⤢��ޤ���</I>��
+<P><B>注意</B> これは DBI の AutoCommit 属性とは <I>何の関係もありません</I>。
 
 <DT><A NAME="commit"><STRONG><P><B>commit</B>
 
 </STRONG></A><PRE>    $obj-&gt;commit;
 
-</PRE><DD>���������ˤ���ѹ���ǥ������˽񤭹��ߤޤ��������ȥ��ߥåȤξ��֤� commit() ��ƤӽФ��Ƥ⹽���ޤ����ۤäƤʤˤ⤷�ʤ������Ǥ���
+</PRE><DD>アクセサによる変更をディスクに書き込みます。オートコミットの状態で commit() を呼び出しても構いません。黙ってなにもしないだけです。
 
 <DT><A NAME="rollback"><STRONG><P><B>rollback</B>
 
 </STRONG></A><PRE>  $obj-&gt;rollback;
 
-</PRE><DD>�Ǹ�Υ��ߥåȤ��鸽�ߤޤǤΡ����֥������Ȥ˴ؤ����ѹ������Ƽ��ä��ޤ���
-���ߤϡ��ǡ����١��������ͤ�ñ��˥�����ɤ��Ƥ�������Ǥ�������ˤϡ��¹Խ���������꤬����Ǥ��礦��
+</PRE><DD>最後のコミットから現在までの、オブジェクトに関する変更を全て取り消します。
+現在は、データベースから値を単純にリロードしてくるだけです。これには、並行処理上の問題があるでしょう。
 
-<P>�⤷�����ȥ��ߥåȤξ��֤Ǥ��Υ᥽�åɤ�ƤӽФ��ȡ��㳰���ꤲ�ޤ���
+<P>もしオートコミットの状態でこのメソッドを呼び出すと、例外を投げます。
 
 <DT><A NAME="is_changed"><STRONG><P><B>is_changed</B>
 
 </STRONG></A><PRE>  @changed_keys = $obj-&gt;is_changed;
 
-</PRE><DD>$obj �����ߥåȤ���Ƥ��ʤ��ѹ�����äƤ��뤫�ɤ�����ɽ�����ޤ���
-�ѹ����줿�����Υꥹ�Ȥ��֤��ޤ���
+</PRE><DD>$obj がコミットされていない変更を持っているかどうかを表示します。
+変更されたキーのリストを返します。
 
-</DL><H2><A NAME="Database_information">�ǡ����١�������
+</DL><H2><A NAME="Database_information">データベース情報
 
 </A></H2><DL><DT><A NAME="id"><STRONG><P><B>id</B>
 
 </STRONG></A><PRE>  $id = $obj-&gt;id;
 
-</PRE><DD>���֥������ȤΥ�ˡ������̻Ҥ��֤��ޤ�������� $obj-&gt;get($self-&gt;columns('Primary')); ��Ʊ���Ǥ���
+</PRE><DD>オブジェクトのユニーク識別子を返します。これは $obj-&gt;get($self-&gt;columns('Primary')); と同じです。
 
 <DT><A NAME="table"><STRONG><P><B>table</B>
 
@@ -312,9 +312,9 @@ true �ͤ� on, false �ͤ� off �Ǥ���
   $table = Class-&gt;table;
   $table = $obj-&gt;table;
 
-</PRE><DD>���饹����Ǽ�����ǡ����١����ơ��֥�ؤ�set/get ��������������� -ɬ��- ���åȤ���ʤ���Фʤ�ޤ���
+</PRE><DD>クラスが格納されるデータベーステーブルへのset/get アクセサ。これは -必ず- セットされなければなりません。
 
-<P>�ơ��֥����ϥ��֥��饹�˷Ѿ�����ޤ����������С��饤�ɤϤǤ��ޤ���
+<P>テーブル情報はサブクラスに継承されますが、オーバーライドはできません。
 
 <DT><A NAME="sequence"><STRONG><P><B>sequence</B>
 
@@ -322,14 +322,14 @@ true �ͤ� on, false �ͤ� off �Ǥ���
   $sequence_name = Class-&gt;sequence;
   $sequence_name = $obj-&gt;sequence;
 
-</PRE><DD>PRIMARY KEY �Υ������󥹤ؤ� set/get ����������
+</PRE><DD>PRIMARY KEY のシーケンスへの set/get アクセサ。
 
 <PRE>    Class-&gt;columns(Primary =&gt; 'id');
     Class-&gt;sequence('class_id_seq');
 
-</PRE><P>Class::DBI �ϡ����֥������Ȥ��������줿����PRIMARY KEY �����ꤵ��Ƥ��ʤ���硢�������󥹤����Ѥ��� PRIMARY KEY �������Ȥ��ޤ���
+</PRE><P>Class::DBI は、オブジェクトが生成されたが、PRIMARY KEY が指定されていない場合、シーケンスを利用して PRIMARY KEY を作ろうとします。
 
-<P><B>����</B>: Class::DBI �� AUTO_INCREMENT �䡢������ह�륻�ޥ�ƥ������⥵�ݡ��Ȥ��Ƥ��ޤ���
+<P><B>注意</B>: Class::DBI は AUTO_INCREMENT や、それに類するセマンティクスもサポートしています。
 
 <DT><A NAME="columns"><STRONG><P><B>columns</B>
 
@@ -337,43 +337,43 @@ true �ͤ� on, false �ͤ� off �Ǥ���
   @columns      = $obj-&gt;columns($group);
   Class-&gt;columns($group, @columns);
 
-</PRE><DD>���饹�Υǡ����١�����Υ����̾�ؤΥ������������饹���Ф���SQLʸ����������Τ˻Ȥ��롣
+</PRE><DD>クラスのデータベース上のカラム名へのアクセサ。クラスに対するSQL文を生成するのに使われる。
 
-<P>��������ͭ�λȤ����ˤ�äƥ��롼�פ櫓���뤳�Ȥ��Ǥ�������ˤ�äƥ��롼����Υ�������٤˸��������ɤ߹��ळ�Ȥ��Ǥ��롣
-����ˤĤ��ƤΤ�äȾܤ�������ϡ�<A HREF="#Lazy_Population_of_Columns">"������lazy����©"</A>��ߤƤ��������� 
+<P>カラムは特有の使い方によってグループわけすることができ、それによってグループ内のカラムを一度に公理強く読み込むことができる。
+これについてのもっと詳しい情報は、<A HREF="#Lazy_Population_of_Columns">"カラムのlazyな生息"</A>をみてください。 
 
-<P>��ͽ�󤵤줿��3�ĤΥ��롼�פ�����ޤ���'All', 'Essential' ������ 'Primary' �Ǥ���
+<P>「予約された」3つのグループがあります。'All', 'Essential' そして 'Primary' です。
 
-<P><B>'All'</B> �ϥ��饹�ǤĤ����뤹�٤ƤΥ����Ǥ���
-���åȤ���ʤ���硢¾�Υ��롼�פ��鼫ư��������ޤ���
+<P><B>'All'</B> はクラスでつかわれるすべてのカラムです。
+セットされない場合、他のグループから自動生成されます。
 
-<P><B>'Primary'</B> �ϥ��饹��ñ��PRIMARY KEY �Ǥ������֥������Ȥ���Ѥ������ˡ�<I>ɬ��</I>���åȤ���ʤ���Фʤ�ޤ���
-(ʣ����PRIMARY KEY�⡢�ǽ�Ū�ˤϥ��ݡ��Ȥ���뤳�Ȥˤʤ�Ǥ��礦)
+<P><B>'Primary'</B> はクラスの単一PRIMARY KEY です。オブジェクトを使用する前に、<I>必ず</I>セットされなければなりません。
+(複数のPRIMARY KEYも、最終的にはサポートされることになるでしょう)
 
 <PRE>    Class-&gt;columns('Primary', 'Title');
 
-</PRE><P><B>'Essential'</B> �ϥ��֥������Ȥ�����ɤ������Ѥ���Τ˺����ɬ�פʥ����ν���Ǥ���
-���֥������Ȥ� retrieve() �����ȡ����Υ��롼����Υ����Τߤ������ɤ���ޤ���
-���륯�饹������������Υ������äƤ��뤬�����������ξ�礽����Τ����Ĥ������Ȥ�ʤ��Ȥ�����������̤�︺����Ȥ��ä��Ȥ��˻Ȥ��ޤ���
-�⤷���åȤ��ʤ���С�<CODE>Class-&gt;columns('All')</CODE> ���鼫ư��������ޤ���
+</PRE><P><B>'Essential'</B> はオブジェクトをロードし、使用するのに最低限必要なカラムの集合です。
+オブジェクトが retrieve() されると、このグループ内のカラムのみがロードされます。
+あるクラスが、たくさんのカラムをもっているが、たいがいの場合その中のいくつかしか使わないとき、メモリ使用量を削減するといったときに使います。
+もしセットしなければ、<CODE>Class-&gt;columns('All')</CODE> から自動生成されます。
 
-<P>������Ϳ���ʤ���硢���٤ƤΥ����Υꥹ�Ȥ��ۤ�����Τ����ꤵ��ޤ���
+<P>引数を与えない場合、すべてのカラムのリストがほしいものと想定されます。
 
-<P><B>����</B> �����饳��ƥ����ȤǤ�ư���ɤ����뤫���ޤ����Ƥ��ޤ���
+<P><B>注意</B> スカラコンテキストでの動作をどうするか、まだ決めていません。
 
 <DT><A NAME="is_column"><STRONG><P><B>is_column</B>
 
 </STRONG></A><PRE>    Class-&gt;is_column($column);
     $obj-&gt;is_column($column);
 
-</PRE><DD>$column �����饹�ޤ��ϥ��֥������ȤΥ����Ǥ���С�true ���֤��ޤ���
+</PRE><DD>$column がクラスまたはオブジェクトのカラムであれば、true を返します。
 
-</DL><H2><A NAME="Table_relationships_Object_relationships">�ơ��֥�ط������֥������ȴط�
+</DL><H2><A NAME="Table_relationships_Object_relationships">テーブル関係、オブジェクト関係
 
-</A></H2><P>�ҤȤĤΥơ��֥뤬�̤Υơ��֥�� FOREIGN KEY �ǻ��Ȥ���褦�ˡ�
-���륪�֥������Ȥ��̤Υ��֥������Ȥ�������������ȤϤ褯����Ǥ��礦��
-���Ȥ��С��ǲ���ĤˤĤ��ơ���äȤ���������������������Ȥ���
-�ơ��֥��Ĥ���ޤ�...
+</A></H2><P>ひとつのテーブルが別のテーブルを FOREIGN KEY で参照するように、
+あるオブジェクトに別のオブジェクトを持たせたいことはよくあるでしょう。
+たとえば、映画監督について、もっとたくさん情報を持たせたいとき。
+テーブルをつくります...
 
 <PRE>    CREATE TABLE Directors (
         Name            VARCHAR(80),
@@ -381,7 +381,7 @@ true �ͤ� on, false �ͤ� off �Ǥ���
         IsInsane        BOOLEAN
     )
 
-</PRE><P>�����ơ�Class::DBI �Υ��֥��饹���Ѱդ��ޤ���
+</PRE><P>そして、Class::DBI のサブクラスを用意します。
 
 <PRE>    package Film::Directors;
     use base qw(Class::DBI);
@@ -392,120 +392,120 @@ true �ͤ� on, false �ͤ� off �Ǥ���
     Film::Directors-&gt;set_db(Main =&gt; 'dbi:mysql', 'me', 'heywoodjablowme',
                             {AutoCommit =&gt; 1});
 
-</PRE><P>����� Film �� ����� Director ���̤��ơ�����̾�����Ǥʤ���Film::Directors �Υ��֥������Ȥ�����Ǥ���褦�ˤʤ�ޤ���
-Film ��1���ɲä�������ǤǤ��ޤ���
+</PRE><P>これで Film は カラム Director を通して、監督名だけでなく、Film::Directors のオブジェクトを取得できるようになります。
+Film に1行追加するだけでできます。
 
-<PRE>    # Director() �� Film::Directors ���֥������ȤؤΥ�������
+<PRE>    # Director() は Film::Directors オブジェクトへのアクセサ
     Film-&gt;hasa('Film::Directors', 'Director');
 
-</PRE><P>����� Film-&gt;Director() ���������ϡ�����̾������ˡ�Film::Director ���֥������Ȥ� get/set �Ǥ���褦�ˤʤ�ޤ���
+</PRE><P>これで Film-&gt;Director() アクセサは、監督名の代わりに、Film::Director オブジェクトを get/set できるようになります。
 
 <DL><DT><A NAME="hasa"><STRONG><P><B>hasa</B>
 
 </STRONG></A><PRE>    Class-&gt;hasa($foreign_class, @foreign_key_columns);
 
-</PRE><DD>Class �� $foreign_class �Ȥδط�������$foreign_class �� PRIMARY KEY �� @foreign_key_columns ����˻��äƤ��뤳�Ȥ�������ޤ���
+</PRE><DD>Class が $foreign_class との関係をもち、$foreign_class の PRIMARY KEY を @foreign_key_columns の中に持っていることを定義します。
 
-<P>@foreign_key_columns ����Ƭ���Ǥ�̾���� ������������������ޤ�������ˤ�äơ�$foreign_class �Υ��֥������Ȥ� get/set �Ǥ��ޤ���
-Film::Director ����Ǹ����� ...
+<P>@foreign_key_columns の先頭要素の名前で アクセサが生成されます。これによって、$foreign_class のオブジェクトを get/set できます。
+Film::Director の例で言うと ...
 
-<PRE>    # Bad Taste �δ��Ĥ� Peter Jackson ��ɽ��
-    # Film::Director ���֥������Ȥˤ���
+<PRE>    # Bad Taste の監督を Peter Jackson を表す
+    # Film::Director オブジェクトにする
     $pj     = Film::Directory-&gt;retreive('Peter Jackson');
     $btaste = Film-&gt;retreive('Bad Taste');
     $btaste-&gt;Director($pj);
 
-</PRE><P>hasa() �ϳ������饹�� require ��Ԥ����Ȥ��ޤ���
-�⤷ require �����Ԥ��Ƥ⡢ñ��� require �ǤϤʤ� (�Ĥޤ� Foreign::Class �� Foreign/Class.pm �ǤϤʤ�) 
-��Ƚ�Ǥ������Ǥˤ��ʤ������Τ������������Ƥ����ΤȤ��ơ�warning ��̵�뤷�ޤ���
+</PRE><P>hasa() は外部クラスの require を行おうとします。
+もし require が失敗しても、単純な require ではない (つまり Foreign::Class は Foreign/Class.pm ではない) 
+と判断し、すでにあなたがそのあたりを処理しているものとして、warning を無視します。
 
-<P>@foreign_key_columns �򥻥åȥ��åפ���Τˡ�columns() ��Ƥ�ɬ�פϤ���ޤ���
-��äƤ��ʤ���С�hasa() ����ưŪ�ˤ�äƤ���ޤ���
+<P>@foreign_key_columns をセットアップするのに、columns() を呼び必要はありません。
+やっていなければ、hasa() が自動的にやってくれます。
 
-<P>XXX ����ư��������������ɤ���������Ǥ������褹�����Ѥ�뤫�⤷��ޤ���
-����������̿̾���������ޤ꼫�����ʤ��Ǥ���
+<P>XXX この動作が気持ちいいかどうか、疑問です。将来すこし変わるかもしれません。
+アクセサの命名形式があまり自信がないです。
 
-<P>����  2�ĤΥ��饹��Ʊ���ǡ����١�����¸�ߤ���ɬ�פϤ���ޤ���! 
+<P>注意  2つのクラスは同じデータベースに存在する必要はありません! 
 
-</DL><H2><A NAME="Lazy_Population_of_Columns">������lazy����©
+</DL><H2><A NAME="Lazy_Population_of_Columns">カラムのlazyな生息
 
-</A></H2><P>Perl �������ˤΤäȤäơ�Class::DBI �ϥ��֥������ȤΥ����ɤˤĤ���lazy �Ǥ���
-��������Υ��֥������Ȥ�Ʊ���˰����Ȥ��ʤɡ�ɬ�פʥ����Ͼ��������ʤ��Τˡ������Υ�������Ф��Τϥ����̵�̤��ʤ����Ȼפ��Ȥ�������Ǥ��礦��
+</A></H2><P>Perl の伝統にのっとって、Class::DBI はオブジェクトのロードについてlazy です。
+たくさんのオブジェクトを同時に扱うときなど、必要なカラムは少ししかないのに、全部のカラムを取り出すのはメモリの無駄だなあ、と思うときがあるでしょう。
 
-<P>Class::DBI �ϥ����򥰥롼�פǤȤ�����ޤ������롼�����1�ĤΥ����˥�����������ȡ����롼�פ�¾�Υ�������Ѥ�������������ꤷ�ơ����롼�פΥ��������������ɤ��ޤ���
-��äơ����Ȥ��� Film ���饹�� NetProfit(������) �� GrossProfit(������) �Υ������ɲä������Ȥ��ޤ��礦��
-�����餯������2�ĤϤ��Ĥ�������Ѥ����Ǥ��礦���Ǥ����� ...
+<P>Class::DBI はカラムをグループでとりだします。グループ内の1つのカラムにアクセスすると、グループの他のカラムも使用するだろうと想定して、グループのカラムを全部ロードします。
+よって、たとえば Film クラスに NetProfit(純利益) と GrossProfit(総利益) のカラムを追加したいとしましょう。
+おそらく、この2つはいつも一緒に利用されるでしょう。ですから ...
 
 <PRE>    Film-&gt;columns('Profit', qw(NetProfit GrossProfit));
 
-</PRE><P>����ǡ����Τ褦�˸ƤӽФ��ȡ�
+</PRE><P>これで、次のように呼び出すと、
 
 <PRE>    $net = $film-&gt;NetProfit;
 
-</PRE><P>Class::DBI �� NetProfit �� GrossProfit ξ����ǡ����١�����������ɤ��ޤ���
-���� GrossProfit() ��Ʊ�����֥������Ȥ��Ф��ƸƤӽФ�����硢�ǡ����١�����á��ɬ�פϤ���ޤ���
-����ˤ�äƥѥե����ޥ󥹤�夲�뤳�Ȥ��Ǥ��뤫�⤷��ޤ��� (YMMV)��
+</PRE><P>Class::DBI は NetProfit と GrossProfit 両方をデータベースからロードします。
+次に GrossProfit() を同じオブジェクトに対して呼び出した場合、データベースを叩く必要はありません。
+これによってパフォーマンスを上げることができるかもしれません (YMMV)。
 
 <PRE>
-</PRE><P>����ư����˿���ʤ��ʤ�С�'All' �Ȥ������롼�פ����Ĥ��äơ������򤹤٤Ƥ���������Ʋ���������������С�Class::DBI �Ϥ��٤ư��٤˥����ɤ��ޤ���
+</PRE><P>この動作が気に食わないならば、'All' というグループだけつくって、カラムをすべてそこに入れて下さい。そうすれば、Class::DBI はすべて一度にロードします。
 
 <PRE>
-</PRE><H2><A NAME="Data_Normalization">�ǡ���������
+</PRE><H2><A NAME="Data_Normalization">データ正規化
 
-</A></H2><P>SQL �Ϥ���������case insensitive (��ʸ����ʸ���ΰ㤤��̵�뤹��) �Ǥ���
-Perl �Ϥ��������������ǤϤ���ޤ��󡣤���ˤ�äơ��ǡ����١�������������Ф��Ȥ������꤬�����뤳�Ȥ�����ޤ���
-Class::DBI �ϥǡ����Τ���äȤ����������򤪤��ʤ��ޤ���
+</A></H2><P>SQL はたいがい、case insensitive (大文字小文字の違いは無視する) です。
+Perl はたいがい、そうではありません。これによって、データベースから情報を取り出すときに問題が起こることがあります。
+Class::DBI はデータのちょっとした正規化をおこないます。
 
 <DL><DT><A NAME="normalize"><STRONG><P><B>normalize</B>
 
 </STRONG></A><PRE>  $obj-&gt;normalize(\@columns);
 
-</PRE><DD>�ǡ����١�������������ʸ����ʸ����ɤΤ褦�˰��������ݾڤ�
-����ޤ��󡣤�äơ�DBI-&gt;fetchrow_hashref() ������������ʸ����ʸ��
-�ǥ����̾(�ޤ�����Ƭ�ˤĤ��ơ��֥�̾��)���֤��Ƥ���褦��������ɤ����ᡢ
-���٤ƤΥ����̾�� �ǡ����Υ����Ȥ��ƻ��Ѥ������ˡ����������ޤ���
+</PRE><DD>データベースがカラムの大文字小文字をどのように扱うかの保証は
+ありません。よって、DBI-&gt;fetchrow_hashref() がおかしな大文字小文字
+でカラム名(また、先頭につくテーブル名も)を返してくるような問題を防ぐため、
+すべてのカラム名を データのキーとして使用する前に、正規化します。
 
 <DT><A NAME="normalize_hash"><STRONG><P><B>normalize_hash</B>
 
 </STRONG></A><PRE>    $obj-&gt;normalize_hash(\%hash);
 
-</PRE><DD>%hash �Τ��٤ƤΥ����� normalize() �����������ޤ������ؤΤ���Υ᥽�åɤǤ���
+</PRE><DD>%hash のすべてのキーを normalize() で正規化します。利便のためのメソッドです。
 
-</DL><H2><A NAME="Defining_SQL_statements">SQLʸ���������
+</DL><H2><A NAME="Defining_SQL_statements">SQL文を定義する
 
-</A></H2><P>Class::DBI �� Ima::DBI ��Ѿ����Ƥ���Τǡ�Ima::DBI ��������ǥǡ����١�����DBI�򰷤��Τ����ޤ����Ǥ���(Ima::DBI �� man page ��ή���ɤߤ��Ƥߤޤ��礦)
+</A></H2><P>Class::DBI は Ima::DBI を継承しているので、Ima::DBI スタイルでデータベースやDBIを扱うのが好ましいです。(Ima::DBI の man page を流し読みしてみましょう)
 
-<P>���֥��饹�ˤ�äƷѾ����뤳�Ȥ��Ǥ���褦�ʥ᥽�åɤ򿷤����񤯤���ˤϡ����饹�Υơ��֥�̾��PRIMARY KEY ̾��ϡ��ɥ����ɤ��ʤ��褦�����դ��ʤ���Фʤ�ޤ���
-set_sql() ��Ȥ��ȡ���ΨŪ�ˡ�����å��夵��륹�ơ��ȥ��ȡ��ϥ�ɥ���������뤳�Ȥ��Ǥ��ޤ���
+<P>サブクラスによって継承することができるようなメソッドを新しく書くためには、クラスのテーブル名、PRIMARY KEY 名をハードコードしないように注意しなければなりません。
+set_sql() を使うと、効率的に、キャッシュされるステートメント・ハンドラを生成することができます。
 
-<P>���̤ˡ�set_sql() �θƤӽФ��Ϥ���ʴ����ˤʤ�ޤ���
+<P>一般に、set_sql() の呼び出しはこんな感じになります。
 
-<PRE>    # sql_GetFooBar() ���������
+<PRE>    # sql_GetFooBar() を定義する
     Class-&gt;set_sql('GetFooBar', &lt;&lt;'SQL');
     SELECT %s
     FROM   %s
     WHERE  Foo = ? AND Bar = ?
 
-</PRE><P>����ˤ�äơ� sql_GetFooBar() �Ȥ����᥽�åɤ��������ޤ���
-������ sprintf() ���̤��ơ�SQLʸ������Τ˻Ȥ��ޤ���
+</PRE><P>これによって、 sql_GetFooBar() というメソッドが定義されます。
+引数は sprintf() を通して、SQL文を埋めるのに使われます。
 
 <PRE>    my $sth = Class-&gt;sql_GetFooBar(join(', ', Class-&gt;columns('Essential')),
                                    Class-&gt;table);
 
-</PRE><P>���饹�Υơ��֥�̾��PRIMARY KEY̾��ϡ��ɥ����ɤ��ʤ��褦�����դ��Ʋ�����������ˡ�table() �� columns() �᥽�åɤ�Ȥ��ޤ���
+</PRE><P>クラスのテーブル名やPRIMARY KEY名をハードコードしないように注意して下さい。代わりに、table() や columns() メソッドを使います。
 
-<P>$db_name ����ά���줿��硢'Main'��³ ����Ѥ�������ꤷ�ޤ���
+<P>$db_name が省略された場合、'Main'接続 を使用すると想定します。
 
-<H2><A NAME="Searching">����
+<H2><A NAME="Searching">検索
 
-</A></H2><P>�����Ĥ��Υ���ץ�ʸ����ѥ᥽�åɤ��󶡤���Ƥ��ޤ������ꥢ���ʸ����ǤϤʤ������饹�β�ǽ����ɽ�������ΤǤ���
+</A></H2><P>いくつかのシンプルな検索用メソッドが提供されています。シリアスな検索ではなく、クラスの可能性を表示するものです。
 
 <DL><DT><A NAME="search"><STRONG><P><B>search</B>
 
 </STRONG></A><PRE>  @objs = Class-&gt;search($key, $value);
   @objs = $obj-&gt;search($key, $value);
 
-</PRE><DD>��Ǽ����Ƥ��륪�֥������ȤˤĤ��ơ�$key �� $value ���ͤ��ĥ��֥������Ȥ򤹤٤��֤���ñ��ʸ����Ǥ���
+</PRE><DD>格納されているオブジェクトについて、$key が $value の値をもつオブジェクトをすべて返す、単純な検索です。
 
 <PRE>    @films = Film-&gt;search('Rating', 'PG');
 
@@ -514,83 +514,83 @@ set_sql() ��Ȥ��ȡ���ΨŪ�ˡ�����å��夵��륹�ơ��ȥ��ȡ��ϥ�ɥ����������
 </STRONG></A><PRE>  @objs = Class-&gt;search_like($key, $like_pattern);
   @objs = $obj-&gt;search_like($key, $like_pattern);
 
-</PRE><DD>$key �� $like_pattern �˥ޥå����륪�֥������Ȥ򤵤���ñ��ʸ����Ǥ���$like_pattern �� SQL �� LIKE �Ҹ�ǵ��Ҥ��줿�ѥ�����Ǥ���'%' �� "Ǥ�դ�1ʸ���ʾ��ñ��", '_' �� "Ǥ�դ�1ʸ����ñ��" ���̣���ޤ���
+</PRE><DD>$key が $like_pattern にマッチするオブジェクトをさがす単純な検索です。$like_pattern は SQL の LIKE 述語で記述されたパターンです。'%' は "任意の1文字以上の単語", '_' は "任意の1文字の単語" を意味します。
 
-<P>XXX % �� _ �Τ����ˡ�* �� ? ��Ȥä������֥��������Ǥ�Ĥ���٤�?
+<P>XXX % と _ のかわりに、* と ? を使ったグロブスタイル版もつくるべき?
 
-<PRE>    # Bob �Ȥ���̾���οͤ����Ĥ����ǲ�򤵤���
+<PRE>    # Bob という名前の人が監督した映画をさがす
     @films = Film-&gt;search_like('Director', 'Bob %');
 
-</PRE></DL><P><HR><H1><A NAME="EXAMPLES">��
+</PRE></DL><P><HR><H1><A NAME="EXAMPLES">例
 
-</A></H1><P>������... �ޤ������פ����뤷��
+</A></H1><P>うーん... まあ、概要があるし。
 
-<P>XXX ��ä��㤬ɬ�פǤ��͡����Τ�����ޤ�Ǥ��礦��
+<P>XXX もっと例が必要ですね。そのうち埋まるでしょう。
 
 <PRE>
-</PRE><P><HR><H1><A NAME="CAVEATS">�ٹ�
+</PRE><P><HR><H1><A NAME="CAVEATS">警告
 
-</A></H1><H2><A NAME="Only_simple_scalar_values_can_be_stored">ñ��ʥ������ͤ�����Ǽ�Ǥ��ʤ�
+</A></H1><H2><A NAME="Only_simple_scalar_values_can_be_stored">単純なスカラ値しか格納できない
 
-</A></H2><P>SQL�äƤΤϺ��ä���Τǡ��ꥹ�Ȥ��Ǽ����Τ�ʣ���ǡ��ϥå�����Ǽ����Τϡ�1�ĥơ��֥뤬ɬ�פˤʤ�ޤ���
-����ʾ�ʣ���ʤ��ȤϤޤ��Ϥ���ʤ��褦�ˤ��Ƥ����������⤷�ꥹ�Ȥ��Ǽ��������С�
-��ʬ���Ȥǥ���������񤤤Ƥ�������(����ν�����ˡ�Ϥ��Τ����¸�����Ĥ��Ǥ�)��
-�⤷�ϥå�����Ǽ��������С��⤦1�ĥơ��֥�ȥ��饹���뤳�Ȥ��θ�������������Ǥ��礦��
+</A></H2><P>SQLってのは困ったもので、リストを格納するのは複雑で、ハッシュを格納するのは、1個テーブルが必要になります。
+これ以上複雑なことはまだはじめないようにしてください。もしリストを格納したければ、
+自分自身でアクセサを書いてください(これの処理方法はそのうち実験するつもりです)。
+もしハッシュを格納したければ、もう1つテーブルとクラスを作ることを考慮した方がいいでしょう。
 
-<P>���줫����������ơ���ưŪ�˥ǡ����򥷥ꥢ�饤�����륢��������Ĥ��뤫�⤷��ޤ���
+<P>だれかに説得されて、自動的にデータをシリアライズするアクセサをつくるかもしれません。
 
-<H2><A NAME="One_table_one_class">1�ơ��֥롢1���饹
+<H2><A NAME="One_table_one_class">1テーブル、1クラス
 
-</A></H2><P>���٤ƤΥ��饹��1�ĥơ��֥��������Ʋ�������2�İʾ�Υơ��֥�ˤҤȤĤΥ��饹��
-ʬ�����뤳�ȤϤǤ��ޤ��󡣤���򰷤���褦�ˤ���Τϡ����ʤ�Ƭ���ˤ��äǤ���
+</A></H2><P>すべてのクラスに1つテーブルを定義して下さい。2個以上のテーブルにひとつのクラスが
+分散することはできません。これを扱えるようにするのは、かなり頭が痛い話です。
 
-<P>�ǽ�Ū�ˤϡ������Υơ��֥�Υ�󥯤䡢�ꥹ�ȤΥǡ�����ɽ���ơ��֥�˴ؤ������¤򳰤����Ȥˤʤ�Ǥ��礦��
+<P>最終的には、これらのテーブルのリンクや、リストのデータを表すテーブルに関する制限を外すことになるでしょう。
 
-<H2><A NAME="Single_column_primary_keys_only">PRIMARY KEY �Υ�����1�Ĥ���
+<H2><A NAME="Single_column_primary_keys_only">PRIMARY KEY のカラムは1個だけ
 
-</A></H2><P>SQL�ơ��֥�ˡ�2�İʾ� PRIMARY KEY ���������Τϡ��������ݡ��Ȥ���Ƥ��ޤ��󡣤ʤ��ä�? ʣ��������Ǥ�������ΥС������ǡ�ʣ���Υ����򥵥ݡ��Ȥ��ޤ���
+</A></H2><P>SQLテーブルに、2個以上 PRIMARY KEY を持たせるのは、現状サポートされていません。なぜって? 複雑だからです。将来のバージョンで、複数のキーをサポートします。
 
 <PRE>
 </PRE><P><HR><H1><A NAME="TODO">TODO
 
-</A></H1><H2><A NAME="Table_object_relationships_need_to_be_handled_">�ơ��֥�/���֥������Ȥδط���ϥ�ɥ뤹�٤�
+</A></H1><H2><A NAME="Table_object_relationships_need_to_be_handled_">テーブル/オブジェクトの関係をハンドルすべき
 
-</A></H2><P>2�ĤΥơ��֥�/���֥������Ȥδط��򰷤����ޤ���ˡ������ޤ���
-�ǽ�Ū�ˤϡ��ȤƤ�ñ�����ˡ�ǡ������δط��򥵥ݡ��Ȥ��Ƥ����Ĥ��Ǥ���
+</A></H2><P>2つのテーブル/オブジェクトの関係を扱ううまい方法がありません。
+最終的には、とても単純な方法で、これらの関係をサポートしていくつもりです。
 
-<H2><A NAME="Lists_are_poorly_supported">�ꥹ�ȤΥ��ݡ��Ȥ��ϼ�
+<H2><A NAME="Lists_are_poorly_supported">リストのサポートが貧弱
 
-</A></H2><P>��ΤΥꥹ�Ȥ򥪥֥������ȥǡ����Ȥ��ư������ޤ���ˡ������ޤ���
-�����ޤ����ǽ�Ū�ˤϼ������褦�ȹͤ��Ƥ����ΤΤҤȤĤǤ���
+</A></H2><P>もののリストをオブジェクトデータとして扱ううまい方法がありません。
+これもまた、最終的には実装しようと考えているもののひとつです。
 
-<H2><A NAME="Using_pseudohashes_as_objects_has_to_be_documented">�����ϥå���򥪥֥������ȤȤ����Ѥ�����ˡ��ɥ�����Ȥˤ��٤�
+<H2><A NAME="Using_pseudohashes_as_objects_has_to_be_documented">疑似ハッシュをオブジェクトとして用いる方法をドキュメントにすべき
 
-</A></H2><H2><A NAME="Cookbook_needs_to_be_written">��Ω�����ɬ�פ�����
+</A></H2><H2><A NAME="Cookbook_needs_to_be_written">献立集を書く必要がある
 
-</A></H2><H2><A NAME="Object_caching_needs_to_be_added">���֥������ȤΥ���å��󥰤��ɲä���ɬ�פ�����
+</A></H2><H2><A NAME="Object_caching_needs_to_be_added">オブジェクトのキャッシングを追加する必要がある
 
-</A></H2><H2><A NAME="Multi_column_primary_keys_untested_">ʣ�������� PRIMARY KEY �ˤĤ��ƥƥ��Ȥ��Ƥ��ʤ�
+</A></H2><H2><A NAME="Multi_column_primary_keys_untested_">複数カラムの PRIMARY KEY についてテストしていない
 
-</A></H2><P>�⤷���ε�ǽ��ɬ�פʤ�С������Ʋ�������ư���褦�ˤ��ޤ���
+</A></H2><P>もしこの機能が必要ならば、教えて下さい。動くようにします。
 
-<H2><A NAME="More_testing_with_more_databases_">��äȤ�����ʥǡ����١����ǥƥ��Ȥ��٤�
+<H2><A NAME="More_testing_with_more_databases_">もっといろんなデータベースでテストすべき
 
-</A></H2><H2><A NAME="Complex_data_storage_via_Storable_needed_">ʣ���ʥǡ����� Storable �ǳ�Ǽ���뤳�Ȥ�ɬ��
+</A></H2><H2><A NAME="Complex_data_storage_via_Storable_needed_">複雑なデータを Storable で格納することが必要
 
-</A></H2><H2><A NAME="There_are_concurrency_problems">�¹Խ��������꤬����
+</A></H2><H2><A NAME="There_are_concurrency_problems">並行処理の問題がある
 
-</A></H2><H2><A NAME="rollback_has_concurrency_problems">rollback() ���¹Խ��������꤬����
+</A></H2><H2><A NAME="rollback_has_concurrency_problems">rollback() は並行処理の問題がある
 
-</A></H2><H2><A NAME="Working_with_transactions_needs_to_be_made_easier_">�ȥ�󥶥�����������äȴ�ñ�ˤǤ���褦��
+</A></H2><H2><A NAME="Working_with_transactions_needs_to_be_made_easier_">トランザクションの操作がもっと簡単にできるように
 
-</A></H2><P>$obj-&gt;commit �� DBI-&gt;commit �ˤ��٤�???
+</A></H2><P>$obj-&gt;commit は DBI-&gt;commit にすべき???
 
-<P>���饹�磻�ɤʥ��ߥåȤȥ�����Хå��Ρ���ñ����ˡ��ɬ�ס�
+<P>クラスワイドなコミットとロールバックの、簡単な方法が必要。
 
 <PRE>
-</PRE><P><HR><H1><A NAME="BUGS_and_CAVEATS">�Х��ȷٹ�
+</PRE><P><HR><H1><A NAME="BUGS_and_CAVEATS">バグと警告
 
-</A></H1><H2><A NAME="Tested_with_">�ƥ��Ȥ����Ķ�
+</A></H1><H2><A NAME="Tested_with_">テストした環境
 
 </A></H2><DL><DT><A NAME="DBD_mysql_MySQL_3_22_and_3_23_"><STRONG><P>DBD::mysql - MySQL 3.22 and 3.23
 
@@ -598,7 +598,7 @@ set_sql() ��Ȥ��ȡ���ΨŪ�ˡ�����å��夵��륹�ơ��ȥ��ȡ��ϥ�ɥ����������
 
 </STRONG><BR><STRONG>DBD::CSV
 
-</STRONG></DL><H2><A NAME="Known_not_to_work_with_">ư��ʤ����Ȥ��狼�äƤ���Ķ�
+</STRONG></DL><H2><A NAME="Known_not_to_work_with_">動作しないことがわかっている環境
 
 </A></H2><DL><DT><A NAME="DBD_RAM_"><STRONG><P>DBD::RAM
 
@@ -606,16 +606,16 @@ set_sql() ��Ȥ��ȡ���ΨŪ�ˡ�����å��夵��륹�ơ��ȥ��ȡ��ϥ�ɥ����������
 </PRE></DL><P><HR><H1><A NAME="AUTHOR">AUTHOR
 
 </A></H1><P>Michael G Schwern &lt;schwern@pobox.com&gt;  
-Uri Gutman, Damian Conway, Mike Lambert ������ POOP ���롼�פˡ���������
-����ˤ錄�äƤν������餤�ޤ�����
+Uri Gutman, Damian Conway, Mike Lambert そして POOP グループに、たくさん
+深夜にわたっての助けをもらいました。
 
 <PRE>
-</PRE><P><HR><H1><A NAME="SEE_ALSO">����ʸ��
+</PRE><P><HR><H1><A NAME="SEE_ALSO">参考文献
 
 </A></H1><P><A HREF="http://search.cpan.org/doc/MSCHWERN/Ima-DBI-0.01/DBI.pm">Ima::DBI</A>, <A HREF="http://search.cpan.org/doc/MSCHWERN/Class-Accessor-0.02/lib/Class/Accessor.pm">Class::Accessor</A>, <A HREF="http://search.cpan.org/doc/TIMB/perl5.004_04/lib/base.pm">base</A>, <A HREF="http://search.cpan.org/doc/MSCHWERN/Class-Data-Inheritable-0.02/lib/Class/Data/Inheritable.pm">Class::Data::Inheritable</A>
 http://www.pobox.com/~schwern/papers/Class-DBI/,
 Perl Object-Oriented Persistence &lt;poop-group@lists.sourceforge.net&gt;,
-<A>Alzabo</A>������ <A HREF="http://search.cpan.org/doc/J/JL/JLLEROY/Tangram-0.08/Tangram.pod">Tangram</A>
+<A>Alzabo</A>そして <A HREF="http://search.cpan.org/doc/J/JL/JLLEROY/Tangram-0.08/Tangram.pod">Tangram</A>
 
 <P><HR></BODY></HTML>
 </BODY></HTML>

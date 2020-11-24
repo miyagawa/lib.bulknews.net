@@ -11,9 +11,9 @@ by <A HREF=http://www.perl.com/pub/au/Conway_Damian>Damian Conway</a><br />
 May 15, 2001
 <p><small>(translated into Japanese by <A href="http://bulknews.net/lib/">Tatsuhiko Miyagawa</A> with permission of Damian Conway.)</small></p>
 
-<p><em>exegesis: [̾��]. ʸ�񡢤Ȥ�������β�ᡢ���⡣</em></p>
-<p>���ε����� Larry Wall �� ���̸��� ``Apocalypse(�ۼ�Ͽ)'' ���¹Ԥ��뵭��������ƤǤ���(2����ϤޤäƤ���Τϡ��ۼ���Ʊ�����뤿��Ǥ�)</p>
-<p>��䤳�������Ȥ�ȴ���ˤ��ơ��ޤ��� Perl 6 �򾯤��񤤤Ƥߤޤ��礦:</p>
+<p><em>exegesis: [名詞]. 文書、とくに聖書の解釈、解説。</em></p>
+<p>この記事は Larry Wall の 一般向け ``Apocalypse(黙示録)'' に並行する記事の第一弾です。(2から始まっているのは、黙示と同期するためです)</p>
+<p>ややこしいことは抜きにして、まずは Perl 6 を少し書いてみましょう:</p>
 
 <pre>
         # bintree - binary tree demo program 
@@ -78,111 +78,111 @@ May 15, 2001
             return $tree;
         }</pre>
 <p>
-<h3><a name="it's perl, jim, and quite like we know it">����� Perl ���衢Jim���ΤäƤ��ߤ������͡�</a></h3>
-<p>�ץ������λϤޤ�ϸ����줿��ΤǤ�:</p>
+<h3><a name="it's perl, jim, and quite like we know it">これは Perl だよ、Jim。知ってたみたいだね。</a></h3>
+<p>プログラムの始まりは見慣れたものです:</p>
 <pre>
         use strict;
         use warnings;
         my ($root, $n);</pre>
 <pre>
         while ($n++ &lt; 20) { insert($root, int rand 1000) }</pre>
-<p>�ʤˤ⿷�������ȤϤ���ޤ��󡣼ºݡ���������ο�������ǽ�������򤷤ƤϤ��ޤ��������Υץ���������ΤȤ��Ƥ� Perl 5 �Υ����ɤˤ��ä���Ǥ���</p>
-<p>������̤˶ä����ȤǤϤ���ޤ���Perl 6 �ϡ�������Ǯ���� Perl 5 �ץ�����ޤ���Ƥ������ޤ줿��ΤʤΤǤ����顣</p>
-<p><a href="http://dev.perl.org/rfc/28.html">RFC 28</a> ����Ƥ��Ƥ���褦�ˡ�Perl �ϴְ㤤�ʤ� Perl �ΤޤޤʤΤǤ���</p>
+<p>なにも新しいことはありません。実際、たくさんの新しい機能の説明をしてはいますが、このプログラム全体としては Perl 5 のコードにそっくりです。</p>
+<p>これは別に驚くことではありません。Perl 6 は、大勢の熱心な Perl 5 プログラマの提案から生まれたものなのですから。</p>
+<p><a href="http://dev.perl.org/rfc/28.html">RFC 28</a> が提案しているように、Perl は間違いなく Perl のままなのです。</p>
 <p>
-<h3><a name="any variables to declare">�ʤˤ���������ѿ���?</a></h3>
-<p>Perl 6 ���ѿ�����Ͼ�� <code>$root</code> �� <code>$n</code> ������Τ褦�˥���ץ�Ǥ�����������äȤ���줿��ˡ�Ǥ�����Ǥ��ޤ�:</p>
+<h3><a name="any variables to declare">なにか宣言する変数は?</a></h3>
+<p>Perl 6 の変数宣言は上の <code>$root</code> や <code>$n</code> の宣言のようにシンプルです。ただ、もっとしゃれた方法でも宣言できます:</p>
 <pre>
         my int ($pre, $in, $post) is constant = (0..2);</pre>
-<p>������������Ƥ���3�Ĥ��ѿ��϶��̤η�(<code>int</code>)�ȥץ��ѥƥ�(<code>constant</code>) ��ͭ���Ƥ��ޤ�. ���Ĥ��쥭������(Typed lexical)�� Perl5 �ˤ⤢�ä���ǽ�Ǥ�����Perl �Υӥ�ȥ��󷿤ˤ�̾�����դ����ΤϤϤ���ƤǤ���</p>
-<p>���η����Ҥˤ�äơ�����ѥ���� <code>$pre</code>, <code>$in</code>, �� <code>$post</code> �ˤ� int �Τߤ���Ǽ����뤳�Ȥ������뤳�Ȥ��Ǥ��ޤ����ޤ���<code>int</code>
-����ʸ���ʤΤǡ������ѿ��μ������Ŭ�����Ƥ⹽��ʤ����Ȥ������ޤ������ε��Ҥ򤹤�� �ѿ���<code>bless</code>�����ꡢ��󥿥���ǤΥץ��ѥƥ����ղä����ꤹ�뤳�Ȥ��Ǥ��ʤ��ʤ뤿��Ǥ���������«�򤷤����Ȥǡ��ץ��������ǵ�§���ˤäƤ��ޤ��ȡ�����ѥ�����⤷���ϥ�󥿥���Υ��顼�ˤʤ�ޤ�(�ɤ���ˤʤ뤫�ϡ�����ѥ��餬���ΰ�ˡ�԰٤���Ū�ˤߤĤ����뤫�ɤ����ˤ�äƷ�ޤ�ޤ�)��</p>
-<p>�⤷ <code>bless</code> ���󥿥���ץ��ѥƥ������ˤ������ʤ��ΤǤ���С����Τ褦�ˤ�񤱤ޤ�:</p>
+<p>ここで宣言している3つの変数は共通の型(<code>int</code>)とプロパティ(<code>constant</code>) を共有しています. 型つきレキシカル(Typed lexical)は Perl5 にもあった機能ですが、Perl のビルトイン型にも名前が付いたのははじめてです。</p>
+<p>この型記述によって、コンパイラに <code>$pre</code>, <code>$in</code>, と <code>$post</code> には int のみが格納されることを伝えることができます。また、<code>int</code>
+が小文字なので、この変数の実装を最適化しても構わないことも伝えます。この記述をすると 変数を<code>bless</code>したり、ランタイムでのプロパティを付加したりすることができなくなるためです。この約束をしたあとで、プログラム中で規則を破ってしまうと、コンパイル時もしくはランタイムのエラーになります(どちらになるかは、コンパイラがその違法行為を、静的にみつけられるかどうかによって決まります)。</p>
+<p>もし <code>bless</code> やランタイムプロパティを犠牲にしたくないのであれば、このようにも書けます:</p>
 <pre>
         my INT ($pre, $in, $post) is constant = (0..2);</pre>
-<p>��������С�3�Ĥ��ѿ��κ�Ŭ�����ϲ�����ޤ�����������ʵ�ǽ���ä� Perl �Υ������ѿ��Ȥ��ư����ޤ���</p>
-<p>�������ä��ü�ʥ������Ǥϡ�<code>int</code>��<code>INT</code> ��Ȥ�ʬ���Ƥ⡢�ºݤˤϤ��ޤ�㤤�Ϥ���ޤ��󡣤������ʤ��顢���Τ褦�˽񤯤����Τ˺����Ǥޤ�:</p>
+<p>こうすれば、3つの変数の最適化具合は下がりますが、いろんな機能をもった Perl のスカラ変数として扱えます。</p>
+<p>こういった特殊なケースでは、<code>int</code>と<code>INT</code> を使い分けても、実際にはあまり違いはありません。しかしながら、次のように書くと明確に差がでます:</p>
 <pre>
         my int @hit_count is dim(100,366,24);</pre>
-<p>����ȼ��Ȥ���Ӥ������Ǥ�:</p>
+<p>これと次とを比較した場合です:</p>
 <pre>
         my INT @hit_count is dim(100,366,24);</pre>
-<p>���η�̡�100���᤯�Τ��ä��ꤷ���������ѿ��򡢤��ä��ꤷ�� int �����ִ��Ǥ��ޤ���</p>
+<p>この結果、100万近くのがっちりしたスカラ変数を、すっきりした int 型に置換できます。</p>
 <p>
 <h3><a name="la proprit c'est le vol">La propri&eacute;t&eacute; c'est le vol</a></h3>
-<p><code>is constant</code> �� <code>is dim</code> �Τ褦������ϥ���ѥ�����Υץ��ѥƥ����ҤǤ������������ü�ʥץ��ѥƥ��� Perl6 �Ǥϥ���������ɤǤ�����<a href="#haven't we met before (part 1)">�����ʤ褦�ˤ���</a>�����ޤ���<code>is dim</code> �ץ��ѥƥ��ϡ�Perl ������μ�����(����Ǥ�!)�������ޤ���<code>is constant</code> �ץ��ѥƥ��ϡ��ѿ������ٽ�������줿�顢�褷�������乹������ʤ����Ȥ�ɽ���ޤ���</p>
-<p>���ξ塢<code>constant</code> �ץ��ѥƥ��ϡ��ѿ��򥤥�饤�󲽤��ƺ�Ŭ���Ǥ��뤫�⤷��ʤ��Ȥ���������ѥ���ؤΥҥ�Ȥˤʤ�ޤ���������󡢤��줬�¸���ǽ�ˤʤ�Τϡ������ѿ���ºݤ��ѿ���Ʊ���褦�˰���ʤ����ΤߤǤ�(��ե���󥹤�Ĥ��ä��ꡢbless �����ꤷ�ʤ��Ȥ�������)��</p>
-<p><code>is</code> ������ɤϡ����줬�ʤ��Ƥ��̣���̤���ˤϾ�ά��ǽ�Ǥ�����äơ��ʲ��Τ褦�ˤ�񤱤ޤ�:</p>
+<p><code>is constant</code> や <code>is dim</code> のような宣言はコンパイル時のプロパティ記述です。こうした特殊なプロパティが Perl6 ではスタンダードですが、<a href="#haven't we met before (part 1)">好きなようにして</a>構いません。<code>is dim</code> プロパティは、Perl に配列の次元数(固定です!)を伝えます。<code>is constant</code> プロパティは、変数が一度初期化されたら、決して代入や更新されないことを表します。</p>
+<p>その上、<code>constant</code> プロパティは、変数をインライン化して最適化できるかもしれないという、コンパイラへのヒントになります。もちろん、これが実現可能になるのは、その変数を実際の変数と同じように扱わない場合のみです(リファレンスをつくったり、bless したりしないということ)。</p>
+<p><code>is</code> キーワードは、それがなくても意味が通る場合には省略可能です。よって、以下のようにも書けます:</p>
 <pre>
         my int ($pre, $in, $post) constant = (0..2);</pre>
-<p>Larry �ϡ�<code>are</code> �� <code>is</code> ��Ʊ�ո�Ȥ����󶡤��뤳�Ȥ�ͤ��Ƥ���褦�Ǥ��Τǡ�������������������Ƥ⤤�����⤷��ޤ���:</p>
+<p>Larry は、<code>are</code> を <code>is</code> の同意語として提供することも考えているようですので、こういう風に宣言してもいいかもしれません:</p>
 <pre>
         my int ($pre, $in, $post) are constant = (0..2);</pre>
-<p>������������<code>is</code> �黻�Ҥν��פʵ�ǽ�Ȥ��ơ�<em>��¦</em> �Υ��ڥ��ɤ��֤����Ȥ��������ޤ����Ĥޤ�:</p>
+<p>次に説明する<code>is</code> 演算子の重要な機能として、<em>左側</em> のオペランドを返すことがあげられます。つまり:</p>
 <pre>
         $submarine is Colour('yellow')</pre>
-<p>��ʸ��<code>$submarine</code> �Ȥ���ɾ������ޤ���<code>'yellow'</code> �ǤϤ���ޤ���</p>
+<p>の文は<code>$submarine</code> として評価されます。<code>'yellow'</code> ではありません。</p>
 <p>
-<h3><a name="more of the same">�ޤ��ޤ�Ʊ�����</a></h3>
-<p><code>show</code> ��3��Ƥ�Ǥ���Ȥ����ϡ�Perl5 �λ��Ȥޤä������Ǥ�:</p>
+<h3><a name="more of the same">またまた同じもの</a></h3>
+<p><code>show</code> を3回呼んでいるところは、Perl5 の時とまったく一緒です:</p>
 <pre>
         print &quot;Pre order:  &quot;; show($root,$pre);  print &quot;\n&quot;;
         print &quot;In order:   &quot;; show($root,$in);   print &quot;\n&quot;;
         print &quot;Post order: &quot;; show($root,$post); print &quot;\n&quot;;</pre>
-<p>�����ʤ��Ȥˡ��������ä��������Ϥ���Ϣ�ܤǤ��������ܤˤ��뤳�Ȥˤʤ�Ǥ��礦��</p>
+<p>幸運なことに、こういったケースはこの連載でたくさん目にすることになるでしょう。</p>
 <p>
-<h3><a name="biting off less so you can chew">̵�����ʤ��Ǥ��ä���ͤ��褦</a></h3>
-<p>����ʽ�����˰�������ȤϤʤ��Ǥ��礦��?:</p>
+<h3><a name="biting off less so you can chew">無理しないでじっくり考えよう</a></h3>
+<p>こんな書き方に飽きたことはないでしょうか?:</p>
 <pre>
-        while (&lt;&gt;) {            # Perl 5 �Υ��ǥ�����
+        while (&lt;&gt;) {            # Perl 5 のイディオム
                 chomp;
                 ...</pre>
-<p>���ϹԤ����٤Ƽ�ưŪ�� chomp ���줿����Ũ����ʤ��Ǥ���? Perl 6 �Ǥϡ����줬�Ǥ��ޤ������ϥϥ�ɥ��ɽ�� <code>$*ARGS</code> �Ȥ����������Х��ѿ��ˡ�<code>chomped</code> �ץ��ѥƥ��򥻥åȤ�������Ǥ褤�ΤǤ�:</p>
+<p>入力行がすべて自動的に chomp されたら素敵じゃないですか? Perl 6 では、それができます。入力ハンドルを表す <code>$*ARGS</code> というグローバル変数に、<code>chomped</code> プロパティをセットするだけでよいのです:</p>
 <pre>
         $*ARGS is chomped;</pre>
-<p>����ˤ�äơ�������ϥ�ɥ���ɤ߹���(<a href="#inputs that output">���Ϥ�������</a>����)������ưŪ�� <code>chomp</code>���줿ʸ������֤��褦�ˤʤ�ޤ����������¾�ζ��ڤꥰ�����Х��ѿ���Ʊ�͡�<code>$/</code> �� Perl 6 ������������ޤ�������ä� chomp ����� trailing character �ϡ�<code>$/</code>������ˡ����Υϥ�ɥ뼫�Ȥ� <code>insep</code> (<strong>in</strong>put <strong>sep</strong>arator)�ץ��ѥƥ��ˤ�äƻ��ꤵ��ޤ���</p>
-<p><code>$*ARGS</code> �ˤ��륢�����ꥹ���ϡ������ѿ����ü�ʥ������Х��̾�����֤Τ�ΤǤ��뤳�Ȥ򼨤��Ƥ��ޤ����⤷���Υ������ꥹ������ά����Ƥ⡢Ʊ̾�Υ쥭������⤷���ϥѥå������ѿ���������ʤ��¤ꡢ�ü�ʥ������Х��̾�����֤Τ�Τˤʤ�ޤ����狼��䤹����С�<code>*</code> �� ``�����������''���ɤ�Ǥ⤤���Ǥ��礦��</p>
-<p>�Ȥ����ǡ�<code>$*ARGS</code> �ȸƤФ��Τϡ�����ˤ�ä� Perl 6 �ץ������ΰ���<em>(arguments)</em>�˥��������Ǥ��뤫��Ǥ�(Perl 5 ��<code>ARGV</code> �ե�����ϥ�ɥ뤬�ץ������� ... ������� ...<em>argumentv</em> �˥��������Ǥ���Τ�Ʊ���Ǥ�)��</p>
+<p>これによって、あらゆるハンドルの読み込み(<a href="#inputs that output">出力する入力</a>参照)が、自動的に <code>chomp</code>された文字列を返すようになります。もちろん、他の区切りグローバル変数と同様、<code>$/</code> は Perl 6 から追放されました。よって chomp される trailing character は、<code>$/</code>の代わりに、そのハンドル自身の <code>insep</code> (<strong>in</strong>put <strong>sep</strong>arator)プロパティによって指定されます。</p>
+<p><code>$*ARGS</code> にあるアスタリスクは、この変数が特殊なグローバルの名前空間のものであることを示しています。もしこのアスタリスクが省略されても、同名のレキシカルもしくはパッケージ変数を宣言しない限り、特殊なグローバルの名前空間のものになります。わかりやすければ、<code>*</code> を ``スタンダード''と読んでもいいでしょう。</p>
+<p>ところで、<code>$*ARGS</code> と呼ばれるのは、これによって Perl 6 プログラムの引数<em>(arguments)</em>にアクセスできるからです(Perl 5 の<code>ARGV</code> ファイルハンドルがプログラムの ... うーんと ...<em>argumentv</em> にアクセスできるのと同じです)。</p>
 <p>
-<h3><a name="inputs that output">���Ϥ�������</a></h3>
+<h3><a name="inputs that output">出力する入力</a></h3>
 <!--http://www.oreilly.com/catalog/cookbook/-->
-<p>���Υץ������� <a href="http://www.oreilly.com/catalog/cookbook/"><em>Cookbook</em></a>�Υ��ꥸ�ʥ�С������Ǥϡ����ιԤϤ����ʤäƤ��ޤ���:</p>
+<p>このプログラムの <a href="http://www.oreilly.com/catalog/cookbook/"><em>Cookbook</em></a>のオリジナルバージョンでは、次の行はこうなっていました:</p>
 <pre>
         for (print &quot;Search? &quot;; &lt;&gt;; print &quot;Search? &quot;) {</pre>
-<p>������ʬ�� Perl 5 �Ǥ�Ǽ���Ǥ����ˡ���ʤ���ħŪ�ʥ����奨�������Ǥ����Ĥޤꡢ���ϥץ���ץȤ�Ф��ơ�<code>$_</code> ���ɤ߹���ǡ��Ȥ����Τ� EOF�ޤǷ����֤��ޤ���Perl 6�Ǥϡ��Ĥ��ˤ��줤����ˡ���Ǥ��ޤ������ޤ��̤Υץ��ѥƥ��Ǥ�:</p>
+<p>この部分は Perl 5 では納得できる解法がない象徴的なシチュエーションです。つまり、入力プロンプトを出して、<code>$_</code> に読み込んで、というのを EOFまで繰り返します。Perl 6では、ついにきれいな方法ができました。また別のプロパティです:</p>
 <pre>
         $ARGS prompts(&quot;Search? &quot;);
         while (&lt;$ARGS&gt;) {</pre>
-<p>�ޤ����Ť��Τϡ����������ɱ黻�Ҥλब�礲������𤵤�Ƥ���Ȥ������ȤǤ��礦�������Ǥ�����2���ۼ�Ͽ�����������ɱ黻�Ҥλ��ͽ�����Ƥ����ˤ⤫����餺�����ꤽ��2�����줫��Ŭ�Ѥ��졢�������å��������Ƥ���ΤǤ�!</p>
-<p>�������Perl 6 �Ǥϰ�������̯�˰ۤʤꡢ�ϥ�ɥ륪�֥�������(�̾���ѿ��˳�Ǽ����Ƥ��ޤ�)�����å������<em>ɬ��</em>�ˤʤäƤ��ޤ�������������� Perl 5 �Ǥ⤹�Ǥ˲�ǽ�Ǥ���</p>
-<p>�Ȥ����ǡ��ץ���ץȤˤĤ��ƤϤɤ��Ǥ��礦? ������Perl 6 �β�ˡ�Ǥϡ����ϥϥ�ɥ�ϡ���Ϣ����ʸ�����ץ��ѥƥ��˻������ǡ������ɤ߹������ˤ���� print ���뤳�Ȥ��Ǥ��ޤ���</p>
-<p><em>����ä��Ԥä�!</em>�� �۵Ĥ򾧤���Τ�ʹ�����ޤ���. <em>���ϥϥ�ɥ뤬���Ϥ򤹤�Τ�???</em>
-�ºݡ�Ĺ�����ȥϥ�ɥ�򤽤Τ褦�˻ȤäƤ����Ϥ��Ǥ���¿���θ���Ǥϡ�ɸ�����Ϥ����ɤ߹�����ˡ�ɸ����ϤΥե�å��夬ɬ���ǽ�˹Ԥ��ޤ�������ˤ�äơ�:</p>
+<p>まず気づくのは、ダイアモンド演算子の死が大げさに報告されているということでしょう。そうです、第2の黙示録がダイアモンド演算子の死を予言していたにもかかわらず、裁定その2がそれから適用され、カギカッコは生きているのです!</p>
+<p>もちろん、Perl 6 では扱いが微妙に異なり、ハンドルオブジェクト(通常は変数に格納されています)がカッコの中に<em>必須</em>になっています。ただ、それは Perl 5 でもすでに可能です。</p>
+<p>ところで、プロンプトについてはどうでしょう? そう、Perl 6 の解法では、入力ハンドルは、関連した文字列をプロパティに持ち、データを読み込む前にそれを print することができます。</p>
+<p><em>ちょっと待った!</em>、 異議を唱えるのが聞こえました. <em>入力ハンドルが出力をするのか???</em>
+実際、長いことハンドルをそのように使ってきたはずです。多くの言語では、標準入力から読み込む時に、標準出力のフラッシュが必ず最初に行われます。これによって、:</p>
 <pre>
         print &quot;nuqneH? &quot;;
         $request = &lt;&gt;;</pre>
-<p>����ʴ����Υ����ɤ�񤤤Ƥ⡢���Ԥǽ��äƤ��ʤ��ˤ⤫����餺���ɤ߹������˥ץ���ץȤ����������Ϥ����ΤǤ���</p>
-<p>�Ĥޤ����ϤȽ��ϤΥᥫ�˥���ϡ����Ǥ���̩����Ŭ�ڤʴط�����äƤ���ΤǤ���
-�������Ѥ�ä����ȤȤ����С����ϥϥ�ɥ�ϥХåե���ե�å��夹�����ˡ�����äȤ���ʸ�����ɽ���Ǥ���褦�ˤʤä����Ȥ����Ǥ���
-����� <code>prompts</code> �ץ��ѥƥ��ˤ�äƤʤ���ޤ����⤷���ϥϥ�ɥ뤬���Υץ��ѥƥ�����äƤ����硢���Ϥ��ɤ߹���ľ���ˡ������ͤ�<code>$*OUT</code> �˽񤫤�ޤ�����äƤ��Υ����ɤ�:</p>
+<p>こんな感じのコードを書いても、改行で終っていないにもかかわらず、読み込み前にプロンプトが正しく出力されるのです。</p>
+<p>つまり入力と出力のメカニズムは、すでに秘密の不適切な関係を持っているのです。
+ここで変わったことといえば、入力ハンドルはバッファをフラッシュする前に、ちょっとした文字列を表示できるようになったことだけです。
+これは <code>prompts</code> プロパティによってなされます。もし入力ハンドルがそのプロパティを持っている場合、入力を読み込む直前に、その値が<code>$*OUT</code> に書かれます。よってこのコードは:</p>
 <pre>
         for (print &quot;Search? &quot;; &lt;&gt;; print &quot;Search? &quot;;) {         # Perl 5 (or 6)</pre>
-<p>���Τ褦�˽�ľ���ޤ���</p>
+<p>このように書き直せます。</p>
 <pre>
         $ARGS prompts(&quot;Search? &quot;);                              # Perl 6
         while (&lt;$ARGS&gt;) {</pre>
-<p>����Ū�ˤϡ�������󤳤�����٤��Ǥ�:</p>
+<p>技術的には、もちろんこうあるべきです:</p>
 <pre>
         $ARGS is prompts(&quot;Search? &quot;);</pre>
-<p>�Ǥ⡢����Ϥ���äȵ����������Ǥ��礦�����꤬�������Ȥ� <code>is</code> �ϡ��ޤ��ˤ���ʴ����Υ���ƥ����ȤǤϡ���ά��ǽ�Ǥ���</p>
-<p>���ܤ��٤��ϡ�<code>is</code> �黻�Ҥ�(<code>is</code> ����ά����Ƥ��Ƥ�!)��¦�Υ��ڥ��ɤ��֤��Τǡ���äȥ��쥬��ȤˤǤ��ޤ�:</p>
+<p>でも、これはちょっと気持ち悪いでしょう。ありがたいことに <code>is</code> は、まさにこんな感じのコンテキストでは、省略可能です。</p>
+<p>注目すべきは、<code>is</code> 演算子は(<code>is</code> が省略されていても!)左側のオペランドを返すので、もっとエレガントにできます:</p>
 <pre>
         while (&lt;$ARGS prompts(&quot;Search? &quot;)&gt;) {</pre>
-<p>�ºݡ����Υ��饤���Ǥ��������ޤ�䤹���Ǥ��礦��<code>prompts</code> �ץ��ѥƥ����ͤϥ롼�פΤɤ������ѹ����줦�뤷���ޤ���󥤥ƥ졼�����Τ��Ӥ˥ꥻ�åȤ���ޤ����顣</p>
-<p>�ץ���ץȥᥫ�˥�������Τʥ��ޥ�ƥ������Ϥޤ����ΤˤʤäƤ��ʤ��Τǡ����֥롼�����ե���󥹤�Ȥäƥ����ʥߥå��˥ץ���ץȤ���������(������Ϥ��ɤ߹������ˡ��ϥ�ɥ뤬���Υ��֥롼�����Ƥӡ��֤��ͤ�ɽ������)���Ȥ�Ǥ��뤫���Τ�ޤ���</p>
+<p>実際、このワンライン版の方が好まれやすいでしょう。<code>prompts</code> プロパティの値はループのどこかで変更されうるし、また毎回イテレーションのたびにリセットされますから。</p>
+<p>プロンプトメカニズムの正確なセマンティクスはまだ明確になっていないので、サブルーチンリファレンスを使ってダイナミックにプロンプトを生成する(毎回入力を読み込む前に、ハンドルがそのサブルーチンを呼び、返り値を表示する)こともできるかも知れません。</p>
 <p>
-<h3><a name="haven't we met before (part 1)">�ɤ����ǲ񤤤ޤ���Ǥ����ä�? (part 1)</a></h3>
-<p>�׵��Ф��ơ��ͤ��ɤ߹�����顢õ���ȥ�ݡ��ȤΥ����ɤϤۤȤ�ɸ����줿��ΤǤ�:</p>
+<h3><a name="haven't we met before (part 1)">どこかで会いませんでしたっけ? (part 1)</a></h3>
+<p>要求を出して、値を読み込んだら、探索とレポートのコードはほとんど見慣れたものです:</p>
 <pre>
             if (my $node = search($root, $_)) {
                 print &quot;Found $_ at $node: $node{VALUE}\n&quot;
@@ -192,136 +192,136 @@ May 15, 2001
                 print &quot;No $_ in tree\n&quot;
             }
         }</pre>
-<p>ͣ������Ǥ���Perl6������ϡ��桼������� <code>Found</code> �ץ��ѥƥ���ȤäƤ��뤳�ȤǤ���</p>
-<p><code>$node{VALUE}.Found</code> ���̾�ϥ᥽�åɥ�����ˤʤ�ޤ� (Perl 6 �Ǥ�
-<code>-&gt;</code> �ǤϤʤ���<code>.</code> �Ƚ񤭤ޤ�). ������<code>$node{VALUE}</code> �� bless ����Ƥ��ʤ����̤� int �Ǥ��Τǡ�<code>Found</code> �Ȥ����᥽�åɤϤ���ޤ��󡣤�ä� Perl �Ϥ��θƤӽФ���ץ��ѥƥ��ؤΥ�����ȸ��ʤ����б�����ץ��ѥƥ�(�ؤΥ����ꥢ��)���֤��ޤ���</p>
+<p>唯一潜んでいるPerl6イズムは、ユーザ定義の <code>Found</code> プロパティを使っていることです。</p>
+<p><code>$node{VALUE}.Found</code> は通常はメソッドコールになります (Perl 6 では
+<code>-&gt;</code> ではなく、<code>.</code> と書きます). しかし<code>$node{VALUE}</code> は bless されていない普通の int ですので、<code>Found</code> というメソッドはありません。よって Perl はこの呼び出しをプロパティへのクエリと見なし、対応するプロパティ(へのエイリアス)を返します。</p>
 <p>
-<h3><a name="take that! and that!">�����Ȥä�! �����!</a></h3>
-<p>Perl 6 �Ǥϡ����֥롼���� -- ɬ�פʤ�� --�ѥ�᡼���ꥹ�Ȥ����Ǥ���褦�ˤʤ�ޤ� (Perl 5 �ǲ�ǽ�ʡ��ְ����Ϥʤ����ɸ��򤵤�䤹���װ����Υץ��ȥ����פȤ��о�Ū�Ǥ�)��</p>
-<p>���Ȥ��С�<code>insert</code> ���֥롼����ϡ�2�ĤΥѥ�᡼����Ȥ��������Ƥ��ޤ�:</p>
+<h3><a name="take that! and that!">あれをとって! あれも!</a></h3>
+<p>Perl 6 では、サブルーチンが -- 必要ならば --パラメータリストを指定できるようになります (Perl 5 で可能な、「悪くはないけど誤解されやすい」引数のプロトタイプとは対象的です)。</p>
+<p>たとえば、<code>insert</code> サブルーチンは、2つのパラメータをとると宣言しています:</p>
 <pre>
         sub insert (HASH $tree is rw, int $val) {</pre>
-<p>�ǽ�Υѥ�᡼���ˤ�äơ���1�����ϥϥå����ե���󥹤ǡ������ͤ��쥭�������ѿ��� <code>$tree</code> �˳�Ǽ����뤳�Ȥ����Ҥ���Ƥ��ޤ�. ��1������ϥå����ե���󥹤�������뤳�Ȥˤ�äơ�¾����ˡ(�Ĥޤꡢ�����˥��֥롼����ƤӽФ������줿�ꡢ����Ū�������ե���󥹤��Ϥ����ꡢ�ʤ�)�ǻȤ����Ȥ������ˤϡ�����ѥ�����˥���å������ȳ�����뤳�Ȥˤʤ�ޤ���</p>
-<p>�ǥե���ȤǤϡ�̾���դ��ѥ�᡼����<code>@_</code> �����ǤȤ� <em>�ۤʤ�</em>�Ȥ������Ȥ����򤹤뤳�Ȥ�����Ǥ�������Ū�ˤ����ȡ����줾��ΰ������б�����ѥ�᡼���˥�ե�����Ϥ������(��Ψ�Τ����)�ˤ⤫����餺���ѥ�᡼�����ͤ��Τ�Τϼ�ưŪ�� <code>constant</code> �Ȥ����������ޤ����Ĥޤꤽ����̤��ͤ��������褦�Ȥ���ȡ����٤ƥ���ѥ��륨�顼�ˤʤ�ޤ�������Ͽ͡��������ּ�ʬ��­���ġפ��Ȥ򸺤餹���Ȥ�տޤ��Ƥ��ޤ���</p>
-<p>������󡢤���� Perl �Ǥ����顢���ä���­��������������С�­���Ĥ��Ȥ�����ޤ�����Ȥ�Ȥΰ�����ȿ�Ǥ����褦�ʡ�̾���դ��ѥ�᡼���ؤ���������Ĥ���ˤϡ����Υѥ�᡼����ɸ��� <code>rw</code> (<strong>r</strong>ead-<strong>w</strong>rite) �ץ��ѥƥ��Ĥ���������ޤ���
-��������ȡ�������ǽ�ʡ���Ȥ�Ȥΰ����ؤΥ����ꥢ���ˤʤꡢ������ǤϤ����ѿ��˰�̣��������뤳�Ȥ�����ޤ���(<a href="#we don't need no stinking backslashes">��ä��Хå�����å���Ϥ⤦����ʤ�</a>����)��</p>
-<p>���������� <code>@_</code> �� Perl 6 �Ǥ����Ѳ�ǽ�Ǥ���������ϥ��֥롼����� Perl 5 ���ˡ��ѥ�᡼���ꥹ�Ȥʤ�������������ΤߤǤ���(<a href="#a good, oldfashioned show">�Ť��ɤ�����</a>����)</p>
-<p><code>insert</code> ����2������ int �ͤ�Ȥ�褦���������Ƥ��ޤ���
-<code>INT</code> �ǤϤʤ� <code>int</code> ��ȤäƤ���Τǡ������ޤ�����Ū�ˡ�������Ф����Ѥʤ��Ȥ�(���ʤ��Ȥ⡢<code>insert</code> ����¦�Ǥ�)���ʤ�����«���Ƥ��ޤ�������ѥ���Ϥ��ξ����Ȥäơ����֥롼����Υ����ɤ��Ŭ�����뤳�Ȥ��Ǥ��뤫�⤷��ޤ���</p>
+<p>最初のパラメータによって、第1引数はハッシュリファレンスで、その値がレキシカル変数の <code>$tree</code> に格納されることが記述されています. 第1引数をハッシュリファレンスと定義することによって、他の方法(つまり、そこにサブルーチン呼び出しを入れたり、明示的に配列リファレンスを渡したり、など)で使おうとした場合には、コンパイル時にキャッチされて罰せられることになります。</p>
+<p>デフォルトでは、名前付きパラメータは<code>@_</code> の要素とは <em>異なる</em>ということを理解することが大事です。具体的にいうと、それぞれの引数は対応するパラメータにリファレンス渡しされる(効率のために)にもかかわらず、パラメータの値そのものは自動的に <code>constant</code> として宣言されます。つまりそれに別の値を代入しようとすると、すべてコンパイルエラーになります。これは人々が偶然「自分の足を撃つ」ことを減らすことを意図しています。</p>
+<p>もちろん、これは Perl ですから、じっと中足骨に狙いを定めれば、足を撃つことが出来ます。もともとの引数に反映されるような、名前付きパラメータへの代入を許可するには、そのパラメータを標準の <code>rw</code> (<strong>r</strong>ead-<strong>w</strong>rite) プロパティつきで宣言します。
+そうすると、代入可能な、もともとの引数へのエイリアスになり、この例ではこの変数に意味を持たせることが出来ます。(<a href="#we don't need no stinking backslashes">腐ったバックスラッシュはもういらない</a>参照)。</p>
+<p>引数の配列 <code>@_</code> は Perl 6 でも利用可能ですが、それはサブルーチンを Perl 5 風に、パラメータリストなしで宣言した場合のみです。(<a href="#a good, oldfashioned show">古き良き外観</a>参照)</p>
+<p><code>insert</code> の第2引数は int 値をとるように定義されています。
+<code>INT</code> ではなく <code>int</code> を使っているので、これもまた明示的に、これに対して変なことを(少なくとも、<code>insert</code> の内側では)しないと約束しています。コンパイラはこの情報を使って、サブルーチンのコードを最適化することができるかもしれません。</p>
 <p>
-<h3><a name="a sigil is for life, not just for value type">���ϰ����Τ�Ρ��ͤη������Τ���ǤϤʤ�</a></h3>
-<p>���Ρ��ϵ夬�ޤ������� Perl ���㤯��������ä������ѿ��ˤ��äĤ��Ƥ�����Υ����� (<code>$</code>, <code>@</code>, �� <code>%</code>)���������ѿ����ɤ�ɾ������뤫�򵭽Ҥ��Ƥ��ޤ������㤨��:</p>
+<h3><a name="a sigil is for life, not just for value type">印は一生のもの、値の型だけのためではない</a></h3>
+<p>遠い昔、地球がまだ新しく Perl が若くて清純だった頃、変数にくっついている印のタイプ (<code>$</code>, <code>@</code>, や <code>%</code>)が、その変数がどう評価されるかを記述していました。例えば:</p>
 <pre>
-        print $x;                       # $x �ϥ�����
-        print $y[1];                    # $y[1] �ϥ�����
-        print $z{a};                    # $z{a} �ϥ�����
-        print $yref-&gt;[1];               # $yref-&gt;[1] �ϥ�����
-        print $zref-&gt;{a};               # $zref-&gt;{a} �ϥ�����
-        print @y;                       # @y �ϥꥹ��
-        print @y[2,3];                  # @y[2,3] �ϥꥹ��
-        print @z{'b','c'};              # @z{'b','c'} �ϥꥹ��
-        print @{$yref}[2,3];            # @{$yref}[2,3] �ϥꥹ��
-        print @{$zref}{'b','c'};        # @{zyref}{'b','c'} �ϥꥹ��
-        print %z;                       # %z �ϥϥå���</pre>
-<p>�ºݤ˻��Ȥ�����ѿ��η��˴ط��ʤ����������������Ȥ�����Ƭ�� <code>$</code> �ˤ�äơ���̤�������ˤʤ뤳�ȤˤʤäƤ��ޤ�����<code>@</code> �ϥꥹ�Ȥˤʤꡢ<code>%</code> �ϥϥå���ˤʤä��ΤǤ���</p>
-<p>���������ΤȤ���OO �إӤ����˿�������Perl��˥��֥롼����ȥ᥽�åɥ�����ζ줤��ʪ��Ϳ���ޤ���:</p>
+        print $x;                       # $x はスカラ
+        print $y[1];                    # $y[1] はスカラ
+        print $z{a};                    # $z{a} はスカラ
+        print $yref-&gt;[1];               # $yref-&gt;[1] はスカラ
+        print $zref-&gt;{a};               # $zref-&gt;{a} はスカラ
+        print @y;                       # @y はリスト
+        print @y[2,3];                  # @y[2,3] はリスト
+        print @z{'b','c'};              # @z{'b','c'} はリスト
+        print @{$yref}[2,3];            # @{$yref}[2,3] はリスト
+        print @{$zref}{'b','c'};        # @{zyref}{'b','c'} はリスト
+        print %z;                       # %z はハッシュ</pre>
+<p>実際に参照される変数の型に関係なく、アクセスされるときの先頭の <code>$</code> によって、結果がスカラになることになっていました。<code>@</code> はリストになり、<code>%</code> はハッシュになったのです。</p>
+<p>しかしそのとき、OO ヘビが庭に侵入し、Perl種にサブルーチンとメソッドコールの苦い果物を与えました:</p>
 <pre>
         print $subref-&gt;();
         print $objref-&gt;method();</pre>
-<p>�������ơ���Ƭ�� <code>$</code> ���֤��ͤη��˴ط��ʤ��ʤ�ޤ�����
-������������ν鿴�Ը����� Perl �����ǡ�ò���Ȼ������꤬�����ޤ�����
-<p>Perl 6 �ϲ桹��ͥ�������Ф줷̱ -- <em>�ۤʤä�</em>ͥ�����ǤϤ���ޤ��� -- �κ¤��ᤷ�Ƥ���ޤ��������Ǥϡ����줾����ѿ����� ��Ĥΰ���������¤����ȤϤ���ޤ���</p>
-<p>Perl 6 �Ǥϡ�������� <em>�Ĥͤ�</em> ��Ƭ�� <code>$</code> �����, ����� <em>�Ĥͤ�</em> ��Ƭ�� <code>@</code> �� (��������Ǥ䥹�饤���˥��������������)�������ϥå���� <em>�Ĥͤ�</em> ��Ƭ�� <code>%</code> ��(���Ǥ䥹�饤���˥��������������)�����ޤ���</p>
-<p>�����ؤ���С����Ϥ⤦����̤Ȥ��Ƥ��ͤη���(�Ȥ��ɤ�)�����ΤǤϤʤ��ΤǤ�������ˡ������äƤ����ѿ������ɤ��ѿ��Ǥ������Ȥ⡢�ޤ��ˤɤη��ʤΤ���(�Ĥͤ�)�����ΤǤ���</p>
-<p><code>insert</code> ���֥롼�������ˡ����ο�������ʸ����򤤤��Ĥ�ߤ뤳�Ȥ��Ǥ��ޤ�����äȤ�狼��䤹���Τ������֥롼����κǽ�ˤ��롢������ʬ�ڤ���������ս�Ǥ��礦:</p>
+<p>こうして、先頭の <code>$</code> は返り値の型に関係なくなりました。
+そして世界中の初心者向けの Perl 教室で、嘆きと歯ぎしりが起きました。
+<p>Perl 6 は我々を優雅な選ばれし民 -- <em>異なった</em>優雅さではありますが -- の座に戻してくれます。そこでは、それぞれの変数型は 一つの印を持ち、迷うことはありません。</p>
+<p>Perl 6 では、スカラは <em>つねに</em> 先頭に <code>$</code> を持ち, 配列は <em>つねに</em> 先頭に <code>@</code> を (配列の要素やスライスにアクセスする時も)持ち、ハッシュは <em>つねに</em> 先頭に <code>%</code> を(要素やスライスにアクセスする時も)持ちます。</p>
+<p>言い替えれば、印はもう、結果としての値の型を(ときどき)示すのではないのです。代わりに、いじっている変数が、どの変数であろうとも、まさにどの型なのかを(つねに)示すのです。</p>
+<p><code>insert</code> サブルーチンの中に、この新しい構文の例をいくつもみることができます。もっともわかりやすいのが、サブルーチンの最初にある、空の部分木を生成する箇所でしょう:</p>
 <pre>
             unless ($tree) {
                 my %node;
                 %node{LEFT}   = undef;
                 %node{RIGHT}  = undef;
                 %node{VALUE}  = $val</pre>
-<p><code>%node</code> �ϥå�������Ǥ˥����������Ƥ���ˤ⤫����餺���ѿ�����Ƭ�� <code>%</code> �Τޤޤǡ��ϥå��奢�������Υ֥쥤��({})���ѿ�̾�θ���ˤĤ��Ƥ��ޤ���</p>
-<p>Ʊ���褦�ˡ���������Ǥ˥�����������ˤϡ����󥢥������ѤΥ֥饱�å�([])���ѿ�̾�Τ��������դ���: <code>@array[1]</code> �Ȥ��ޤ�������� Perl 5 �ι�ʸ�����礭����æ������ʬ�Ǥ���Perl 5 �Ǥϡ�<code>@array[1]</code> �����Ǥ�1�ĤΡ�<code>@array</code> �Υ��饤���Ǥ����� Perl 6 �Ǥϡ������ñ�����ǤؤΥ����쥯�ȥ��������ˤʤ�ޤ�(���饤���ϴޤޤ�ޤ���)��</p>
-<p>������󡢤���Ϥ��ʤ����Perl 6 �ˤϲ������줿���󥹥饤���ѤΥ��ޥ�ƥ�������ɬ�פʤ��Ȥ��̣���Ƥ��ޤ���Larry �Ϥ��ε���� Perl �Υ��饤����ǽ���������ơ�¿�����������Ǥ�դΥ��饤����������������褦�Ȥ��Ƥ��ޤ���������������Ϥޤ�����ۼ�Ͽ�˽񤫤�ޤ���</p>
-<p>���ޤΤȤ����ϡ�������ΤäƤ���н�ʬ�Ǥ��礦�����������֥饱�åȤ����ñ�쥹�����񤱤С�ñ�����ǤΥ�å����åפˤʤ롣�֥饱�åȤ���˥ꥹ�Ȥ�񤱤С����饤���ˤʤ롣</p>
+<p><code>%node</code> ハッシュの要素にアクセスしているにもかかわらず、変数の先頭は <code>%</code> のままで、ハッシュアクセスのブレイス({})が変数名の後ろについています。</p>
+<p>同じように、配列の要素にアクセスするには、配列アクセス用のブラケット([])を変数名のうしろに付けて: <code>@array[1]</code> とします。これは Perl 5 の構文から大きく逸脱する部分です。Perl 5 では、<code>@array[1]</code> は要素が1つの、<code>@array</code> のスライスでした。 Perl 6 では、これは単一要素へのダイレクトアクセスになります(スライスは含まれません)。</p>
+<p>もちろん、これはすなわち、Perl 6 には改訂された配列スライス用のセマンティクスが必要なことを意味しています。Larry はこの機会に Perl のスライス機能を増強して、多次元の配列の任意のスライスやダイスに備えようとしています。しかし、それはまだ先の黙示録に書かれます。</p>
+<p>いまのところは、これを知っていれば十分でしょう。スクエアブラケットの中に単一スカラを書けば、単一要素のルックアップになる。ブラケットの中にリストを書けば、スライスになる。</p>
 <p>
-<h3><a name="haven't we met before (part 2)">�ɤ����ǲ񤤤ޤ���Ǥ����ä�? (part 2)</a></h3>
-<p>�Ǹ�Ρ�<code>%node</code> �����Ǥؤ������ϤҤȤҤ꤬ͤ����ޤ���
-����������� (�Υ��ԡ�) �� <code>Found</code> �ץ��ѥƥ��������Ƥ��ơ������ͤ�0�˽��������Ƥ��ޤ�:
+<h3><a name="haven't we met before (part 2)">どこかで会いませんでしたっけ? (part 2)</a></h3>
+<p>最後の、<code>%node</code> の要素への代入はひとひねりがあります。
+代入される値 (のコピー) は <code>Found</code> プロパティも割り当てられて、その値が0に初期化されています:
 <pre>
                 %node{VALUE}  = $val is Found(0);</pre>
-<p>�⤦���ٽ񤯤ȡ����줬ư���Τϡ��ץ��ѥƥ��� <code>is</code> �ˤ�äƥ��åȤ����Ȥ��ϡ��黻�η�̤Ϻ�¦�Υ��ڥ���(���ξ�� <code>$val</code>)�Ȥʤꡢ�ץ��ѥƥ��ο������ͤ����Ǥ�<em>�ʤ�</em>����Ǥ���</p>
-<p>�ºݡ������ۤɤ⸫�ޤ��������ʲ��Τ褦�ʹ�ʸ��������ư���ΤϤ������ä���ͳ�Ǥ�:</p>
+<p>もう一度書くと、これが動作するのは、プロパティが <code>is</code> によってセットされるときは、演算の結果は左側のオペランド(この場合 <code>$val</code>)となり、プロパティの新しい値の方では<em>ない</em>からです。</p>
+<p>実際、さきほども見ましたが、以下のような構文が正しく動作するのはそういった理由です:</p>
 <pre>
         while (&lt;$ARGS prompts(&quot;Search? &quot;)&gt;) {</pre>
-<p><code>$ARGS prompts(&quot;Search? &quot;)</code> �Ȥ���ʸ�ϥϥ�ɥ�Υץ���ץȤ򥻥åȤ���<code>$ARGS</code> ���֤��ޤ������줬���������ɱ黻�ҤΥ��ڥ��ɤˤʤꡢ��̤Ȥ��ƥץ���ץ�-�ɤ߹��������Υϥ�ɥ�ˤ�äƹԤ��ޤ���</p>
+<p><code>$ARGS prompts(&quot;Search? &quot;)</code> という文はハンドルのプロンプトをセットし、<code>$ARGS</code> を返します。これがダイアモンド演算子のオペランドになり、結果としてプロンプト-読み込み操作がそのハンドルによって行われます。</p>
 <p>
-<h3><a name="we don't need no stinking backslashes">��ä��Хå�����å���Ϥ⤦����ʤ�</a></h3>
-<p>���ä��󿷤���<code>%node</code> ������������ȡ����Υ�ե���󥹤���1�����Ȥ����Ϥ��Ѥ��ѿ������������ɬ�פ�����ޤ���(�⤷����Ǥ褯�狼��ʤ��ä��顢
+<h3><a name="we don't need no stinking backslashes">腐ったバックスラッシュはもういらない</a></h3>
+<p>いったん新たな<code>%node</code> が初期化されると、そのリファレンスは第1引数として渡す用の変数に代入される必要があります。(もしこれでよくわからなかったら、
 <!--http://www.manning.com/conway/-->
-<a href="http://www.manning.com/conway/"><em>Object Oriented Perl</em></a> �Υ�������� 12.3.2 �ˤ��롢���Υĥ꡼���ƥ��˥å��ξܺ٤ʲ���򸫤Ƥ���������)</p>
-<p>Perl 5�Ǥϡ���Ȥ�Ȥΰ������ѹ�����ˤϡ�<code>$_[0]</code>(�Ĥޤ� Perl 6 �Ǥ� <code>@_[0]</code>) �ؤ�������ɬ�ܤǤ����������������Ǥϡ�<code>$tree</code> �� <code>rw</code> �Ȥ�����������Τǡ������ľ���������뤳�Ȥǡ���Ȥ�Ȥΰ�����Ŭ�ڤ��ѹ���ä��뤳�Ȥ�����ޤ�:</p>
+<a href="http://www.manning.com/conway/"><em>Object Oriented Perl</em></a> のセクション 12.3.2 にある、このツリー操作テクニックの詳細な解説を見てください。)</p>
+<p>Perl 5では、もともとの引数を変更するには、<code>$_[0]</code>(つまり Perl 6 では <code>@_[0]</code>) への代入が必須でした。しかしここでは、<code>$tree</code> を <code>rw</code> として宣言したので、これに直接代入することで、もともとの引数に適切に変更を加えることが出来ます:</p>
 <pre>
                 $tree = %node;</pre>
-<p><em>����㡢</em> (�ȻפäƤ���Ǥ��礦)�� <em>��ŵŪ�ʼ��ԤˤҤä����äƤ��ޤ��ޤ����������饳��ƥ����ȤǤϡ��ϥå���ϡ����Ѥ��Ƥ���Х��åȤ���Ψ�Ȥ���ɾ�������ΤǤ�!</em></p>
-<p>Perl 5 �ǤϤ����Ǥ��礦���������ʤ��� Perl 6 �Ǥϡ����Ρ֤ۤȤ�ɻȤ��ʤ���ư��ϡ��ѥ��������Ĥ�䡢ή���٤�Τ�Τ䡢DSL �ץ��Х�����Ʊ��ƻ�򤿤ɤ�ޤ��������äơ������饳��ƥ����Ȥ�ɾ������ȡ��ϥå���(������)�ϼ��ȤΥ�ե���󥹤��֤��ޤ�����äơ���Υ����ɤ�������ư���ΤǤ���</p>
-<p><em>�狼�ä���</em> (�Ի׵Ĥ˻פäƤ���Ǥ��礦), <em>�⤷����⤽���ʤ顢�ɤ���ä������Ĺ������������???</em> ���������ϡ����ͥ���ƥ����ȤǤϡ������ե���󥹤������٤������Ĺ����ɾ������ޤ�����äơ�Perl 5 �Υ����ɤ����������:</p>
+<p><em>ありゃ、</em> (と思っているでしょう)、 <em>古典的な失敗にひっかかってしまいました。スカラコンテキストでは、ハッシュは、利用しているバケットの比率として評価されるのです!</em></p>
+<p>Perl 5 ではそうでしょう、しかしながら Perl 6 では、この「ほとんど使えない」動作は、パウダーかつらや、流行遅れのものや、DSL プロバイダと同じ道をたどりました。代わって、スカラコンテキストで評価すると、ハッシュ(や配列)は自身のリファレンスを返します。よって、上のコードは正しく動作するのです。</p>
+<p><em>わかった、</em> (不思議に思っているでしょう), <em>もし配列もそうなら、どうやって配列の長さを取得するの???</em> その答えは、数値コンテキストでは、配列リファレンスが、今度は配列の長さに評価されます。よって、Perl 5 のコードを翻訳すると:</p>
 <pre>
-        while (@queue &gt; 0) {    # @queue �򥹥����ɾ�������Ĺ���ˤʤ�</pre>
-<p>�����:</p>
+        while (@queue &gt; 0) {    # @queue をスカラで評価すると長さになる</pre>
+<p>これは:</p>
 <pre>
-        while (@queue &gt; 0) {    # @queue �򥹥����ɾ������ȥ�ե���󥹤ˤʤ�
-                                # �����ե���󥹤���ͤ�ɾ�������Ĺ���ˤʤ�</pre>
-<p>Ʊ�ͤˡ��֡��ꥢ�󥳥�ƥ����ȤǤϡ�����ϡ����Ǥ���äƤ���� true �Ȥ���ɾ������ޤ�����ä� Perl 5 �Υ����ɤ����������:</p>
+        while (@queue &gt; 0) {    # @queue をスカラで評価するとリファレンスになる
+                                # 配列リファレンスを数値で評価すると長さになる</pre>
+<p>同様に、ブーリアンコンテキストでは、配列は、要素を持っていれば true として評価されます。よって Perl 5 のコードを翻訳すると:</p>
 <pre>
-        while (@queue) {    # @queue �򥹥����ɾ�������Ĺ���ˤʤ�</pre>
-<p>�����:</p>
+        while (@queue) {    # @queue をスカラで評価すると長さになる</pre>
+<p>これは:</p>
 <pre>
-        while (@queue) {    # @queue ��֡��ꥢ���ɾ������ȡ����Ǥʤ���� true �Ȥʤ�</pre>
-<p>ȴ���ܤ��ʤ��Ǥ��礦?</p>
+        while (@queue) {    # @queue をブーリアンで評価すると、空でなければ true となる</pre>
+<p>抜け目がないでしょう?</p>
 <p>
-<h3><a name="you say %node{value}, but i say $tree{value}">���ʤ��� <code>%node{VALUE}</code>, �Ǥ�錄���� <code>$tree{VALUE}</code></a></h3>
-<p>�������Ρ��ɤ��Ѥ߹�����顢<code>%node{VALUE}</code> �� <code>'VALUE'</code> ����ȥ�˥����������ޤ���<code>$tree</code> �� <code>%node</code> �ؤΥ�ե���󥹤��ݻ����Ƥ���ΤǤ����顢Ʊ������ȥ�˥�������������ˡ��ɬ�פǤ���</p>
-<p>Perl 5 �ǤϤ����ʤ�Ǥ��礦:</p>
+<h3><a name="you say %node{value}, but i say $tree{value}">あなたは <code>%node{VALUE}</code>, でもわたしは <code>$tree{VALUE}</code></a></h3>
+<p>新しいノードを積み込んだら、<code>%node{VALUE}</code> で <code>'VALUE'</code> エントリにアクセスします。<code>$tree</code> は <code>%node</code> へのリファレンスを保持しているのですから、同じエントリにアクセスする方法が必要です。</p>
+<p>Perl 5 ではこうなるでしょう:</p>
 <pre>
-        $tree-&gt;{VALUE}        # Perl 5 �� �ϥå����ե���� $tree �Υ���ȥ�ؤΥ�������</pre>
-<p>�����ơ�<code>-&gt;</code> �� Perl 6 �Ǥ� <code>.</code> �Ƚ񤯤ΤǤ����顢Perl 6 �ǤϤ����ʤ�ޤ�:</p>
+        $tree-&gt;{VALUE}        # Perl 5 式 ハッシュリファレンス $tree のエントリへのアクセス</pre>
+<p>そして、<code>-&gt;</code> は Perl 6 では <code>.</code> と書くのですから、Perl 6 ではこうなります:</p>
 <pre>
-        $tree.{VALUE}         # Perl 6 �� �ϥå����ե���� $tree �Υ���ȥ�ؤΥ�������</pre>
-<p>�������ʤ��顢�ϥå���ؤΥ����쥯�ȥ��������ϡ����ޤ�ޤä����ۤʤ����Ȥäơ�<code>%node{VALUE}</code> �Ƚ񤫤�ޤ�����äơ�<code>.</code> ���ʤ��Ƥ�ۣ��ˤϤʤ�ʤ��Τǡ���ά��ǽ�Ǥ�:</p>
+        $tree.{VALUE}         # Perl 6 式 ハッシュリファレンス $tree のエントリへのアクセス</pre>
+<p>しかしながら、ハッシュへのダイレクトアクセスは、いまやまったく異なる印を使って、<code>%node{VALUE}</code> と書かれます。よって、<code>.</code> がなくても曖昧にはならないので、省略可能です:</p>
 <pre>
-        $tree{VALUE}          # Perl 6 �� �ϥå����ե���� $tree �Υ���ȥ�ؤΥ�������</pre>
-<p>�����Ƥ��줬���ϥå����ե���󥹤˥������������̾�ν����Ǥ�:</p>
+        $tree{VALUE}          # Perl 6 式 ハッシュリファレンス $tree のエントリへのアクセス</pre>
+<p>そしてこれが、ハッシュリファレンスにアクセスする通常の書き方です:</p>
 <pre>
             if    ($tree{VALUE} &gt; $val) { insert($tree{LEFT},  $val) }
             elsif ($tree{VALUE} &lt; $val) { insert($tree{RIGHT}, $val) }
             else                        { warn &quot;dup insert of $val\n&quot; }
         }</pre>
-<p>����ϼºݡ��츫���ƴ������ꡢ�ޤä����ޤ���路��<em>�ʤ��ΤǤ�</em>��
-�㤨�С�<a href="#haven't we met before (part 1)">�ɤ����ǲ񤤤ޤ���Ǥ����ä�? (part 1)</a>����äƤߤơ�������</p>
+<p>これは実際、一見して感じるより、まったくまぎらわしく<em>ないのです</em>。
+例えば、<a href="#haven't we met before (part 1)">どこかで会いませんでしたっけ? (part 1)</a>に戻ってみて、ここで</p>
 <pre>
         if (my $node = search($root, $_)) {
             print &quot;Found $_ at $node: $node{VALUE}\n&quot;</pre>
-<p>���ο�������ʸ�����Ǥ˻Ȥ��Ƥ������Ȥ˵��Ť��ޤ�����?</p>
-<p>Perl 5 �Ǥϡ������(���ˤ褯����)���顼�Ǥ�����2���ܤϡ��ºݤ� <code>%{$node}</code> �Υ���ȥ꤬�ߤ����Τˡ�<code>%node</code> �Υ���ȥ�� print ���褦�Ȥ��ƥ��顼�ˤʤ�ΤǤ���
-������ Perl 6 �Ǥϡ��ְտޤ����̤�ˡ�ư���ΤǤ���</p>
-<p>�����Ƥ�����󡢤���¾�Υ�ե���󥹤ؤΥ��������⡢Ʊ�ͤ�<code>.</code> ���ά�Ǥ��ޤ�: <code>$arr_ref[$index]</code> �� <code>$sub_ref(@args)</code> �Ǥ���</p>
-<p>��ñ���Ѵ�ɽ���Ѱդ��ޤ���:</p>
+<p>この新しい構文がすでに使われていたことに気づきましたか?</p>
+<p>Perl 5 では、これは(非常によくある)エラーでした。2行目は、実際は <code>%{$node}</code> のエントリが欲しいのに、<code>%node</code> のエントリを print しようとしてエラーになるのです。
+しかし Perl 6 では、「意図した通りに」動くのです。</p>
+<p>そしてもちろん、その他のリファレンスへのアクセスも、同様に<code>.</code> を省略できます: <code>$arr_ref[$index]</code> や <code>$sub_ref(@args)</code> です。</p>
+<p>簡単な変換表を用意しました:</p>
 <pre>
         Access through...       Perl 5          Perl 6
         =================       ======          ======
-        �������ѿ�              $foo            $foo
-        �����ѿ�                $foo[$n]        @foo[$n]
-        �ϥå����ѿ�            $foo{$k}        %foo{$k}
-        �����ե����        $foo-&gt;[$n]      $foo[$n] (or $foo.[$n])
-        �ϥå����ե����    $foo-&gt;{$k}      $foo{$k} (or $foo.{$k})
-        �����ɥ�ե����      $foo-&gt;(@a)      $foo(@a) (or $foo.(@a))
-        ���󥹥饤��            @foo[@ns]       @foo[@ns]
-        �ϥå��她�饤��        @foo{@ks}       %foo{@ks}</pre>
+        スカラ変数              $foo            $foo
+        配列変数                $foo[$n]        @foo[$n]
+        ハッシュ変数            $foo{$k}        %foo{$k}
+        配列リファレンス        $foo-&gt;[$n]      $foo[$n] (or $foo.[$n])
+        ハッシュリファレンス    $foo-&gt;{$k}      $foo{$k} (or $foo.{$k})
+        コードリファレンス      $foo-&gt;(@a)      $foo(@a) (or $foo.(@a))
+        配列スライス            @foo[@ns]       @foo[@ns]
+        ハッシュスライス        @foo{@ks}       %foo{@ks}</pre>
 <p>
-<h3><a name="a good, oldfashioned show">�Ť��ɤ�����</a></h3>
-<p>���֥롼���� <code>show</code> �ϥѥ�᡼���ꥹ�ȤΥ��ץ����ǽ���������Ƥ��ޤ��������Ǥϡ��ѥ�᡼������򤹤٤ƾ�ά���ơ��Ť��ɤ��������줿``Ǥ�դο��ΰ�����Ȥäơ����������<code>@_</code>�������''���Υ��ޥ�ƥ����������Ѥ��Ƥ��ޤ���</p>
-<p>�ºݡ�DWIM (Do What I Mean) �äݤ����󥢥������ι�ʸ��Τ����С����֥롼���� <code>show</code> ������ Perl 5 �Ǥ�:</p>
+<h3><a name="a good, oldfashioned show">古き良き外観</a></h3>
+<p>サブルーチン <code>show</code> はパラメータリストのオプション機能を説明しています。ここでは、パラメータ指定をすべて省略して、古き良き、見慣れた``任意の数の引数をとって、それを全部<code>@_</code>に入れる''式のセマンティクスを利用しています。</p>
+<p>実際、DWIM (Do What I Mean) っぽい配列アクセスの構文をのぞけば、サブルーチン <code>show</code> は生の Perl 5 です:</p>
 <pre>
         sub show {
             return unless @_[0];
@@ -331,62 +331,62 @@ May 15, 2001
             show(@_[0]{LEFT}, @_[1])     if @_[1] == $post;
             show(@_[0]{RIGHT},@_[1]) unless @_[1] == $pre;
         }</pre>
-<p>�����Ƥ���ϡ�5 ���� 6 �ذܹԤ�������̾�и������Τˤʤ�Ǥ��礦:
-Perl �Ϥ��ä� Perl �Ǥ���³���ޤ� ... �鷺������Ĺ���ʤ��� <!-- only slightly more so. --></p>
-<p>������󡢥��֥롼���� <code>show</code> �ϡ��Ȥˤ⤫���ˤ⡢�ۤɤ褯�ե��󥭡��� Perl �Ǥ����顢�⤷������������ʬ�ڤ򷫤��֤����줫����Τ�������Ū���ݼ���֤Ǥʤ��ʤ顢<!-- so if symmetrically guarded repetitions of the left- and right- subtree traversals aren't your maintenance dream -->��Perl �ο����� <em>case</em> ʸ�ν��֤ˤʤ�Ǥ��礦��</p>
-<p>��������������ۼ�Ͽ����4 �ޤ����餫�ˤ���ޤ��󤫤顢�⤷���� <a href="http://www.meninblack.com/media/kay08.html">�������֤���</a>��������Τʤ�....&lt;FLASH&gt;...���꤬�Ȥ���</p>
+<p>そしてこれは、5 から 6 へ移行する時に通常経験するものになるでしょう:
+Perl はずっと Perl であり続けます ... わずかに成長しながら <!-- only slightly more so. --></p>
+<p>もちろん、サブルーチン <code>show</code> は、とにもかくにも、ほどよくファンキーな Perl ですから、もし左右均等に部分木を繰り返し入れかえるのが、理想的な保守状態でないなら、<!-- so if symmetrically guarded repetitions of the left- and right- subtree traversals aren't your maintenance dream -->、Perl の新しい <em>case</em> 文の出番になるでしょう。</p>
+<p>しかし、これは黙示録その4 まで明らかにされませんから、もしこの <a href="http://www.meninblack.com/media/kay08.html">小さな赤い光</a>が見えるのなら....&lt;FLASH&gt;...ありがとう。</p>
 <p>
-<h3><a name="search me">�錄����õ����</a></h3>
-<p>���֥롼���� <code>search</code> �Υѥ�᡼���ꥹ�Ȥ�Perl �ο���Υ��ޥ�ƥ������λ���ȤʤäƤ��ƶ�̣�����Ǥ�:</p>
+<h3><a name="search me">わたしを探して</a></h3>
+<p>サブルーチン <code>search</code> のパラメータリストはPerl の新旧のセマンティクスの雑種となっていて興味深いです:</p>
 <pre>
         sub search (HASH $tree is rw, *@_) {</pre>
-<p>ξ���Υѥ�᡼��������Ū���������Ƥ��ޤ�����2�Ĥ�����(<code>*@_</code>) �ˤ�äơ��Ĥ�Υѥ�᡼����<code>@_</code> �˽�����ޤ���
-������ <code>@_</code> �˴ؤ��� <em>�Ի׵Ĥ�(magical)</em> ���Ȥϰ�Ĥ⤢��ޤ���: �⤷2�Ĥ������� <code>*@others</code> �ξ�硢�Ĥ�ΰ����� <code>@others</code> ������ޤ���</p>
-<p>2�Ĥ�Υѥ�᡼���Υ������ꥹ���ϡ��б���������ν��֤��������Υꥹ�ȥ���ƥ����ȤǤ��뤳�Ȥ� Perl 6 �������Ƥ��ޤ����Ĥޤꡢ�����Ϥ��٤�ñ��Υꥹ�ȤȤ��ư���졢�б�����ѥ�᡼�����ͤ���������뤳�Ȥ򼨤��Ƥ��ޤ�������� Perl 5 �� <code>@</code> �ץ��ȥ����פ������Ǥ���</p>
-<p>�Ф��ơ�<code>@param</code> �Υѥ�᡼������ϡ�Perl 5 �� <code>\@</code> �ץ��ȥ����פ������ǡ��б���������Ȥ��������ѿ�������Ū��ɬ�פǤ���</p>
-<p>���Ť������⤷��ޤ��󤬡�<code>@_</code> �ΰ����� <em>2����</em> ���齸��Ƥ���Τǡ�õ���Ƥ���ѥ�᡼�� (�Ĥޤ���2����) �� <code>@_[0]</code> �Ȥ��ƻ��Ȥ���Ƥ��ޤ���<code>@_[1]</code>�ǤϤ���ޤ���:</p>
+<p>両方のパラメータは明示的に宣言されていますが、2つめの宣言(<code>*@_</code>) によって、残りのパラメータは<code>@_</code> に集められます。
+ここで <code>@_</code> に関して <em>不思議な(magical)</em> ことは一つもありません: もし2つめの宣言が <code>*@others</code> の場合、残りの引数は <code>@others</code> に入ります。</p>
+<p>2つめのパラメータのアスタリスクは、対応する引数の順番が、ただのリストコンテキストであることを Perl 6 に伝えています。つまり、引数はすべて単一のリストとして扱われ、対応するパラメータの値に代入されることを示しています。これは Perl 5 の <code>@</code> プロトタイプと等価です。</p>
+<p>対して、<code>@param</code> のパラメータ宣言は、Perl 5 の <code>\@</code> プロトタイプと等価で、対応する引数として配列変数が明示的に必要です。</p>
+<p>気づいたかもしれませんが、<code>@_</code> の引数を <em>2番目</em> から集めているので、探しているパラメータ (つまり第2引数) は <code>@_[0]</code> として参照されています。<code>@_[1]</code>ではありません:</p>
 <pre>
             return search($tree{@_[0]&lt;$tree{VALUE} &amp;&amp; &quot;LEFT&quot; || &quot;RIGHT&quot;}, @_[0])
                 unless $tree{VALUE} == @_[0];</pre>
 <p>
-<h3><a name="haven't we met before (part 3)">�ɤ����ǲ񤤤ޤ���Ǥ����ä�? (part 3)</a></h3>
-<p><code>search</code> �θ������2���ܤϡ�Perl 6 �Х�Х�βս�Ǥ������ޤ���Ū�ΥΡ��ɤˤ��ɤ�Ĥ��ơ�������֤��ޤ���
-������ <code>Found</code> �ץ��ѥƥ��򥤥󥯥���Ȥ�����ɬ�פ⤢�ꡢ����ʴ����Ǥ�äƤ��ޤ�:</p>
+<h3><a name="haven't we met before (part 3)">どこかで会いませんでしたっけ? (part 3)</a></h3>
+<p><code>search</code> の後ろから2行目は、Perl 6 バリバリの箇所です。うまく目的のノードにたどりついて、それを返します。
+しかし <code>Found</code> プロパティをインクリメントさせる必要もあり、こんな感じでやっています:</p>
 <pre>
             $tree{VALUE} is Found($tree{VALUE}.Found+1);</pre>
-<p>������ʬ����ץ��ѥƥ��˥�����������3�Ĥ���ˡ�Τ���2�Ĥ��褯�狼��ޤ�:
-read-write �� <code>.</code> ��ʸ�� write-only �� <code>is</code> �黻�ҤǤ���</p>
-<p>�ץ��ѥƥ����᥽�åɤΤ褦�˥�������������硢�������ͤ�������Ϥ����Ȥˤ�äƥ��åȤǤ��ޤ����ͤ��Ϥ���뤫�ɤ����ˤ�����餺���黻�Ҥη�̤ϥץ��ѥƥ��ؤΥ����ꥢ��(�Ĥޤ� lvalue)�Ǥ����Ĥޤꡢ�ͤ� <code>Found</code> �ץ��ѥƥ��Ϥ���ʴ����Ǥ⥤�󥯥���ȤǤ��ޤ�:</p>
+<p>この部分からプロパティにアクセスする3つの方法のうち2つがよくわかります:
+read-write の <code>.</code> 構文と write-only の <code>is</code> 演算子です。</p>
+<p>プロパティがメソッドのようにアクセスされる場合、新しい値を引数に渡すことによってセットできます。値が渡されるかどうかにかかわらず、演算子の結果はプロパティへのエイリアス(つまり lvalue)です。つまり、値の <code>Found</code> プロパティはこんな感じでもインクリメントできます:</p>
 <pre>
         $tree{VALUE}.Found($tree{VALUE}.Found+1);</pre>
-<p>�⤷���ϡ����Τ褦��:
+<p>もしくは、このように:
 </p>
 <pre>
 
         $tree{VALUE}.Found++;</pre>
-<p>������<code>is</code> ��ʸ �ϥץ��ѥƥ��Υ��åȤ�������ޤ��󡣤���� <code>is</code> �黻�Ϻ�¦�Υ��ڥ��� (�ץ��ѥƥ�����äƤ�����) ���֤����ץ��ѥƥ����Τ�Τ��ͤ��֤��ʤ�����Ǥ����������ʤ��顢����� <code>return</code> ʸ�κǸ央�꤮��ǥץ��ѥƥ��򥻥åȤ���Ȥ��ˤ��ʤ������Ǥ�:</p>
+<p>一方、<code>is</code> 構文 はプロパティのセットしか出来ません。これは <code>is</code> 演算は左側のオペランド (プロパティを持っているもの) を返し、プロパティそのものの値は返さないためです。しかしながら、これは <code>return</code> 文の最後ぎりぎりでプロパティをセットするときにかなり便利です:</p>
 <pre>
         return $result is Verified;</pre>
-<p>�⤦��Ĥ褯�Ȥ�줽���ʤΤϡ�0��true �䡢0�Ǥʤ�false ���֤��Ȥ��ä��Ȥ��Ǥ��礦:</p>
+<p>もう一つよく使われそうなのは、0でtrue や、0でないfalse を返すといったときでしょう:</p>
 <pre>
         sub my_system ($shell_command) {
                 ...
                 return $error is false if $error;
                 return 0 is true;
         }</pre>
-<p>�ץ��ѥƥ��˥�����������<em>3�Ĥ�</em>����ˡ�ϡ��᥿�ץ��ѥƥ� <code>prop</code> �ˤ�äơ����٤ƤΥץ��ѥƥ���ޤ���ϥå���Υ�ե���󥹤����������ˡ�Ǥ�:</p>
+<p>プロパティにアクセスする<em>3つめ</em>の方法は、メタプロパティ <code>prop</code> によって、すべてのプロパティを含んだハッシュのリファレンスを取得する方法です:</p>
 <pre>
         $tree{VALUE}.prop{Found}++;</pre>
-<p>���ε�ǽ��Ȥäơ������ѿ�����ĥץ��ѥƥ���<em>���٤�</em>�ꥹ�Ȥ��뤳�Ȥ�Ǥ��ޤ�:</p>
+<p>この機能を使って、その変数がもつプロパティを<em>すべて</em>リストすることもできます:</p>
 <pre>
         for (keys %{$tree.prop}) {
             print &quot;$_: $tree{VALUE}.prop{$key}\n&quot;;
         }</pre>
-<p>�Ȥ����ǡ��ۼ�Ͽ����2 �Ǥϡ�Larry �ϥ᥿�ץ��ѥƥ� <code>prop</code> �Τ��Ȥ򡢤��ɤ��� <code>btw</code> �Ȥ��äƤ��ޤ�����<a href="http://www.meninblack.com/media/kay08.html">����μ��ŵ���</a>�Τ������ǡ����������褦�Ǥ���</p>
+<p>ところで、黙示録その2 では、Larry はメタプロパティ <code>prop</code> のことを、おどけて <code>btw</code> といっていますが、<a href="http://www.meninblack.com/media/kay08.html">現代の治療技術</a>のおかげで、克服したようです。</p>
 <p>
-<h3><a name="coda on an earlier theme">����Υơ��ޤˤ�ɤ�</a></h3>
-<p>���ε����Ϥ��ޤ��ޤʡ�Perl 6 ���󶡤�����פʿ���ǽ����⤷�ޤ�����������������������Ȥ��äƤ��Ӥ��뤳�ȤϤ���ޤ���Perl �Ϥ��Ĥ��äơ����ʤ��Υ�٥�ǡ���ʬ�ˤ��ä��꤯�륹������ǡ������ɤ����ˡ���󶡤��Ƥ��ޤ��������줬�Ѥ�뤳�ȤϤ���ޤ��󡣤⤷ Perl 5 �Υ������뤬���ʤ��ˤȤäƥ٥��Ȥ��Ȥ��Ƥ⡣</p>
-<p>�����ǰ��ä�����ǽ�ΤۤȤ�ɤϡ�<em>Ǥ��</em>�Τ�ΤǤ����顢�Ȥ�ʤ��ȷ��Ƥ⡢Ʊ���ץ������� Perl 5 ��<em>�ȤƤ�</em>�ᤤ���ǽ񤯤��Ȥ�����ޤ�������ʴ�����:</p>
+<h3><a name="coda on an earlier theme">初期のテーマにもどる</a></h3>
+<p>この記事はさまざまな、Perl 6 の提供する重要な新機能を解説しました。しかし、新しいからといっておびえることはありません。Perl はいつだって、あなたのレベルで、自分にしっくりくるスタイルで、コードを書く方法を提供してきました。それが変わることはありません。もし Perl 5 のスタイルがあなたにとってベストだとしても。</p>
+<p>ここで扱った新機能のほとんどは、<em>任意</em>のものですから、使わないと決めても、同じプログラムを Perl 5 に<em>とても</em>近い形で書くことが出来ます。こんな感じで:</p>
 <pre>
         use strict;
         use warnings;
@@ -443,8 +443,8 @@ read-write �� <code>.</code> ��ʸ�� write-only �� <code>is</code> �黻�ҤǤ���</
             @_[0]{FOUND}++;
             return @_[0];
         }</pre>
-<p>�ºݡ�Pure Perl5 �����Ѥ�äƤ���Τϡ�40 ʸ�� (1779ʸ����) �Ǥ��������ơ���������ʬ�����������ǤΥ�å����åפ���Ƭ����<code>$</code> �Ǥʤ��� <code>@</code> �ˤʤäƤ��뤳�Ȥ����Ǥ���</p>
-<p>p52p6 �ȥ�󥹥졼���ʤ��ǡ�98% �� backward compatibility �Ǥ� ... ���Ф餷��!</p>
+<p>実際、Pure Perl5 から変わっているのは、40 文字 (1779文字中) です。そして、その大部分が、配列要素のルックアップの先頭が、<code>$</code> でなくて <code>@</code> になっていることだけです。</p>
+<p>p52p6 トランスレータなしで、98% の backward compatibility です ... すばらしい!</p>
 <p><b>Links in this document:</b><br /><em>Cookbook</em>: <a href="http://www.oreilly.com/catalog/cookbook/">http://www.oreilly.com/catalog/cookbook/</a><br />
 <em>Object Oriented Perl</em>: <a href="http://www.manning.com/conway/">http://www.manning.com/conway/</a><br />
 </p>

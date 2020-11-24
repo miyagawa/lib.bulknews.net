@@ -4,22 +4,22 @@ Object-Oriented Programming with Perl Vol.29
 =======================================================
 
 
-1. Exporter �ˤ�� Mixin  ������������������������
+1. Exporter による Mixin  ＿＿＿＿＿＿＿＿＿＿＿＿
 
-¿�ŷѾ���Ȥ����Ȥʤ���Mixin �����������ˡ��Ҳ𤷤ޤ���
+多重継承を使うことなく、Mixin を実装する方法を紹介します。
 
-Vol.23 [1] �ǾҲ𤷤��褦�ˡ�Perl �ηѾ���¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��뤿
-�ᡢʣ���� abstract �ʥ��饹�˼����Υ����ɤ�񤭡�¿�ŷѾ��ˤ�äƤ���
-�����ǽ�Ϥ�Ѿ�����Ȥ��ä����Ȥ��Ǥ��ޤ���
+Vol.23 [1] で紹介したように、Perl の継承は多重継承をサポートしているた
+め、複数の abstract なクラスに実装のコードを書き、多重継承によってそれ
+ぞれの能力を継承するといったことができます。
 
-  walk �᥽�åɤ�������� Walkable
-  talk �᥽�åɤ�������� Talkable
-  Walkable �� Talkable �� Human
+  walk メソッドを実装する Walkable
+  talk メソッドを実装する Talkable
+  Walkable で Talkable な Human
 
-�Ȥ������饹���ؤ򥳡��ɤ�ɽ������Ȱʲ��Τ褦�ˤʤ�ޤ���
+というクラス階層をコードで表現すると以下のようになります。
 
 
-  Talkable.pm ������������������������������
+  Talkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Talkable;
   use strict;
   
@@ -30,7 +30,7 @@ Vol.23 [1] �ǾҲ𤷤��褦�ˡ�Perl �ηѾ���¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��뤿
 
   1;
 
-  Walkable.pm ������������������������������
+  Walkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Walkable;
   use strict;
   
@@ -40,7 +40,7 @@ Vol.23 [1] �ǾҲ𤷤��褦�ˡ�Perl �ηѾ���¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��뤿
 
   1;
 
-  Human.pm  ��������������������������������
+  Human.pm  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Human;
   use strict;
   use base qw(Talkable Walkable);
@@ -57,7 +57,7 @@ Vol.23 [1] �ǾҲ𤷤��褦�ˡ�Perl �ηѾ���¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��뤿
 
   1;
 
-  sample.pl ��������������������������������
+  sample.pl ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   use strict;
   use Human;
 
@@ -65,23 +65,23 @@ Vol.23 [1] �ǾҲ𤷤��褦�ˡ�Perl �ηѾ���¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��뤿
   $man->talk;
   $man->walk;
 
-��������¿�ŷѾ��Υǥ��åȤϤ�����ʤȤ����ǻ�Ŧ����Ƥ��ޤ���������
-���ɷ��ηѾ���¤�ˤʤä����ˡ����󥹥��󥹤Υ��ȥ�ӥ塼�Ȥ���ʣ��
-��ȸ��ä�����Ǥ���
+しかし、多重継承のデメリットはいろんなところで指摘されています。ダイヤ
+モンド型の継承構造になった場合に、インスタンスのアトリビュートが重複す
+ると言った問題です。
 
-Java �� Ruby �Ǥϡ�¿�ŷѾ��򥵥ݡ��Ȥ��Ƥ��ޤ��󡣤����ˡ�Java �Ǥ� 
-interface, Ruby �Ǥ� module �ˤ�� mixin [2] ���󶡤��Ƥ��ޤ���Ruby �� 
-mixin ��ǽ�ϡ����Τޤޤμ����� Perl �Ǥ������ǽ�Ǥ���
+Java や Ruby では、多重継承をサポートしていません。かわりに、Java では 
+interface, Ruby では module による mixin [2] を提供しています。Ruby の 
+mixin 機能は、そのままの実装で Perl でも実装可能です。
 
-  walk �᥽�åɤ��󶡤��� Walkable
-  talk �᥽�åɤ��󶡤��� Talkable
-  Walkable �� Talkable ���� walk, talk �᥽�åɤ�����Ѥ� Human
+  walk メソッドを提供する Walkable
+  talk メソッドを提供する Talkable
+  Walkable と Talkable から walk, talk メソッドを受け継ぐ Human
 
-�ȹͤ������Ѥ��ޤ����᥽�åɤȤϡ�ñ�˥��֥롼����Ǥ����顢���֥롼��
-����� = Export �ȹͤ���С�������ñ��Ǥ���
+と考え方を変えます。メソッドとは、単にサブルーチンですから、サブルーチ
+ンの提供 = Export と考えれば、実装は単純です。
 
 
-  Talkable.pm ������������������������������
+  Talkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Talkable;
   use strict;
   use base qw(Exporter);
@@ -94,7 +94,7 @@ mixin ��ǽ�ϡ����Τޤޤμ����� Perl �Ǥ������ǽ�Ǥ���
 
   1;
 
-  Walkable.pm ������������������������������
+  Walkable.pm ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Walkable;
   use strict;
   use base qw(Exporter);
@@ -106,7 +106,7 @@ mixin ��ǽ�ϡ����Τޤޤμ����� Perl �Ǥ������ǽ�Ǥ���
 
   1;
 
-  Human.pm  ��������������������������������
+  Human.pm  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
   package Human;
   use strict;
   use Talkable;
@@ -125,12 +125,12 @@ mixin ��ǽ�ϡ����Τޤޤμ����� Perl �Ǥ������ǽ�Ǥ���
   1;
   
 
-Human ���饹�ϤɤΥ��饹��Ѿ������������� Talkable, Walkable �� use 
-���뤳�Ȥˤ�äơ�talk, walk ���֥롼����� Human �ѥå������� 
-"import" ���Ƥ��ޤ����ؿ��� import ���Ƥ����ơ��ƤФ��ݤˤϥ��󥹥�
-�󥹥᥽�åɤȤ��Ƽ¹Ԥ����Ȥ������ȥ�å��ˤʤ�ޤ���
+Human クラスはどのクラスも継承せず、かわりに Talkable, Walkable を use 
+することによって、talk, walk サブルーチンを Human パッケージに 
+"import" しています。関数を import しておいて、呼ばれる際にはインスタ
+ンスメソッドとして実行されるところがトリックになります。
 
-1�����դ��٤��ʤΤϡ��ʲ��Τ褦�ʥ����ɤǤ���
+1つ注意すべきなのは、以下のようなコードです。
 
   package Walkable;
 
@@ -145,13 +145,13 @@ Human ���饹�ϤɤΥ��饹��Ѿ������������� Talkable, Walkable �� use
       return $speed;
   }
 
-walk() �᥽�å���� $self ����¿�ŷѾ��ξ��� isa Walkable �Ǥ�������
-Exporter �ˤ�� mixin �ǤϤޤä���̵�ط��Ǥ�����ä� Walkable ���饹��
-�� get_speed() �᥽�åɤ�Ƥ֤��ȤϤǤ��ޤ���
+walk() メソッド内の $self が、多重継承の場合は isa Walkable でしたが、
+Exporter による mixin ではまったく無関係です。よって Walkable クラス内
+の get_speed() メソッドを呼ぶことはできません。
 
   Can't locate object method "get_speed" via package "Human"
 
-�Ȥ����㳰���ꤲ���뤳�Ȥˤʤ�ޤ���������褹��ˤϡ�
+という例外が投げられることになります。これを解決するには、
 
   package Walkable;
 
@@ -167,9 +167,9 @@ Exporter �ˤ�� mixin �ǤϤޤä���̵�ط��Ǥ�����ä� Walkable ���饹��
   }
   
 
-�Ȥ���ɬ�פ�����ޤ���get_speed($self) �ȤʤäƤ���Τ��ݥ���ȤǤ���
-Ʊ�ͤʥ����ɤ򥯥饹�᥽�åɤˤĤ��Ƽ���������ˤϡ�__PACKAGE__ �� 
-caller() �����Ѥ��뤳�Ȥˤʤ�Ǥ��礦��
+とする必要があります。get_speed($self) となっているのがポイントです。
+同様なコードをクラスメソッドについて実装する場合には、__PACKAGE__ や 
+caller() を利用することになるでしょう。
 
 [1] http://bulknews.net/lib/mailmag/23/mag.txt
 [2] http://www.rubycentral.com/book/tut_modules.html

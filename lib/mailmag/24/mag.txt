@@ -4,52 +4,52 @@ Object-Oriented Programming with Perl Vol.24
 =======================================================
 
 
-1. ���ȥ�ӥ塼�ȤΥ��ץ��벽 ������������������������
+1. アトリビュートのカプセル化 ＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl �Υ��֥������Ȥˤϥ��ץ��벽��ɸ����������Ƥ���櫓�ǤϤ���ޤ�
-�󡣤��Ȥ���̵̾�ϥå���١����ǥ��󥹥��󥹤�����������硢���쥳����
-�ϥϥå���ؤΥ����������¤Ϥ���ޤ��󤫤顢�����������ΤäƤ���С�Ǥ
-�դΥ��������������뤳�Ȥ���ǽ�ˤʤäƤ��ޤ��ޤ���
+Perl のオブジェクトにはカプセル化が標準装備されているわけではありませ
+ん。たとえば無名ハッシュベースでインスタンスを生成した場合、言語コアで
+はハッシュへのアクセス制限はありませんから、内部実装を知っていれば、任
+意のキーを外部から操作することが可能になってしまいます。
 
-�����դϴ���Ū�˿»ζ���Ū����ʬ���礭��������椨 Perl �Υ��֥�������
-�ظ��������������Ȥ��Ƥ���Ȥ⤤���ޤ����ȤϤ������º����ꤽ��Ǥ�
-���äƤ��ޤ��Τǡ�����ϥ��饹��������Υ��ȥ�ӥ塼�ȤؤΥ�����������
-�¤�����ˡ��ͤ��ޤ���
+この辺は基本的に紳士協定的な部分が大きく、それゆえ Perl のオブジェクト
+指向は性善説を前提としているともいわれます。とはいえ、実際問題それでは
+困ってしまうので、今回はクラス外部からのアトリビュートへのアクセスを制
+限する方法を考えます。
 
 
-2. ������������ ��������������������������������������
+2. アクセス制限 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-���ȥ�ӥ塼�ȤؤΥ������������¤�����ˡ�Ȥ��Ƥ�2�Ĺͤ����ޤ���
+アトリビュートへのアクセスを制限する方法としては2つ考えられます。
 
-  a) ���餫�Υϥå���Ȥäơ����⤽�⥢�������Ǥ��ʤ��Ƥ��ޤ�
-  b) ���ȥ�ӥ塼�ȤؤΥ����������󶡤������饤����ȤˤϤ�������Ѥ����롣
+  a) 何らかのハックを使って、そもそもアクセスできなくてしまう
+  b) アトリビュートへのアクセサを提供し、クライアントにはそれを利用させる。
 
-a) ����ˡ��¸����Ƥ���⥸�塼��Ȥ��ơ�Tie::SecureHash[1] �䡢
-Class::Fields[2] ���󤲤��ޤ���
+a) の方法を実現しているモジュールとして、Tie::SecureHash[1] や、
+Class::Fields[2] が挙げられます。
 
-Tie::SecureHash �� Damian Conway ��Υ⥸�塼��ǡ��ϥå���γƥ�����
-�Ф��� public, private, protected �Ȥ��ä��ե饰��Ĥ��뤳�Ȥ��Ǥ��ޤ���
-Class::Fields �� Michael Schwern ��Υ⥸�塼��ǡ��ѥå������ѿ� 
-%FIELDS �����뤳�Ȥˤ�äơ�Tie::SecureHash Ʊ�ͤ� public, private 
-�ʤɤΥ��ȥ�ӥ塼��°�������Ǥ��ޤ���
+Tie::SecureHash は Damian Conway 作のモジュールで、ハッシュの各キーに
+対して public, private, protected といったフラグをつけることができます。
+Class::Fields は Michael Schwern 作のモジュールで、パッケージ変数 
+%FIELDS を操作することによって、Tie::SecureHash 同様に public, private 
+などのアトリビュート属性を操作できます。
 
-������pseudo-hash ���Τ�Τε�ǽ�� EXPERIMENTAL �Ǥ���Ф��꤫���Ƕ��
-�ּ¸��ϼ��Ԥ��ä��פȤ��ơ��Ȥ��ʤ��ʤ���������������Ƥ��ޤ�[3]����
-������ fields.pm, base.pm �ˤ�� backward compatibility �ϰݻ�������
-���Ǥ����������Ѷ�Ū�� pseudo-hash ����Ԥ����Ȥ��򤱤������褤�Ǥ���
-����
+ただ、pseudo-hash そのものの機能は EXPERIMENTAL であるばかりか、最近は
+「実験は失敗だった」として、使えなくなる方向性が示されています[3]。も
+ちろん fields.pm, base.pm による backward compatibility は維持されるは
+ずですが、今後積極的に pseudo-hash 操作を行うことは避けた方がよいでしょ
+う。
 
 [1] http://search.cpan.org/search?dist=Tie-SecureHash
 [2] http://search.cpan.org/search?dist=Class-Fields
 [3] http://use.perl.org/article.pl?sid=01/07/16/127257&mode=thread&threshold= 
 
 
-����� b) �Υ�������������ˡ��Ҳ𤷤ޤ����������������硢Java 
-�ʤɤǸ����� set_foo(), get_foo() �Ȥ���2������Ѱդ���ΤǤϤʤ���
-foo() �Ȥ����᥽�åɤ� set/get ���Ѥˤ���Τ� Perl ή�Ǥ���
+今回は b) のアクセサを作る方法を紹介します。アクセサを作る場合、Java 
+などで見られる set_foo(), get_foo() という2種類を用意するのではなく、
+foo() というメソッドで set/get 兼用にするのが Perl 流です。
 
-�����Ǥϡ�Birds �Ȥ������饹��ͤ��Ƥߤޤ���Birds ���饹�ϥ��ȥ�ӥ塼
-�ȤȤ��� species, size, squalk, color ������ޤ���
+ここでは、Birds というクラスを考えてみます。Birds クラスはアトリビュー
+トとして species, size, squalk, color を持ちます。
 
     package Birds;
 
@@ -64,8 +64,8 @@ foo() �Ȥ����᥽�åɤ� set/get ���Ѥˤ���Τ� Perl ή�Ǥ���
         return $obj;
     }
 
-�ǥե���ȤΥ��󥹥ȥ饯����������ޤ��������ˡ��ƥ��ȥ�ӥ塼�Ȥ��Ф�
-�ƥ��������᥽�åɤ�������ޤ���
+デフォルトのコンストラクタを定義しました。次に、各アトリビュートに対し
+てアクセサメソッドを定義します。
 
     sub species {
         my($self) = shift;
@@ -79,12 +79,12 @@ foo() �Ȥ����᥽�åɤ� set/get ���Ѥˤ���Τ� Perl ή�Ǥ���
         $self->{size};
     }
 
-    # squalk(), color() ��Ʊ��
+    # squalk(), color() も同様
 
   
-����ʴ����Ǥ�������4�ĤΥ᥽�åɤϥϥå���Υ������㤦�����ǤۤȤ��
-���Ǥ��͡��ºݡ��������ä������ɤ�񤯺ݤˤϥ��ԡ�&�ڡ����Ȥ��ۤȤ�
-�ɤˤʤäƤ��ޤ��Ǥ��礦���Ȥ������Ȥǡ�����äȰ��̲����Ƥߤޤ���
+こんな感じです。が、4つのメソッドはハッシュのキーが違うだけでほとんど
+一緒ですね。実際、こういったコードを書く際にはコピー&ペーストがほとん
+どになってしまうでしょう。ということで、ちょっと一般化してみます。
 
     sub _accessor {
         my($self, $name, $data) = @_;
@@ -113,9 +113,9 @@ foo() �Ȥ����᥽�åɤ� set/get ���Ѥˤ���Τ� Perl ή�Ǥ���
     }
 
 
-_accessor() �Ȥ����᥽�åɤˤ�äƥϥå�����������Ū�ˤ⥫�ץ��벽��
-�ޤ������������ϥ��å���Ȥ��������Ǥ��������ǡ��᥽�å�̾�ȥ��������
-�Ǥ��뤳�Ȥ����ܤ���С�AUTOLOAD ��Ȥ������ǥ���פ��դ��Ǥ��礦��
+_accessor() というメソッドによってハッシュ操作を内部的にもカプセル化し
+ました。すこしはスッキリとした感じです。ここで、メソッド名とキーが一緒
+であることに注目すれば、AUTOLOAD を使うアイデアを思い付くでしょう。
 
 
     sub _accessor {
@@ -124,7 +124,7 @@ _accessor() �Ȥ����᥽�åɤˤ�äƥϥå�����������Ū�ˤ⥫�ץ��벽��
         $self->{$name};
     }
 
-    # ���������Υꥹ��
+    # アクセサのリスト
     my %Accessors = map { $_ => 1 } qw(species size color squalk);
 
     sub AUTOLOAD {
@@ -133,7 +133,7 @@ _accessor() �Ȥ����᥽�åɤˤ�äƥϥå�����������Ū�ˤ⥫�ץ��벽��
         my($class, $method) = $AUTOLOAD =~ /^(.+)::([^:]+)$/;
 
         if( $Accessors{$method} ) {
-            # �ۤ�Ȥ� goto �Τۤ�������
+            # ほんとは goto のほうがいい
             return $self->_accessor($method, @_);
         }
         else {
@@ -142,34 +142,34 @@ _accessor() �Ȥ����᥽�åɤˤ�äƥϥå�����������Ū�ˤ⥫�ץ��벽��
     }
 
 
-AUTOLOAD �ϥ��饹��˥᥽�åɤ��ߤĤ���ʤ��ä��ݤ˸ƤФ��᥽�åɤǡ�
-���饹̾�ȥ᥽�å�̾�� :: ��Ϣ�뤵��ơ�$AUTOLOAD �Ȥ����ѥå������ѿ�
-�˳�Ǽ����ƸƤФ�ޤ���
+AUTOLOAD はクラス内にメソッドがみつからなかった際に呼ばれるメソッドで、
+クラス名とメソッド名が :: で連結されて、$AUTOLOAD というパッケージ変数
+に格納されて呼ばれます。
 
-���Ȥ��С�
+たとえば、
 
     $b = Birds->new;
     $b->squalk;
 
-�ȸƤӽФ����ȡ�$AUTOLOAD == 'Birds::squalk'; �ȤʤäƤ��ޤ���������
-�ϡ�%Accessors ����Ͽ�������ΤΤߡ�_accessor() ��ƤӽФ�������ʳ�
-�ϥǥե���Ȥ��㳰��夲��褦�ˤ��Ƥ��ޤ���(die ... ����ʬ)
+と呼び出されると、$AUTOLOAD == 'Birds::squalk'; となっています。ここで
+は、%Accessors に登録があるもののみ、_accessor() を呼び出し、それ以外
+はデフォルトの例外を上げるようにしています。(die ... の部分)
 
-�������ơ�%Accessors ����������ǡ����ȥ�ӥ塼�ȤؤΥ�����������
-���Ǥ���褦�ˤϤʤ�ޤ�����������AUTOLOAD ��Ȥ���硢�ʲ��Τ褦�ʥ�
-���åȤ�����ޤ���(�ܺ٤Ϥޤ��ε����)
+こうして、%Accessors を操作するだけで、アトリビュートへのアクセサを定
+義できるようにはなりました。ただ、AUTOLOAD を使う場合、以下のようなデ
+メリットがあります。(詳細はまたの機会に)
 
-  * �ѥե����ޥ󥹤��褯�ʤ�
-  * �Ѿ��� AUTOLOAD ��ʻ�Ѥ����꤬������
-  * can() �������ʤ�
-
-
-��äơ������Ǥ��̤���ˡ�Ȥ��ơ���������������Ѥ��ޤ�������ܥ�ơ���
-��򤤤��äơ��ƥ��ȥ�ӥ塼�Ȥ�̾���Υ᥽�åɤ� run-time ���������Ƥ�
-�ޤ���ˡ�Ǥ���
+  * パフォーマンスがよくない
+  * 継承と AUTOLOAD の併用で問題が起こる
+  * can() が効かない
 
 
-    # ���������Υꥹ��
+よって、ここでは別の方法として、クロージャを利用します。シンボルテーブ
+ルをいじって、各アトリビュートの名前のメソッドを run-time に生成してし
+まう方法です。
+
+
+    # アクセサのリスト
     my @Accessors = qw(species size color squalk);
 
     for my $accessor (@Accessors) {
@@ -182,25 +182,25 @@ AUTOLOAD �ϥ��饹��˥᥽�åɤ��ߤĤ���ʤ��ä��ݤ˸ƤФ��᥽�åɤǡ�
     }
 
 
-typeglob �˥��֥롼�����ե���󥹤�����뤳�Ȥˤ�äơ����������᥽��
-�ɤ�����Ǥ��ޤ������Υ�����ץȤ� use strict 'refs' �ʴĶ��Ǥϥ��顼
-�ˤʤ�ޤ��Τǡ����Υ���ܥ�ơ��֥������ʬ�Υ������פΤߡ�no strict 'refs' 
-��Ĥ���Ȥ褤�Ǥ��礦��
+typeglob にサブルーチンリファレンスを入れることによって、アクセサメソッ
+ドが定義できます。このスクリプトは use strict 'refs' な環境ではエラー
+になりますので、このシンボルテーブル操作部分のスコープのみ、no strict 'refs' 
+をつけるとよいでしょう。
 
-��������Ѳ����ƻȤ���褦�ˤ����⥸�塼��� Class::Accessor[4] ������
-�ޤ��������������������������饹�ϡ��ޤ� Class::Accessor ��Ѿ�������
-�饹�᥽�å� mk_accessors() �򥳡��뤹������ǡ���������������Ǥ��뤹
-�����ΤǤ������� Class::Accessor �������μ����ϡ��ޤ��˾嵭����ˡ��
-���Ѥ��Ƥ��ޤ���
+これを汎用化して使えるようにしたモジュールに Class::Accessor[4] があり
+ます。アクセサを装備したいクラスは、まず Class::Accessor を継承し、ク
+ラスメソッド mk_accessors() をコールするだけで、アクセサが定義できるす
+ぐれものです。この Class::Accessor の内部の実装は、まさに上記の方法を
+採用しています。
 
 
      package Birds;
      use base qw(Class::Accessor);
      Birds->mk_accessors(qw(species size color squalk));
 
-��������ǡ��������� species(), size(), color(), squalk() �����ѤǤ���
-�����ºݤˤϡ����󥹥ȥ饯�� new() ���������Ƥ���Τǡ������������
-���Ȥʤ������Ѥ��뤳�Ȥ�����ޤ���(�����С��饤�ɤ��Ƥ����ꤢ��ޤ���)
+これだけで、アクセサ species(), size(), color(), squalk() が利用できま
+す。実際には、コンストラクタ new() も定義されているので、自ら定義する
+ことなく、利用することが出来ます。(オーバーライドしても問題ありません)
 
      package main;
      my $penguin = Birds->new;
@@ -211,11 +211,11 @@ typeglob �˥��֥롼�����ե���󥹤�����뤳�Ȥˤ�äơ����������᥽��
 [4] http://search.cpan.org/search?dist=Class-Accessor
 
 
-3. �ޤȤ� ��������������������������������������������
+3. まとめ ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Class::Accessor �⥸�塼������Ѥ���ȡ����ԥڤ˽��Ϥ��Ƥ��ޤ������ʥ�
-�������᥽�åɤ��������ñ�˽���ơ����������Ǥ���ɮ�Ԥξ�硢���ȥ�
-�ӥ塼�Ȥ�3�İʾ�ˤʤä��顢���Υ⥸�塼���Ȥ��褦�ˤ��Ƥ��ޤ���
+Class::Accessor モジュールを利用すると、コピペに終始してしまいがちなア
+クセサメソッドの定義が簡単に出来て、非常に便利です。筆者の場合、アトリ
+ビュートが3つ以上になったら、このモジュールを使うようにしています。
 
 
 --

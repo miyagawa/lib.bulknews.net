@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>�Ѽ�Ϻ - ���ޥ�ɥ饤�󤫤��±�/����ñ������</TITLE>
+<TITLE>英辞郎 - コマンドラインから和英/英和単語翻訳</TITLE>
 <LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
 </HEAD>
 
@@ -25,53 +25,53 @@
 <P>
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
-�Ѽ�Ϻ - ���ޥ�ɥ饤�󤫤��±�/����ñ������
+英辞郎 - コマンドラインから和英/英和単語翻訳
 
 <P>
 <HR>
 <H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
 <P>
-�Ѽ�Ϻ�Ȥ��������Ȥ�����ޤ���ALC�Ȥ�����ҤΥ����Ⱦ�ǡ��ե����फ���±�/���¤�ñ���������Ǥ���ͥ���ΤǤ��������Ѹ�ʤɤ�˭�٤ʤΤǤʤ��ʤ��Ȥ����꤬����ޤ���
+英辞郎というサイトがあります。ALCという会社のサイト上で、フォームから和英/英和の単語翻訳ができる優れものです。技術用語なども豊富なのでなかなか使い勝手があります。
 
 
 <P>
-����򡢥�����夫��Ȥ���褦�ˤ��������Ȥ����Τ�����δ��Ǥ�������
-�ǱѸ�ε��ѽ���ɤ�Ǥ���Ȥ����ޤ��ɥ�����Ȥ�Ѹ�Ǥ���ɬ�פ��Ǥ�
-�����Ȥ������������Ť��֥饦����Ȥ����Ȥʤ� (w3m �� lynx ����Ѥ��Ƥ�
-��ҤȤʤ餽��Ǥ⹽���ޤ���)�����ޥ�ɥ饤�󤫤����äȤ���ñ���
-�����Ф���ȡ������������Ȼפ��ΤǤ���
+これを、シェル上から使えるようにしたい、というのが今回の企画です。職場
+で英語の技術書を読んでいるとき、またドキュメントを英語でかく必要がでて
+きたとき、いちいち重いブラウザを使うことなく (w3m や lynx を常用してい
+るひとならそれでも構いませんが)、コマンドラインからちょっとした単語の
+訳が出せると、非常に便利だと思うのです。
 
 <P>
-���󥿡��ե������Ȥ��Ƥϡ�nslookup ���ޥ�ɤΤ褦�ˡ�
+インターフェースとしては、nslookup コマンドのように、
 
 <P>
 <PRE>  $ eijiro.pl foo
-  $ eijiro.pl �ۤ��ۤ�
+  $ eijiro.pl ほげほげ
   $ eijiro.pl
   eijjiro&gt; foo
   
-�������Ϥ���Τȡ����󥿥饯�ƥ��֤ʥ�����Τ�Τ������򥵥ݡ��Ȥ��褦
-�Ȼפ��ޤ���
+引数で渡すものと、インタラクティブなシェルのものの双方をサポートしよう
+と思います。
 </PRE>
 <P>
 <HR>
 <H1><A NAME="libwww_perl">libwww-perl</A></H1>
 <P>
-�֥饦���Υե����फ��CGI�򤿤�����ʬ���������ˤϡ�Perl �� libwww-perl
-�ѥå�������Ȥ��ȴ�ñ�Ǥ���LWP �ϡ�Gisle Aas ����ˤ�ä�
-���ƥʥ󥹤���Ƥ��ꡢHTTP �̿��ޤ��򡢤��ä���Ȥ������饹���ؤ�
-�������Ƥ��ޤ���
+ブラウザのフォームからCGIをたたく部分を実装するには、Perl の libwww-perl
+パッケージを使うと簡単です。LWP は、Gisle Aas さんによって
+メンテナンスされており、HTTP 通信まわりを、すっきりとしたクラス階層で
+実装しています。
 
 <P>
-��ñ�ʻȤ����Ȥ��ơ�LWP::Simple �Ȥ������饹���󶡤���Ƥ��ޤ���ñ���
-����URL���饳��ƥ�Ĥ�إå��������������ꡢ��������ǥ���������¸
-�����ꤹ��ΤǤ���С����� LWP::Simple �⥸�塼��ˤ�ä��󶡤����� ��
+簡単な使い方として、LWP::Simple というクラスが提供されています。単純に
+あるURLからコンテンツやヘッダ情報を取得したり、ローカルディスクに保存
+したりするのであれば、この LWP::Simple モジュールによって提供される関 数
 <CODE>get(),</CODE> <CODE>head(),</CODE> <CODE>mirror()</CODE>
-�ʤɤ�Ȥäƴ�ñ�˼������뤳�Ȥ��Ǥ��ޤ���
+などを使って簡単に実装することができます。
 
 <P>
-���Ȥ��С����� URL ���Ф���GET�ꥯ�����Ȥ��ꤲ��HTML���������ɽ������
-������ץȤϰʲ��Τ褦�ˤʤ�ޤ���
+たとえば、ある URL に対してGETリクエストを投げ、HTMLを取得して表示する
+スクリプトは以下のようになります。
 
 <P>
 <PRE>     1  #!/usr/local/bin/perl
@@ -82,17 +82,17 @@
      6  print get('<A HREF="http://www.asahi.com/">http://www.asahi.com/</A>');
 </PRE>
 <P>
-��ñ�Ǥ��͡�
+簡単ですね。
 
 <P>
-ñ��� GET|HEAD ���ꤲ������Ǥʤ����ѥ�᡼�����ꤲ�롢Cookie �����
-�Ϥ����ץ��������̤���Basic ǧ�ڤ�Ԥ����Ȥʤ�� LWP::Simple �Ǥϸ���
-���ʤäƤ��ޤ������ξ�硢LWP::UserAgent ���饹��ȤäƼ������뤳�Ȥ�
-�Ǥ��ޤ���
+単純に GET|HEAD を投げるだけでなく、パラメータも投げる、Cookie も受け
+渡す、プロキシを通す、Basic 認証を行う、となると LWP::Simple では厳し
+くなってきます。この場合、LWP::UserAgent クラスを使って実装することが
+できます。
 
 <P>
-���륵���Ȥ��Ф��� Basic ǧ�ڤ�Ԥ���������ȿ���������äƤ������ˡ�
-�������Ƥ�ɽ�����륹����ץȤϰʲ��Τ褦�ˤʤ�ޤ���
+あるサイトに対して Basic 認証を行い、正しく反応がかえってきた場合に、
+その内容を表示するスクリプトは以下のようになります。
 
 <P>
 <PRE>     1  #!/usr/local/bin/perl
@@ -114,31 +114,31 @@
     17  }
 </PRE>
 <P>
-���Τ褦�ˡ�LWP::UserAgent �� <CODE>request()</CODE> �᥽�åɤ�
-HTTP::Request ���� �����Ϥ����Ȥˤ�ꡢHTTP::Response
-���饹���֤äƤ���Ȥ������ͤˤʤ� �Ƥ��ޤ���HTTP::Request, HTTP::Response
-�������Ȥ� HTTP::Message �Υ� �֥��饹�Ȥ��Ƽ�������Ƥ��ޤ����ܺ٤�
-perldoc lwpcook ��ߤƤ���������
+このように、LWP::UserAgent の <CODE>request()</CODE> メソッドに
+HTTP::Request クラ スを渡すことにより、HTTP::Response
+クラスが返ってくるという仕様になっ ています。HTTP::Request, HTTP::Response
+は双方とも HTTP::Message のサ ブクラスとして実装されています。詳細は
+perldoc lwpcook をみてください。
 
 <P>
 <HR>
 <H1><A NAME="URI_Escape">URI::Escape</A></H1>
 <P>
-�±������ξ�硢���ܸ��ե���������Ϥ��뤳�Ȥˤʤ�ޤ�����HTTP�ꥯ��
-���Ȥˤ��Τޤ����ܸ���Ϥ��ΤǤϤʤ����֥饦������ASCIIʸ���� URI-escape
-�Ȥ��������ǥ��󥳡��ɤ����Ϥ��Ƥ��ޤ���
+和英翻訳の場合、日本語をフォームに入力することになりますが、HTTPリクエ
+ストにそのまま日本語を渡すのではなく、ブラウザが非ASCII文字を URI-escape
+という方式でエンコードして渡しています。
 
 <P>
-URI ���������פλ��ͤ����˴�ñ�Ǥ�������ʸ���� <CODE>$str</CODE>
-�򥨥󥳡��ɤ��� �ˤϡ��ʲ��Τ褦�ˤ��ޤ���
+URI エスケープの仕様は非常に簡単です。ある文字列 <CODE>$str</CODE>
+をエンコードする には、以下のようにします。
 
 <P>
 <PRE>  $str =~ s/(\W)/'%' . unpack('H2', $1)/eg;
 </PRE>
 <P>
-<CODE>sprintf()</CODE> �� <CODE>ord()</CODE>
-��Ȥ��ʤɤ�����������ˡ������ޤ������⥸�塼��� �Ȥ��ΤǤ����
-URI::Escape ���Ѱդ���Ƥ��ޤ����Ȥ����ϰʲ����̤�Ǥ���
+<CODE>sprintf()</CODE> と <CODE>ord()</CODE>
+を使うなどいろいろな方法がありますが、モジュールを 使うのであれば
+URI::Escape が用意されています。使い方は以下の通りです。
 
 <P>
 <PRE>     1  #!/usr/local/bin/perl
@@ -146,56 +146,56 @@ URI::Escape ���Ѱդ���Ƥ��ޤ����Ȥ����ϰʲ����̤�Ǥ���
      3  use strict;
      4  use URI::Escape;
      5
-     6  my $query = '����������=escape';
+     6  my $query = 'エスケープ=escape';
      7  print uri_escape($query, '\W');
 </PRE>
 <P>
-������ <CODE>uri_escape()</CODE> ����2������ <CODE>\W</CODE> ���Ϥ��Ƥ���Ȥ������ݥ���ȤǤ��� uri_escape
-�ؿ��ϡ��ǥե���ȤǤϡ�URI�˻ȤäƤϤ����ʤ�ʸ���פ� escape
-���ޤ�������CGI�����Ϥ����ͤΥ��������פ�ͤ��Ƥ��ޤ����顢��
-��ǤϤޤ����ΤǤ���<CODE>=</CODE>, <CODE>&amp;</CODE> �Ȥ��ä�ʸ���ϡ�URI �Ȥ��Ƥϻ��Ѳ�ǽ�� ������CGI
-�Υѥ�᡼���Ȥ����Ϥ���硢<CODE>=</CODE> �� <CODE>&amp;</CODE> ���ü�ʰ�̣����� �ޤ����Ǥ����顢<CODE>[a-zA-Z0-9_]</CODE> �Ǥʤ�ʸ���Ϥ��٤� escape ���ʤ���Фʤ�� ����
+ここで <CODE>uri_escape()</CODE> の第2引数に <CODE>\W</CODE> を渡しているところがポイントです。 uri_escape
+関数は、デフォルトでは「URIに使ってはいけない文字」を escape
+します。今回、CGIに入力した値のエスケープを考えていますから、こ
+れではまずいのです。<CODE>=</CODE>, <CODE>&amp;</CODE> といった文字は、URI としては使用可能で すが、CGI
+のパラメータとして渡す場合、<CODE>=</CODE> や <CODE>&amp;</CODE> は特殊な意味を持ち ます。ですから、<CODE>[a-zA-Z0-9_]</CODE> でない文字はすべて escape しなければなりま せん。
 
 <P>
 <HR>
 <H1><A NAME="Term_ReadLine">Term::ReadLine</A></H1>
 <P>
-�ʾ��2�Ĥǡ���������������̤�ɽ�������ΤϤǤ������Ǥ������󥿥饯
-�ƥ��֤ˤ��켫�ȡ�������Ȥ��Ƽ¹Ԥ����ΤϤɤ�����Ф褤�Ǥ��礦����
+以上の2つで、引数から翻訳結果を表示するものはできそうです。インタラク
+ティブにそれ自身、シェルとして実行するものはどうすればよいでしょうか。
 
 <P>
-CPAN �⥸�塼��򥤥󥹥ȡ��뤹��Ȥ��ˡ�
+CPAN モジュールをインストールするときに、
 
 <P>
 <PRE>  perl -MCPAN -e shell
 </PRE>
 <P>
-��Ω���夬�� CPAN �����롢����Υ�������ʬ��������Ƥ��� Term::ReadLine
-���Ȥ��ޤ����ºݤˤ� Term::ReadLine::Perl, Term::ReadLine::Gnu
-�Τɤ��餫�����Ѥ���ΤǤ���������ˤ�ä� Ctrl-P
-�ǥҥ��ȥ�򤵤��Τܤä��ꡢ�Ȥ��ä����Ȥ���ñ�ˤǤ���褦�ˤʤ�ޤ���
+で立ち上がる CPAN シェル、これのシェル部分を実装している Term::ReadLine
+が使えます。実際には Term::ReadLine::Perl, Term::ReadLine::Gnu
+のどちらかを利用するのですが、これによって Ctrl-P
+でヒストリをさかのぼったり、といったことが簡単にできるようになります。
 
 <P>
 <HR>
 <H1><A NAME="IMPLEMENTATION">IMPLEMENTATION</A></H1>
 <P>
-�����������ޤ��������Ȥϥ桼�������Ϥ������äơ�HTTP�ꥯ�����Ȥ����� ��
-eijiro ���䤤��碌����̤�ɽ������Ф褤���Ȥˤʤ�ޤ���
+準備は整いました。あとはユーザの入力を受け取って、HTTPリクエストを生成 し
+eijiro に問い合わせ、結果を表示すればよいことになります。
 
 <P>
-�٤��������Ȥ��ưʲ��ΤȤ������פ��Ƥ��ޤ���
+細かい実装として以下のところを工夫しています。
 
 <P>
-�ޤ��±�/���¥⡼�ɤ��ڤ��ؤ��ϡ�����ɽ���ˤ�äƼ�ư�ǹԤ��ޤ����ޤ���
-�֤äƤ��� HTML �򡢥�����Ǹ��䤹�����뤿��ˤϥ�����󥰥��󥸥�
-ɬ�פˤʤäƤ��ޤ����������Ǥ� HTML::TreeBuilder, HTML::FormatText ��
-���Ѥ��Ƥ��ޤ���
+まず和英/英和モードの切り替えは、正規表現によって自動で行います。また、
+返ってくる HTML を、シェルで見やすくするためにはレンダリングエンジンが
+必要になってきますが、ここでは HTML::TreeBuilder, HTML::FormatText を
+使用しています。
 
 <P>
-���󥿥饯�ƥ��֥�����ξ��ˤϡ���λ���Ƽ���Ω���夲���ݤ˥ҥ��ȥ���
-���Ǥ���褦���ҥ��ȥ�ե�����˵�Ͽ���롢�Ȥ��ä����Ȥ⤷�Ƥ��ޤ�����
-�󥿥饯�ƥ��֥⡼�ɤ� Ctrl-D �⤷���� !exit �Ȥ������Ϥǽ�λ����褦
-�ˤʤäƤ��ޤ���
+インタラクティブシェルの場合には、終了して次に立ち上げた際にヒストリ補
+完できるよう、ヒストリファイルに記録する、といったこともしています。イ
+ンタラクティブモードは Ctrl-D もしくは !exit という入力で終了するよう
+になっています。
 
 <P>
 <PRE>     1  #!/usr/local/bin/perl
@@ -282,7 +282,7 @@ HREF="http://search.cpan.org/search?dist=libwww-perl">http://search.cpan.org/sea
 HREF="http://search.cpan.org/search?dist=Term-ReadLine-Perl">http://search.cpan.org/search?dist=Term-ReadLine-Perl</A>
 
 
-<DT><STRONG><A NAME="item__">�Ѽ�Ϻ</A></STRONG><DD>
+<DT><STRONG><A NAME="item__">英辞郎</A></STRONG><DD>
 <P>
 <A HREF="http://www.alc.co.jp/">http://www.alc.co.jp/</A> <A
 HREF="http://member.nifty.ne.jp/eijiro/index.html">http://member.nifty.ne.jp/eijiro/index.html</A>

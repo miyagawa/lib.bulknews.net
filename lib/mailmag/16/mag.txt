@@ -4,48 +4,48 @@ Object-Oriented Programming with Perl Vol.16
 =======================================================
 
 
-1. �Ϥ���� ������������������������������������������
+1. はじめに ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-����ϡ�Web ���ץꥱ�������ȯ����Ω�������ʥ⥸�塼���Ҳ𤷤ޤ���
+今回は、Web アプリケーション開発に役立ちそうなモジュールを紹介します。
 
-Web���ץꥱ�������Ǥη��ƥ��Ȥϡ��֥饦���ǳ�ǧ����ɬ�פ����ꡢ��
-ư���ˤ����󤤤�ΤǤ���HTTP ���饤����Ȥ򥷥ߥ�졼�Ȥ����ƥ��Ȥ���
-����С���ư�ƥ��Ȥˤ���ʼ����夬˾��ޤ���
+Webアプリケーションでの結合テストは、ブラウザで確認する必要があり、自
+動化には程遠いものです。HTTP クライアントをシミュレートし、テストがで
+きれば、自動テストによる品質向上が望めます。
 
-2. HTTP::Monkeywrench ��������������������������������
+2. HTTP::Monkeywrench ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Perl ��HTTP���饤����ȤȤ����С�LWP::UserAgent(*1) ���פ��⤫�Ӥޤ���
-���� LWP::UserAgent �����Ѥ��ơ���ñ�ʥƥ��ȥ�����ץȺ�����ٱ礷�Ƥ�
-���Τ� HTTP::Monkeywrench (*2) �Ǥ���
+Perl でHTTPクライアントといえば、LWP::UserAgent(*1) が思い浮かびます。
+この LWP::UserAgent を利用して、簡単なテストスクリプト作成を支援してく
+れるのが HTTP::Monkeywrench (*2) です。
 
 *1 http://cpan2.org/Asset/display?dist=libwww-perl
 *2 http://cpan2.org/Asset/display?dist=Monkeywrench
 
-���Υ⥸�塼���ͥ��Ƥ���Ȥ����� "session", "click" �Ȥ�����ǰ�򥵥ݡ�
-�Ȥ��Ƥ������Ǥ����Ĥޤꡢ
+このモジュールの優れているところは "session", "click" という概念をサポー
+トしている点です。つまり、
 
-+ Ʊ��Υ��å����ϤҤȤޤȤ�ˤ��ƥƥ��ȤǤ���
-+ �ڡ������ܤ�Ϣ³���Ƶ�Ͽ�Ǥ���
++ 同一のセッションはひとまとめにしてテストできる
++ ページ遷移を連続して記録できる
 
-���Ȥˤʤ�ޤ���Cookie (��³/���å����) �򥵥ݡ��Ȥ��Ƥ��뤿�ᡢ
-Apache::Session::* �ʤɤ� Cookie �����Ѥ��ƥ��å���������ԤäƤ���
-���Ǥ⡢������ä� Cookie �򼡥ڡ����Υꥯ�����Ȥ��ղä���Ȥ��ä���
-�꤬�Ԥ��ޤ���
+ことになります。Cookie (永続/セッション) をサポートしているため、
+Apache::Session::* などで Cookie を利用してセッション管理を行っている
+場合でも、受け取った Cookie を次ページのリクエストに付加するといった設
+定が行えます。
 
-�ޤ��ڡ������ܤ򥵥ݡ��Ȥ��Ƥ��뤿�ᡢ�ڡ���A => �ڡ���B => �ڡ���C ��
-���ä����ܤ���֤Ȥ�������Ǥ��ޤ���
+またページ遷移をサポートしているため、ページA => ページB => ページC と
+いった遷移も順番として設定できます。
 
-�ƥ��ȼ��Τ������ TestUnit �ʤɤ�Ʊ�ͤˤ��ƹԤ��ޤ�������Ū�ˤϡ�
-$session �Ȥ��������ե���󥹤��Ѱդ������줾������Ǥ� 1����å���
-ɽ���褦�ˤ��ޤ����ƥ��Ȥ������ڡ����ˤ� success_res, error_res �Ȥ�
-�������ǡ�����/���Ԥ������˽и�����ʸ��������ꤷ�Ƥ����ޤ���
+テスト自体は前回の TestUnit などと同様にして行います。具体的には、
+$session という配列リファレンスを用意し、それぞれの要素が 1クリックを
+表すようにします。テストしたいページには success_res, error_res とい
+うキーで、成功/失敗した場合に出現する文字列を設定しておきます。
 
-a.cgi, b.cgi, c.cgi �ν�˥ڡ������ܤ��ơ�
+a.cgi, b.cgi, c.cgi の順にページ遷移して、
 
-+ b.cgi �� OK �Ȥ���ʸ���󤬸����
-+ c.cgi �� NG �Ȥ���ʸ���󤬸���ʤ�
++ b.cgi に OK という文字列が現れる
++ c.cgi に NG という文字列が現れない
 
-���Ȥ�ƥ��Ȥ��륹����ץȤϡ��ʲ��Τ褦�ˤʤ�ޤ���
+ことをテストするスクリプトは、以下のようになります。
 
 #!/usr/bin/perl
 use strict;
@@ -69,27 +69,27 @@ my $test = HTTP::Monkeywrench->new($settings);
 $test->test($session);
 
 
-SUCCEED / FAIL �η�̤����䤹�����Ϥ���ޤ�����̤�᡼���������륪��
-�����⤢��ޤ��Τǡ���ư�ƥ��Ȥʤɤˤ�����Ƥ��ޤ������Τ褦�ʥ�����
-�ץȤ�1����˽���Ƥ�������ּ�ư�ƥ��Ȥʤɤ��Ƥ����ȡ���������ȯ��
-�ˤ�Ĥʤ���Ǥ��礦��
+SUCCEED / FAIL の結果が見やすく出力されます。結果をメール送信するオプ
+ションもありますので、自動テストなどにも向いています。このようなスクリ
+プトを1ヶ所に集めておいて夜間自動テストなどしておくと、問題の早期発見
+にもつながるでしょう。
 
 
-3. ������ / ���� ������������������������������������
+3. 問題点 / 応用 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-HTTP::Monkeywrench �ؤ���˾�Ȥ��Ƥϡ�
+HTTP::Monkeywrench への要望としては、
 
-* sendcookie, acceptcookie �� session ���ȤǤʤ� setting �����������
-* �����Х�������
+* sendcookie, acceptcookie は session ごとでなく setting で定義したい
+* 少々バグがある
 
-�ʤɤ�����ޤ�����Ԥ���ˤϥ᡼�뤷�Ƥ��ޤ�����˻�����褦�ǥ��ƤϤ�
-���ʤ����Ƥ���ޤ���TODO List �ˤ� �ץ����������Ф� mod_perl �ϥ��
-������Ѥ����֥쥳�����ġ���פκ��������󤲤��Ƥ��ޤ������줬�Ǥ���
-�����������ˤʤꤽ����ͽ�������ޤ���
+などがあります。作者さんにはメールしていますが、忙しいようでメンテはな
+かなかしてくれません。TODO List には プロキシサーバや mod_perl ハンド
+ラを利用した「レコーダツール」の作成、が挙げられています。これができる
+と相当便利になりそうな予感がします。
 
-�����ΥХ��ˤĤ��Ƥϡ��ѥå���������Ƥ���ޤ���Cookie ��Ϣ������URL��
-�����쥯�Ȥؤ��б���Squid �к��ʤɤ���ʤȤ����Ǥ���Version 1.13 �Ǥ�
-���Ѥ���������
+少々のバグについては、パッチを作成してあります。Cookie 関連、相対URLリ
+ダイレクトへの対応、Squid 対策などが主なところです。Version 1.13 でご
+利用ください。
 
 http://bulknews.net/lib/mailmag/16/monkeywrench.patch
 *** Monkeywrench.pm.orig        Tue Jan 23 16:16:30 2001
@@ -124,12 +124,12 @@ http://bulknews.net/lib/mailmag/16/monkeywrench.patch
 !               push(@{ $click->{'urls'} },$url);
 
 
-3. �ޤȤ�  ������������������������������������������
+3. まとめ  ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 
-Web���ץꥱ�������ƥ��ȥġ����Ҳ𤷤ޤ�����
+Webアプリケーションテストツールを紹介しました。
 
-����ϡ�mod_perl �ʴĶ������ѤǤ��� Apache::FakeRequest �ˤĤ��ƾ�����
-�𤷤ޤ���
+次回は、mod_perl な環境で利用できる Apache::FakeRequest について少し紹
+介します。
 
 
 --

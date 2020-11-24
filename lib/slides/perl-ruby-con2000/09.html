@@ -1,5 +1,5 @@
 <HTML>
-<HEAD><TITLE>Perl Conference - ете╕ехб╝еыд╬║юдъ╩¤</TITLE>
+<HEAD><TITLE>Perl Conference - уГвуВ╕уГеуГ╝уГлуБоф╜ЬуВКцЦ╣</TITLE>
 <LINK rel="stylesheet" href="default.css">
 </HEAD>
 <BODY>
@@ -8,22 +8,22 @@
 <A href="08.html">[prev]</A> <A href="10.html">[next]</A>
 </DIV>
 <!-- /navi -->
-<H2><CODE>bless</CODE>д╚д╧</H2>
+<H2><CODE>bless</CODE>уБиуБп</H2>
 <HR>
 <BLOCKQUOTE><PRE><CODE>$obj = bless { }, "ClassName";
 </CODE></PRE></BLOCKQUOTE>
 <UL>
-<LI>Perl д╬╩╤┐ЇдЄепеще╣╠╛д╦╖ыд╙╔╒д▒ды
-<LI>1░·┐Їд╬╛ь╣ч, ╕╜║▀д╬е╤е├е▒б╝е╕д╦ <CODE>bless</CODE>д╡дьды
-<LI>╖╤╛╡д╟║о═Ёд╖д╩ддд┐дс, 2░·┐Їд╟╕╞д╓д┘дн
+<LI>Perl уБохдЙцХ░уВТуВпуГйуВ╣хРНуБлч╡РуБ│ф╗ШуБСуВЛ
+<LI>1х╝ХцХ░уБоха┤хРИ, чП╛хЬиуБоуГСуГГуВ▒уГ╝уВ╕уБл <CODE>bless</CODE>уБХуВМуВЛ
+<LI>ч╢ЩцЙ┐уБзц╖╖ф╣▒уБЧуБкуБДуБЯуВБ, 2х╝ХцХ░уБзхС╝уБ╢уБ╣уБН
 </UL>
 <BLOCKQUOTE><PRE><CODE>package Child;
-@ISA = qw(Person);		# ╖╤╛╡
+@ISA = qw(Person);		# ч╢ЩцЙ┐
 sub new {
-    my $class = shift;		# епеще╣╠╛
-    my $self = $class->SUPER::new(@_);	# ┐╞епеще╣д╬ new
-						# $self д╧ Child епеще╣!
-    $self->do_my_own_thing;	# Child епеще╣д╬есе╜е├е╔
+    my $class = shift;		# уВпуГйуВ╣хРН
+    my $self = $class->SUPER::new(@_);	# шжкуВпуГйуВ╣уБо new
+						# $self уБп Child уВпуГйуВ╣!
+    $self->do_my_own_thing;	# Child уВпуГйуВ╣уБоуГбуВ╜уГГуГЙ
     return $self;
 }
 </CODE></PRE></BLOCKQUOTE>

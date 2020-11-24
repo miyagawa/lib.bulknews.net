@@ -4,12 +4,12 @@ Object-Oriented Programming with Perl Vol.20
 =======================================================
 
 
-1. Topics ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+1. Topics ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-O'Reilly ¤Î Perl.com[1] ¤Ç Perl 6 ¤Ë´Ø¤¹¤ëµ­»ö¤¬¤¤¤¯¤Ä¤«¤Ç¤Æ¤¤¤Þ¤¹¡£
-Larry Wall ¤Î Appocalypse 2, ¤½¤·¤Æ Damian Conway ¤Î Exegesis 2 ¤ò¥»¥Ã
-¥È¤ÇÆÉ¤à¤È¡¢Perl 6 ¤¬¤¤¤Ã¤¿¤¤¤É¤ó¤Ê¸À¸ì¤Ë¤Ê¤Ã¤Æ¤¤¤¯¤Î¤«¤ï¤«¤ë¤È»×¤¤¤Þ
-¤¹¡£
+O'Reilly ã® Perl.com[1] ã§ Perl 6 ã«é–¢ã™ã‚‹è¨˜äº‹ãŒã„ãã¤ã‹ã§ã¦ã„ã¾ã™ã€‚
+Larry Wall ã® Appocalypse 2, ãã—ã¦ Damian Conway ã® Exegesis 2 ã‚’ã‚»ãƒƒ
+ãƒˆã§èª­ã‚€ã¨ã€Perl 6 ãŒã„ã£ãŸã„ã©ã‚“ãªè¨€èªžã«ãªã£ã¦ã„ãã®ã‹ã‚ã‹ã‚‹ã¨æ€ã„ã¾
+ã™ã€‚
 
 Larry's Appocalypse 2
 http://www.perl.com/pub/2001/05/03/wall.html
@@ -18,39 +18,39 @@ Damian Conway's Exegesis 2
 http://www.perl.com/pub/2001/05/08/exegesis2.html
 
 
-¾Ü¤·¤¯¤Ï¸¶Ê¸¤òÆÉ¤ó¤Ç¤¯¤À¤µ¤¤¡¢¤È¤·¤«¤¤¤¨¤Ê¤¤¤ó¤Ç¤¹¤¬¡¢¶½Ì£¿¼¤¤Âç¤­¤ÊÊÑ
-¹¹¤Ï°Ê²¼¤Î¤è¤¦¤Ê´¶¤¸¤Ç¤¹¡£
+è©³ã—ãã¯åŽŸæ–‡ã‚’èª­ã‚“ã§ãã ã•ã„ã€ã¨ã—ã‹ã„ãˆãªã„ã‚“ã§ã™ãŒã€èˆˆå‘³æ·±ã„å¤§ããªå¤‰
+æ›´ã¯ä»¥ä¸‹ã®ã‚ˆã†ãªæ„Ÿã˜ã§ã™ã€‚
 
-* ¥ª¥Ö¥¸¥§¥¯¥È¤Î¥á¥½¥Ã¥É¥³¡¼¥ë¤Ï -> ¤Ç¤Ê¤¯ . ¤Ë
+* ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚³ãƒ¼ãƒ«ã¯ -> ã§ãªã . ã«
 
-* property ¤È¤¤¤¦³µÇ° : is
+* property ã¨ã„ã†æ¦‚å¿µ : is
   e.g.) my int $pi is constant = 3.14;
 
-* $ @ % ¤Î¸«Ä¾¤·
-  Perl5 ¤Ç¤Ï @foo ¤Î 1ÈÖÌÜ¤ÎÍ×ÁÇ¤Ï $foo[1] ¤Ç¤·¤¿¤¬¡¢Perl6 ¤Ç¤Ï @foo[1]
-  ¤È¤Ê¤ë¤è¤¦¤Ç¤¹¡£¥Ï¥Ã¥·¥å¤âÆ±ÍÍ¤Ç¤¹¡£Âå¤ï¤ê¤Ë¡¢¥¹¥é¥¤¥¹ÍÑ¤Î¿·¤·¤¤µ­Ë¡¤¬
-  ÍÑ°Õ¤µ¤ì¤Þ¤¹¡£
+* $ @ % ã®è¦‹ç›´ã—
+  Perl5 ã§ã¯ @foo ã® 1ç•ªç›®ã®è¦ç´ ã¯ $foo[1] ã§ã—ãŸãŒã€Perl6 ã§ã¯ @foo[1]
+  ã¨ãªã‚‹ã‚ˆã†ã§ã™ã€‚ãƒãƒƒã‚·ãƒ¥ã‚‚åŒæ§˜ã§ã™ã€‚ä»£ã‚ã‚Šã«ã€ã‚¹ãƒ©ã‚¤ã‚¹ç”¨ã®æ–°ã—ã„è¨˜æ³•ãŒ
+  ç”¨æ„ã•ã‚Œã¾ã™ã€‚
 
 
 [1] http://www.perl.com/
 
-2. ¤ª¤·¤é¤» ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+2. ãŠã—ã‚‰ã› ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
 * YARPC 19101
 
-2001/5/26 ¤Ë YARPC (Yet Another Ruby/Perl Conference) 19101 ¤¬³«ºÅ¤µ¤ì
-¤Þ¤¹¡£¥»¥Ã¥·¥ç¥ó¤Î¾ÜºÙ¤¬¸ø¼°¥µ¥¤¥È[2] ¤«¤é¤¿¤É¤ì¤ë¥Ú¡¼¥¸
+2001/5/26 ã« YARPC (Yet Another Ruby/Perl Conference) 19101 ãŒé–‹å‚¬ã•ã‚Œ
+ã¾ã™ã€‚ã‚»ãƒƒã‚·ãƒ§ãƒ³ã®è©³ç´°ãŒå…¬å¼ã‚µã‚¤ãƒˆ[2] ã‹ã‚‰ãŸã©ã‚Œã‚‹ãƒšãƒ¼ã‚¸
 
   http://www.tokyo.pm.org/YARPC_WIP.html
 
-¤«¤é¤´Í÷¤Ë¤Ê¤ì¤Þ¤¹¡£´ØÅì¶á¹Ù¤ÎÊý¤Ï¤¼¤Ò¤´Íè¾ì¤¯¤À¤µ¤¤¡£
+ã‹ã‚‰ã”è¦§ã«ãªã‚Œã¾ã™ã€‚é–¢æ±è¿‘éƒŠã®æ–¹ã¯ãœã²ã”æ¥å ´ãã ã•ã„ã€‚
 
 [2] http://yarpc.tokyo.pm.org/
 
 
-3. ¼¡²óÍ½¹ð ¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²¡²
+3. æ¬¡å›žäºˆå‘Š ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿ï¼¿
 
-Damian Conway ¤Î NEXT.pm ¤Ë¤Ä¤¤¤Æ¾Ò²ð¤·¤¿¤¤¤È»×¤¤¤Þ¤¹¡£
+Damian Conway ã® NEXT.pm ã«ã¤ã„ã¦ç´¹ä»‹ã—ãŸã„ã¨æ€ã„ã¾ã™ã€‚
 
 
 --

@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>DBIx::FullTextSearch - MySQL �򥹥ȥ졼���Ȥ��ƥɥ�����ȤΥ���ǥ�����Ĥ���</TITLE>
+<TITLE>DBIx::FullTextSearch - MySQL をストレージとしてドキュメントのインデクスをつくる</TITLE>
 <LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
 </HEAD>
 
@@ -16,11 +16,11 @@
 	<UL>
 
 		<LI><A HREF="#Frontends">Frontends</A>
-		<LI><A HREF="#_">�ե���ȥ����</A>
+		<LI><A HREF="#_">フロントエンド</A>
 		<LI><A HREF="#Backends">Backends</A>
-		<LI><A HREF="#_">�Хå������</A>
+		<LI><A HREF="#_">バックエンド</A>
 		<LI><A HREF="#Mixing_frontends_and_backends">Mixing frontends and backends</A>
-		<LI><A HREF="#_">�ե���ȥ���ɤȥХå�����ɤ�ͻ��</A>
+		<LI><A HREF="#_">フロントエンドとバックエンドの融合</A>
 	</UL>
 
 	<LI><A HREF="#METHODS">METHODS</A>
@@ -42,7 +42,7 @@
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
 DBIx::FullTextSearch - MySQL
-�򥹥ȥ졼���Ȥ��ƥɥ�����ȤΥ���ǥ�����Ĥ���
+をストレージとしてドキュメントのインデクスをつくる
 
 <P>
 <HR>
@@ -50,28 +50,28 @@ DBIx::FullTextSearch - MySQL
 <P>
 <PRE>    use DBIx::FullTextSearch;
     use DBI;
-    # �ǡ����١�������³ (�̾��DBI)
+    # データベースに接続 (通常のDBI)
     my $dbh = DBI-&gt;connect('dbi:mysql:database', 'user', 'passwd');
 </PRE>
 <P>
-<PRE>    # ���ȥåץꥹ�Ȥκ���
+<PRE>    # ストップリストの作成
     my $sl = DBIx::FullTextSearch::StopList-&gt;create_default($dbh, 'sl_en', 'English');
 </PRE>
 <P>
-<PRE>    # �ǥե���Ȥ� english ���ȥåץꥹ�Ȥ� english ���ƥޤǥ���ǥ��������
+<PRE>    # デフォルトの english ストップリストと english ステマでインデクスを作成
     my $fts = DBIx::FullTextSearch-&gt;create($dbh, 'fts_web_1',
                 frontend =&gt; 'string', backend =&gt; 'blob',
                 stoplist =&gt; 'sl_en', stemmer =&gt; 'en-us');
-    # ���뤤�ϴ�¸�Τ�Τ򳫤�
+    # あるいは既存のものを開く
     # my $fts = DBIx::FullTextSearch-&gt;open($dbh, 'fts_web_1');
 </PRE>
 <P>
-<PRE>    # �ɥ�����Ȥ򥤥�ǥ�������
+<PRE>    # ドキュメントをインデクスする
     $fts-&gt;index_document('krtek', 'krtek leze pod zemi');
     $fts-&gt;index_document('jezek', 'Jezek ma ostre bodliny.');
 </PRE>
 <P>
-<PRE>    # �ޥå��θ���
+<PRE>    # マッチの検索
     my @docs = $fts-&gt;contains('foo');
     my @docs = $fts-&gt;econtains('+foo', '-Bar');
     my @docs = $fts-&gt;search('+foo -Bar');
@@ -88,12 +88,12 @@ document is nearly anything -- Perl scalar, file, Web document, database
 field.
 
 <P>
-DBIx::FullTextSearch �ϥɥ�����Ȥ����Ƥ򥤥�ǥ������뤿��Υե쥭
-���֥�ʥ���塼�����Ǥ������Υ⥸�塼��� MySQL �ǡ����١�����Ȥ�
-��ñ��ȥɥ�����Ȥξ�����Ǽ���������˥ɥ�����ȤΥ���ǥå�����
-���������ꡢ�ѹ������ꡢ�ޥå��򸡺����뤿��� Perl ���󥿥ե���������
-�����ޤ���DBix::FullTextSearch �ˤ����Ƥϡ��ɥ�����ȤϤۤܤʤ�Ǥ�
-OK�Ǥ� -- Perl �����顢�ե����롢Web ʸ�񡢥ǡ����١����ե�����ɤʤɡ�
+DBIx::FullTextSearch はドキュメントの内容をインデクスするためのフレキ
+シブルなソリューションです。このモジュールは MySQL データベースを使っ
+て単語とドキュメントの情報を格納し、新たにドキュメントのインデックスを
+作成したり、変更したり、マッチを検索するための Perl インタフェースを提
+供します。DBix::FullTextSearch においては、ドキュメントはほぼなんでも
+OKです -- Perl スカラ、ファイル、Web 文書、データベースフィールドなど。
 
 <P>
 The basic style of interface is shown above. What you need is a MySQL
@@ -102,11 +102,11 @@ maintain all necessary information. Once created it can be accessed many
 times, either for updating the index (adding documents) or searching.
 
 <P>
-����Ū�ʥ��󥿥ե������Υ�������Ͼ嵭���̤�Ǥ���ɬ�פʤΤ� MySQL �ǡ�
-���١����� <EM>DBI</EM>, <A HREF="/DBD/mysql.html">DBD::mysql</A> �Ǥ������� DBIx::FullTextSearch ����
-�ǥ�����Ĥ���ޤ������Υ���ǥ����ϡ����٤Ƥ�ɬ�פʾ������ƥʥ�
-����ơ��֥�ˤ�äƹ�������ޤ������٤Ĥ���С�����ǥ����ι��� (�ɥ���
-���Ȥ��ɲ�)�両���Ѥˡ����٤Ǥ⥢���������뤳�Ȥ��Ǥ��ޤ���
+基本的なインタフェースのスタイルは上記の通りです。必要なのは MySQL デー
+タベースと <EM>DBI</EM>, <A HREF="/DBD/mysql.html">DBD::mysql</A> です。次に DBIx::FullTextSearch イン
+デクスをつくります。このインデクスは、すべての必要な情報をメンテナンス
+するテーブルによって構成されます。一度つくれば、インデクスの更新 (ドキュ
+メントの追加)や検索用に、何度でもアクセスすることができます。
 
 <P>
 DBIx::FullTextSearch uses one basic table to store parameters of the index.
@@ -121,23 +121,23 @@ understanding of how it all works may be usefull when you are deciding if
 this module is for you and what type of index will best suit your needs.
 
 <P>
-DBIx::FullTextSearch �Ϥޤ��١����Υơ��֥�˥���ǥ����Υѥ�᡼����
-��Ǽ���ޤ���2�Ĥ�Υơ��֥�ˡ��ɥ�����Ȥ�ñ�졢�ޤ�����ǥ����Υ�
-����(����ǥ����κ������˻���)�ˤ�äơ�¾�ξ�����Ǽ���뤿��Υơ���
-��򤤤��Ĥ����Ѥ��ޤ�(������ʸ����(URL�ʤ�)���������ο��ͤؤ��Ѵ�ɽ��
-��)���桼���ˤȤäƤϡ��������������Τ�Τ��Ȥ䥤��ǥ����ο����񤤤�
-���פǤϤ���ޤ��󡣽��פʤΤ�API���Ĥޤ�ɥ�����ȤΥ���ǥ�������
-��ɥ���������ñ��ؤΥ������Ԥ��᥽�åɤǤ��������������ΤȤ���
-�ɤΤ褦��ư���Τ��򤢤������ΤäƤ������Ȥϡ����Υ⥸�塼������
-���٤������ꤷ���ꡢ�ɤΥ����פΥ���ǥ�������Ŭ�������򤹤�ݤˤ��ä�
-ͭ�פǤ��礦��
+DBIx::FullTextSearch はまずベースのテーブルにインデクスのパラメータを
+格納します。2つめのテーブルに、ドキュメントと単語、またインデクスのタ
+イプ(インデクスの作成時に指定)によって、他の情報を格納するためのテーブ
+ルをいくつか使用します(外部の文字列(URLなど)から内部の数値への変換表な
+ど)。ユーザにとっては、こうした内部のものごとやインデクスの振る舞いは
+重要ではありません。重要なのはAPI、つまりドキュメントのインデクス生成
+やドキュメント内の単語へのクエリを行うメソッドです。しかし、全体として
+どのように動作するのかをある程度知っておくことは、このモジュールを使用
+すべきか決定したり、どのタイプのインデクスが最適かを選択する際にきっと
+有益でしょう。
 
 <P>
 <HR>
 <H2><A NAME="Frontends">Frontends</A></H2>
 <P>
 <HR>
-<H2><A NAME="_">�ե���ȥ����</A></H2>
+<H2><A NAME="_">フロントエンド</A></H2>
 <P>
 From the user, application point of view, the DBIx::FullTextSearch index
 stores documents that are named in a certain way, allows adding new
@@ -149,13 +149,13 @@ to look up what documents contain certain words and return names of the
 documents.
 
 <P>
-�桼�����ץꥱ�������λ�������ߤ�ȡ�DBIx::FullTextSearch �Υ����
-�����ϡ����餫�η���̾���Ť���줿�ɥ�����Ȥ��Ǽ���������˥ɥ����
-��Ȥ��ɲäǤ���``����ñ��ꥹ�Ȥ�ޤ�ɥ�����Ȥ�̾���򶵤���''�Ȥ���
-���������Ԥ��᥽�åɤ��󶡤��ޤ���DBIx::FullTextSearch �Υ���ǥ���
-�ϡ�ʸ�񼫿Ȥϳ�Ǽ���ޤ�������ˡ��ɥ���������ñ��ˤĤ��Ƥξ�
-���¤�������ݻ����������ñ���ޤ���ɥ�����Ȥ򸡺����ơ��ɥ���
-����̾���֤����Ȥ��®�˹Ԥ���褦�ˤ��Ƥ��ޤ���
+ユーザアプリケーションの視点からみると、DBIx::FullTextSearch のインデ
+クスは、何らかの形で名前づけられたドキュメントを格納し、新たにドキュメ
+ントを追加でき、``この単語リストを含むドキュメントの名前を教えて''といっ
+たクエリを行うメソッドを提供します。DBIx::FullTextSearch のインデクス
+は、文書自身は格納しません。代わりに、ドキュメント内の単語についての情
+報を構造化して保持し、特定の単語を含んだドキュメントを検索して、ドキュ
+メント名を返すことを高速に行えるようにしています。
 
 <P>
 DBIx::FullTextSearch provides a couple of predefined frontend classes that
@@ -163,9 +163,9 @@ specify various types of documents (and the way they relate to their
 names).
 
 <P>
-DBIx::FullTextSearch ������ѤߤΥե���ȥ���ɥ��饹�򤤤��Ĥ��󶡤�
-�Ƥ��ꡢ���줾��˥ɥ�����ȥ�����(�Ȥ��줬�ɤΤ褦��̾���ȴ�Ϣ�Ť�
-�Ƥ��뤫)�����ꤵ��Ƥ��ޤ���
+DBIx::FullTextSearch は定義済みのフロントエンドクラスをいくつか提供し
+ており、それぞれにドキュメントタイプ(とそれがどのように名前と関連づい
+ているか)が指定されています。
 
 <DL>
 <DT><STRONG><A NAME="item_default">default</A></STRONG><DD>
@@ -174,8 +174,8 @@ By default, user specifies the integer number of the document and the
 content (body) of the document. The code would for example read
 
 <P>
-�ǥե���ȤǤϡ��桼���ϥɥ�����ȥʥ�С��ȥɥ�����Ȥ����(�ܥǥ�)
-����ꤷ�ޤ���
+デフォルトでは、ユーザはドキュメントナンバーとドキュメントの中身(ボディ)
+を指定します。
 
 <P>
 <PRE>        $fts-&gt;index_document(53, 'zastavujeme vyplaty vkladu');
@@ -186,9 +186,9 @@ words. When looking for all documents containing word (string) vklad, a
 call
 
 <P>
-�Τ褦�ʥ����ɤ���ˤ���ȡ�DBIx::FullTextSearch �ϥɥ������53��3��
-��ñ���ޤ�Ǥ��뤳�Ȥ�Ф��Ƥ����ޤ���ñ��(ʸ����) vklad ��ޤह��
-�ƤΥɥ�����Ȥ򸡺�����ݤˤϡ�
+のようなコードを例にすると、DBIx::FullTextSearch はドキュメント53は3つ
+の単語を含んでいることを覚えておきます。単語(文字列) vklad を含むすべ
+てのドキュメントを検索する際には、
 
 <P>
 <PRE>        my @docs = $fts-&gt;contains('vklad*');
@@ -198,8 +198,8 @@ would return numbers of all documents containing words starting with
 'vklad', 53 among them.
 
 <P>
-�Ȥ���ȡ�'vklad' ����Ϥ��ޤ�ñ���ޤह�٤ƤΥɥ�����ȥʥ�С���
-�����Ǥ� 53 ���֤��ޤ���
+とすると、'vklad' からはじまる単語を含むすべてのドキュメントナンバー、
+ここでは 53 を返します。
 
 <P>
 So here it's user's responsibility to maintain a relation between the
@@ -208,16 +208,16 @@ vklady. Perhaps the documents are already stored somewhere and have unique
 numeric id.
 
 <P>
-��äƤ����Ǥϥɥ�����ȥʥ�С�����ȤΥ�졼����󡢤Ĥޤ�ɥ����
-���53�� vklady �ˤĤ��ƤΤ�ΤǤ���ط�����ƥʥ󥹤���Τϥ桼����
-��Ǥ�Ǥ����ɥ�����ȤϤ��Ǥ�¾�ξ��ǳ�Ǽ���졢��ˡ����ʿ��ͤ�ID��
-���äƤ���褦�ʾ��Ǥ���
+よってここではドキュメントナンバーと中身のリレーション、つまりドキュメ
+ント53が vklady についてのものである関係をメンテナンスするのはユーザの
+責任です。ドキュメントはすでに他の場所で格納され、ユニークな数値のIDを
+持っているような場合です。
 
 <P>
 Note that the numeric id must be no larger than 2^<A HREF="#item_doc_id_bits">doc_id_bits</A>.
 
 <P>
-����ID�� 2^<A HREF="#item_doc_id_bits">doc_id_bits</A> ����礭���ƤϤ����ʤ����Ȥ����դ��Ƥ���������
+数値IDは 2^<A HREF="#item_doc_id_bits">doc_id_bits</A> より大きくてはいけないことに注意してください。
 
 <DT><STRONG><A NAME="item_string">string</A></STRONG><DD>
 <P>
@@ -226,9 +226,9 @@ of numbers. Still the user has to specify both the name of the document and
 the content:
 
 <P>
-�ե���ȥ���� <STRONG>string</STRONG> ��Ȥ��ȡ��桼���ϥɥ�����Ȥ�̾������ͤ�
-�Ϥʤ���ʸ����ǻ��ꤹ�뤳�Ȥ��Ǥ��ޤ��������Ǥ�桼���ϥɥ������̾
-����Ȥ���ꤹ��ɬ�פ�����ޤ���
+フロントエンド <STRONG>string</STRONG> を使うと、ユーザはドキュメントの名前を数値で
+はなく、文字列で指定することができます。ここでもユーザはドキュメント名
+と中身を指定する必要があります。
 
 <P>
 <PRE>        $fts-&gt;index_document('foobar',
@@ -238,7 +238,7 @@ the content:
 After that,
 
 <P>
-���������顢
+そうしたら、
 
 <P>
 <PRE>        $fts-&gt;contains('dog')
@@ -248,7 +248,7 @@ will return 'foobar' as one of the names of documents with word 'dog' in
 it.
 
 <P>
-�� 'dog' ��ޤ�ɥ�����Ȥ�̾���Ȥ��� 'foobar' ���֤��ޤ���
+は 'dog' を含むドキュメントの名前として 'foobar' を返します。
 
 <DT><STRONG><A NAME="item_file">file</A></STRONG><DD>
 <P>
@@ -258,11 +258,11 @@ needed -- the content of the file is read by the DBIx::FullTextSearch
 transparently:
 
 <P>
-�ե�����򥤥�ǥ�������ˤϡ��ե���ȥ���� <STRONG>file</STRONG> ��Ȥ��ޤ�������
-�Ǥϥɥ�����Ȥ���Ȥ����餫�˥ե�����̾�ˤ�äƻ��ꤵ���ե������
-��ȤǤ����顢index_document ��Ƥֺݤˤ�̾����������ɬ�פ���ޤ���
-�ե��������Ȥ��ɤ߹��ߤ� DBIx::FullTextSearch �ˤ�ä�Ʃ��Ū�˹Ԥ��
-�ޤ���
+ファイルをインデクスするには、フロントエンド <STRONG>file</STRONG> を使います。ここ
+ではドキュメントの中身は明らかにファイル名によって指定されるファイルの
+中身ですから、index_document を呼ぶ際には名前だけしか必要ありません。
+ファイルの中身の読み込みは DBIx::FullTextSearch によって透過的に行われ
+ます。
 
 <P>
 <PRE>        $fts-&gt;index_document('/usr/doc/FAQ/Linux-FAQ');
@@ -273,7 +273,7 @@ transparently:
 Web document can be indexed by the frontend <STRONG>url</STRONG>. DBIx::FullTextSearch uses <EM>LWP</EM> to get the document and then parses it normally:
 
 <P>
-�ե���ȥ���� <STRONG>url</STRONG> �ǥ�����ʸ��Υ���ǥ������Ԥ��ޤ��� DBIx::FullTextSearch �� <EM>LWP</EM> ��Ȥäƥɥ�����Ȥ���������̾��̤� �ѡ������ޤ�:
+フロントエンド <STRONG>url</STRONG> でウェブ文書のインデクスが行えます。 DBIx::FullTextSearch は <EM>LWP</EM> を使ってドキュメントを取得し、通常通り パースします:
 
 <P>
 <PRE>        $fts-&gt;index_document('<A HREF="http://www.perl.com/">http://www.perl.com/</A>');
@@ -282,7 +282,7 @@ Web document can be indexed by the frontend <STRONG>url</STRONG>. DBIx::FullText
 Note that the HTML tags themselves are indexed along with the text.
 
 <P>
-HTML ������ƥ�����Ʊ�ͤ˥���ǥ�������뤳�Ȥ����դ��Ƥ���������
+HTML タグもテキスト同様にインデクスされることに注意してください。
 
 <DT><STRONG><A NAME="item_table">table</A></STRONG><DD>
 <P>
@@ -292,9 +292,9 @@ in MySQL table. Since MySQL doesn't support triggers, you have to call the
 the sequence probably will be
 
 <P>
-DBIx::FullTextSearch ��Ȥä� MySQL �ơ��֥�� char ���뤤�� blob ��
-�ե�����ɤ˥���ǥ�����Ϥ뤳�Ȥ��Ǥ��ޤ���MySQL �ϥȥꥬ�򥵥ݡ��Ȥ�
-�Ƥ��ʤ����ᡢDBIx::FullTextSearch �� <A HREF="#item_index_document">index_document</A> �᥽�åɤ�ơ� �֥뤬�ѹ������٤˸ƤӽФ�ɬ�פ�����ޤ�������Ȥ��Ƥϡ�
+DBIx::FullTextSearch を使って MySQL テーブルの char あるいは blob の
+フィールドにインデクスをはることができます。MySQL はトリガをサポートし
+ていないため、DBIx::FullTextSearch の <A HREF="#item_index_document">index_document</A> メソッドをテー ブルが変更する度に呼び出す必要があります。順序としては、
 
 <P>
 <PRE>        $dbh-&gt;do('insert into the_table (id, data, other_fields)
@@ -302,7 +302,7 @@ DBIx::FullTextSearch ��Ȥä� MySQL �ơ��֥�� char ���뤤�� blob ��
         $fts-&gt;index_document($name);
 </PRE>
 <P>
-�Τ褦�ˤʤ�Ǥ��礦��
+のようになるでしょう。
 
 <P>
 When calling <A HREF="#item_contains">contains</A>, the id (name) of the record will be returned. If the id in the_table is
@@ -310,9 +310,9 @@ numeric, it's directly used as the internal numeric id, otherwise a
 string's way of converting the id to numeric form is used.
 
 <P>
-<A HREF="#item_contains">contains</A> ��Ƥ֤ȡ��쥳���ɤ� id (̾��) ���֤�ޤ���the_table �� id
-�����ͤʤ顢�����ο���id �Ȥ��Ƥ��Τޤ޻��ѤǤ��ޤ����������Ǥʤ����
-string ��Ʊ�ͤ���ˡ�� id ������ͤ��Ѵ�����ޤ���
+<A HREF="#item_contains">contains</A> を呼ぶと、レコードの id (名前) が返ります。the_table の id
+が数値なら、内部の数値id としてそのまま使用できますし、そうでなければ
+string と同様の方法で id から数値に変換されます。
 
 <P>
 When creating this index, you'll have to pass it three additionial options,
@@ -320,10 +320,10 @@ When creating this index, you'll have to pass it three additionial options,
 specified columns.
 
 <P>
-���Υ���ǥ�����Ĥ���ݤˤϡ�3�ĤΥ��ץ���� <A HREF="#item_table_name">table_name</A>,
-<A HREF="#item_column_name">column_name</A>, <A HREF="#item_column_id_name">column_id_name</A> ����ꤹ��ɬ�פ�����ޤ������ץ����
-�Ȥ��ơ����ꤵ�줿�����Υǡ���������������Ԥ������ column_process
-���ץ������Ѱդ���Ƥ��ޤ���
+このインデクスをつくる際には、3つのオプション <A HREF="#item_table_name">table_name</A>,
+<A HREF="#item_column_name">column_name</A>, <A HREF="#item_column_id_name">column_id_name</A> を指定する必要があります。オプション
+として、指定されたカラムのデータに整形処理を行うための column_process
+オプションも用意されています。
 
 </DL>
 <P>
@@ -331,25 +331,25 @@ The structure of DBIx::FullTextSearch is very flexible and adding new
 frontend (what will be indexed) is very easy.
 
 <P>
-DBIx::FullTextSearch �ι�¤�ϤȤƤ�ե쥭���֥�ʤΤǡ������ʥե����
-�����(�ʤˤ�����ǥ�������뤫)���ɲä���ΤϤȤƤ��ñ�Ǥ���
+DBIx::FullTextSearch の構造はとてもフレキシブルなので、新たなフロント
+エンド(なにがインデクスされるか)を追加するのはとても簡単です。
 
 <P>
 <HR>
 <H2><A NAME="Backends">Backends</A></H2>
 <P>
 <HR>
-<H2><A NAME="_">�Хå������</A></H2>
+<H2><A NAME="_">バックエンド</A></H2>
 <P>
 While frontend specifies what is indexed and how the user sees the
 collection of documents, backend is about low level database way of
 actually storing the information in the tables. Three types are available:
 
 <P>
-�ե���ȥ���ɤ��ʤˤ򥤥�ǥ������뤫���ޤ��桼�����ɥ�����Ȥν���
-��ɤΤ褦�˰���������ꤹ��Τ��Ф����Хå�����ɤϥ�����٥�Ǽºݤ�
-�ɤΤ褦�˥ơ��֥�ؾ�����Ǽ���뤫��������ޤ���3�ĤΥ����פ����Ѳ�
-ǽ�Ǥ���
+フロントエンドがなにをインデクスするか、またユーザがドキュメントの集合
+をどのように扱うかを指定するのに対し、バックエンドはローレベルで実際に
+どのようにテーブルへ情報を格納するかを定義します。3つのタイプが利用可
+能です。
 
 <DL>
 <DT><STRONG><A NAME="item_blob">blob</A></STRONG><DD>
@@ -364,12 +364,12 @@ table, without any direct database access. Updating a document (or merely
 reindexing it) requires update of all blobs, which is slow.
 
 <P>
-��ñ��ˤĤ��ơ�blob �Ϥ���ñ���ޤह�٤ƤΥɥ�����ȤΥꥹ�Ȥ�
-�ɥ�����ȥʥ�С��Ƚи�����ȤȤ�˥ơ��֥���ݻ����ޤ������ȥ졼��
-�ϤȤƤ⥳��ѥ��Ȥˤʤ�ޤ����ɥ������̾(���Ȥ���URL)�������ǿ���
-���Ѵ������Τǡ��ǡ����γ�Ǽ������Ϲ�®�Ǥ������������ɥ�����Ȥ�
-����(���뤤��ñ�ʤ�ƥ���ǥ���)�Ϥ��٤Ƥ� blob �򹹿�����ɬ�פ����ꡢ
-�٤��Ǥ���
+各単語について、blob はその単語を含むすべてのドキュメントのリストを、
+ドキュメントナンバーと出現回数とともにテーブルに保持します。ストレージ
+はとてもコンパクトになります。ドキュメント名(たとえばURL)は内部で数値
+に変換されるので、データの格納や取得は高速です。しかし、ドキュメントの
+更新(あるいは単なる再インデクス)はすべての blob を更新する必要があり、
+遅いです。
 
 <P>
 The list of documents is stored sorted by document name so that fetching an
@@ -378,10 +378,10 @@ to update (or at least scan) all records in the table makes this storage
 unsuitable for collections of documents that often change.
 
 <P>
-�ɥ�����ȤΥꥹ�Ȥϥɥ������̾�ǥ����Ȥ��졢1�Ĥ�ñ��Υɥ����
-��Ȥξ�����������Τ����Ū�ưפˤʤäƤ��ޤ������ơ��֥�����쥳��
-�ɤ򹹿� (���뤤�ϥ������) ����ɬ�פ����뤿�ᡢ���ˤ˹��������ɥ���
-���ȥ��쥯�����ˤϤ��γ�Ǽ��ˡ�ϸ����Ƥ��ʤ��Ǥ��礦��
+ドキュメントのリストはドキュメント名でソートされ、1つの単語のドキュメ
+ントの情報を取得するのは比較的容易になっていますが、テーブルの全レコー
+ドを更新 (あるいはスキャン) する必要があるため、頻繁に更新されるドキュ
+メントコレクションにはこの格納方法は向いていないでしょう。
 
 <DT><STRONG><A NAME="item_column">column</A></STRONG><DD>
 <P>
@@ -391,10 +391,10 @@ describing one document and insert new ones. However, the database indexes
 that have to be maintained are large.
 
 <P>
-<STRONG>column</STRONG> �Хå�����ɤϥǡ����١����Υե�����ɤ�ñ��/�ɥ�����Ȥ�
-�ڥ����Ǽ����ξ���򥤥�ǥ�������Τǡ������⹹�����®�ˤʤäƤ��ޤ���
-�Ĥޤꡢ����ɥ�����Ȥ˴ؤ���쥳���ɤ򤹤٤ƺ�������ꡢ�������ɲ�
-�����ꤹ��Τϴ�ñ�Ǥ��������������ƥʥ󥹤���ơ��֥���礭���ʤ�� ����
+<STRONG>column</STRONG> バックエンドはデータベースのフィールドに単語/ドキュメントの
+ペアを格納し、両方をインデクスするので、取得も更新も高速になっています。
+つまり、あるドキュメントに関するレコードをすべて削除したり、新たに追加
+したりするのは簡単です。しかし、メンテナンスするテーブルは大きくなりま す。
 
 <P>
 Both <STRONG>blob</STRONG> and <STRONG>column</STRONG> backends only store a count -- number of occurencies of the word in the
@@ -402,25 +402,25 @@ document (and even this can be switched off, yielding just a yes/no
 information about the word's presence). This allows questions like
 
 <P>
-<STRONG>blob</STRONG> �� <STRONG>cokumn</STRONG> �ϤȤ�˥�����ȡ��Ĥޤ�ɥ���������ñ��ν�
-�����������¸���ޤ���(�ޤ�����򥪥դˤ��ơ�ñ�줬�и����뤫�ݤ��ξ�
-������ˤ��뤳�Ȥ�Ǥ��ޤ�)����äưʲ��Τ褦�ʥ�����
+<STRONG>blob</STRONG> と <STRONG>cokumn</STRONG> はともにカウント、つまりドキュメント内の単語の出
+現回数しか保存しません(またこれをオフにして、単語が出現するか否かの情
+報だけにすることもできます)。よって以下のようなクエリ
 
 <P>
 <PRE>        all documents containing words 'voda' or 'Mattoni'
                 but not a word 'kyselka'
 </PRE>
 <P>
-<PRE>        'voda' �� 'Mattoni' ��ޤब 'kyselka' ��ޤޤʤ��ɥ������
+<PRE>        'voda' か 'Mattoni' を含むが 'kyselka' を含まないドキュメント
 </PRE>
 <P>
 but you cannot ask whether a document contains a phrase 'kyselka Mattoni'
 because such information is not maintained by these types of backends.
 
 <P>
-��¹ԤǤ��ޤ���������ɥ�����Ȥ� 'kyselka Mattoni' �Ȥ����ե졼��
-��ޤ�Ǥ��뤫�ɤ������Τ뤳�ȤϤǤ��ޤ��󡣤�����������Ϥ����ΥХ�
-������ɤǤϥ��ƥʥ󥹤���Ƥ��ʤ�����Ǥ���
+を実行できますが、あるドキュメントが 'kyselka Mattoni' というフレーズ
+を含んでいるかどうかを知ることはできません。そうした情報はこれらのバッ
+クエンドではメンテナンスされていないためです。
 
 <DT><STRONG><A NAME="item_phrase">phrase</A></STRONG><DD>
 <P>
@@ -428,9 +428,9 @@ To allow phrase matching, a <STRONG>phrase</STRONG> backend is available. For ea
 lists of positions of the word in the document. A query
 
 <P>
-�ե졼���ޥå��󥰤�¸�����Τˡ�<STRONG>phrase</STRONG> �Хå�����ɤ����ѤǤ��ޤ���
-ñ��ȥɥ�����ȥʥ�С����Ȥˡ��ɥ��������νи��Ľ�Υꥹ�Ȥ� blob
-����¸���ޤ���
+フレーズマッチングを実現するのに、<STRONG>phrase</STRONG> バックエンドを利用できます。
+単語とドキュメントナンバーごとに、ドキュメント内の出現個所のリストを blob
+で保存します。
 
 <P>
 <PRE>        $fts-&gt;contains('kyselk* Mattoni');
@@ -440,8 +440,8 @@ then only returns those documents (document names/numbers) where word
 kyselka (or kyselky, or so) is just before word Mattoni.
 
 <P>
-�Ȥ���������ϡ�ñ�� kyselka (���뤤�� kyselky �ʤ�) ��ñ�� Mattoni ��
-ľ���ˤ���ɥ������ (�ɥ������̾/�ʥ�С�) �����֤��ޤ���
+というクエリは、単語 kyselka (あるいは kyselky など) が単語 Mattoni の
+直前にあるドキュメント (ドキュメント名/ナンバー) しか返しません。
 
 </DL>
 <P>
@@ -449,7 +449,7 @@ kyselka (or kyselky, or so) is just before word Mattoni.
 <H2><A NAME="Mixing_frontends_and_backends">Mixing frontends and backends</A></H2>
 <P>
 <HR>
-<H2><A NAME="_">�ե���ȥ���ɤȥХå�����ɤ�ͻ��</A></H2>
+<H2><A NAME="_">フロントエンドとバックエンドの融合</A></H2>
 <P>
 Any frontend can be used with any backend in one DBIx::FullTextSearch
 index. You can index Web documents with <A HREF="#item_url">url</A> frontend and <A HREF="#item_phrase">phrase</A> backend to be able to find phrases in the documents. And you can use the
@@ -458,12 +458,12 @@ for example for mailing-list archives, where we need to index huge number
 of documents that do not change at all.
 
 <P>
-�ҤȤĤ� DBIx::FullTextSearch ����ǥ����ǡ�Ǥ�դΥե���ȥ���ɤȥХ�
-������ɤ���ѤǤ��ޤ����ե���ȥ���� <A HREF="#item_url">url</A> �� Web ʸ��򥤥�ǥ��� ���ơ�<A HREF="#item_phrase">phrase</A> �Хå�����ɤǥɥ��������Υե졼���򸡺���Ȥ�����
-���Ǥ����ǥե���Ȥˤ���С��ʥ�С��١����Υɥ�����ȥ�������ȡ�
-<A HREF="#item_blob">blob</A> �Хå�����ɤˤ�äƥǥ��������ڡ�����ʤ�٤���ΨŪ�˻Ȥ��ޤ���
-���Ȥ��Х᡼��󥰥ꥹ�ȤΥ��������֤Τ褦�ˡ����ޤ��Ѳ����ʤ�����ʿ�
-�Υɥ�����Ȥ򥤥�ǥ�������ɬ�פ�����Ȥ��ˤ������Ǥ��礦��
+ひとつの DBIx::FullTextSearch インデクスで、任意のフロントエンドとバッ
+クエンドを使用できます。フロントエンド <A HREF="#item_url">url</A> で Web 文書をインデクス して、<A HREF="#item_phrase">phrase</A> バックエンドでドキュメント内のフレーズを検索るというわ
+けです。デフォルトにすれば、ナンバーベースのドキュメントスキームと、
+<A HREF="#item_blob">blob</A> バックエンドによってディスクスペースをなるべく効率的に使えます。
+たとえばメーリングリストのアーカイブのように、あまり変化しない膨大な数
+のドキュメントをインデクスする必要があるときには便利でしょう。
 
 <P>
 Finding optimal combination is very important and may require some analysis
@@ -472,10 +472,10 @@ storage requirements. Benchmarking on actual target platform is very useful
 during the design phase.
 
 <P>
-��Ŭ���ȹ礻���դ���ΤϤȤƤ���פǤ������ɥ�����ȤΥ��쥯�����
-�����ˤĤ��Ƥ�ʬ�Ϥ䡢®�٤䥹�ȥ졼���˴ؤ����׷��ɬ�פȤ��ޤ�����
-�ץե������ˤ����ƼºݤΥץ�åȥե������ǥ٥���ޡ����򤷤Ƥߤ����
-��ͭ�פǤ���
+最適な組合せを見付けるのはとても重要ですが、ドキュメントのコレクション
+と操作についての分析や、速度やストレージに関する要件を必要とします。設
+計フェーズにおいて実際のプラットフォーム上でベンチマークをしてみると大
+変有益です。
 
 <P>
 <HR>
@@ -486,7 +486,7 @@ DBIx::FullTextSearch API.
 
 <P>
 DBIx::FullTextSearch API
-�Ȥ��ơ��ʲ��Υ᥽�åɤ��桼�������ɤ����Ѳ�ǽ�Ǥ���
+として、以下のメソッドがユーザサイドで利用可能です。
 
 <DL>
 <DT><STRONG><A NAME="item_create">create</A></STRONG><DD>
@@ -502,12 +502,12 @@ for what values), etc. See below for list of create options and discussion
 of their use.
 
 <P>
-���饹�᥽�å� <A HREF="#item_create">create</A> �ϡ����ꤷ��̾��(����ǥ�����̾���ϥ١����Ȥ�
-��ѥ�᡼���ơ��֥��̾���Ǥ�)�Υ���ǥ�����ɬ�פʥơ��֥�򤹤٤ƺ�
-���������֥������ȡ��Ĥޤ꿷�������줿����ǥ������֤��ޤ�������ǥ�
-��̾�θ�˻��ꤵ��륪�ץ����ϡ��ե���ȥ���ɤȥХå�����ɤΥ����ס�
-���ȥ졼���Υѥ�᡼�� (�ͤ��ȤΥӥåȿ�) �ʤɤ�������ޤ���create ��
-���ץ����ꥹ�Ȥ䤽�λ�����ˡ�ˤĤ��Ƥϡ��ʲ��򻲾Ȥ��Ƥ���������
+クラスメソッド <A HREF="#item_create">create</A> は、指定した名前(インデクスの名前はベースとな
+るパラメータテーブルの名前です)のインデクスと必要なテーブルをすべて作
+成し、オブジェクト、つまり新しく作られたインデクスを返します。インデク
+ス名の後に指定されるオプションは、フロントエンドとバックエンドのタイプ、
+ストレージのパラメータ (値ごとのビット数) などを定義します。create の
+オプションリストやその使用方法については、以下を参照してください。
 
 <DT><STRONG><A NAME="item_open">open</A></STRONG><DD>
 <P>
@@ -519,10 +519,10 @@ Since all the index parameters and information are stored in the <CODE>$index_na
 and the name of the parameter table are the only needed arguments.
 
 <P>
-���ꤵ�줿 DBIx::FullTextSearch �Υ��֥������Ȥ��֤��ޤ�������ǥ�����
-�ѥ�᡼���Ϥ��٤�(¾��ɬ�פʥơ��֥�̾��ޤ�) <CODE>$index_name</CODE> �ơ��֥�
-����¸����Ƥ��ޤ��Τǡ��ǡ����١����ϥ�ɥ�ȥѥ�᡼���ơ��֥��̾��
-�Τߤ�ɬ�פǤ���
+指定された DBIx::FullTextSearch のオブジェクトを返します。インデクスの
+パラメータはすべて(他に必要なテーブル名も含め) <CODE>$index_name</CODE> テーブル
+に保存されていますので、データベースハンドラとパラメータテーブルの名前
+のみが必要です。
 
 <DT><STRONG><A NAME="item_index_document">index_document</A></STRONG><DD>
 <P>
@@ -537,11 +537,11 @@ document and its content. For <A HREF="#item_file">file</A>,
 appended to the content from the file, URL, or database table.
 
 <P>
-<A HREF="#item_default">default</A> �� <A HREF="#item_string">string</A> �ե���ȥ���ɤξ�硢2�Ĥΰ����������ޤ� -- �ɥ������̾
-(���ͤ⤷����ʸ����) �Ȥ�����ȤǤ���<A HREF="#item_file">file</A>,
-<A HREF="#item_url">url</A>, <A HREF="#item_table">table</A> �ե���ȥ���ɤξ�����ȤϾ�ά��ǽ�Ǥ�����Ȥ򲿤�
-�Ϥ��ȡ����Υե����롢URL���ǡ����١����ơ��֥뤫�����������Ȥ˥���
-��ɤ���ޤ���
+<A HREF="#item_default">default</A> と <A HREF="#item_string">string</A> フロントエンドの場合、2つの引数が求められます -- ドキュメント名
+(数値もしくは文字列) とその中身です。<A HREF="#item_file">file</A>,
+<A HREF="#item_url">url</A>, <A HREF="#item_table">table</A> フロントエンドの場合は中身は省略可能です。中身を何か
+渡すと、そのファイル、URL、データベーステーブルから取得した中身にアペ
+ンドされます。
 
 <DT><STRONG><A NAME="item_delete_document">delete_document</A></STRONG><DD>
 <P>
@@ -552,8 +552,8 @@ Removes information about document from the index. Note that for <A HREF="#item_
 backend this is very time consuming process.
 
 <P>
-����ǥ�������ɥ�����Ȥ˴ؤ������������ޤ���<A HREF="#item_blob">blob</A> �Хå�����
-�ɤξ�礳������˻��֤�������ץ������Ǥ��뤳�Ȥ����դ��Ƥ���������
+インデクスからドキュメントに関する情報を削除します。<A HREF="#item_blob">blob</A> バックエン
+ドの場合これは非常に時間がかかるプロセスであることに注意してください。
 
 <DT><STRONG><A NAME="item_contains">contains</A></STRONG><DD>
 <P>
@@ -564,8 +564,8 @@ Returns list of names (numbers or strings, depending on the frontend) of
 documents that contain some of specified words.
 
 <P>
-���ꤵ�줿ñ��Τ����Ĥ���ޤ�ɥ������̾�Υꥹ�� (�ե���ȥ���ɼ�
-��ǡ����ͤ⤷����ʸ����Ȥʤ�)���֤��ޤ���
+指定された単語のいくつかを含むドキュメント名のリスト (フロントエンド次
+第で、数値もしくは文字列となる)を返します。
 
 <DT><STRONG><A NAME="item_econtains">econtains</A></STRONG><DD>
 <P>
@@ -577,9 +577,9 @@ plus or minus signs to specify that the word must or mustn't be present in
 the document for it to match.
 
 <P>
-econatins �� extended contains ���̣�����ץ饹��ޥ��ʥ�����Ƭ�ˤĤ�
-�뤳�Ȥˤ�äơ��ޥå����٤��ɥ�����Ȥ��Ǥ�ñ�줬�и����뤫���ʤ���
-�����Ǥ��ޤ���
+econatins は extended contains を意味し、プラスやマイナスを先頭につけ
+ることによって、マッチすべきドキュメントに素の単語が出現するかしないか
+を指定できます。
 
 <DT><STRONG><A NAME="item_search">search</A></STRONG><DD>
 <P>
@@ -590,8 +590,8 @@ This is a wrapper to econtains which takes a user input string and parses
 it into can-include, must-include, and must-not-include words and phrases.
 
 <P>
-econtains �ؤΥ�åѤǡ��桼��������ʸ����������äơ��ޤ�Ǥ�褤/
-�ޤޤʤ��ƤϤʤ�ʤ�/�ޤ�ǤϤʤ�ʤ�ñ��ȥե졼���˥ѡ������ޤ���
+econtains へのラッパで、ユーザの入力文字列を受け取って、含んでもよい/
+含まなくてはならない/含んではならない単語とフレーズにパースします。
 
 <DT><STRONG><A NAME="item_contains_hashref">contains_hashref, econtains_hashref, search_hashref</A></STRONG><DD>
 <P>
@@ -600,9 +600,9 @@ reference to a hash where keys are the document names and values are the
 number of occurencies of the words.
 
 <P>
-<A HREF="#item_contains">contains</A>, <A HREF="#item_econtains">econtains</A>, <A HREF="#item_search">search</A> �˻��Ƥ��ޤ������ɥ������̾��
-�ꥹ�ȤǤϤʤ����������ɥ������̾���ͤ�ñ��Υɥ��������и����
-�Ȥʤ�ϥå����ե���󥹤Υꥹ�Ȥ��֤��ޤ���
+<A HREF="#item_contains">contains</A>, <A HREF="#item_econtains">econtains</A>, <A HREF="#item_search">search</A> に似ていますが、ドキュメント名の
+リストではなく、キーがドキュメント名で値が単語のドキュメント内出現回数
+となるハッシュリファレンスのリストを返します。
 
 <DT><STRONG><A NAME="item_drop">drop</A></STRONG><DD>
 <P>
@@ -610,8 +610,8 @@ Removes all tables associated with the index, including the base parameter
 table. Effectivelly destroying the index form the database.
 
 <P>
-����ǥ����˴�Ϣ����ơ��֥�򡢥١����ѥ�᡼���ơ��֥��ޤᡢ���٤�
-������ޤ����ǡ����١������饤��ǥ������ΨŪ�˺���Ǥ��ޤ���
+インデクスに関連するテーブルを、ベースパラメータテーブルを含め、すべて
+削除します。データベースからインデクスを効率的に削除できます。
 
 <P>
 <PRE> $fts-&gt;drop;
@@ -621,7 +621,7 @@ table. Effectivelly destroying the index form the database.
 Emptys the index so you can reindex the data.
 
 <P>
-����ǥ�������ˤ��ƥǡ�����ƥ���ǥ����Ǥ���褦�ˤ��ޤ���
+インデクスを空にしてデータを再インデクスできるようにします。
 
 <P>
 <PRE> $fts-&gt;empty;
@@ -635,8 +635,8 @@ Here we list the options that may be passed to <A HREF="#item_create">create</A>
 detail.
 
 <P>
-<A HREF="#item_create">create</A> �᥽�åɤ��Ϥ����ץ����Υꥹ�ȤǤ�����������䥹�ȥ졼����
-�ѥ�᡼����٤������ꤹ�뤳�Ȥ��Ǥ��ޤ���
+<A HREF="#item_create">create</A> メソッドに渡すオプションのリストです。スタイルやストレージの
+パラメータを細かく指定することができます。
 
 <DL>
 <DT><STRONG><A NAME="item_backend">backend</A></STRONG><DD>
@@ -645,8 +645,8 @@ The backend type, default <A HREF="#item_blob">blob</A>, possible values <A HREF
 (see above for explanation).
 
 <P>
-�Хå�����ɤΥ����ס��ǥե���Ȥ� <A HREF="#item_blob">blob</A> �ǡ��Ȥꤦ���ͤ� <A HREF="#item_blob">blob</A>,
-<A HREF="#item_column">column</A>, <A HREF="#item_phrase">phrase</A> (�ܺ٤������Ͼ�������)
+バックエンドのタイプ。デフォルトは <A HREF="#item_blob">blob</A> で、とりうる値は <A HREF="#item_blob">blob</A>,
+<A HREF="#item_column">column</A>, <A HREF="#item_phrase">phrase</A> (詳細な説明は上部参照)
 
 <DT><STRONG><A NAME="item_frontend">frontend</A></STRONG><DD>
 <P>
@@ -654,16 +654,16 @@ The frontend type. The <A HREF="#item_default">default</A> frontend requires the
 with the content of the document, other possible values are <A HREF="#item_string">string</A>, <A HREF="#item_file">file</A> and <A HREF="#item_url">url</A> (see above for more info).
 
 <P>
-�ե���ȥ���ɤΥ����ס�<A HREF="#item_default">default</A> �ե���ȥ���ɤϥ桼�����ɥ����� �Ȥο��� id
-����Ȥ���ꤹ��ɬ�פ����롣�ۤ��ˤȤꤦ���ͤ� <A HREF="#item_string">string</A>,
-<A HREF="#item_file">file</A>, <A HREF="#item_url">url</A>, <A HREF="#item_table">table</A> (�ܺ٤������Ͼ嵭����)��
+フロントエンドのタイプ。<A HREF="#item_default">default</A> フロントエンドはユーザがドキュメン トの数値 id
+と中身を指定する必要がある。ほかにとりうる値は <A HREF="#item_string">string</A>,
+<A HREF="#item_file">file</A>, <A HREF="#item_url">url</A>, <A HREF="#item_table">table</A> (詳細な説明は上記参照)。
 
 <DT><STRONG><A NAME="item_word_length">word_length</A></STRONG><DD>
 <P>
 Maximum length of words that may be indexed, default 30.
 
 <P>
-����ǥ��������ñ��κ���Ĺ���ǥե���Ȥ� 30��
+インデクスされる単語の最大長。デフォルトは 30。
 
 <DT><STRONG><A NAME="item_data_table">data_table</A></STRONG><DD>
 <P>
@@ -672,8 +672,8 @@ stored. By default, the name of the index (of the base table) with _data
 suffix is used.
 
 <P>
-�ºݤ�ñ��/�ɥ�����ȥ�졼�������Ǽ����ơ��֥�̾���ǥե���Ȥ�
-�ϡ�����ǥ���̾ (�١����ơ��֥�̾) �θ���� _data �򤯤äĤ�����Ρ�
+実際の単語/ドキュメントリレーションを格納するテーブル名。デフォルトで
+は、インデクス名 (ベーステーブル名) の後ろに _data をくっつけたもの。
 
 <DT><STRONG><A NAME="item_name_length">name_length</A></STRONG><DD>
 <P>
@@ -682,9 +682,9 @@ conversion table from these names to internal integer ids. This value
 specifies maximum length of these string names (URLs, file names, ...).
 
 <P>
-�ɥ������̾��ʸ�����Ȥ��ե���ȥ���ɤǤϡ�������̾������������ ��
-id �ؤ��Ѵ�ɽ����ƥʥ󥹤���ɬ�פ�����ޤ��������ͤϤ�������ʸ�� ��
-(URL, �ե�����̾) �κ���Ĺ����ꤷ�ޤ���
+ドキュメント名に文字列を使うフロントエンドでは、これらの名前から整数値 の
+id への変換表をメンテナンスする必要があります。この値はこうした文字 列
+(URL, ファイル名) の最大長を指定します。
 
 <DT><STRONG><A NAME="item_blob_direct_fetch">blob_direct_fetch</A></STRONG><DD>
 <P>
@@ -695,10 +695,10 @@ this value, all values are fetched from the database and the final search
 is done in Perl code sequentially.
 
 <P>
-<A HREF="#item_blob">blob</A> �Хå�����ɤΤߡ�blob ����¸�����ɥ�����ȥꥹ�ȤˤĤ��ƾ�
-��򸡺�����ݡ�blob �Хå�����ɤ� blob ����Ȥ򥤥󥿡��Х뤴�Ȥ�ʬ
-�䤷�Ƹ������ޤ������󥿡��Х뤬�����ͤ�꾮������硢���٤Ƥ��ͤ�ǡ�
-���١�������������ơ��ǽ�Ū�ʸ����� Perl �����ɤǹԤ��ޤ���
+<A HREF="#item_blob">blob</A> バックエンドのみ。blob で保存したドキュメントリストについて情
+報を検索する際、blob バックエンドは blob の中身をインターバルごとに分
+割して検索します。インターバルがこの値より小さい場合、すべての値をデー
+タベースから取得して、最終的な検索は Perl コードで行われます。
 
 <DT><STRONG><A NAME="item_word_id_bits">word_id_bits</A></STRONG><DD>
 <P>
@@ -709,19 +709,19 @@ number of distinct words that may be indexed. The default is 16 bits and
 possible values are 8, 16, 24 or 32 bits.
 
 <P>
-<A HREF="#item_column">column</A> �� <CODE>phase</CODE> �Хå�����ɤǤϡ�DBIx::FullTextSearch �ϥ��ڡ�
-������Τ���ˡ���ñ��˿��ͤ� id �������Ƥƥ��ƥʥ󥹤��Ƥ��ޤ���
-word_id_bits �ѥ�᡼���Ϥ����Ѵ�ɽ�ǻȤ��ӥåȿ�����ꤷ������ǥ���
-�ǵ��Ƥ����ñ����ΨŪ�����¤��뤳�Ȥ��Ǥ��ޤ����ǥե���Ȥ�16bit �ǡ�
-�Ȥꤦ���ͤ� 8, 16, 24, 32 �ӥåȤǤ���
+<A HREF="#item_column">column</A> や <CODE>phase</CODE> バックエンドでは、DBIx::FullTextSearch はスペー
+ス節約のために、各単語に数値の id を割り当ててメンテナンスしています。
+word_id_bits パラメータはこの変換表で使うビット数を指定し、インデクス
+で許容される単語を効率的に制限することができます。デフォルトは16bit で、
+とりうる値は 8, 16, 24, 32 ビットです。
 
 <DT><STRONG><A NAME="item_word_id_table">word_id_table</A></STRONG><DD>
 <P>
 Name of the table that holds conversion from words to their numeric id (for <A HREF="#item_column">column</A> and <A HREF="#item_phrase">phrase</A> backends). By default is the name of the index with _words suffix.
 
 <P>
-ñ�줫�����id�ؤ��Ѵ�ɽ���ݻ�����ơ��֥�̾(<A HREF="#item_column">column</A> �� <A HREF="#item_phrase">phrase</A> �Х� ������ɸ���)���ǥե���ȤǤϡ�����ǥ�����̾���θ���� _words ��Ĥ�
-����Ρ�
+単語から数値idへの変換表を保持するテーブル名(<A HREF="#item_column">column</A> と <A HREF="#item_phrase">phrase</A> バッ クエンド向け)。デフォルトでは、インデクスの名前の後ろに _words をつけ
+たもの。
 
 <DT><STRONG><A NAME="item_doc_id_bits">doc_id_bits</A></STRONG><DD>
 <P>
@@ -732,10 +732,10 @@ documents to hold. The default is 16 bits and possible values are 8, 16 and
 32 bits for <A HREF="#item_blob">blob</A> backend and 8, 16, 24 and 32 bits for <A HREF="#item_column">column</A> and <A HREF="#item_phrase">phrase</A> backends.
 
 <P>
-�ɥ�����Ȥο���id (�桼���ˤ�äƻ��ꤵ���(<A HREF="#item_default">default</A> �Хå������)
-�����⥸�塼��ˤ�äƥɥ�����Ȥ�ʸ����̾�����Ѵ���������������)
-���ݻ�����ӥåȿ��������ͤˤ�äơ��ݻ�����ɥ�����ȿ��κ����ͤ���
-�¤���ޤ����ǥե���ȤǤ� 16�ӥåȤǡ��Ȥꤦ���ͤ� <A HREF="#item_blob">blob</A> �Хå����� �ɤǤ� 8, 16, 32 bit, <A HREF="#item_column">column</A> �� <A HREF="#item_phrase">phrase</A> �Хå�����ɤǤ� 8, 16, 24, 32 bit �Ǥ���
+ドキュメントの数値id (ユーザによって指定される(<A HREF="#item_default">default</A> バックエンド)
+か、モジュールによってドキュメントの文字列名から変換されて生成される)
+を保持するビット数。この値によって、保持するドキュメント数の最大値が制
+限されます。デフォルトでは 16ビットで、とりうる値は <A HREF="#item_blob">blob</A> バックエン ドでは 8, 16, 32 bit, <A HREF="#item_column">column</A> と <A HREF="#item_phrase">phrase</A> バックエンドでは 8, 16, 24, 32 bit です。
 
 <DT><STRONG><A NAME="item_doc_id_table">doc_id_table</A></STRONG><DD>
 <P>
@@ -743,8 +743,8 @@ Name of the table that holds conversion from string names of documents to
 their numeric id, by default the name of the index with _docid suffix.
 
 <P>
-�ɥ�����Ȥ�ʸ����̾������� id �ؤ��Ѵ�ɽ���ݻ�����ơ��֥�̾���ǥե�
-��ȤǤϥ���ǥ�����̾���� _docid ��Ĥ�����Ρ�
+ドキュメントの文字列名から数値 id への変換表を保持するテーブル名。デフォ
+ルトではインデクスの名前に _docid をつけたもの。
 
 <DT><STRONG><A NAME="item_count_bits">count_bits</A></STRONG><DD>
 <P>
@@ -753,8 +753,8 @@ the document. The default is 8 and possible values are the same as with
 doc_id_bits.
 
 <P>
-�ɥ��������γ�ñ��νи�������¸���뤿��Υӥåȿ����ǥե���Ȥ� 8bit
-�ǡ��Ȥꤦ���ͤ� doc_id_bits ��Ʊ���Ǥ���
+ドキュメント内の各単語の出現数を保存するためのビット数。デフォルトは 8bit
+で、とりうる値は doc_id_bits と同じです。
 
 <DT><STRONG><A NAME="item_position_bits">position_bits</A></STRONG><DD>
 <P>
@@ -764,10 +764,10 @@ default is 32 bits and possible values are 8, 16 or 32 bits. This value
 limits the maximum number of words of each document that can be stored.
 
 <P>
-<CODE>phase</CODE> �Хå�����ɤǤϡ�DBIx::FullTextSearch �ϳ�ñ��Υɥ������
-��ΰ��֤���¸���ޤ��������ͤϡ�������Ū�Τ���˻��Ѥ��륹�ڡ��������
-���ޤ����ǥե���Ȥ� 32bit �ǡ��Ȥꤦ���ͤ� 8, 16, 32 �ӥåȤǤ�������
-�ͤˤ�äơ��ƥɥ�����Ȥ��ݻ��Ǥ���ñ��κ���������¤���ޤ���
+<CODE>phase</CODE> バックエンドでは、DBIx::FullTextSearch は各単語のドキュメント
+内の位置を保存します。この値は、この目的のために使用するスペースを指定
+します。デフォルトは 32bit で、とりうる値は 8, 16, 32 ビットです。この
+値によって、各ドキュメントが保持できる単語の最大数が制限されます。
 
 <DT><STRONG><A NAME="item_index_splitter">index_splitter</A></STRONG><DD>
 <P>
@@ -777,10 +777,10 @@ The code will be evalled inside of the DBIx::FullTextSearch code. The
 default is
 
 <P>
-DBIx::FullTextSearch �ϡ��ɥ�����ȤΥ���ǥ����󥰤κݡ��桼���λ�
-�ꤷ��Ǥ�դ�Perl �����ɤˤ�äƥɥ�����Ȥ���Ȥ�ñ���ʬ�䤹�뤳��
-���Ǥ��ޤ��������ɤ� DBIx::FullTextSearch �Υ�������� eval ����ޤ���
-�ǥե���Ȥ�
+DBIx::FullTextSearch は、ドキュメントのインデクシングの際、ユーザの指
+定した任意のPerl コードによってドキュメントの中身を単語に分割すること
+ができます。コードは DBIx::FullTextSearch のコード内で eval されます。
+デフォルトは
 
 <P>
 <PRE>        /(\w{2,$word_length})/g
@@ -790,17 +790,17 @@ and shows that the input is stored in the variable <CODE>$data</CODE> and the co
 perl_and_index_data_* methods (see source), especially <A HREF="#item__word_length">$word_length</A> to get the maximum length of words and <A HREF="#item__backend">$backend</A> to get the backend object.
 
 <P>
-�ǡ����Ϥ��ѿ� <CODE>$data</CODE> �˳�Ǽ����Ƥ��ơ������ɤ�¾�ˤ� perl_and_index_data_*
-�᥽�å�������Ѳ�ǽ���ѿ����ä� <A HREF="#item__word_length">$word_length</A> 
-��ñ��κ���Ĺ��<A HREF="#item__backend">$backend</A> �ǥХå�����ɥ��֥������Ȥ˥��������Ǥ���
-���Ȥ��Ǥ��ޤ�(�ܤ����ϥ������򸫤Ƥ�������)��
+で、入力は変数 <CODE>$data</CODE> に格納されていて、コードは他にも perl_and_index_data_*
+メソッド内で利用可能な変数、特に <A HREF="#item__word_length">$word_length</A> 
+で単語の最大長、<A HREF="#item__backend">$backend</A> でバックエンドオブジェクトにアクセスできる
+ことができます(詳しくはソースを見てください)。
 
 <P>
 The default value also shows that by default, the minimum length of words
 indexed is 2.
 
 <P>
-�ǥե�����ͤˤ��ȡ�����ǥ��������ñ���Ĺ���κǾ��ͤ� 2 �Ǥ���
+デフォルト値によると、インデクスされる単語の長さの最小値は 2 です。
 
 <DT><STRONG><A NAME="item_search_splitter">search_splitter</A></STRONG><DD>
 <P>
@@ -808,7 +808,7 @@ This is similar to the <A HREF="#item_index_splitter">index_splitter</A> method,
 default is
 
 <P>
-<A HREF="#item_index_splitter">index_splitter</A> �᥽�åɤ˻��Ƥ��ޤ������ɥ�����ȤΥ���ǥ����� �ǤϤʤ���<CODE>contains_hasherf</CODE> �᥽�åɤǥɥ�����Ȥ򸡺�����ݤ˻Ȥ� ��ޤ����ǥե���Ȥ�
+<A HREF="#item_index_splitter">index_splitter</A> メソッドに似ていますが、ドキュメントのインデクシング ではなく、<CODE>contains_hasherf</CODE> メソッドでドキュメントを検索する際に使わ れます。デフォルトは
 
 <P>
 <PRE>       /([a-zA-Z_0-9]{2,$word_length}\*?)/g
@@ -817,7 +817,7 @@ default is
 Which, unlike the default <A HREF="#item_index_splitter">index_splitter</A>, allows for the wild card character (*).
 
 <P>
-�ǡ��ǥե���Ȥ� <A HREF="#item_index_splitter">index_splitter</A> �Ȥ����äơ��磻��ɥ�����ʸ�� (*) �����Ѳ�ǽ�Ǥ���
+で、デフォルトの <A HREF="#item_index_splitter">index_splitter</A> とちがって、ワイルドカード文字 (*) が使用可能です。
 
 <DT><STRONG><A NAME="item_filter">filter</A></STRONG><DD>
 <P>
@@ -826,9 +826,9 @@ methods) are send to filter that may do further processing. Filter is again
 a Perl code, the default is
 
 <P>
-splitter �ˤ�äƽ��Ϥ��줿ñ�� (�ޤ� (e)contains* �᥽�åɤΤ��٤Ƥ�
-�ѥ�᡼��) �� filter ������졢��������ޤ���filter ��Ǥ�դ� Perl ����
-�ɤǡ��ǥե���Ȥ�
+splitter によって出力された単語 (また (e)contains* メソッドのすべての
+パラメータ) は filter に送られ、処理されます。filter も任意の Perl コー
+ドで、デフォルトは
 
 <P>
 <PRE>        map { lc $_ }
@@ -838,8 +838,8 @@ showing that the filter operates on input list and by default does
 conversion to lowercase (yielding case insensitive index).
 
 <P>
-�ǡ����ϤΥꥹ�Ȥ��Ф��ƥǥե���Ȥ� lowercase �Ѵ��򤫤��� (�Ĥޤ���
-ʸ����ʸ���򥤥�ǥ����Ƕ��̤��ʤ�) ���Ȥ��狼��ޤ���
+で、入力のリストに対してデフォルトで lowercase 変換をかける (つまり大
+文字小文字をインデクスで区別しない) ことがわかります。
 
 <DT><STRONG><A NAME="item_init_env">init_env</A></STRONG><DD>
 <P>
@@ -848,22 +848,22 @@ is reasonable to set before the actual procession of words, you can use yet
 another Perl hook to set things up. The default is
 
 <P>
-�桼������� splitter �� filter �ϡ��ºݤ�ñ����������˼¹Ԥ����٤�
-��Τ˰�¸���Ƥ��뤳�Ȥ��ͤ�����Τǡ����åȥ��å��Ѥ� Perl �եå���
-���ѤǤ��ޤ����ǥե���Ȥ�
+ユーザ定義の splitter や filter は、実際の単語処理の前に実行されるべき
+ものに依存していることが考えられるので、セットアップ用の Perl フックも
+利用できます。デフォルトは
 
 <P>
 <PRE>        use locale
 </PRE>
 <P>
-�Ǥ���
+です。
 
 <DT><STRONG><A NAME="item_stoplist">stoplist</A></STRONG><DD>
 <P>
 This is the name of a <A HREF="/DBIx/FullTextSearch/StopList.html">DBIx::FullTextSearch::StopList</A> object that is used for stop words.
 
 <P>
-���ȥåץ�ɤ˻Ȥ��� <A HREF="/DBIx/FullTextSearch/StopList.html">DBIx::FullTextSearch::StopList</A> ���֥����� �Ȥ�̾���Ǥ���
+ストップワードに使われる <A HREF="/DBIx/FullTextSearch/StopList.html">DBIx::FullTextSearch::StopList</A> オブジェク トの名前です。
 
 <DT><STRONG><A NAME="item_stemmer">stemmer</A></STRONG><DD>
 <P>
@@ -871,22 +871,22 @@ If this option is set, then word stemming will be enabled in the indexing
 and searching.
 
 <P>
-���Υ��ץ����򥻥åȤ���ȡ�����ǥ����󥰤ȸ����ˤ����ơ�ñ��Υ���
-�ߥ󥰤�ͭ���ˤʤ�ޤ���
+このオプションをセットすると、インデクシングと検索において、単語のステ
+ミングが有効になります。
 
 <P>
 The value is the name of a <A HREF="/Lingua/Stem.html">Lingua::Stem</A> recognized locale. Currently, 'en', 'en-us' and 'en-uk' are the only
 recognized locales. All locale identifiers are converted to lowercase. 
 
 <P>
-�ͤ� <A HREF="/Lingua/Stem.html">Lingua::Stem</A> ��ǧ���Ǥ��� locale ��̾���Ǥ���locale �Ϥ��٤ƾ� ʸ�����Ѵ�����ޤ���
+値は <A HREF="/Lingua/Stem.html">Lingua::Stem</A> が認識できる locale の名前です。locale はすべて小 文字に変換されます。
 
 <DT><STRONG><A NAME="item_table_name">table_name</A></STRONG><DD>
 <P>
 For <A HREF="#item_table">table</A> frontend; this is the name of the table that will be indexed.
 
 <P>
-<A HREF="#item_table">table</A> �ե���ȥ������; ����ǥ��������ơ��֥�̾�Ǥ���
+<A HREF="#item_table">table</A> フロントエンド用; インデクスされるテーブル名です。
 
 <DT><STRONG><A NAME="item_column_name">column_name</A></STRONG><DD>
 <P>
@@ -896,8 +896,8 @@ table.column that will be used if the <A HREF="#item_table_name">table_name</A>
 option is not specified.
 
 <P>
-<A HREF="#item_table">table</A> �ե���ȥ������; �ɥ�����Ȥ�ޤ� <A HREF="#item_table_name">table_name</A> ��Υ���� �������ե���󥹤ǡ�����ǥ��������ǡ����Ȥʤ�ޤ���<A HREF="#item_table_name">table_name</A> 
-���ά�������ˤϡ�table.column �Ȥ���������Ȥ����Ȥ�Ǥ��ޤ���
+<A HREF="#item_table">table</A> フロントエンド用; ドキュメントを含む <A HREF="#item_table_name">table_name</A> 内のカラム の配列リファレンスで、インデクスされるデータとなります。<A HREF="#item_table_name">table_name</A> 
+を省略した時には、table.column という書き方を使うこともできます。
 
 <DT><STRONG><A NAME="item_column_id_name">column_id_name</A></STRONG><DD>
 <P>
@@ -907,10 +907,10 @@ directly used as identifiers, otherwise a conversion to numeric values is
 made.
 
 <P>
-<A HREF="#item_table">table</A> �ե���ȥ���ɸ���; <A HREF="#item_table_name">table_name</A> �Υ쥳���ɤ�̾�� (id) ����
-�����Ƥ���ե������̾�Ǥ������ꤵ��ʤ���硢primary key �ȤʤäƤ���
-�ե�����ɤˤʤ�ޤ������Υե�����ɤ����ͤξ�硢�����ͤ�ľ�� id �Ȥ�
-�����Ѥ���ޤ����������Ǥʤ����Ͽ��ͤؤ��Ѵ����Ԥ��ޤ���
+<A HREF="#item_table">table</A> フロントエンド向け; <A HREF="#item_table_name">table_name</A> のレコードの名前 (id) を保
+持しているフィールド名です。指定されない場合、primary key となっている
+フィールドになります。このフィールドが数値の場合、この値が直接 id とし
+て利用されますが、そうでない場合は数値への変換が行われます。
 
 </DL>
 <P>
@@ -922,9 +922,9 @@ success, upon failure they return undef and set error message in <CODE>$DBIx::Fu
 variable.
 
 <P>
-create �� open �᥽�åɤ��������� DBIx::FullTextSearch ���֥������Ȥ�
-�֤������Ԥ���� undef ���֤������顼��å������� 
-<CODE>$DBIx::FullTextSearch::errstr</CODE> �˥��åȤ��ޤ���
+create と open メソッドは成功時に DBIx::FullTextSearch オブジェクトを
+返し、失敗すると undef を返し、エラーメッセージを 
+<CODE>$DBIx::FullTextSearch::errstr</CODE> にセットします。
 
 <P>
 All other methods return reasonable (documented above) value on success,
@@ -932,9 +932,9 @@ failure is signalized by unreasonable (typically undef or null) return
 value; the error message may then be retrieved by <CODE>$fts-&amp;gt;errstr</CODE> method call.
 
 <P>
-����¾�Υ᥽�åɤ��������ˤϵ����Ƥ����� (�嵭�˥ɥ�����Ȥ�����
-��)���֤������Ԥ����ݤˤϲ��餫�� (�����餯 undef ���̥�) ���֤��ͤǤ�
-����ޤ������顼��å������� <CODE>$fts-&amp;gt;errstr</CODE> �᥽�åɤǼ����Ǥ��� ����
+その他のメソッドは成功時には求められている値 (上記にドキュメントした通
+り)を返し、失敗した際には何らかの (おそらく undef かヌル) の返り値でわ
+かります。エラーメッセージは <CODE>$fts-&amp;gt;errstr</CODE> メソッドで取得できま す。
 
 <P>
 <HR>
@@ -943,8 +943,8 @@ value; the error message may then be retrieved by <CODE>$fts-&amp;gt;errstr</COD
 This documentation describes DBIx::FullTextSearch module version 0.60.
 
 <P>
-���Υɥ�����Ȥ� DBIx::FullTextSearch �⥸�塼�� version 0.60 �ˤĤ�
-�Ƶ��Ҥ��Ƥ��ޤ���
+このドキュメントは DBIx::FullTextSearch モジュール version 0.60 につい
+て記述しています。
 
 <P>
 <HR>
@@ -953,27 +953,27 @@ This documentation describes DBIx::FullTextSearch module version 0.60.
 Error handling needs more polishing.
 
 <P>
-���顼�����Ϥ⤦���������줤�ˤ���ɬ�פ����롣
+エラー処理はもうすこしきれいにする必要がある。
 
 <P>
 We do not check if the stored values are larger that specified by the
 <CODE>*_bits</CODE> parameters.
 
 <P>
-��Ǽ���줿�ͤ� <CODE>*_bits</CODE>
-�ѥ�᡼���ǻ��ꤵ�줿�ͤ���礭�����ɤ����ϥ����� �����Ƥ��ޤ���
+格納された値が <CODE>*_bits</CODE>
+パラメータで指定された値より大きいかどうかはチェッ クしていません。
 
 <P>
 No CGI administration tool at the moment.
 
 <P>
-������CGI�Υ��ɥߥ˥��ȥ졼�����ġ���Ϥ���ޤ���
+現状、CGIのアドミニストレーションツールはありません。
 
 <P>
 No scoring algorithm implemented.
 
 <P>
-��������󥰤Υ��르�ꥺ��ϼ������Ƥ��ޤ���
+スコアリングのアルゴリズムは実装していません。
 
 <P>
 <HR>
@@ -983,8 +983,8 @@ These modules are under active development. If you would like to
 contribute, please e-mail <A HREF="mailto:tj@anidea.com">tj@anidea.com</A>
 
 <P>
-���Υ⥸�塼��ϳ�ȯ�˳�ȯ���Ԥ��Ƥ��ޤ�������ȥ�ӥ塼�Ȥ�������С� <A
-HREF="mailto:tj@anidea.com">tj@anidea.com</A> �ޤǥ᡼�뤷�Ƥ���������
+このモジュールは活発に開発が行われています。コントリビュートしたければ、 <A
+HREF="mailto:tj@anidea.com">tj@anidea.com</A> までメールしてください。
 
 <P>
 There are two mailing lists for this module, one for users, and another for
@@ -993,10 +993,10 @@ HREF="http://sourceforge.net/mail/?group_id=8645">http://sourceforge.net/mail/?g
 
 
 <P>
-�⥸�塼��Υ桼���ȥǥ٥��åѸ����ˡ�2�ĥ᡼��󥰥ꥹ�Ȥ�����ޤ���
-subscribe ����ˤϡ� <A
+モジュールのユーザとデベロッパ向けに、2つメーリングリストがあります。
+subscribe するには、 <A
 HREF="http://sourceforge.net/mail/?group_id=8645">http://sourceforge.net/mail/?group_id=8645</A>
-�򸫤� ����������
+を見て ください。
 
 <P>
 <HR>
@@ -1020,7 +1020,7 @@ USA
 Fixes, Bug Reports, Docs have been generously provided by:
 
 <P>
-�Х��ե���������ݡ��ȡ��ɥ�����Ȥ��󶡤���ĺ��������:
+バグフィクス、レポート、ドキュメントは提供して頂いた方々:
 
 <P>
 <PRE>  Ade Olonoh
@@ -1039,8 +1039,8 @@ Of course, big thanks to Jan Pazdziora, the original author of this module.
 Especially for providing a clean, modular code base!
 
 <P>
-������󡢤��Υ⥸�塼��θ���ԤǤ��� Jan Pazdziora ���礤�˴��դ���
-�����äˡ����줤�ʥ⥸�塼�륳���ɤ١�����Ĥ��äƤ��줿���Ȥ�!
+もちろん、このモジュールの原作者である Jan Pazdziora に大いに感謝しま
+す。特に、きれいなモジュールコードべースをつくってくれたことに!
 
 <P>
 <HR>
@@ -1067,8 +1067,8 @@ more information, see <A
 HREF="http://www.lucene.com">http://www.lucene.com</A> )
 
 <P>
-(Java �򤪻Ȥ��ʤ顢Lucene �򸫤Ƥߤ뤳�Ȥ򶯤������ᤷ�ޤ����ܺ٤� <A
-HREF="http://www.lucene.com">http://www.lucene.com</A> �򸫤Ƥ�������)
+(Java をお使いなら、Lucene を見てみることを強くお勧めします。詳細は <A
+HREF="http://www.lucene.com">http://www.lucene.com</A> を見てください)
 
 <P>
 I'm aware of <A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> and <A HREF="/DBIx/KwIndex.html">DBIx::KwIndex</A>
@@ -1076,8 +1076,8 @@ modules and about UdmSearch utility, and about htdig and glimpse on the
 non-database side of the world.
 
 <P>
-<A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> �� <A HREF="/DBIx/KwIndex.html">DBIx::KwIndex</A> �Ȥ��ä��⥸�塼���¸�ߤ䡢 UdmSearch �ʤɤΥ桼�ƥ���ƥ�������ˤ� htdig
-�� glimse �Τ褦�˥ǡ� ���١����˴ط��ʤ���Τ�����Τ��ΤäƤ��ޤ���
+<A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> や <A HREF="/DBIx/KwIndex.html">DBIx::KwIndex</A> といったモジュールの存在や、 UdmSearch などのユーティリティ、さらには htdig
+や glimse のようにデー タベースに関係ないものがあるのも知っています。
 
 <P>
 To me, using a database gives reasonable maintenance benefits. With
@@ -1088,12 +1088,12 @@ that somebody accidently deleted or mungled, and making the index available
 remotely is not trivial.
 
 <P>
-��ˤȤäƤϡ��ǡ����١�����Ȥ����Ȥǥ��ƥʥ��̤Ǥν�ʬ�����פ���
-��ޤ���������ȼ��Υե�����˳�Ǽ����褦������ (���ȥ졼�����르�ꥺ
-�ब��ΨŪ�Ǥ褯�ͤ����Ƥ����Ȥ��Ƥ�) �ξ�硢¿���Υ桼���Τ���Υե�
-�����ǥ��쥯�ȥ�Υѡ��ߥå���������䡢ï�����ְ�äƥե�������
-����������Ƥ��ޤä��ꤹ�뤳�ȤȤ��Ĥ��Ʈ���뤳�Ȥˤʤꡢ�ޤ�����ǥ�
-�����⡼�Ȥ����Ѳ�ǽ�ˤ��뤳�Ȥϴ�ñ�ǤϤ���ޤ���
+私にとっては、データベースを使うことでメンテナンス面での十分な利益があ
+ります。情報を独自のファイルに格納するような製品 (ストレージアルゴリズ
+ムが効率的でよく考えられていたとしても) の場合、多くのユーザのためのファ
+イルやディレクトリのパーミッションの問題や、誰かが間違ってファイルを消
+したり壊してしまったりすることといつも格闘することになり、またインデク
+スをリモートで利用可能にすることは簡単ではありません。
 
 <P>
 That's why I've wanted a module that will use a database as a storage
@@ -1102,10 +1102,10 @@ on many web servers MySQL is part of the standard equipment. So using it
 for text indexes seemed natural.
 
 <P>
-����������ͳ�ǡ����ȥ졼���ΥХå�����ɤ˥ǡ����١�����Ȥ������ä���
-�Ǥ���MySQL ��Ȥ��ȡ���⡼�ȥ��������⥢����������⼫ͳ�˹Ԥ��ޤ�����
-¿���Υ����֥����ФǤ� MySQL ��ɸ����������Ƥ��ޤ�����äƥƥ����Ȥ�
-����ǥ����Ȥ��� MySQL ��Ȥ��Τϼ����Ǥ��礦��
+こうした理由で、ストレージのバックエンドにデータベースを使いたかったの
+です。MySQL を使うと、リモートアクセスもアクセス制御も自由に行えますし、
+多くのウェブサーバでは MySQL は標準装備されています。よってテキストの
+インデクスとして MySQL を使うのは自然でしょう。
 
 <P>
 However, existing <A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> and UdmSearch are too narrow-aimed to me. The first only supports indexing
@@ -1115,11 +1115,11 @@ hand is only for web documents, making it unsuitable for indexing
 mailing-list archives or local data.
 
 <P>
-����������¸�� <A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> �� UdmSearch �ϻ�ˤȤäƤ��о��ϰ�
-���������ޤ������Ԥϥǡ����١����˳�Ǽ���줿�ǡ����Υ���ǥ����������ݡ�
-�Ȥ��Ƥ��ޤ��󤬡��ɥ�����Ȥ��Ĥ�ǡ����١����������Ȥϸ¤�ʤ���
-���礦������ UdmSearch ��Webʸ����ò����Ƥ���Τǡ��᡼��󥰥ꥹ�Ȥ�
-���������֤��������ǡ����Υ���ǥ����ˤϸ����Ƥ��ޤ���
+しかし、既存の <A HREF="/DBIx/TextIndex.html">DBIx::TextIndex</A> や UdmSearch は私にとっては対象範囲
+が狭すぎます。前者はデータベースに格納されたデータのインデクスしかサポー
+トしていませんが、ドキュメントいつもデータベースに入れるとは限らないで
+しょう。一方 UdmSearch はWeb文書に特化しているので、メーリングリストの
+アーカイブやローカルデータのインデクスには向いていません。
 
 <P>
 I believe that DBIx::FullTextSearch is reasonably flexible and still very
@@ -1134,15 +1134,15 @@ that it provides make it easy to build a complete solution on top of this
 in very short course of time.
 
 <P>
-DBIx::FullTextSearch �Ͻ�ʬ�ե쥭���֥�Ǥޤ���ʬ��®���ȻפäƤ��ޤ���
-�ʤˤ���Ŭ���򲡤��Ĥ�����Ϥ��ޤ��� -- �����ο����礭�����󶡺Ѥߤ�
-��Τ���­�Ǥ��ʤ���С����ĤǤ��ȼ��Υե���ȥ���ɤ�Хå�����ɤǥ�
-���塼����ĥ���뤳�Ȥ��Ǥ��ޤ����ޤ�����¸�Τ�Τγ�ĥ�⡢1��2�ĤΥ�
-��᡼�����ɲäǿ����˵�ǽ���ɲä��뤳�Ȥ��Ǥ��ޤ���������󡢥ѥå���
-���ĤǤⴿ�ޤǤ��� DBIx::FullTextSearch ��¿���Υץ��������Ȥ����Ѳ�ǽ
-�ʥġ���Ǥ���¿���οͤˤϤ��줾��Υˡ���������ޤ����顢���Υ⥸�塼
-��ϴ����ʴĶ��ǤϤ���ޤ��󡣰��������Υ⥸�塼�뤬�󶡤��Ƥ���᥽��
-�ɤ򸵤ˤ��ơ������ʥ���塼������ñ���֤ǹ��ۤ���Τ��ưפǤ��礦��
+DBIx::FullTextSearch は十分フレキシブルでまた十分高速だと思っています。
+なにが最適かを押しつけたりはしません -- 選択肢の数は大きく、提供済みの
+もので満足できなければ、いつでも独自のフロントエンドやバックエンドでモ
+ジュールを拡張することができます。また、既存のものの拡張も、1つ2つのパ
+ラメータの追加で新たに機能を追加することができます。もちろん、パッチは
+いつでも歓迎です。 DBIx::FullTextSearch は多くのプロジェクトで利用可能
+なツールです。多くの人にはそれぞれのニーズがありますから、このモジュー
+ルは完全な環境ではありません。一方、このモジュールが提供しているメソッ
+ドを元にして、完全なソリューションを単期間で構築するのは容易でしょう。
 
 </BODY>
 

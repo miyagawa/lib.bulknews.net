@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>bulknews - �˥塼�������Ȥθ��Ф��μ�ư����</TITLE>
+<TITLE>bulknews - ニュースサイトの見出しの自動取得</TITLE>
 <LINK REV="made" HREF="mailto:hackers@FreeBSD.org">
 </HEAD>
 
@@ -29,30 +29,30 @@
 <P>
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
-bulknews - �˥塼�������Ȥθ��Ф��μ�ư����
+bulknews - ニュースサイトの見出しの自動取得
 
 <P>
 <HR>
 <H1><A NAME="APPLICATIONS">APPLICATIONS</A></H1>
 <P>
 bulknews ( <A HREF="http://bulknews.net/">http://bulknews.net/</A> )
-�ϼ��3�ĤΥ��ץꥱ��������깽�� ����Ƥ��ޤ���
+は主に3つのアプリケーションより構成 されています。
 
 <P>
-<PRE>  crawl.pl      �ƥ˥塼�������Ȥ��󤹤롣
-  mail.pl       �桼������Ͽ�����ˤ��碌���᡼���ۿ����롣
-  index.cgi     ���ꤵ�줿���դΥإåɥ饤���ɽ�����롣
+<PRE>  crawl.pl      各ニュースサイトを巡回する。
+  mail.pl       ユーザの登録状況にあわせ、メール配信する。
+  index.cgi     指定された日付のヘッドラインを表示する。
 </PRE>
 <P>
-WWW�����Ф� Apache, �ǡ����١����ˤ� MySQL �����ѡ������֥��ץꥱ������
-��� <CODE>Apache::Registry</CODE> �����Ѥ��ƹ�®����Ϥ��äƤ��ޤ���
-<CODE>Apache::DBI</CODE> �ˤ�äƱ�³���ͥ�������ԤäƤ��ޤ��Τǡ���³�κݤ�
-�����С��إåɤ�����ޤ���
+WWWサーバは Apache, データベースには MySQL を利用。ウェブアプリケーショ
+ンは <CODE>Apache::Registry</CODE> を利用して高速化をはかっています。
+<CODE>Apache::DBI</CODE> によって永続コネクションを行っていますので、接続の際の
+オーバーヘッドがありません。
 
 <P>
-MySQL�ǡ����١����ˤϤ����Ĥ��Υơ��֥뤬�Ѱդ��Ƥ���ޤ��������פʤ�
-�Τϡ������Ⱦ����Ͽ���� site �ȡ����Ф�������Ǽ���� headlines ��
-�����ơ��֥�����ϰʲ��Τ褦�ˤ��Ƥ��ޤ���
+MySQLデータベースにはいくつかのテーブルが用意してありますが、主要なも
+のは、サイト情報を記録する site と、見出し情報を格納する headlines で
+す。テーブル定義は以下のようにしています。
 
 <P>
 <PRE>  CREATE TABLE site (
@@ -77,9 +77,9 @@ MySQL�ǡ����١����ˤϤ����Ĥ��Υơ��֥뤬�Ѱդ��Ƥ���ޤ��������פʤ�
 <HR>
 <H2><A NAME="crawl_pl">crawl.pl</A></H2>
 <P>
-�˥塼�������Ȥ��󤹤뤿��Υ��ץꥱ�������Regexp ���Ѥ��ơ�����
-�ꥹ�Ȥ��������MySQL �ǡ����١����Ⱦȹ礷�ơ���������Τ� INSERT ����
-�����ޤ���
+ニュースサイトを巡回するためのアプリケーション。Regexp を用いて、記事
+リストを取得し、MySQL データベースと照合して、新しいものを INSERT して
+いきます。
 
 <P>
 <PRE>     1    #!/usr/local/bin/perl
@@ -116,22 +116,22 @@ MySQL�ǡ����١����ˤϤ����Ĥ��Υơ��֥뤬�Ѱդ��Ƥ���ޤ��������פʤ�
     32
 </PRE>
 <P>
-9,10 ���ܤ�����ե�������ɤ߹��ߡ�http://www.perlmonth.com/ �ˤƾ�
-�𤵤�Ƥ����Τǡ�������赤�����äƻ��Ѥ��Ƥޤ���<EM>Config.pm</EM> �ˡ�
-<CODE>%Config</CODE> �Ȥ����ϥå�����������<CODE>*main::Config</CODE> ���ե���󥹤ˤ�
-�Ƥ��ޤ����Ȥǡ�̵�Ѥ��ѿ�EXPORT�򸺤餷�Ƥ��ޤ����������ϥå���ξ��
-�ϡ�use strict �ˤʤ�ʤ��Τ���ǰ��<CODE>-w</CODE> �ե饰�Ǿ����ϥ����å��Ǥ��� ������pseudo-hash
-��Ȥ��Τ��������⤷��ʤ��Ǥ��͡�
+9,10 行目は設定ファイルの読み込み。http://www.perlmonth.com/ にて紹
+介されていたので、それ以来気に入って使用してます。<EM>Config.pm</EM> に、
+<CODE>%Config</CODE> というハッシュを定義し、<CODE>*main::Config</CODE> をリファレンスにし
+てしまうことで、無用の変数EXPORTを減らしています。ただ、ハッシュの場合
+は、use strict にならないのが残念。<CODE>-w</CODE> フラグで少しはチェックできま すが、pseudo-hash
+を使うのが賢いかもしれないですね。
 
 <P>
-20 ���ܤǡ�<CODE>WWW::Headline::Crawler</CODE> ���󥹥��󥹤��������˥塼������ �Ȥν���Ԥ��ޤ������Υ��饹�� <CODE>LWP::UserAgent</CODE> ���饹��Ѿ����Ƥ�
-��Τǡ�HTTP�̿��˴ؤ���᥽�åɤ�������ʤ���ɬ�פϤ���ޤ��󡣥˥塼
-�������Ȥ˴ؤ��������������᥽�åɤ򤤤��Ĥ����äƤ�������Ǥ���
+20 行目で、<CODE>WWW::Headline::Crawler</CODE> インスタンスを生成。ニュースサイ トの巡回を行います。このクラスは <CODE>LWP::UserAgent</CODE> クラスを継承してい
+るので、HTTP通信に関するメソッドは定義しなおす必要はありません。ニュー
+スサイトに関する情報を取得するメソッドをいくつか持っているだけです。
 
 <P>
-25���ܤǤϡ��ºݤ˽�󤹤륵���Ȥ��Ф��� for �롼�פ򤫤��Ƥ��ޤ���1��
-���Ȥ�1���饹�ȤʤäƤ��ꡢ���줾�쥢�֥��ȥ饯�ȥ��饹 
-<CODE>WWW::Headline::Site</CODE> ���饹��Ѿ����Ƥ��ޤ���
+25行目では、実際に巡回するサイトに対して for ループをかけています。1サ
+イトが1クラスとなっており、それぞれアブストラクトクラス 
+<CODE>WWW::Headline::Site</CODE> クラスを継承しています。
 
 <P>
 <PRE>     1  package WWW::Headline::Site;
@@ -233,20 +233,20 @@ MySQL�ǡ����١����ˤϤ����Ĥ��Υơ��֥뤬�Ѱդ��Ƥ���ޤ��������פʤ�
     97  1;
 </PRE>
 <P>
-<CODE>WWW::Headline::Site</CODE> ���饹�μ����Ͼ���̤ꡣ���Υ��饹�ϥ��֥��ȥ�
-���ȥ��饹�ʤΤǡ���󤷤��������Ȥ��Ǥ����餳�Υ��饹��Ѿ����ơ�
+<CODE>WWW::Headline::Site</CODE> クラスの実装は上の通り。このクラスはアブストラ
+クトクラスなので、巡回したいサイトができたらこのクラスを継承して、
 <CODE>_init(),</CODE> <CODE>parse()</CODE>
-�Τ��줾��Υ᥽�åɤ�Ŭ���˥����С��饤�ɤ���
-���С���󤷤���Ͽ����Ȥ����ޤǤ����ݤߤƤ����褦�ˤʤ�ޤ���
+のそれぞれのメソッドを適当にオーバーライドして
+やれば、巡回して登録するところまでを面倒みてくれるようになります。
 
 <P>
-�ƥ᥽�åɤϤ��줾�졢_init() �������Ȥξ���parse() �����Ф��� parse
-���뤿�������ɽ�����������������äƤ��ޤ���
+各メソッドはそれぞれ、_init() がサイトの情報、parse() が見出しを parse
+するための正規表現を定義する役割を持っています。
 
 <P>
-���Ȥ��� Ascii24 <A
+たとえば Ascii24 <A
 HREF="http://www.ascii24.com/">http://www.ascii24.com/</A>
-�Ǥμ����ϰʲ��Τ褦�ˤʤ� �ޤ���
+での実装は以下のようになり ます。
 
 <P>
 <PRE>     1  package WWW::Headline::Site::Ascii24;
@@ -277,23 +277,23 @@ HREF="http://www.ascii24.com/">http://www.ascii24.com/</A>
     26  1;
 </PRE>
 <P>
-20���ܤ� parse ���뤿��� Regexp �ˤʤ�ޤ��������ȥ��URL��ޥå�������
+20行目が parse するための Regexp になります。タイトルとURLをマッチさせ、
 <CODE>match()</CODE>
-�᥽�åɤ�ƤӽФ����Ȥǡ��������������ɤ�����Ƚ�̤��顢DB
-�ؤ���Ͽ�ޤǤ���ư�ǹԤ���褦�ˤʤ�ޤ���
+メソッドを呼び出すことで、新しい記事かどうかの判別から、DB
+への登録までが自動で行われるようになります。
 
 <P>
 <HR>
 <H2><A NAME="mail_pl">mail.pl</A></H2>
 <P>
-�桼���ؤΥ᡼���ۿ��ϡ����0ʬ�˹Ԥ��ޤ���headlines �γƥ쥳���ɤ�
-timestamp �������äƤ��ޤ��Τǡ��㤨�� 3���֤������ۿ����˾���Ƥ�
-��桼���Ǥ���С�3���ְ������Ͽ����Ƥ��븫�Ф����ۿ�����Ф�������
-�ˤʤ�ޤ���
+ユーザへのメール配信は、毎時0分に行われます。headlines の各レコードは
+timestamp カラムをもっていますので、例えば 3時間おきの配信を希望してい
+るユーザであれば、3時間以内に登録されている見出しを配信すればいいこと
+になります。
 
 <P>
-�桼������Ͽ������ MySQL �ǡ����١������ user �ơ��֥�� site_user �ơ�
-�֥�����������Ǽ���Ƥ��ޤ���
+ユーザの登録状況は MySQL データベース上に user テーブルと site_user テー
+ブルを作成し、格納しています。
 
 <P>
 <PRE>  CREATE TABLE user (
@@ -312,56 +312,56 @@ timestamp �������äƤ��ޤ��Τǡ��㤨�� 3���֤������ۿ����˾���Ƥ�
   );
 </PRE>
 <P>
-user �ơ��֥�� Email �򥭡��Ȥ��ơ��쥳���ɤ��������ƥ桼���ˤĤ��ơ�
-�ۿ������������Ȥ�ʣ�������ǽ�ʤΤǡ�site_user �ơ��֥�ǥ�졼�����
-��ȤäƤ��ޤ���
+user テーブルに Email をキーとして、レコードを生成。各ユーザについて、
+配信したいサイトは複数選択可能なので、site_user テーブルでリレーション
+をとっています。
 
 <P>
-�桼����Ͽ��WWW����Ԥ��ޤ����᡼�륢�ɥ쥹���������ɤ���������Τ��ᡢ
-�ʲ��Υ��ƥåפ���Ͽ��Ԥ��ޤ���
+ユーザ登録はWWWから行います。メールアドレスが妥当かどうかの整合のため、
+以下のステップで登録を行います。
 
 <DL>
-<DT><STRONG><A NAME="item__">�ե������ Email ������</A></STRONG><DD>
+<DT><STRONG><A NAME="item__">フォームに Email を入力</A></STRONG><DD>
 <P>
-Apache::Session �ˤƿ����ʥ��å�����ȯ�ԡ����å������Ф��� Email
-���Ǽ���ޤ������� Email ���ɥ쥹�˥��å����ID��Query String �ˤ��
-URI�򵭺ܤ����᡼����������ޤ���
+Apache::Session にて新たなセッションを発行。セッションに対して Email
+を格納します。該当 Email アドレスにセッションIDをQuery String にもつ
+URIを記載したメールを送信します。
 
-<DT><STRONG><A NAME="item_URI">URI�˥֥饦�����饢������</A></STRONG><DD>
+<DT><STRONG><A NAME="item_URI">URIにブラウザからアクセス</A></STRONG><DD>
 <P>
-���å����ID�˴�Ϣ����Email ��ǧ�ھ��֤Ȥʤꡢ������̤����ܤ��ޤ�����
-�����륵���ȡ�����ñ�̤ʤɤ����ꤷ���塢user, site_user �ơ��֥�ؤ� INSERT
-���Ԥ��ޤ���
+セッションIDに関連するEmail が認証状態となり、設定画面へ遷移します。配
+信するサイト、時間単位などを設定した後、user, site_user テーブルへの INSERT
+が行われます。
 
 </DL>
 <P>
 <HR>
 <H2><A NAME="index_cgi">index.cgi</A></H2>
 <P>
-�ƥ쥳���ɤˤ� timestamp ���Ĥ��Ƥ��뤿�ᡢ�ƾ��˹��פ���쥳���ɤ�
-SELECTʸ�ˤƽ��׸塢�����Ȥ��Ȥ˥��롼��ʬ������ɽ�����ޤ���
+各レコードには timestamp がついているため、各条件に合致するレコードを
+SELECT文にて集計後、サイトごとにグループ分けして表示します。
 
 <P>
-���롼��ʬ���� <CODE>HTML::Template</CODE> �ˤ��롼�׵�ǽ���Ѥ��Ƥ��ޤ����ƥ�
-���Ȥ��ȤΥ쥳����ɽ����롼�פ��Ѥ��Ƥ��ꡢ�ͥ��Ȥ�����¤�ȤʤäƤ��� ����
+グループ分けは <CODE>HTML::Template</CODE> によるループ機能を用いています。各サ
+イトごとのレコード表示もループを用いており、ネストした構造となっていま す。
 
 <P>
-WWW����Υ��󥿥ե������ˤϤ���ʳ��ˤ⡢���Ф�����फ���LIKE������ �Ԥ� <EM>search.cgi</EM> �䡢i�⡼�ɤ��������ǽ��CGI�ʤɤ��Ѱդ��Ƥ���ޤ���
+WWWからのインタフェースにはこれ以外にも、見出しカラムからのLIKE検索を 行う <EM>search.cgi</EM> や、iモードから閲覧可能なCGIなどを用意してあります。
 
 <P>
 <HR>
 <H1><A NAME="FUTURE_IMPLEMENTATION">FUTURE IMPLEMENTATION</A></H1>
 <P>
-Dynamic HTML + JavaScript �����Ѥ��ơ����Ф��� Marquee ɽ�����륹����
-�ץȤ������Ǥ� ( <A
+Dynamic HTML + JavaScript を利用して、見出しを Marquee 表示するスクリ
+プトを準備中です ( <A
 HREF="http://www.jiji.co.jp/">http://www.jiji.co.jp/</A>
-�Τ褦��)���������֥饦��
-������ǡ�������ɥ���������Ĵ�᤬���ޤ����äƤ��餺��Ĵ����Ǥ���
+のような)。ただ、ブラウザ
+の問題で、ウィンドウサイズの調節がうまくいっておらず、調整中です。
 
 <P>
-�ޤ����ƥ����ȤΥ���ƥ�ľ���򤢤�魯���ʤǤ��� RSS �ؤ��б���ͤ�
-�Ƥ��ޤ���XML::RSS �����Ѥ��ơ�(Perl Conference �ǲ�������Υ��å����
-��ʹ���������ʤΤǡ����⤽��RSS�ˤĤ��Ƥ褯�狼�äƤʤ���Ǥ����ɤ�)
+また、各サイトのコンテンツ情報をあらわす規格である RSS への対応も考え
+ています。XML::RSS を利用して。(Perl Conference で岡部さんのセッション
+を聞いただけなので、そもそもRSSについてよくわかってないんですけどね)
 
 <P>
 <HR>
